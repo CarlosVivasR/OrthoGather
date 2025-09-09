@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+
+# runtime outputs
+Proteomas/*
+GOAfiles/*
+static/data_folder/*
+static/plots/*
+static/results/*
+static/flask_sessions/*
+
+# keep placeholder readmes
+!Proteomas/README.md
+!GOAfiles/README.md
+!static/data_folder/README.md
+!static/plots/README.md
+!static/results/README.md
+!static/flask_sessions/README.md
+
