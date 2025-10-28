@@ -17,3 +17,4 @@ static/flask_sessions/*
 !static/results/README.md
 !static/flask_sessions/README.md
 
+.DS_Store
