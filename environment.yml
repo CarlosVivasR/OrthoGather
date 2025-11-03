@@ -1,4 +1,4 @@
-name: orthogather
+name: orthogather37
 channels:
   - conda-forge
   - bioconda
