@@ -24,6 +24,60 @@ It streamlines the path from species selection to results you can read, share, a
 The app operates entirely on your machine — favoring **privacy**, **reproducibility**, and **quick iteration**.
 
 ---
+## 🔽 Download and Installation
+
+To install **OrthoGather**, first clone the repository and move into the project folder:
+
+```bash
+git clone https://github.com/CarlosVivasR/OrthoGather.git
+cd OrthoGather
+```
+
+The installation process depends on your operating system. Each method automatically configures the required environment and dependencies, but you can consult installation_guide.pdf for a complete explanation of every step and additional troubleshooting details.
+
+### 🧩 macOS (Intel / Rosetta)
+
+Run the following command to install OrthoGather on macOS systems with Intel chips, or using Rosetta mode on Apple Silicon:
+```bash
+./install_orthogather_mac.sh
+```
+
+This script will:
+- Check that you are running in Intel (Rosetta) mode.
+- Create a dedicated environment named orthogather37 with Python 3.7.
+- Install all required dependencies (Flask, GOATOOLS, OrthoFinder, etc.).
+- Verify that OrthoGather is correctly installed and ready to use.
+
+⚠️ Note:
+Conda must be installed on macOS before running this script (e.g., via Miniforge, Anaconda, or Miniconda).
+The installation guide (installation_guide.pdf) includes step-by-step instructions on how to install Conda and enable Rosetta mode properly.
+
+Once completed, remember to open your terminal in Rosetta mode and activate the environment each time you want to use the tool:
+```bash
+conda activate orthogather37
+python app.py
+```
+### 🧬 Linux / WSL (Windows Subsystem for Linux)
+
+For Linux or WSL users, run the following command:
+```bash
+./install_orthogather_wsl.sh
+```
+
+The script will automatically:
+- Detect if you are running inside a WSL or Linux environment.
+- Check if Micromamba is installed — if not, it will display the command to install it manually and prompt you to restart the terminal.
+- Create the environment orthogather37 with Python 3.7.
+- Install all required dependencies and verify the OrthoFinder installation.
+- After installation, activate the environment and start the tool:
+``` bash
+micromamba activate orthogather37
+python app.py
+```
+
+For a comprehensive explanation of the setup process, including dependency management, configuration tips, and troubleshooting on both macOS and WSL/Linux, please refer to the detailed installation_guide.pdf included in this repository.
+
+---
 
 ## 🧬 Input flows
 
