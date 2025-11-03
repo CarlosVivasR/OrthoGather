@@ -1,7 +1,7 @@
 # 🧬 OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment
 
 **OrthoGather** — compare proteomes with **[OrthoFinder](https://github.com/davidemms/OrthoFinder)** and discover function with **[GOATOOLS](https://github.com/tanghaibao/goatools)** — all in a local web app.  
-Download **UniProt** proteomes, run **OrthoFinder 3.0.1b1**, perform **GO enrichment** (*Biological Process / Cellular Component / Molecular Function*), and export figures/Excel.  
+Download **UniProt** proteomes, run **OrthoFinder 3.0.1b1**, perform **GO enrichment**, and export figures/Excel.  
 *Requires Python 3.7.*
 
 ---
