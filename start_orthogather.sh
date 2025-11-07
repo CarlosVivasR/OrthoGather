@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# OrthoGather launcher (macOS/Linux) - requiere conda env 'ortho37'
-# No crea entornos: si falta, muestra error y sale.
+# OrthoGather launcher (macOS/Linux) - requires conda env 'ortho37'
+# Does not create environments: if missing, shows error and exits.
 set -euo pipefail
 
-# Evitar error por LD_LIBRARY_PATH no definido
+# Prevent error if LD_LIBRARY_PATH is not defined
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}"
 
-# --- Resolver la ruta REAL del script (sigue alias/symlinks) ---
+# --- Resolve the REAL path of the script (follows alias/symlinks) ---
 if [ -n "${ZSH_VERSION:-}" ]; then
   SRC="${(%):-%N}"
 else
@@ -20,7 +20,7 @@ done
 APP_DIR="$( cd -P "$( dirname "$SRC" )" >/dev/null 2>&1 && pwd )"
 cd "$APP_DIR"
 
-# --- Cargar conda en esta shell ---
+# --- Load conda in this shell ---
 if command -v conda >/dev/null 2>&1; then
   if [ -n "${ZSH_VERSION:-}" ]; then
     eval "$(conda shell.zsh hook)"
@@ -28,21 +28,20 @@ if command -v conda >/dev/null 2>&1; then
     eval "$(conda shell.bash hook)"
   fi
 else
-  echo "[ERROR] conda no está en PATH. Ejecuta 'conda init zsh|bash' y reabre la terminal." >&2
+  echo "[ERROR] conda is not in PATH. Run 'conda init zsh|bash' and reopen the terminal." >&2
   exit 1
 fi
 
-# --- Comprobar que existe el entorno 'ortho37' ---
+# --- Check that the 'ortho37' environment exists ---
 if ! conda info --envs | awk '{print $1}' | grep -qx "ortho37"; then
-  echo "[ERROR] Falta el entorno 'ortho37'. Revisa el README de instalación." >&2
+  echo "[ERROR] The environment 'ortho37' is missing. Check the installation README." >&2
   exit 1
 fi
 
-# --- Activar y lanzar ---
+# --- Activate and launch ---
 conda activate ortho37
 echo "[INFO] Dir: $PWD"
 python app.py
 
-# Mantener la terminal abierta después de terminar
+# Keep the terminal open after finishing
 exec $SHELL
-

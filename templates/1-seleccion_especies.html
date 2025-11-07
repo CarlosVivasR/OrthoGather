@@ -48,8 +48,8 @@
       text-align: right;
       line-height: 1.25;
       font-size: 14px;
-      color: inherit;                         /* hereda blanco */
-      max-width: 36ch;                        /* evita que el email desplace */
+      color: inherit;                         
+      max-width: 36ch;                        
     }
     header .info p { margin: 2px 0; }
     header .info a { color: inherit; text-decoration: none; }
@@ -64,13 +64,13 @@
       padding: 40px;
       display: flex;
       flex-direction: column;
-      align-items: stretch;     /* 👈 que se estire, no que se centre */
+      align-items: stretch;     
     }
 
     .card {
       max-width: 1000px;
-      width: min(1000px, 92vw); /* 👈 asegura un ancho cómodo en todas las pantallas */
-      margin: 0 auto;           /* 👈 centrada */
+      width: min(1000px, 92vw); 
+      margin: 0 auto;           
       background-color: white;
       padding: 30px 40px;
       border-radius: 10px;
@@ -140,7 +140,7 @@
       justify-content: center;
       align-items: center;
       gap: 30px;
-      margin: 20px auto;        /* 👈 centra el bloque respecto a la página */
+      margin: 20px auto;       
     }
 
     .button-group button {
@@ -197,7 +197,7 @@
       display: none;
       max-width: 1000px;
       width: min(1000px, 92vw);
-      margin: 20px auto 0;   /* top 20px y centrado horizontal */
+      margin: 20px auto 0;   
     }
 
 
@@ -251,39 +251,38 @@
       cursor: pointer;
       color: #888;
       font-size: 16px;
-      padding: 4px;                /* un poco de espacio para el fondo */
-      border-radius: 4px;          /* esquinas redondeadas */
+      padding: 4px;              
+      border-radius: 4px;          
       transition: color 0.2s, transform 0.2s, background-color 0.2s;
     }
 
-    /* Al pasar el ratón */
     .remove-btn:hover {
       color: #e73d09;
       transform: scale(1.15);
-      background-color: #f0f0f0;   /* gris muy claro */
+      background-color: #f0f0f0;   
     }
 
-    /* Al recibir foco (clic o tabulación) */
+
     .remove-btn:focus,
     .remove-btn:focus-visible {
       outline: none;
-      background-color: #e0e0e0;   /* gris un poco más marcado */
+      background-color: #e0e0e0;   
     }
 
     #downloadStatus {
-      margin-top: 6px;                 /* poco espacio bajo los botones */
+      margin-top: 6px;               
       text-align: center;
       font-weight: 600;
-      text-decoration: none;           /* sin subrayado */
+      text-decoration: none;          
       background: transparent !important;
       border: 0 !important;
       padding: 0 !important;
       border-radius: 0 !important;
     }
 
-    /* Colores según estado, solo texto */
-    #downloadStatus.success { color: #0f5132; }  /* verde */
-    #downloadStatus.error   { color: #842029; }  /* rojo  */
+
+    #downloadStatus.success { color: #0f5132; } 
+    #downloadStatus.error   { color: #842029; }  
 
   </style>
 </head>
@@ -333,7 +332,7 @@
     </div>
 
     <div id="logPanel" class="log-panel"></div>
-    <!-- Botones de análisis que aparecen solo tras terminar OrthoFinder -->
+
     <div id="postAnalysisButtons">
       <h3 style="color: #003366; margin-bottom: 20px;">Choose further analysis:</h3>
       <img src="static/images/boton1.png" alt="Protein Analysis"
@@ -341,7 +340,7 @@
       <img src="static/images/boton2.png" alt="Gene Ontology Analysis"
           onclick="goGeneOntologyGenerated()" />
     </div>
-<!-- cierre de .card -->
+
   </main>
 
   <footer>
@@ -362,7 +361,7 @@
     const resultsDiv = document.getElementById("results");
     const selectedDiv = document.getElementById("selected");
   
-    // Utilidad: POST + redirect real con un form (para navegar al resultado del Protein Analysis)
+
     function postAndRedirect(url, params) {
       const form = document.createElement('form');
       form.method = 'POST';
@@ -377,42 +376,27 @@
       document.body.appendChild(form);
       form.submit();
     }
-  
-    // -----------------------------
-    // NUEVO: Protein Analysis (generated)
-    // Abre el Orthogroups.zip de Proteomas
-    // -----------------------------
+
     function goProteinAnalysisGenerated() {
-      // Navegamos con POST para que /cargar_carpeta procese modo=generated
       postAndRedirect('/cargar_carpeta', { modo: 'generated' });
     }
   
-    // -----------------------------
-    // NUEVO: Gene Ontology (generated)
-    // Fija session["modo"]="generated" y luego va a /resultado_goa
-    // -----------------------------
     async function goGeneOntologyGenerated() {
       try {
-        // Asegura session["modo"] = "generated" y que el ZIP se haya extraído a static/data_folder
         await fetch('/cargar_carpeta', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ modo: 'generated' })
         });
-        // Ahora GO leerá Proteomas/Orthogroups.zip (porque session["modo"] ya es "generated")
         window.location.href = '/resultado_goa';
       } catch (e) {
-        alert('Error preparando datos para GO (generated): ' + e.message);
+        alert('Error preparing data for GO (generated): ' + e.message);
       }
     }
   
-    // Deja visibles las funciones a nivel global (para los onclick de los <img>)
     window.goProteinAnalysisGenerated = goProteinAnalysisGenerated;
     window.goGeneOntologyGenerated = goGeneOntologyGenerated;
   
-    // -----------------------------
-    // Carga del catálogo UniProt
-    // -----------------------------
     fetch("static/Proteomes_json/proteomes_list.json")
       .then(res => res.json())
       .then(data => { proteomeData = data; })
@@ -423,9 +407,6 @@
         status.classList.add("error");
       });
   
-    // -----------------------------
-    // Buscador
-    // -----------------------------
     document.getElementById("search").addEventListener("input", function () {
       const searchTerm = this.value.toLowerCase();
       resultsDiv.innerHTML = "";
@@ -481,10 +462,7 @@
       selectedTemp.splice(index, 1);
       updateSelected();
     }
-  
-    // -----------------------------
-    // Descargar proteomas
-    // -----------------------------
+
     document.getElementById("downloadBtn").addEventListener("click", function () {
       const ids = selectedTemp.map(item => item.id);
       const status = document.getElementById("downloadStatus");
@@ -521,9 +499,7 @@
       });
     });
   
-    // -----------------------------
-    // Ejecutar OrthoFinder (SSE)
-    // -----------------------------
+
     document.getElementById("runOrthofinderBtn").addEventListener("click", function () {
       const logPanel = document.getElementById("logPanel");
       const gif = document.getElementById("loadingGif");
@@ -554,18 +530,17 @@
       };
     });
   
-    // (Opción antigua aún usada en otros sitios: preselected)
     function runGeneOntologyPreselected() {
       fetch('/cargar_carpeta?filename=Orthogroups.zip&modo=preselected')
         .then(response => {
           if (!response.ok) {
-            alert('Error preparando los datos para GO analysis.');
+            alert('Error preparing data for GO analysis.');
             return;
           }
           window.location.href = '/resultado_goa';
         })
         .catch(error => {
-          alert('Error inesperado: ' + error.message);
+          alert('Unexpected error:' + error.message);
         });
     }
     window.runGeneOntologyPreselected = runGeneOntologyPreselected;

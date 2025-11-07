@@ -44,8 +44,9 @@ logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 def respond(ok: bool, msg: str, *, where=None, hint=None, payload=None, code=200):
     """
-    Respuesta JSON uniforme para GO.
-    ok=True/False, msg=mensaje humano, where=punto del flujo, hint=pista de solución, payload=dict con datos extra.
+    Uniform JSON response for GO.
+    ok=True/False, msg=human-readable message, where=workflow step,
+    hint=solution suggestion, payload=dict with extra data.
     """
     data = {"success": ok, "message": msg}
     if where:   data["where"] = where
@@ -60,35 +61,34 @@ def respond(ok: bool, msg: str, *, where=None, hint=None, payload=None, code=200
     return jsonify(data), code
 
 # ------------------------
-#App
+# App
 # ------------------------
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Cambia esto por una clave segura
+app.secret_key = 'your_secret_key'  
 
-# Configuración de sesiones en disco (para almacenar más datos sin exceder el tamaño de cookie)
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = os.path.join("static", "flask_sessions")
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
 # ------------------------
-# Directorios de trabajo
+# Working directories
 # ------------------------
 STATIC_FOLDER = "static"
 PROTEOMES_FOLDER = "Proteomas"
 GOA_DOWNLOAD_FOLDER = "GOAfiles"
 RESULTS_FOLDER = os.path.join(STATIC_FOLDER, "results")
 JSON_PATH = "static/Proteomes_json/proteomes_list.json"
-GO_ROOT_OBO = "go-basic.obo"  # en la raíz, junto a app.py
+GO_ROOT_OBO = "go-basic.obo"  # located in the root directory, next to app.py
 
-# Crear carpetas necesarias
+# Create required folders
 os.makedirs(PROTEOMES_FOLDER, exist_ok=True)
 os.makedirs(GOA_DOWNLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
 os.makedirs(app.config["SESSION_FILE_DIR"], exist_ok=True)
 
 # ------------------------
-# Variables globales
+# Global variables
 # ------------------------
 orthogroups_df = None
 gene_count_df = None
@@ -100,8 +100,8 @@ species_urls = None
 selected_orthogroups_list = None
 final_protein_list = None
 
+
 def find_free_port(start=5000, end=5100):
-    """Busca un puerto libre en el rango indicado."""
     for port in range(start, end + 1):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
@@ -115,45 +115,45 @@ def open_browser(port):
     webbrowser.open(f"http://127.0.0.1:{port}")
 
 def cargar_datos_carpeta(ruta_carpeta):
-    print(f"Archivos en la carpeta '{ruta_carpeta}':")
+    print(f"Files in folder '{ruta_carpeta}':")
     try:
         print(os.listdir(ruta_carpeta))
     except Exception as e:
-        print(f"[WARN] No se pudo listar '{ruta_carpeta}': {e}")
+        print(f"[WARN] Could not list '{ruta_carpeta}': {e}")
 
     gene_count_path = os.path.join(ruta_carpeta, 'Orthogroups.GeneCount.tsv')
     orthogroups_path = os.path.join(ruta_carpeta, 'Orthogroups.tsv')
     single_copy_path = os.path.join(ruta_carpeta, 'Orthogroups_SingleCopyOrthologues.txt')
     unassigned_path  = os.path.join(ruta_carpeta, 'Orthogroups_UnassignedGenes.tsv')
 
-    # 👉 Solo estos dos son obligatorios
+    # 👉 Only these two are mandatory
     if not os.path.exists(gene_count_path):
-        raise FileNotFoundError(f"No se encontró el archivo: {gene_count_path}")
+        raise FileNotFoundError(f"File not found: {gene_count_path}")
     if not os.path.exists(orthogroups_path):
-        raise FileNotFoundError(f"No se encontró el archivo: {orthogroups_path}")
+        raise FileNotFoundError(f"File not found: {orthogroups_path}")
 
-    # Cargas obligatorias
+    # Mandatory loads
     gene_count_df  = pd.read_csv(gene_count_path, sep='\t')
     orthogroups_df = pd.read_csv(orthogroups_path, sep='\t')
 
-    # Cargas opcionales
+    # Optional loads
     single_copy_df = None
     if os.path.exists(single_copy_path):
         try:
             single_copy_df = pd.read_csv(single_copy_path, sep='\t')
         except Exception as e:
-            print(f"[WARN] No se pudo leer SingleCopy (continuamos): {e}")
+            print(f"[WARN] Could not read SingleCopy (continuing): {e}")
     else:
-        print(f"[WARN] Opcional no encontrado (continuamos): {single_copy_path}")
+        print(f"[WARN] Optional file not found (continuing): {single_copy_path}")
 
     unassigned_df = None
     if os.path.exists(unassigned_path):
         try:
             unassigned_df = pd.read_csv(unassigned_path, sep='\t')
         except Exception as e:
-            print(f"[WARN] No se pudo leer Unassigned (continuamos): {e}")
+            print(f"[WARN] Could not read Unassigned (continuing): {e}")
     else:
-        print(f"[WARN] Opcional no encontrado (continuamos): {unassigned_path}")
+        print(f"[WARN] Optional file not found (continuing): {unassigned_path}")
 
     return gene_count_df, orthogroups_df, single_copy_df, unassigned_df
 
@@ -169,18 +169,18 @@ def generar_figura_1(gene_count_df):
     try:
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Limpieza de datos
+        # Data cleaning
         data = gene_count_df['Total'].replace([np.inf, -np.inf], np.nan).dropna()
 
-        # Cálculo seguro del último bin
+        # Safe calculation of the last bin
         penultimo_bin = 1000.5
         max_val_usuario = int(data.max()) + 1
         if max_val_usuario <= penultimo_bin:
-            ultimo_bin = penultimo_bin + 100  # asegura orden creciente
+            ultimo_bin = penultimo_bin + 100  # ensure increasing order
         else:
             ultimo_bin = max_val_usuario
 
-        # Bins definidos
+        # Defined bins
         bins = [
             0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5,
             12.5, 15.5, 18.5, 20.5, 25.5, 30.5, 35.5, 40.5,
@@ -188,7 +188,7 @@ def generar_figura_1(gene_count_df):
             200.5, 300.5, 400.5, 500.5, penultimo_bin, ultimo_bin
         ]
 
-        bins = sorted(set(bins))  # elimina duplicados si `ultimo_bin == penultimo_bin`
+        bins = sorted(set(bins))  # removes duplicates if `ultimo_bin == penultimo_bin`
 
         labels = [
             '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
@@ -198,9 +198,10 @@ def generar_figura_1(gene_count_df):
             '101-200', '201-300', '301-400', '401-500', '501-1000', '1001+'
         ]
 
-        # Validación de longitud
+        # Length validation
         if len(labels) != len(bins) - 1:
-            print(f"[AVISO] No se generará figura 1: número de labels ({len(labels)}) no coincide con bins-1 ({len(bins)-1})")
+            print(f"[WARNING] Figure 1 will not be generated: number of labels ({len(labels)}) "
+                  f"does not match bins-1 ({len(bins)-1})")
             return None
 
         grouped_data = pd.cut(data, bins=bins, labels=labels, include_lowest=True, right=False)
@@ -208,7 +209,7 @@ def generar_figura_1(gene_count_df):
 
         sns.barplot(x=counts.index, y=counts.values, ax=ax, color='orange')
 
-        # Líneas separadoras
+        # Separator lines
         separator_positions = {
             '10_11-12': 9.5,
             '19-20_21-25': 13.5,
@@ -219,7 +220,7 @@ def generar_figura_1(gene_count_df):
         for position in separator_positions.values():
             ax.axvline(x=position, color='black', linestyle='--')
 
-        # Textos explicativos
+        # Explanatory text
         text_positions = {
             (5, 5): 'INC by 1 ',
             (10, 13): 'INC by 2 ',
@@ -254,29 +255,29 @@ def generar_figura_1(gene_count_df):
         return 'figura_1.png'
 
     except Exception as e:
-        print(f"[ERROR] No se pudo generar figura_1: {e}")
+        print(f"[ERROR] Could not generate figura_1: {e}")
         return None
 
 def generar_figura_2(gene_count_df, axes=None):
-    # Crear los ejes si no se proporcionan
+    # Create axes if not provided
     if axes is None:
         fig, axes = plt.subplots(figsize=(10, 6))
 
-    # Convertir todas las columnas numéricas excepto la primera (ID de ortogrupos)
+    # Convert all numeric columns except the first one (orthogroup ID)
     gene_count_df.iloc[:, 1:] = gene_count_df.iloc[:, 1:].apply(pd.to_numeric, errors='coerce')
 
-    # Seleccionar las especies (todas las columnas excepto la primera y la última)
+    # Select species (all columns except the first and last)
     species = gene_count_df.columns[1:-1]
     
-    # Contar cuántas especies comparten ortogrupos
+    # Count how many species share orthogroups
     shared_orthogroups = gene_count_df[species].apply(lambda x: x > 0).sum(axis=1)
     unique_orthogroups = shared_orthogroups.value_counts().sort_index()
 
-    # Asegurar que los valores de X estén como strings para etiquetado correcto
+    # Ensure X values are strings for correct labeling
     x_labels = unique_orthogroups.index.astype(str)
     y_values = unique_orthogroups.values
 
-    # Graficar con etiquetas explícitas
+    # Plot with explicit labels
     sns.barplot(x=x_labels, y=y_values, ax=axes)
 
     axes.set_title('Number of Unique and Shared Orthogroups', fontsize=16)
@@ -284,7 +285,7 @@ def generar_figura_2(gene_count_df, axes=None):
     axes.set_ylabel('Count', fontsize=14)
     axes.tick_params(axis='x', rotation=0)
 
-    # Guardar la imagen
+    # Save the image
     crear_directorio_plots()
     image_path = os.path.join('static', 'plots', 'figura_2.png')
     plt.savefig(image_path)
@@ -293,13 +294,13 @@ def generar_figura_2(gene_count_df, axes=None):
     return 'figura_2.png'
 
 def generar_figura_3(gene_count_df, species, umbral=7):
-    fig = plt.figure(figsize=(30, 17))  # Ajustamos el tamaño de la figura
-    gs = GridSpec(2, 2, width_ratios=[2, 1], height_ratios=[3, 1])  # Tamaño relativo de los subgráficos
+    fig = plt.figure(figsize=(30, 17))  # Adjust figure size
+    gs = GridSpec(2, 2, width_ratios=[2, 1], height_ratios=[3, 1])  # Relative size of subplots
     
-    # Ejes
-    ax1 = fig.add_subplot(gs[0, 0])  # Eje para el gráfico principal
-    ax2 = fig.add_subplot(gs[0, 1])  # Eje para la leyenda de abreviaturas en formato tabla
-    ax3 = fig.add_subplot(gs[1, :])  # Eje para la leyenda de combinaciones en formato tabla
+    # Axes
+    ax1 = fig.add_subplot(gs[0, 0])  # Axis for main plot
+    ax2 = fig.add_subplot(gs[0, 1])  # Axis for abbreviation legend in table format
+    ax3 = fig.add_subplot(gs[1, :])  # Axis for combination legend in table format
     ax2.axis('off')
     ax3.axis('off')
 
@@ -309,7 +310,7 @@ def generar_figura_3(gene_count_df, species, umbral=7):
     for sp in species:
         abbr = ''.join([p[0].upper() for p in sp.split()[:2]])
         
-        # Si la abreviatura ya ha sido usada, le agregamos un contador para hacerla única
+        # If the abbreviation has already been used, add a counter to make it unique
         contador = 1
         abbr_unica = abbr
         while abbr_unica in abreviatura_usadas:
@@ -354,46 +355,46 @@ def generar_figura_3(gene_count_df, species, umbral=7):
     n_especies = {k: len(k.split(' + ')) for k in porcentajes.keys()}
     utilizados = sorted(set(n_especies.values()))
 
-    ### Asignación de colores usando Viridis para combinaciones de especies
+    ### Color assignment using Viridis for species combinations
     cmap_combinaciones = cm.get_cmap('viridis')
 
-    # Generar los colores utilizando un rango basado en el número de "utilizados"
+    # Generate colors based on the number of "utilizados"
     colores_combinaciones = [cmap_combinaciones(i / (len(utilizados) - 1)) for i in range(len(utilizados))]
 
-    # Asignar los colores a cada combinación de especies
+    # Assign colors to each species combination
     colores = {}
     for i, n in enumerate(utilizados):
-        color = colores_combinaciones[i]  # Asignar color de Viridis
+        color = colores_combinaciones[i]  # Assign Viridis color
         for k in n_especies:
             if n_especies[k] == n:
-                colores[k] = color  # Asignar el color de Viridis a cada combinación de especies
+                colores[k] = color  # Assign Viridis color to each species combination
 
-    ### Asignación de colores claros manuales para la tabla de abreviaturas
+    ### Light color palette for the abbreviation table
     colores_claros = ["#add8e6", "#90ee90", "#ffb6c1", "#ffa07a", "#f0e68c", "#e0ffff", "#fafad2", "#d3d3d3", "#ffefd5", "#ffdab9",
                     "#e6e6fa", "#dda0dd", "#b0e0e6", "#bc8f8f", "#f5f5dc", "#ffe4e1", "#d8bfd8", "#d2b48c", "#add8e6", "#deb887"]
     color_cycle_claros = cycle(colores_claros)
 
-    abreviaturas_cortas = {sp: sp[:5] for sp in species}  # Abreviaturas cortas (5 caracteres)
-    unique_groups = list(set(abreviaturas_cortas.values()))  # Grupos únicos basados en las abreviaturas
-    group_colors = {group: next(color_cycle_claros) for group in unique_groups}  # Asignamos un color claro a cada grupo
+    abreviaturas_cortas = {sp: sp[:5] for sp in species}  # Short abbreviations (5 characters)
+    unique_groups = list(set(abreviaturas_cortas.values()))  # Unique groups based on abbreviations
+    group_colors = {group: next(color_cycle_claros) for group in unique_groups}  # Assign a light color to each group
 
-    # Crear la tabla de abreviaturas
+    # Create abbreviation table
     tabla_abreviaturas = pd.DataFrame(list(abreviaturas.items()), columns=['Strain Name', 'Abbreviation'])
     tabla = ax2.table(cellText=tabla_abreviaturas.values, cellLoc='center', loc='center')
 
-    # Obtener la posición y tamaño de la tabla para ajustar la posición del título dinámicamente
+    # Get table position and size to adjust title dynamically
     renderer = fig.canvas.get_renderer()
     tabla_pos = tabla.get_window_extent(renderer)
 
-    # Calcular la nueva posición del título basado en la altura de la tabla
-    # Queremos que esté justo por encima de la tabla
-    y_title_position = tabla_pos.ymax / fig.bbox.ymax + 0.06 #Aquí ajusto bien para que el título Abbreviations se encuentra justo al lado de la tabla.
+    # Calculate new title position based on table height
+    # We want it to be right above the table
+    y_title_position = tabla_pos.ymax / fig.bbox.ymax + 0.06  # Adjust so "Abbreviations" appears right beside the table.
 
-    # Colocar el título con anotación directamente sobre la tabla (centrado y ajustado en Y)
+    # Place the title directly above the table (centered and Y-adjusted)
     ax2.annotate('Abbreviations', xy=(0.8, y_title_position), xycoords='figure fraction', 
                 ha='center', fontsize=16, fontweight='bold', annotation_clip=False)
 
-    # Aplicar los colores y ajustar el tamaño de las celdas de la tabla
+    # Apply colors and adjust table cell size
     for (i, j), cell in tabla.get_celld().items():
         strain_name = tabla_abreviaturas.iloc[i, 0] if i < len(tabla_abreviaturas) else ""
         group_key = strain_name[:5]
@@ -404,14 +405,14 @@ def generar_figura_3(gene_count_df, species, umbral=7):
         if group_key in group_colors:
             cell.set_facecolor(group_colors[group_key])
 
-    # Escalar la tabla para que el tamaño de la fuente y el espaciado sean adecuados
+    # Scale table to make font size and spacing appropriate
     tabla.scale(1.2, 1.2)
 
-    # Eliminar esta línea que genera el segundo título redundante
-    # ax2.set_title('Abbreviations', fontsize=14, pad=10)  # Eliminar esta línea
+    # Remove redundant title line
+    # ax2.set_title('Abbreviations', fontsize=14, pad=10)  # Removed
     ax2.axis('off')
 
-    # Gráfico principal en ax1
+    # Main plot (ax1)
     bars = ax1.barh([etiquetas_abreviadas[k] for k in porcentajes.keys()], list(porcentajes.values()), color=[colores[k] for k in porcentajes.keys()])
     ax1.set_xlabel('Percentage of Proteins (%)', fontweight='bold',)
     ax1.set_title('Percentage of Unique and Shared Proteins between Species', fontweight='bold',)
@@ -420,11 +421,11 @@ def generar_figura_3(gene_count_df, species, umbral=7):
         width = bar.get_width()
         ax1.text(width + 0.1, bar.get_y() + bar.get_height()/2, f'{width:.2f}%', va='center', rotation=10)
 
-    # Personalizar los ejes: ocultar superior y derecho, pero mantener los ejes X e Y
+    # Customize axes: hide top and right borders but keep X and Y axes
     ax1.spines['top'].set_visible(False)
     ax1.spines['right'].set_visible(False)
 
-    # Eliminar duplicados en la leyenda y asignar correctamente los colores
+    # Remove duplicates in legend and assign colors correctly
     unique_legend_labels = []
     species_legend_patches = []
     legend_colors = {}
@@ -433,48 +434,48 @@ def generar_figura_3(gene_count_df, species, umbral=7):
             legend_colors[n] = colores[k]
             unique_legend_labels.append(n)
 
-    # Ordenar la leyenda de menos a más especies
+    # Sort legend from fewer to more species
     sorted_legend_labels = sorted(unique_legend_labels)
 
-    # Crear los parches de la leyenda ordenados
+    # Create sorted legend patches
     species_legend_patches = [plt.Line2D([0], [0], marker='o', color='w', label=f'{n} species', markersize=10, markerfacecolor=legend_colors[n]) for n in sorted_legend_labels]
     ax1.legend(handles=species_legend_patches, title="Number of Species", loc='upper right')
 
 
-    # Tabla de combinaciones (Figura 3) - Solo si hay combinaciones
+    # Combination table (Figure 3) - Only if combinations exist
     if combinaciones_numeradas:
         tabla_combinaciones = pd.DataFrame(list(combinaciones_numeradas.items()), columns=['Combination', 'Species'])
         tabla3 = ax3.table(cellText=tabla_combinaciones.values, cellLoc='center', loc='center')
 
-        # Obtener la posición y tamaño de la tabla para ajustar la posición del título dinámicamente
+        # Get table position and size to adjust title dynamically
         renderer = fig.canvas.get_renderer()
         tabla_pos = tabla3.get_window_extent(renderer)
 
-        # Calcular la nueva posición del título basado en la altura de la tabla
-        # Queremos que esté justo por encima de la tabla
-        y_title_position = tabla_pos.ymax / fig.bbox.ymax - 0.005   # Ajustar el 0.02 para afinar la posición si es necesario
+        # Calculate new title position based on table height
+        # We want it to be right above the table
+        y_title_position = tabla_pos.ymax / fig.bbox.ymax - 0.005   # Adjust 0.02 if needed to fine-tune position
 
-        # Colocar el título con anotación directamente sobre la tabla (centrado y ajustado en Y)
+        # Place title directly above the table (centered and Y-adjusted)
         ax3.annotate('Combinations', xy=(0.55, y_title_position), xycoords='figure fraction', 
                     ha='center', fontsize=16, fontweight='bold', annotation_clip=False)
 
-        # Aplicar los colores que están en la Figura 1 (colores) a las filas correspondientes de la tabla
+        # Apply colors from Figure 1 (colores) to corresponding rows in the table
         for (i, j), cell in tabla3.get_celld().items():
-            if i < len(tabla_combinaciones):  # Solo aplicar a las filas válidas
-                # Obtener el número de especies en la combinación (segunda columna)
+            if i < len(tabla_combinaciones):  # Apply only to valid rows
+                # Get number of species in combination (second column)
                 species_combination = tabla_combinaciones.iloc[i, 1]
                 num_species = len(species_combination.split(' + '))
-                # Aplicar el color correspondiente al número de especies
+                # Apply corresponding color based on number of species
                 for k in colores:
                     if n_especies[k] == num_species:
-                        cell.set_facecolor(colores[k])  # Asignar el color correspondiente
-                # Ajustar el ancho de las columnas
-                if j == 0:  # Primera columna (Combination)
+                        cell.set_facecolor(colores[k])  # Assign corresponding color
+                # Adjust column widths
+                if j == 0:  # First column (Combination)
                     cell.set_width(0.10)
-                elif j == 1:  # Segunda columna (Species)
+                elif j == 1:  # Second column (Species)
                     cell.set_width(0.85)
 
-        # Escalar la tabla
+        # Scale the table
         tabla3.scale(1.2, 1.2)
 
         ax3.axis('off')
@@ -574,19 +575,19 @@ def crear_upset_plot_proteinas(gene_count_df, species, title, ortogrupos_por_com
     return f"{title.replace(' ', '_')}.png", protein_counts
 
 def generar_archivo_excel_upsetplots_v2(ortogrupos_por_combinacion, orthogroups_df, species, abreviaturas, filename='UpSetPlot_Data_v2.xlsx'):
-    """Genera un archivo Excel con múltiples hojas, donde cada hoja representa una combinación de especies.
-    Cada hoja contiene una lista de ortogrupos y las proteínas correspondientes para cada especie en columnas separadas."""
+    """Generates an Excel file with multiple sheets, where each sheet represents a combination of species.
+    Each sheet contains a list of orthogroups and the corresponding proteins for each species in separate columns."""
 
     with pd.ExcelWriter(filename) as writer:
         for combinacion, ortogrupos in ortogrupos_por_combinacion.items():
-            # Crear una lista para almacenar los datos de ortogrupos y proteínas para cada especie
+            # Create a list to store orthogroup and protein data for each species
             combinacion_data = []
 
-            # Iterar sobre los ortogrupos y extraer el Orthogroup ID y las proteínas para cada especie
+            # Iterate through orthogroups and extract Orthogroup ID and proteins for each species
             for ortogrupo in ortogrupos:
                 row_data = {'Orthogroup ID': ortogrupo}
 
-                # Agregar las proteínas para cada especie en las columnas correspondientes
+                # Add the proteins for each species in their respective columns
                 for sp in species:
                     if sp in orthogroups_df.columns:
                         proteins = orthogroups_df.at[ortogrupo, sp] if pd.notna(orthogroups_df.at[ortogrupo, sp]) else ""
@@ -594,22 +595,22 @@ def generar_archivo_excel_upsetplots_v2(ortogrupos_por_combinacion, orthogroups_
 
                 combinacion_data.append(row_data)
 
-            # Crear un DataFrame para la hoja de la combinación actual
+            # Create a DataFrame for the current combination sheet
             df_combinacion = pd.DataFrame(combinacion_data)
 
-            # Usar las abreviaturas para crear el nombre de la hoja
+            # Use abbreviations to create the sheet name
             hoja_nombre = ' + '.join([abreviaturas.get(sp, sp) for sp in combinacion])
-            if not hoja_nombre:  # Verificar si el nombre de la hoja está vacío
-                hoja_nombre = 'Unnamed_Combination'  # Asignar un nombre predeterminado en caso de que esté vacío
-            hoja_nombre = hoja_nombre[:31]  # Limitar a 31 caracteres para cumplir con el límite de Excel
+            if not hoja_nombre:  # Check if sheet name is empty
+                hoja_nombre = 'Unnamed_Combination'  # Assign a default name if empty
+            hoja_nombre = hoja_nombre[:31]  # Limit to 31 characters to comply with Excel restrictions
 
-            # Escribir el DataFrame de la combinación en una nueva hoja del archivo Excel
+            # Write the combination DataFrame to a new Excel sheet
             df_combinacion.to_excel(writer, sheet_name=hoja_nombre, index=False)
 
     return filename
 
 def filter_orthogroups(orthogroups_df, uniprot_ids):
-    """Filtra ortogrupos que contienen genes con IDs de UniProt proporcionados."""
+    """Filter orthogroups that contain genes with the provided UniProt IDs."""
     selected_orthogroups = []
     for idx, row in orthogroups_df.iterrows():
         genes = set()
@@ -620,11 +621,11 @@ def filter_orthogroups(orthogroups_df, uniprot_ids):
         if genes & set(uniprot_ids):
             selected_orthogroups.append(row['Orthogroup'])
 
-    print(f'Ortogrupos seleccionados: {selected_orthogroups}')  # Añadir esto
+    print(f'Selected orthogroups: {selected_orthogroups}')
     return selected_orthogroups
 
 def graficar_upset_plots_proteome(orthogroups_df, selected_orthogroups, species):
-    """Genera UpSet plots para ortogrupos y genes específicos del proteoma."""
+    """Generate UpSet plots for orthogroups and genes specific to the proteome."""
     data = orthogroups_df[orthogroups_df['Orthogroup'].isin(selected_orthogroups)]
 
     gene_presence = pd.DataFrame(index=data['Orthogroup'])
@@ -643,12 +644,12 @@ def graficar_upset_plots_proteome(orthogroups_df, selected_orthogroups, species)
     for _, row in gene_presence.iterrows():
         memberships.append([sp for sp in species if row[sp] > 0])
 
-    # Ajustes dinámicos
+    # Dynamic sizing
     n_species = len(species)
     fig_size = calcular_figsize(n_species)
     elem_size = calcular_element_size(n_species)
 
-    # Primer gráfico: ortogrupos
+    # First plot: orthogroups
     upset_data_groups = from_memberships(memberships)
     fig1 = plt.figure(figsize=fig_size)
     upset1 = UpSet(upset_data_groups, subset_size='count', show_counts=True,
@@ -664,7 +665,7 @@ def graficar_upset_plots_proteome(orthogroups_df, selected_orthogroups, species)
     plt.savefig(image_path_ortogrupos, bbox_inches='tight')
     plt.close(fig1)
 
-    # Segundo gráfico: genes
+    # Second plot: genes
     upset_data_genes = from_memberships(memberships, data=gene_counts)
     fig2 = plt.figure(figsize=fig_size)
     upset2 = UpSet(upset_data_genes, subset_size='sum', show_counts=True,
@@ -683,12 +684,12 @@ def graficar_upset_plots_proteome(orthogroups_df, selected_orthogroups, species)
     return 'upset_plot_ortogrupos.png', 'upset_plot_genes.png'
 
 def generar_archivo_excel_upsetplots_filtrado(orthogroups_df, ortogrupos_por_combinacion, species, abreviaturas, selected_orthogroups, filename='UpSetPlot_Filtrado.xlsx'):
-    """Genera un archivo Excel filtrado con los selected_orthogroups proporcionados."""
+    """Generates a filtered Excel file using the provided selected_orthogroups."""
 
-    # Extraer la parte numérica de los selected_orthogroups
+    # Extract the numeric part of the selected_orthogroups
     selected_numeric_ids = [int(re.search(r'\d+', og).group()) for og in selected_orthogroups]
 
-    # Generar el archivo Excel completo
+    # Generate the complete Excel file
     with pd.ExcelWriter('UpSetPlot_Data_v2.xlsx') as writer:
         for combinacion, ortogrupos in ortogrupos_por_combinacion.items():
             combinacion_data = []
@@ -705,35 +706,35 @@ def generar_archivo_excel_upsetplots_filtrado(orthogroups_df, ortogrupos_por_com
 
             df_combinacion = pd.DataFrame(combinacion_data)
 
-            # Usar las abreviaturas para crear el nombre de la hoja
+            # Use abbreviations to create the sheet name
             hoja_nombre = ' + '.join([abreviaturas.get(sp, sp) for sp in combinacion])
 
-            # Si el nombre de la hoja está vacío, asignar un nombre predeterminado
+            # If the sheet name is empty, assign a default one
             if not hoja_nombre:
                 hoja_nombre = 'Unnamed_Combination'
 
-            # Limitar a 31 caracteres para cumplir con el límite de Excel
+            # Limit to 31 characters to comply with Excel sheet name restrictions
             hoja_nombre = hoja_nombre[:31]
 
-            # Escribir el DataFrame de la combinación en una nueva hoja del archivo Excel
+            # Write the DataFrame of the current combination to a new Excel sheet
             df_combinacion.to_excel(writer, sheet_name=hoja_nombre, index=False)
 
-    # Cargar el archivo Excel completo y filtrar
+    # Load the complete Excel file and apply filtering
     original_data = pd.read_excel('UpSetPlot_Data_v2.xlsx', sheet_name=None)
 
-    # Diccionario para almacenar las hojas filtradas
+    # Dictionary to store filtered sheets
     filtered_sheets = {}
 
-    # Filtrar cada hoja del archivo original
+    # Filter each sheet in the original file
     for sheet_name, df in original_data.items():
-        # Filtrar las filas que contienen los ortogrupos seleccionados
+        # Filter rows containing the selected orthogroups
         filtered_df = df[df['Orthogroup ID'].isin(selected_numeric_ids)]
 
-        # Si la hoja no queda vacía, la añadimos al diccionario
+        # Add to dictionary only if the sheet is not empty
         if not filtered_df.empty:
             filtered_sheets[sheet_name] = filtered_df
 
-    # Crear el nuevo archivo Excel con solo las hojas filtradas
+    # Create a new Excel file containing only the filtered sheets
     with pd.ExcelWriter(filename) as writer:
         for sheet_name, df in filtered_sheets.items():
             df.to_excel(writer, sheet_name=sheet_name, index=False)
@@ -741,12 +742,11 @@ def generar_archivo_excel_upsetplots_filtrado(orthogroups_df, ortogrupos_por_com
     return filename
 
 def read_orthogroups_data(zip_path):
-    """Leer y devolver el contenido del archivo Orthogroups.tsv desde un archivo ZIP."""
+    """Read and return the contents of the Orthogroups.tsv file from a ZIP archive."""
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         with zip_ref.open('Orthogroups.tsv') as file:
             return pd.read_csv(file, sep='\t')
 
-# --- Funciones auxiliares básicas ---
 
 def normalize(text):
     return re.sub(r"[^a-zA-Z0-9]", "", text.lower())
@@ -790,8 +790,8 @@ def match_species(species_list, proteomes):
 
 def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
     """
-    Genera un Excel con 4 hojas y devuelve un 'summary' con diagnósticos.
-    Si detecta problemas comunes, levanta ValueError con mensaje claro.
+    Generates an Excel file with 4 sheets and returns a 'summary' with diagnostics.
+    If common issues are detected, raises ValueError with a clear message.
     """
     summary = {
         "tsv_path": tsv_path,
@@ -806,20 +806,20 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
         "warnings": []
     }
 
-    # --- Validaciones básicas de entrada
+    # --- Basic input validation
     if not os.path.exists(tsv_path):
         raise FileNotFoundError(f"Orthogroups.tsv not found at {tsv_path}")
     if not isinstance(species_to_goafile, dict) or not species_to_goafile:
         raise ValueError("species_to_goafile is empty or not a dict")
 
-    # --- Carga y chequeos de esquema
+    # --- Load and check structure
     try:
         df = pd.read_csv(tsv_path, sep='\t')
     except Exception as e:
         raise ValueError(f"Could not read TSV as tab-delimited: {e}")
 
     if "Orthogroup" not in df.columns:
-        raise ValueError("TSV must contain an 'Orthogroup' column as first col")
+        raise ValueError("TSV must contain an 'Orthogroup' column as first column")
 
     species_all = list(df.columns[1:])
     summary["n_orthogroups"] = len(df)
@@ -828,7 +828,7 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
     if summary["n_orthogroups"] == 0:
         summary["warnings"].append("TSV has 0 rows (no orthogroups).")
 
-    # --- Detectar especies del TSV que no tienen GOA y viceversa
+    # --- Detect TSV species without GOA and extra GOA species not in TSV
     tsv_species_set = set(species_all)
     goa_species_set = set(species_to_goafile.keys())
     missing_goa_for_tsv_species = sorted([s for s in species_all if s not in goa_species_set])
@@ -837,16 +837,16 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
     summary["species_without_goa"] = missing_goa_for_tsv_species
     if missing_goa_for_tsv_species:
         summary["warnings"].append(
-            f"{len(missing_goa_for_tsv_species)} TSV species have no GOA mapping (ok, seguirán en 'Initial Groups')."
+            f"{len(missing_goa_for_tsv_species)} TSV species have no GOA mapping (ok, they will remain in 'Initial Groups')."
         )
     if extra_goa_species_not_in_tsv:
         summary["warnings"].append(
             f"{len(extra_goa_species_not_in_tsv)} GOA species not found as TSV columns: {extra_goa_species_not_in_tsv[:5]}..."
         )
 
-    # --- Cálculo robusto del % de anotación
+    # --- Robust calculation of annotation percentage
     porcentajes = []
-    # Precompilar patrón de split: coma + espacios opcionales
+    # Precompile split pattern: comma + optional spaces
     splitter = re.compile(r"\s*,\s*")
 
     for _, row in df.iterrows():
@@ -861,11 +861,11 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
             if not s:
                 continue
 
-            # split robusto: admite "A|X, B|Y" y "A|X,B|Y" indistintamente
+            # Robust split: accepts both "A|X, B|Y" and "A|X,B|Y"
             prots = [p for p in splitter.split(s) if p]
             total_proteinas += len(prots)
 
-            # Sólo las especies que están en el mapeo GOA suman al numerador
+            # Only species with GOA mapping count toward the numerator
             if sp in goa_species_set:
                 proteinas_con_goa += len(prots)
 
@@ -874,7 +874,7 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
 
     df.insert(1, "Annotation Percentage", porcentajes)
 
-    # --- Dividir en hojas
+    # --- Split into sheets
     initial = df.copy()
     filtered = df[df["Annotation Percentage"] > 0].copy()
     removed  = df[df["Annotation Percentage"] == 0].copy()
@@ -882,15 +882,15 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
     summary["rows_zero_annotation"] = len(removed)
     summary["rows_nonzero_annotation"] = len(filtered)
 
-    # 'Groups of Interest' = sólo columnas con GOA (si alguna falta, no es error)
+    # 'Groups of Interest' = only columns with GOA (missing ones are not errors)
     species_with_goa_sorted = sorted(list(goa_species_set & tsv_species_set))
     columns_interest = ["Orthogroup", "Annotation Percentage"] + species_with_goa_sorted
     interest = initial[columns_interest].copy()
 
-    # --- Guardar Excel con una hoja de 'Meta' (diagnóstico)
+    # --- Save Excel with a 'Meta' sheet (diagnostics)
     try:
         with pd.ExcelWriter(output_excel_path) as writer:
-            # Hoja de diagnóstico
+            # Diagnostic sheet
             meta = pd.DataFrame({
                 "key": [
                     "n_orthogroups", "n_species_cols",
@@ -910,7 +910,7 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
             removed.to_excel(writer, sheet_name="Removed Groups", index=False)
             interest.to_excel(writer, sheet_name="Groups of Interest", index=False)
 
-            # Hoja con species y mapeos GOA (auditoría)
+            # Sheet with species and GOA mappings (audit)
             m = pd.DataFrame(
                 [{"species": s, "goa_file": species_to_goafile.get(s, "")} for s in species_all]
             )
@@ -918,22 +918,22 @@ def generate_go_excel(tsv_path, species_to_goafile, output_excel_path):
     except Exception as e:
         raise ValueError(f"Failed to write Excel: {e}")
 
-    # --- Logs útiles
-    print(f"✅ GOA Excel guardado en {output_excel_path}")
-    print(f"🧬 Especies (TSV) con GOA: {len(species_with_goa_sorted)} / {len(species_all)}")
+    # --- Useful logs
+    print(f"✅ GOA Excel saved to {output_excel_path}")
+    print(f"🧬 Species (TSV) with GOA: {len(species_with_goa_sorted)} / {len(species_all)}")
     if missing_goa_for_tsv_species:
-        print(f"⚠️ Sin GOA (TSV): {missing_goa_for_tsv_species[:8]}{'...' if len(missing_goa_for_tsv_species)>8 else ''}")
+        print(f"⚠️ Missing GOA (TSV): {missing_goa_for_tsv_species[:8]}{'...' if len(missing_goa_for_tsv_species)>8 else ''}")
     if extra_goa_species_not_in_tsv:
-        print(f"⚠️ GOA extra (no en TSV): {extra_goa_species_not_in_tsv[:8]}{'...' if len(extra_goa_species_not_in_tsv)>8 else ''}")
+        print(f"⚠️ Extra GOA (not in TSV): {extra_goa_species_not_in_tsv[:8]}{'...' if len(extra_goa_species_not_in_tsv)>8 else ''}")
 
     return summary
 
 def generate_go_image_from_excel(excel_path, output_image_path):
-    """Genera la figura de 4 paneles usando los porcentajes ya calculados en el Excel."""
+    """Generates a 4-panel figure using the annotation percentages already calculated in the Excel file."""
     try:
         df = pd.read_excel(excel_path, sheet_name="Initial Groups")
         if "Annotation Percentage" not in df.columns:
-            print("❌ La hoja no contiene columna 'Annotation Percentage'")
+            print("❌ The sheet does not contain the 'Annotation Percentage' column")
             return
 
         all_annotation = df["Annotation Percentage"]
@@ -966,13 +966,13 @@ def generate_go_image_from_excel(excel_path, output_image_path):
         axes[0, 1].axhline(q3_nz, color="purple", linestyle="--", label=f"Q3: {q3_nz:.2f}%")
         axes[0, 1].legend()
 
-        # c) Histograma All
+        # c) Histogram All
         sns.histplot(all_annotation, bins=bins, color="cornflowerblue", kde=True, edgecolor="black", ax=axes[1, 0])
         axes[1, 0].set_title("c) Distribution - All Orthogroups")
         axes[1, 0].set_xlabel("Annotation %")
         axes[1, 0].set_ylabel("Number of Orthogroups")
 
-        # d) Histograma >0%
+        # d) Histogram >0%
         sns.histplot(non_zero_annotation, bins=bins, color="lightgreen", kde=True, edgecolor="black", ax=axes[1, 1])
         axes[1, 1].set_title("d) Distribution - Orthogroups >0%")
         axes[1, 1].set_xlabel("Annotation %")
@@ -981,12 +981,13 @@ def generate_go_image_from_excel(excel_path, output_image_path):
         plt.tight_layout()
         fig.savefig(output_image_path)
         plt.close()
-        print(f"✅ Imagen GO generada en {output_image_path}")
+        print(f"✅ GO image generated at {output_image_path}")
 
     except Exception as e:
-        print(f"❌ Error al generar figura GO desde Excel: {e}")
+        print(f"❌ Error generating GO figure from Excel: {e}")
 
 def clear_goa_dir(goa_dir: str):
+    """Cleans the GOA directory by removing all its contents (files and subdirectories)."""
     p = Path(goa_dir)
     p.mkdir(parents=True, exist_ok=True)
     for item in p.iterdir():
@@ -994,17 +995,15 @@ def clear_goa_dir(goa_dir: str):
             if item.is_dir():
                 shutil.rmtree(item, ignore_errors=True)
             else:
-                # Compatible con Python < 3.8 (sin missing_ok)
                 try:
                     item.unlink()
                 except FileNotFoundError:
                     pass
         except Exception as e:
-            print(f"[WARN] No pude borrar {item}: {e}")
+            print(f"[WARN] Could not delete {item}: {e}")
 
 
 def parse_uniprot_block(text_or_list) -> List[str]:
-    """Acepta str o list; devuelve lista limpia de UniProt IDs."""
     if text_or_list is None:
         return []
     if isinstance(text_or_list, list):
@@ -1019,15 +1018,15 @@ def build_id2gos_from_goa_folder(goa_folder: str,
                                  limit_files: Optional[List[str]] = None
                                  ) -> Dict[str, List[str]]:
     """
-    Lee TODOS los .goa/.gaf (también .gz) del folder y construye id2gos (BP+CC+MF).
-    Si limit_files se pasa, restringe a ese subconjunto de ficheros (por nombre).
-    Devuelve: dict[gene_id] -> list[go_id]
+    Reads ALL .goa/.gaf (including .gz) files from the folder and builds id2gos (BP+CC+MF).
+    If limit_files is provided, restricts to that subset of files (by name).
+    Returns: dict[gene_id] -> list[go_id]
     """
     folder = Path(goa_folder)
     if not folder.exists():
         raise FileNotFoundError(f"GOA folder not found: {goa_folder}")
 
-    # Acepta .goa/.gaf con o sin .gz
+    # Accept .goa/.gaf with or without .gz
     patterns = ["*.goa", "*.gaf", "*.goa.gz", "*.gaf.gz"]
     files: List[Path] = []
     for pat in patterns:
@@ -1047,17 +1046,17 @@ def build_id2gos_from_goa_folder(goa_folder: str,
 
     for f in files:
         try:
-            print(f"HMS:{datetime.timedelta(0)}  leyendo anotaciones: {f.name}", flush=True)
+            print(f"HMS:{datetime.timedelta(0)}  reading annotations: {f.name}", flush=True)
 
-            # GafReader soporta .gz y permite pedir por namespace
+            # GafReader supports .gz and allows filtering by namespace
             gafr = GafReader(str(f), prt=None)
 
             per_file_counts = {"BP": 0, "CC": 0, "MF": 0}
             for ns in ("BP", "CC", "MF"):
                 d_ns = gafr.get_id2gos(namespace=ns)  # dict[str, set[str]]
-                # contar términos por archivo/NS (para log)
+                # count terms per file/namespace (for logging)
                 per_file_counts[ns] = sum(len(gos) for gos in d_ns.values())
-                # fusionar en estructura global
+                # merge into global structure
                 for gid, gos in d_ns.items():
                     id2gos[str(gid)].update(gos)
 
@@ -1065,72 +1064,71 @@ def build_id2gos_from_goa_folder(goa_folder: str,
             for k in ns_totals:
                 ns_totals[k] += per_file_counts[k]
 
-            print(f"{per_file_counts['BP']} GO en BP, "
-                  f"{per_file_counts['CC']} en CC, "
-                  f"{per_file_counts['MF']} en MF", flush=True)
+            print(f"{per_file_counts['BP']} GO in BP, "
+                  f"{per_file_counts['CC']} in CC, "
+                  f"{per_file_counts['MF']} in MF", flush=True)
 
         except Exception as e:
-            print(f"[WARN] No pude leer {f.name}: {e}", flush=True)
+            print(f"[WARN] Could not read {f.name}: {e}", flush=True)
 
     if total_read == 0:
-        raise ValueError("No se pudo leer ninguna anotación GO de los .goa/.gaf.")
+        raise ValueError("No GO annotations could be read from the .goa/.gaf files.")
 
-    print(f"TOTAL archivos leídos: {total_read}. "
-          f"GO cargados -> BP:{ns_totals['BP']}, CC:{ns_totals['CC']}, MF:{ns_totals['MF']}",
+    print(f"TOTAL files read: {total_read}. "
+          f"Loaded GO -> BP:{ns_totals['BP']}, CC:{ns_totals['CC']}, MF:{ns_totals['MF']}",
           flush=True)
 
-    # Convertir sets a listas (estable/serializable). Si quieres, ordena para estabilidad.
+    # Convert sets to lists (stable/serializable). Sort if needed for reproducibility.
     return {gid: sorted(gos) for gid, gos in id2gos.items()}
 
 def ensure_godag(path=GO_ROOT_OBO):
+    """Ensures that the GO DAG (ontology) file exists and loads it."""
     if not Path(path).exists():
-        raise FileNotFoundError(f"No encuentro el OBO en {path}. Debe estar junto a app.py.")
-    print(f"[INFO] Cargando GODag desde {path} ...", flush=True)
+        raise FileNotFoundError(f"Cannot find OBO file at {path}. It must be located next to app.py.")
+    print(f"[INFO] Loading GODag from {path} ...", flush=True)
     return GODag(path, prt=None)
 
-##################################################################################################################
+
 ############################################################################################################
 ############################################################################################################
-###############################   AQUI EMPIEZA LA PARTE DE @APP ROUTE     ##################################
+###############################################   @APP ROUTE     ###########################################
 ############################################################################################################
 ############################################################################################################
 
-# Rutas para la web
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/reanalyze')
 def reanalyze():
-    """Redirige al punto en que se generaron las figuras 1 y 2"""
-    # Si las figuras ya han sido generadas, redirigimos al usuario a esa vista
+    """Redirects to the point where Figures 1 and 2 were generated."""
+    # If the figures have already been generated, redirect the user to that view
     if 'figuras_generadas' in session:
         plot_url_1 = session['plot_url_1']
         plot_url_2 = session['plot_url_2']
         ruta_carpeta = session.get('ruta_carpeta', '')
-        species = list(session.get('species', []))  # Recuperar las especies del dataframe
+        species = list(session.get('species', []))  # Retrieve species from the dataframe
         return render_template('resultado.html', 
                                plot_url_1=plot_url_1, 
                                plot_url_2=plot_url_2, 
                                species=species, 
                                ruta_carpeta=ruta_carpeta)
-    # Si no hay datos, redirigimos al inicio
+    # If no data exists, redirect to the home page
     return redirect(url_for('index'))
 
-# Asegúrate de tener estos imports al principio del archivo app.py
 import os, zipfile, shutil
 from flask import flash, redirect, url_for, render_template, request, session
 
 @app.route('/cargar_carpeta', methods=['POST', 'GET'])
 def cargar_carpeta():
     """
-    Entradas soportadas:
-      - POST + file (modo=upload): ZIP subido -> extrae en static/data_folder/upload
-      - POST + modo=generated:     usa Proteomas/Orthogroups.zip -> extrae en static/data_folder/generated
-      - GET  + filename=Orthogroups.zip (&modo=preselected|generated):
+    Supported inputs:
+      - POST + file (mode=upload): ZIP uploaded -> extracted into static/data_folder/upload
+      - POST + mode=generated:     uses Proteomas/Orthogroups.zip -> extracted into static/data_folder/generated
+      - GET  + filename=Orthogroups.zip (&mode=preselected|generated):
                                     preselected = static/Orthogroups.zip
                                     generated   = Proteomas/Orthogroups.zip
-      - POST + especies[]=...      (desde resultado.html) genera figuras 4 y 5
+      - POST + especies[]=...      (from resultado.html) generates Figures 4 and 5
     """
     global orthogroups_df, gene_count_df, species_selected, ortogrupos_por_combinacion, abreviaturas
 
@@ -1144,46 +1142,46 @@ def cargar_carpeta():
                 elif os.path.isdir(p):
                     shutil.rmtree(p)
             except Exception as e:
-                print(f"[WARN] No se pudo borrar {p}: {e}")
+                print(f"[WARN] Could not delete {p}: {e}")
 
     def _render_result_and_cache(ruta_carpeta, modo_flag):
         """
-        Carga DataFrames, genera figuras 1 y 2, guarda en sesión y renderiza resultado.html.
-        Requisitos mínimos: Orthogroups.GeneCount.tsv y Orthogroups.tsv
-        (SingleCopy y Unassigned son opcionales para las Figuras 1 y 2).
+        Loads DataFrames, generates Figures 1 and 2, stores results in session, and renders resultado.html.
+        Minimum requirements: Orthogroups.GeneCount.tsv and Orthogroups.tsv
+        (SingleCopy and Unassigned files are optional for Figures 1 and 2).
         """
         try:
-            # Log de ayuda
+            # Log for debugging
             try:
-                print(f"[INFO] Contenido de '{ruta_carpeta}':", os.listdir(ruta_carpeta))
+                print(f"[INFO] Contents of '{ruta_carpeta}':", os.listdir(ruta_carpeta))
             except Exception as _e:
-                print(f"[WARN] No se pudo listar '{ruta_carpeta}': {_e}")
+                print(f"[WARN] Could not list '{ruta_carpeta}': {_e}")
 
-            # --- Validación mínima imprescindible
+            # --- Minimum required files
             req_gene = os.path.join(ruta_carpeta, 'Orthogroups.GeneCount.tsv')
             req_og   = os.path.join(ruta_carpeta, 'Orthogroups.tsv')
             missing = [p for p in (req_gene, req_og) if not os.path.exists(p)]
             if missing:
                 for p in missing:
                     print(f"[ERROR] Missing: {p}")
-                flash("Faltan ficheros mínimos (se requieren Orthogroups.GeneCount.tsv y Orthogroups.tsv).")
+                flash("Missing required files (Orthogroups.GeneCount.tsv and Orthogroups.tsv are mandatory).")
                 return redirect(url_for('index'))
 
-            # --- Aviso (opcional) si faltan otros ficheros, pero seguimos
+            # --- Optional files warning (continue even if missing)
             for opt in ('Orthogroups_SingleCopyOrthologues.txt',
                         'Orthogroups_UnassignedGenes.tsv',
                         'Orthogroups.txt'):
                 p = os.path.join(ruta_carpeta, opt)
                 if not os.path.exists(p):
-                    print(f"[WARN] Opcional no encontrado (continuamos): {p}")
+                    print(f"[WARN] Optional file not found (continuing): {p}")
 
-            # Carga y figuras (tu función ya sabe leer lo que haya)
+            # Load and generate figures
             gene_count_df_, orthogroups_df_, single_copy_df_, unassigned_df_ = cargar_datos_carpeta(ruta_carpeta)
 
             plot_url_1 = generar_figura_1(gene_count_df_)
             plot_url_2 = generar_figura_2(gene_count_df_)
 
-            # Cache en sesión
+            # Cache results in session
             session['figuras_generadas'] = True
             session['plot_url_1'] = plot_url_1
             session['plot_url_2'] = plot_url_2
@@ -1191,7 +1189,7 @@ def cargar_carpeta():
             session['species'] = list(gene_count_df_.columns[1:])
             session['modo'] = modo_flag
 
-            # (opcional) globales si los usas en otras rutas
+            # Optionally keep globals if used elsewhere
             globals()['gene_count_df'] = gene_count_df_
             globals()['orthogroups_df'] = orthogroups_df_
 
@@ -1204,8 +1202,8 @@ def cargar_carpeta():
             )
 
         except Exception as e:
-            print(f"[ERROR] _render_result_and_cache(modo={modo_flag}, ruta={ruta_carpeta}) -> {e}")
-            flash(f"Error preparando resultados ({modo_flag}): {e}")
+            print(f"[ERROR] _render_result_and_cache(mode={modo_flag}, path={ruta_carpeta}) -> {e}")
+            flash(f"Error preparing results ({modo_flag}): {e}")
             return redirect(url_for('index'))
 
     # -------------------------
@@ -1213,14 +1211,14 @@ def cargar_carpeta():
     # -------------------------
     if request.method == 'POST':
 
-        # --- A) UPLOAD: archivo subido manualmente
+        # --- A) UPLOAD: manually uploaded ZIP file
         if 'file' in request.files:
             folder = request.files['file']
             if folder.filename == '':
-                flash('No se seleccionó ningún archivo ZIP.')
+                flash('No ZIP file selected.')
                 return redirect(url_for('index'))
             if not folder.filename.lower().endswith('.zip'):
-                flash('El archivo debe ser .zip')
+                flash('The uploaded file must be a .zip archive.')
                 return redirect(url_for('index'))
 
             ruta_carpeta = os.path.join('static', 'data_folder', 'upload')
@@ -1233,38 +1231,38 @@ def cargar_carpeta():
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(ruta_carpeta)
             except Exception as e:
-                print(f"[ERROR] Descomprimiendo ZIP de upload: {e}")
-                flash(f"Error al descomprimir el ZIP subido: {e}")
+                print(f"[ERROR] Unzipping uploaded ZIP: {e}")
+                flash(f"Error extracting the uploaded ZIP: {e}")
                 return redirect(url_for('index'))
 
             return _render_result_and_cache(ruta_carpeta, 'upload')
 
-        # --- B) GENERATED: ZIP generado por OrthoFinder
+        # --- B) GENERATED: ZIP generated by OrthoFinder
         if request.form.get('modo') == 'generated':
             ruta_carpeta = os.path.join('static', 'data_folder', 'generated')
             _clean_dir(ruta_carpeta)
 
             zip_src = os.path.join('Proteomas', 'Orthogroups.zip')
             if not os.path.isfile(zip_src):
-                flash('No se encontró Proteomas/Orthogroups.zip. Ejecuta OrthoFinder primero.')
+                flash('File Proteomas/Orthogroups.zip not found. Please run OrthoFinder first.')
                 return redirect(url_for('index'))
 
             try:
                 with zipfile.ZipFile(zip_src, 'r') as zip_ref:
                     zip_ref.extractall(ruta_carpeta)
             except Exception as e:
-                print(f"[ERROR] Descomprimiendo ZIP generated: {e}")
-                flash(f"Error al descomprimir ZIP generado: {e}")
+                print(f"[ERROR] Unzipping generated ZIP: {e}")
+                flash(f"Error extracting generated ZIP: {e}")
                 return redirect(url_for('index'))
 
             return _render_result_and_cache(ruta_carpeta, 'generated')
 
-        # --- C) Figuras adicionales (selección de especies)
+        # --- C) Additional figures (species selection)
         if 'especies' in request.form:
             species_selected = request.form.getlist('especies')
             ruta_carpeta = request.form.get('ruta_carpeta', session.get('ruta_carpeta', ''))
             if not species_selected:
-                flash('Por favor selecciona al menos una especie.')
+                flash('Please select at least one species.')
                 return redirect(url_for('index'))
 
             try:
@@ -1288,15 +1286,15 @@ def cargar_carpeta():
                     img_path_5=img_path_5
                 )
             except Exception as e:
-                print(f"[ERROR] Figuras adicionales: {e}")
-                flash(f"Error al generar figuras adicionales: {e}")
+                print(f"[ERROR] Additional figures: {e}")
+                flash(f"Error generating additional figures: {e}")
                 return redirect(url_for('index'))
 
     # -------------------------
     # GET (preselected / generated / upload)
     # -------------------------
     if request.method == 'GET':
-        # A) preselected / generated -> extraer desde el ZIP indicado
+        # A) preselected / generated -> extract from given ZIP
         if request.args.get('filename') == 'Orthogroups.zip':
             modo_arg = request.args.get('modo', 'preselected')
             try:
@@ -1315,28 +1313,28 @@ def cargar_carpeta():
                 return _render_result_and_cache(ruta_carpeta, modo_arg)
 
             except Exception as e:
-                print(f"[ERROR] GET cargar_carpeta (modo={modo_arg}): {e}")
-                flash(f"Error al procesar archivo (modo={modo_arg}): {e}")
+                print(f"[ERROR] GET cargar_carpeta (mode={modo_arg}): {e}")
+                flash(f"Error processing file (mode={modo_arg}): {e}")
                 return redirect(url_for('index'))
 
-        # B) upload -> reutilizar carpeta ya extraída por el flujo de subida
+        # B) upload -> reuse already extracted folder from upload flow
         if request.args.get('modo') == 'upload':
             try:
                 ruta_carpeta = os.path.join('static', 'data_folder', 'upload')
                 if not os.path.isdir(ruta_carpeta):
-                    flash('No hay datos de upload preparados. Sube antes un ZIP.')
+                    flash('No upload data prepared. Please upload a ZIP first.')
                     return redirect(url_for('index'))
 
-                # No limpiamos ni extraemos nada: ya está descomprimido por el POST de upload
+                # Do not clean or extract anything here: it’s already unpacked by the upload POST
                 return _render_result_and_cache(ruta_carpeta, 'upload')
 
             except Exception as e:
-                print(f"[ERROR] GET cargar_carpeta (modo=upload): {e}")
-                flash(f"Error al preparar upload: {e}")
+                print(f"[ERROR] GET cargar_carpeta (mode=upload): {e}")
+                flash(f"Error preparing upload: {e}")
                 return redirect(url_for('index'))
 
     # -------------------------
-    # Re-render si ya hay figuras
+    # Re-render if figures already exist
     # -------------------------
     if session.get('figuras_generadas'):
         return render_template(
@@ -1351,17 +1349,17 @@ def cargar_carpeta():
 
 @app.route('/create_excel')
 def create_excel():
-    """Generar el archivo Excel cuando se solicite mediante el botón."""
+    """Generate the Excel file when requested via the button."""
     global orthogroups_df, species_selected, gene_count_df, ortogrupos_por_combinacion, abreviaturas
 
-    # Verifica si los datos están cargados; si no, los carga
+    # Check if the data is loaded; if not, load it
     if orthogroups_df is None:
         gene_count_df, orthogroups_df, _, _ = cargar_datos_carpeta('static/data_folder')
 
-    # Crear el archivo Excel
+    # Create the Excel file
     excel_filename = generar_archivo_excel_upsetplots_v2(ortogrupos_por_combinacion, orthogroups_df, species_selected, abreviaturas)
 
-    return 'Excel generado'
+    return 'Excel generated'
 
 @app.route('/download_excel')
 def download_excel():
@@ -1374,36 +1372,38 @@ def download_image(filename):
 
 @app.route('/generate_new_figures', methods=['POST'])
 def generate_new_figures():
-    global orthogroups_df, species_selected, ortogrupos_por_combinacion, selected_orthogroups  # Añadir selected_orthogroups como global
+    global orthogroups_df, species_selected, ortogrupos_por_combinacion, selected_orthogroups  # Add selected_orthogroups as global
 
-    # Obtener los UniProt IDs enviados desde el frontend
+    # Get UniProt IDs sent from the frontend
     data = request.get_json()
     uniprot_ids = data.get('data', '').split()
 
-    # Filtrar los ortogrupos utilizando los UniProt IDs
+    # Filter orthogroups using the provided UniProt IDs
     selected_orthogroups = filter_orthogroups(orthogroups_df, uniprot_ids)
 
     if selected_orthogroups:
-        # Generar las figuras filtradas (Figuras 6 y 7)
+        # Generate filtered figures (Figures 6 and 7)
         img_path_ortogrupos, img_path_genes = graficar_upset_plots_proteome(
             orthogroups_df, selected_orthogroups, species_selected
         )
 
-        # Devolver las rutas de las figuras al frontend
+        # Return figure paths to the frontend
         return jsonify({'img_path_6': img_path_ortogrupos, 'img_path_7': img_path_genes})
     else:
-        return jsonify({'error': 'No se encontraron ortogrupos coincidentes con los IDs de UniProt proporcionados.'}), 400
+        return jsonify({'error': 'No orthogroups found matching the provided UniProt IDs.'}), 400
 
 @app.route('/create_excel_proteome_filtrado', methods=['POST'])
 def create_excel_proteome_filtrado():
     global orthogroups_df, ortogrupos_por_combinacion, species_selected, abreviaturas, selected_orthogroups
 
-    # Verifica que selected_orthogroups ya se ha generado
+    # Check that selected_orthogroups has already been generated
     if not selected_orthogroups:
-        return jsonify({'error': 'No se han generado ortogrupos filtrados aún.'}), 400
+        return jsonify({'error': 'No filtered orthogroups have been generated yet.'}), 400
 
-    # Generar el archivo Excel utilizando los selected_orthogroups
-    excel_filename = generar_archivo_excel_upsetplots_filtrado(orthogroups_df, ortogrupos_por_combinacion, species_selected, abreviaturas, selected_orthogroups)
+    # Generate the Excel file using the selected_orthogroups
+    excel_filename = generar_archivo_excel_upsetplots_filtrado(
+        orthogroups_df, ortogrupos_por_combinacion, species_selected, abreviaturas, selected_orthogroups
+   )
 
     return send_file(excel_filename, as_attachment=True)
 
@@ -1419,7 +1419,7 @@ def download_proteomes():
         print("❌ No proteomes received from frontend.")
         return jsonify({"error": "No proteomes provided."}), 400
 
-    print("🔁 Limpieza de carpeta Proteomas...")
+    print("🔁 Cleaning Proteomes folder...")
     for f in os.listdir(PROTEOMES_FOLDER):
         path = os.path.join(PROTEOMES_FOLDER, f)
         try:
@@ -1428,14 +1428,14 @@ def download_proteomes():
             elif os.path.isdir(path):
                 shutil.rmtree(path)
         except Exception as e:
-            print(f"❌ Error eliminando {path}: {e}")
+            print(f"❌ Error deleting {path}: {e}")
 
     descargados = []
     errores = []
     vacios = []
 
     for pid in proteome_ids:
-        print(f"\n🔍 Procesando {pid}...")
+        print(f"\n🔍 Processing {pid}...")
 
         # METADATA
         url_metadata = f"https://rest.uniprot.org/proteomes/{pid}"
@@ -1445,11 +1445,11 @@ def download_proteomes():
                 raise Exception(f"Metadata HTTP {r_meta.status_code}")
             metadata = r_meta.json()
         except Exception as e:
-            print(f"❌ Fallo al descargar metadata de {pid}: {e}")
+            print(f"❌ Failed to download metadata for {pid}: {e}")
             errores.append(f"{pid} (metadata failed: {e})")
             continue
 
-        # Nombre de archivo
+        # File name
         organism_name = metadata.get("taxonomy", {}).get("scientificName", "Unknown_organism")
         safe_name = re.sub(r"[^\w\-_\.() ]", "_", organism_name).replace(" ", "_")
         filename = f"{safe_name}.fasta"
@@ -1463,24 +1463,24 @@ def download_proteomes():
                 raise Exception(f"FASTA HTTP {r_fasta.status_code}")
             with open(filepath, "w") as f:
                 f.write(r_fasta.text)
-            print(f"📁 Guardado en: {filepath}")
+            print(f"📁 Saved to: {filepath}")
         except Exception as e:
-            print(f"❌ Fallo al guardar FASTA de {pid}: {e}")
+            print(f"❌ Failed to save FASTA for {pid}: {e}")
             errores.append(f"{pid} (fasta failed: {e})")
             continue
 
-        # Verificación de tamaño
+        # Size verification
         if os.path.getsize(filepath) == 0:
             os.remove(filepath)
-            print(f"⚠️ Archivo vacío eliminado: {filename}")
+            print(f"⚠️ Empty file removed: {filename}")
             vacios.append(filename)
         else:
             descargados.append(filename)
 
-    print("\n✅ DESCARGA FINALIZADA")
-    print(f"✔️ Descargados: {descargados}")
-    print(f"⚠️ Vacíos: {vacios}")
-    print(f"❌ Errores: {errores}")
+    print("\n✅ DOWNLOAD COMPLETED")
+    print(f"✔️ Downloaded: {descargados}")
+    print(f"⚠️ Empty: {vacios}")
+    print(f"❌ Errors: {errores}")
 
     return jsonify({
         "descargados": descargados,
@@ -1522,7 +1522,7 @@ def run_orthofinder():
         resultados_base = os.path.join(PROTEOMES_FOLDER, "OrthoFinder")
         subdirs = [d for d in os.listdir(resultados_base) if d.startswith("Results_")]
         if not subdirs:
-            return jsonify({"error": "❌ No se encontró ninguna carpeta Results_"}), 500
+            return jsonify({"error": "❌ No 'Results_' folder found"}), 500
 
         latest_result = sorted(subdirs)[-1]
         orthogroups_path = os.path.join(resultados_base, latest_result, "Orthogroups")
@@ -1544,7 +1544,7 @@ def run_orthofinder():
                 if os.path.exists(file_path):
                     zipf.write(file_path, arcname=filename)
                 else:
-                    print(f"⚠️ No encontrado: {filename}")
+                    print(f"⚠️ Not found: {filename}")
 
         end_time = time.time()
         tiempo = f"⏱️ Total time: {int((end_time - start_time) // 60)}m {int((end_time - start_time) % 60)}s"
@@ -1581,7 +1581,7 @@ def stream_orthofinder():
         resultados_base = os.path.join(PROTEOMES_FOLDER, "OrthoFinder")
         subdirs = [d for d in os.listdir(resultados_base) if d.startswith("Results_")]
         if not subdirs:
-            yield "data: ❌ No result folder found.\n\n"
+            yield "data: ❌ No 'Results_' folder found.\n\n"
             yield "data: DONE\n\n"
             return
 
@@ -1604,10 +1604,11 @@ def stream_orthofinder():
                 file_path = os.path.join(orthogroups_path, filename)
                 if os.path.exists(file_path):
                     zipf.write(file_path, arcname=filename)
-                    yield f"data: ✔️ Zipped: {filename}\n\n"
+                    yield f"data: ✔️ Added to ZIP: {filename}\n\n"
                 else:
-                    yield f"data: ⚠️ Missing: {filename}\n\n"
+                    yield f"data: ⚠️ Missing file: {filename}\n\n"
 
+        yield "data: ✅ OrthoFinder completed successfully. ZIP created at Proteomas/Orthogroups.zip\n\n"
         yield "data: DONE\n\n"
 
     return Response(stream_with_context(generate()), mimetype='text/event-stream')
@@ -1618,7 +1619,7 @@ def generate_tree_image():
     import random
     import json
 
-    species_labels = request.form.getlist('especies')  # etiquetas exactas seleccionadas
+    species_labels = request.form.getlist('especies')  # exact selected labels
     if not species_labels:
         return jsonify({"error": "No species selected"}), 400
 
@@ -1635,10 +1636,12 @@ def generate_tree_image():
     ncbi = NCBITaxa()
     tree = ncbi.get_topology(taxon_ids)
 
+    # Randomize branch lengths to improve visualization
     for node in tree.traverse():
         if not node.is_root():
             node.dist = round(random.uniform(0.1, 1.5), 3)
 
+    # Define layout for branch labels
     def layout(node):
         if node.is_leaf():
             label = taxid_to_label.get(int(node.name), f"taxid {node.name}")
@@ -1647,6 +1650,7 @@ def generate_tree_image():
             face.margin_left = 4
             faces.add_face_to_node(face, node, column=0, position="branch-right")
 
+    # Tree visualization style
     ts = TreeStyle()
     ts.layout_fn = layout
     ts.show_leaf_name = False
@@ -1670,16 +1674,16 @@ def resultado_goa():
     modo = session.get("modo")
     species = None
 
-    # Preferimos reutilizar species si ya las calculaste antes
+    # Prefer using the species list already stored in session if available
     if session.get("species"):
         species = session["species"]
 
     if species is None:
-        # Cargar species según modo
+        # Load species according to mode
         if modo == "preselected":
             zip_path = os.path.join("static", "Orthogroups.zip")
             if not os.path.exists(zip_path):
-                return "No se encontró el archivo ZIP esperado (preselected).", 400
+                return "Expected ZIP file not found (preselected).", 400
             with zipfile.ZipFile(zip_path, 'r') as z:
                 with z.open("Orthogroups.tsv") as f:
                     df = pd.read_csv(f, sep="\t", nrows=0)
@@ -1688,7 +1692,7 @@ def resultado_goa():
         elif modo == "generated":
             zip_path = os.path.join("Proteomas", "Orthogroups.zip")
             if not os.path.exists(zip_path):
-                return "No se encontró el archivo ZIP esperado (generated).", 400
+                return "Expected ZIP file not found (generated).", 400
             with zipfile.ZipFile(zip_path, 'r') as z:
                 with z.open("Orthogroups.tsv") as f:
                     df = pd.read_csv(f, sep="\t", nrows=0)
@@ -1697,23 +1701,23 @@ def resultado_goa():
         elif modo == "upload":
             ruta_carpeta = session.get("ruta_carpeta", "")
             if not ruta_carpeta:
-                return "No hay ruta de trabajo para upload. Sube el ZIP primero.", 400
+                return "No working directory found for upload mode. Please upload the ZIP first.", 400
             tsv_path = os.path.join(ruta_carpeta, "Orthogroups.tsv")
             if not os.path.exists(tsv_path):
-                return "No se encontró Orthogroups.tsv en upload.", 400
+                return "Orthogroups.tsv not found in upload directory.", 400
             df = pd.read_csv(tsv_path, sep="\t", nrows=0)
             species = list(df.columns[1:])
 
         else:
-            return "Modo no reconocido. Asegúrate de haber cargado un archivo.", 400
+            return "Unrecognized mode. Please ensure you have loaded a valid file.", 400
 
-    # Cargar proteomas disponibles (con GOA o el JSON general)
+    # Load available proteomes (with GOA or from the general JSON)
     proteomes = load_proteomes(JSON_PATH)
 
-    # Matching automático
+    # Automatic species matching
     species_cache = match_species(species, proteomes)
 
-    # Guardar info en sesión
+    # Save information in session
     session["species_detected"] = species
     session["species_matches"] = species_cache
 
@@ -1722,9 +1726,9 @@ def resultado_goa():
 @app.route("/download_goa_files", methods=["POST"])
 def download_goa_files():
     """
-    Descarga los GOA seleccionados desde la tabla de matching,
-    limpia GOAfiles/, guarda el mapeo especie->fichero en sesión
-    y genera el Excel 'Gene_Ontology_Analysis.xlsx'.
+    Downloads the selected GOA files from the matching table,
+    clears GOAfiles/, saves the species->file mapping in session,
+    and generates the Excel file 'Gene_Ontology_Analysis.xlsx'.
     """
     try:
         data = request.get_json(silent=True) or {}
@@ -1735,15 +1739,15 @@ def download_goa_files():
             if urls:
                 return respond(False, "Missing species_to_url mapping",
                                where="download_goa_files",
-                               hint="Envía species_to_url: { 'Species name': 'https://.../file.goa' }",
+                               hint="Send species_to_url: { 'Species name': 'https://.../file.goa' }",
                                code=400)
             return respond(False, "No GOA URLs received",
                            where="download_goa_files",
-                           hint="Selecciona especies con GOA y vuelve a intentar.",
+                           hint="Select species with valid GOA and try again.",
                            code=400)
 
-        # 1) limpiar GOAfiles/
-        print("[INFO] download_goa_files: limpiando GOAfiles/")
+        # 1) Clean GOAfiles/
+        print("[INFO] download_goa_files: cleaning GOAfiles/")
         clear_goa_dir(GOA_DOWNLOAD_FOLDER)
         os.makedirs(GOA_DOWNLOAD_FOLDER, exist_ok=True)
 
@@ -1769,44 +1773,44 @@ def download_goa_files():
                         ok = True
                         break
                     except Exception as e:
-                        print(f"[WARN] fallo descargando {url} ({attempt}/{MAX_RETRIES}): {e}")
+                        print(f"[WARN] failed downloading {url} ({attempt}/{MAX_RETRIES}): {e}")
                         if attempt < MAX_RETRIES:
                             time.sleep(RETRY_DELAY)
                 if ok:
                     downloaded.append(filename)
                     goa_mapping[species] = filename
                 else:
-                    failed.append({"species": species, "reason": "max retries"})
+                    failed.append({"species": species, "reason": "max retries exceeded"})
 
             except Exception as e:
                 failed.append({"species": species, "reason": f"Unexpected: {e}"})
 
         session["goa_mapping"] = goa_mapping
 
-        # 2) generar Excel base
+        # 2) Generate base Excel
         ruta_carpeta = session.get('ruta_carpeta')
         if not ruta_carpeta or not os.path.exists(ruta_carpeta):
-            return respond(False, "Work folder not prepared",
+            return respond(False, "Working directory not prepared",
                            where="download_goa_files",
-                           hint="Vuelve a cargar los ortogrupos (Upload/Preselected/Generated).",
+                           hint="Reload orthogroups (Upload/Preselected/Generated).",
                            code=400)
 
         orthogroups_path = os.path.join(ruta_carpeta, 'Orthogroups.tsv')
         if not os.path.exists(orthogroups_path):
             return respond(False, "Orthogroups.tsv not found",
                            where="download_goa_files",
-                           hint="Asegúrate de haber cargado correctamente los ortogrupos.",
+                           hint="Make sure orthogroups were loaded correctly.",
                            code=404)
 
         os.makedirs(RESULTS_FOLDER, exist_ok=True)
         output_excel = os.path.join(RESULTS_FOLDER, 'Gene_Ontology_Analysis.xlsx')
         excel_summary = generate_go_excel(orthogroups_path, goa_mapping, output_excel)
 
-        print("✅ GOA Excel guardado en", output_excel)
-        print(f"🧬 Especies (TSV) con GOA: {len(excel_summary.get('species_with_goa', []))} / {excel_summary.get('n_species_cols')}")
+        print("✅ GOA Excel saved at", output_excel)
+        print(f"🧬 Species (TSV) with GOA: {len(excel_summary.get('species_with_goa', []))} / {excel_summary.get('n_species_cols')}")
         if excel_summary.get("species_without_goa"):
             arr = excel_summary["species_without_goa"]
-            print(f"⚠️ Sin GOA (TSV): {arr[:8]}{'...' if len(arr)>8 else ''}")
+            print(f"⚠️ Without GOA (TSV): {arr[:8]}{'...' if len(arr)>8 else ''}")
 
         return respond(True, "GOA files processed and Excel generated",
                        where="download_goa_files",
@@ -1821,14 +1825,14 @@ def download_goa_files():
     except Exception as e:
         return respond(False, f"Unexpected error in download_goa_files: {e}",
                        where="download_goa_files",
-                       hint="Consulta el log y verifica species_to_url, permisos de escritura y red.",
+                       hint="Check the log and verify species_to_url, write permissions, and network connection.",
                        code=500)
 
 @app.route("/download_go_excel")
 def download_go_excel():
     output_excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
     if not os.path.exists(output_excel_path):
-        return "El archivo Excel no existe. Por favor, ejecuta primero el análisis GO.", 404
+        return "The Excel file does not exist. Please run the GO analysis first.", 404
     return send_file(output_excel_path, as_attachment=True)
 
 @app.route("/fix_taxid", methods=["POST"])
@@ -1841,17 +1845,17 @@ def fix_taxid():
         if not taxon_id or not original:
             return respond(False, "Missing taxon_id or original name",
                            where="fix_taxid",
-                           hint="Envía { taxon_id, original } en el body.",
+                           hint="Send { taxon_id, original } in the request body.",
                            code=400)
 
-        # Cargar proteomas desde JSON
+        # Load proteomes from JSON
         proteomes = load_proteomes(JSON_PATH)
         match = next((p for p in proteomes if str(p.get("taxon_id")) == str(taxon_id)), None)
 
         if not match:
-            return respond(False, "No match for Taxon ID",
+            return respond(False, "No match found for Taxon ID",
                            where="fix_taxid",
-                           hint="Verifica el taxon_id en el JSON de proteomas.",
+                           hint="Verify the taxon_id in the proteomes JSON file.",
                            code=404)
 
         return respond(True, "Taxon fixed",
@@ -1866,7 +1870,7 @@ def fix_taxid():
     except Exception as e:
         return respond(False, f"Unexpected error in fix_taxid: {e}",
                        where="fix_taxid",
-                       hint="Revisa el JSON de proteomas y la petición.",
+                       hint="Check the proteomes JSON and the request data.",
                        code=500)
 
 @app.route("/run_go_analysis", methods=["POST"])
@@ -1878,9 +1882,9 @@ def run_go_analysis():
         image_path = os.path.join(PLOTS_FOLDER, "annotation_distribution.png")
 
         if not os.path.exists(excel_path):
-            return respond(False, "Excel GOA not found",
+            return respond(False, "GOA Excel not found",
                            where="run_go_analysis",
-                           hint="Pulsa 'Download GOA files' para generar el Excel primero.",
+                           hint="Click 'Download GOA files' to generate the Excel first.",
                            code=404)
 
         try:
@@ -1888,22 +1892,22 @@ def run_go_analysis():
         except Exception as e:
             return respond(False, f"Failed to generate annotation figure: {e}",
                            where="run_go_analysis",
-                           hint="Revisa el Excel 'Gene_Ontology_Analysis.xlsx'.",
+                           hint="Check the 'Gene_Ontology_Analysis.xlsx' file.",
                            code=500)
 
-        return respond(True, "Annotation distribution generated",
+        return respond(True, "Annotation distribution successfully generated",
                        where="run_go_analysis",
                        payload={"image_file_path": image_path})
 
     except Exception as e:
         return respond(False, f"Unexpected error in run_go_analysis: {e}",
                        where="run_go_analysis",
-                       hint="Consulta logs; verifica rutas y permisos.",
+                       hint="Check logs and verify file paths and permissions.",
                        code=500)
 
 @app.route('/foreground_analysis', methods=['POST'])
 def foreground_analysis():
-    """Guarda en sesión el foreground (pasted IDs o expansión por ortogrupos) con logs claros."""
+    """Stores the foreground (pasted IDs or orthogroup-expanded IDs) in session, with detailed logs."""
     try:
         data = request.get_json(silent=True) or {}
         uniprot_ids = parse_uniprot_block(data.get('uniprot_ids', []))
@@ -1912,14 +1916,18 @@ def foreground_analysis():
         print(f"[FG] Use Orthogroups flag: {use_orthogroups}", flush=True)
 
         if not uniprot_ids:
-            return respond(False, "No UniProt IDs provided", where="foreground_analysis",
-                           hint="Pega al menos un UniProt ID.", code=400)
+            return respond(False, "No UniProt IDs provided",
+                           where="foreground_analysis",
+                           hint="Paste at least one UniProt ID.",
+                           code=400)
 
         excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
         if not os.path.exists(excel_path):
             print(f"[FG][ERR] Gene Ontology Analysis file not found at: {excel_path}", flush=True)
             return respond(False, "Gene Ontology Analysis file not found.",
-                           where="foreground_analysis", hint="Pulsa 'Download GOA files' primero.", code=404)
+                           where="foreground_analysis",
+                           hint="Click 'Download GOA files' first.",
+                           code=404)
 
         print("[FG] Loading sheets from Excel file ...", flush=True)
         try:
@@ -1927,17 +1935,19 @@ def foreground_analysis():
             ortogrupos_interes   = pd.read_excel(excel_path, sheet_name='Groups of Interest')
         except Exception as e:
             print(f"[FG][ERR] Failed reading sheets: {e}", flush=True)
-            return respond(False, f"Excel malformado: {e}", where="foreground_analysis",
-                           hint="Re-genera el Excel desde 'Download GOA files'.", code=500)
+            return respond(False, f"Malformed Excel file: {e}",
+                           where="foreground_analysis",
+                           hint="Re-generate the Excel using 'Download GOA files'.",
+                           code=500)
         print(f"[FG] Sheets loaded. Initial Groups rows={len(ortogrupos_iniciales)}, Groups of Interest rows={len(ortogrupos_interes)}", flush=True)
 
-        # expansión por ortogrupos
+        # Expand by orthogroups
         uniprot_set = set(uniprot_ids)
         selected_orthogroups = set()
         protein_set = set()
 
         if use_orthogroups:
-            # detectar OGs que contienen cualquiera de los IDs
+            # Detect orthogroups containing any of the provided IDs
             hits_ogs = 0
             for _, row in ortogrupos_iniciales.iterrows():
                 og = row['Orthogroup']
@@ -1949,9 +1959,9 @@ def foreground_analysis():
                         selected_orthogroups.add(og)
                         hits_ogs += 1
                         break
-            print(f"[FG] OGs matched by pasted IDs: {hits_ogs}", flush=True)
+            print(f"[FG] Orthogroups matched by pasted IDs: {hits_ogs}", flush=True)
 
-            # expandir IDs desde 'Groups of Interest'
+            # Expand IDs from 'Groups of Interest'
             exp_added = 0
             for og in selected_orthogroups:
                 sub = ortogrupos_interes[ortogrupos_interes['Orthogroup'] == og]
@@ -1962,13 +1972,13 @@ def foreground_analysis():
                             ids = re.findall(r'\|([^|]+)\|', protein)
                             protein_set.update(ids)
                             exp_added += len(ids)
-            print(f"[FG] Expanded foreground IDs added from OGs: {exp_added}", flush=True)
+            print(f"[FG] Expanded foreground IDs added from orthogroups: {exp_added}", flush=True)
 
             if not selected_orthogroups:
                 print("[FG][WARN] No orthogroups matched the provided UniProt IDs.", flush=True)
         else:
             protein_set.update(uniprot_ids)
-            # reportar qué OGs contienen alguno de los IDs (info útil)
+            # Report which orthogroups contain any of the IDs (useful info)
             hits_ogs = 0
             for _, row in ortogrupos_iniciales.iterrows():
                 og = row['Orthogroup']
@@ -1980,16 +1990,16 @@ def foreground_analysis():
                         selected_orthogroups.add(og)
                         hits_ogs += 1
                         break
-            print(f"[FG] OGs that contain at least one pasted ID: {hits_ogs}", flush=True)
+            print(f"[FG] Orthogroups containing at least one pasted ID: {hits_ogs}", flush=True)
 
         final_protein_list = sorted(protein_set)
         selected_orthogroups_list = sorted(selected_orthogroups)
 
-        # guarda en sesión
+        # Store in session
         session['foreground_proteins'] = final_protein_list
         session['selected_orthogroups'] = selected_orthogroups_list
 
-        # logs vistosos
+        # Clear logs
         print(f"[FG] Selected Orthogroups (n={len(selected_orthogroups_list)}): {selected_orthogroups_list}", flush=True)
         print(f"[FG] Final Protein List size: {len(final_protein_list)}", flush=True)
 
@@ -1998,14 +2008,16 @@ def foreground_analysis():
                        payload={"foreground_proteins": final_protein_list})
     except Exception as e:
         print("[FG][ERR] Unexpected error:", str(e), flush=True)
-        return respond(False, f"Unexpected error: {e}", where="foreground_analysis", code=500)
+        return respond(False, f"Unexpected error: {e}",
+                       where="foreground_analysis",
+                       code=500)
 
 @app.route('/background_analysis', methods=['POST'])
 def background_analysis():
     """
-    Define el background para GO:
-      - choice '4': IDs pegados (con o sin 'use_orthogroups')
-      - choice '5': usar TODOS los GOA descargados como background
+    Defines the background for GO analysis:
+      - choice '4': pasted UniProt IDs (with or without 'use_orthogroups')
+      - choice '5': use ALL downloaded GOA files as background
     """
     try:
         data = request.get_json(silent=True) or {}
@@ -2017,28 +2029,32 @@ def background_analysis():
         if choice == '4' and not custom_uniprot_ids:
             return respond(False, "No UniProt IDs provided",
                            where="background_analysis",
-                           hint="Pega al menos un UniProt ID para el background.", code=400)
+                           hint="Paste at least one UniProt ID for the background.",
+                           code=400)
 
         excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
         if not os.path.exists(excel_path):
             print(f"[BG][ERR] Excel not found at: {excel_path}", flush=True)
             return respond(False, "Gene Ontology Analysis file not found.",
                            where="background_analysis",
-                           hint="Pulsa 'Download GOA files' primero.", code=404)
+                           hint="Click 'Download GOA files' first.",
+                           code=404)
 
         try:
             ortogrupos_iniciales = pd.read_excel(excel_path, sheet_name='Initial Groups')
             ortogrupos_interes   = pd.read_excel(excel_path, sheet_name='Groups of Interest')
         except Exception as e:
             print(f"[BG][ERR] Failed reading sheets: {e}", flush=True)
-            return respond(False, f"Excel malformado: {e}", where="background_analysis",
-                           hint="Re-genera el Excel desde 'Download GOA files'.", code=500)
+            return respond(False, f"Malformed Excel file: {e}",
+                           where="background_analysis",
+                           hint="Re-generate the Excel using 'Download GOA files'.",
+                           code=500)
 
         background_ids = set()
 
         if choice == '4':
             if use_orthogroups:
-                # seleccionar OGs que contengan cualquiera de los custom IDs
+                # Select orthogroups containing any of the custom IDs
                 sel_ogs = set()
                 base_set = set(custom_uniprot_ids)
                 og_hits = 0
@@ -2052,8 +2068,8 @@ def background_analysis():
                             sel_ogs.add(og)
                             og_hits += 1
                             break
-                print(f"[BG] OGs matched by custom IDs: {og_hits}", flush=True)
-                # expandir IDs desde 'Groups of Interest'
+                print(f"[BG] Orthogroups matched by custom IDs: {og_hits}", flush=True)
+                # Expand IDs from 'Groups of Interest'
                 exp_added = 0
                 for og in sel_ogs:
                     sub = ortogrupos_interes[ortogrupos_interes['Orthogroup'] == og]
@@ -2064,18 +2080,19 @@ def background_analysis():
                                 ids = re.findall(r'\|([^|]+)\|', protein)
                                 background_ids.update(ids)
                                 exp_added += len(ids)
-                print(f"[BG] Expanded background IDs added from OGs: {exp_added}", flush=True)
+                print(f"[BG] Expanded background IDs added from orthogroups: {exp_added}", flush=True)
             else:
                 background_ids.update(custom_uniprot_ids)
                 print(f"[BG] Background from pasted IDs only: n={len(background_ids)}", flush=True)
 
         elif choice == '5':
-            # usar todos los GOA descargados -> el universo se construirá leyendo GOAfiles
+            # Use all downloaded GOA files -> universe will be built later in /gene_ontology_analysis
             if not os.path.isdir(GOA_DOWNLOAD_FOLDER):
                 print(f"[BG][ERR] GOA folder not found: {GOA_DOWNLOAD_FOLDER}", flush=True)
                 return respond(False, "GOA download folder not found",
                                where="background_analysis",
-                               hint="Descarga primero los GOA desde la tabla de species.", code=400)
+                               hint="Download the GOA files from the species table first.",
+                               code=400)
 
             goa_files = [f for f in os.listdir(GOA_DOWNLOAD_FOLDER)
                          if f.endswith((".gaf", ".gaf.gz", ".goa", ".goa.gz"))]
@@ -2083,13 +2100,14 @@ def background_analysis():
             if not goa_files:
                 return respond(False, "No GOA files found",
                                where="background_analysis",
-                               hint="Pulsa 'Download GOA Files' antes de usar esta opción.", code=400)
+                               hint="Click 'Download GOA files' before using this option.",
+                               code=400)
 
             session["background_mode"] = "goa_all"
             session["background_goa_files"] = goa_files
-            # background_ids se deja vacío; se calculará en /gene_ontology_analysis
+            # background_ids left empty; will be calculated later in /gene_ontology_analysis
             session["background_ids"] = session.get("background_ids", [])
-            print(f"[BG] ✅ set to ALL GOA files ({len(goa_files)})", flush=True)
+            print(f"[BG] ✅ Set to ALL GOA files ({len(goa_files)})", flush=True)
             return respond(True, "Background set to all GOA files",
                            where="background_analysis",
                            payload={"background_files": goa_files,
@@ -2098,28 +2116,29 @@ def background_analysis():
         else:
             return respond(False, f"Background choice '{choice}' not implemented",
                            where="background_analysis",
-                           hint="Usa la opción 4 (IDs pegados) o 5 (usar GOA).", code=400)
+                           hint="Use option 4 (pasted IDs) or 5 (use GOA).",
+                           code=400)
 
-        # guardar en sesión (opción 4)
+        # Save to session (option 4)
         session["background_mode"] = "ids"
         session["background_ids"] = sorted(background_ids)
-        print(f"[BG] ✅ selected IDs: {len(background_ids)}", flush=True)
-        return respond(True, "Background stored",
+        print(f"[BG] ✅ Selected background IDs: {len(background_ids)}", flush=True)
+        return respond(True, "Background successfully stored",
                        where="background_analysis",
                        payload={"background_ids": sorted(background_ids)})
     except Exception as e:
-        print(f"[BG][ERR] Unexpected: {e}", flush=True)
+        print(f"[BG][ERR] Unexpected error: {e}", flush=True)
         return respond(False, str(e), where="background_analysis", code=500)
 
 @app.route('/gene_ontology_analysis', methods=['POST'])
 def gene_ontology_analysis():
     try:
         # -------------------------------
-        # PARÁMETROS DEL FRONTEND
+        # FRONTEND PARAMETERS
         # -------------------------------
         data = request.get_json(silent=True) or {}
         p_value_threshold = float(data.get('p_value', 0.05))
-        max_terms = data.get('max_terms')  # None o int
+        max_terms = data.get('max_terms')  # None or int
         min_depth = int(data.get('min_depth', 2))
         print("="*80)
         print(f"[GO] ▶ Starting GO Analysis")
@@ -2128,7 +2147,7 @@ def gene_ontology_analysis():
         print(f"     - max_terms = {max_terms}", flush=True)
 
         # -------------------------------
-        # RECUPERAR SESIÓN
+        # SESSION DATA
         # -------------------------------
         foreground = session.get("foreground_proteins", [])
         background_ids = session.get("background_ids", [])
@@ -2139,14 +2158,15 @@ def gene_ontology_analysis():
             print("[GO][ERR] ❌ Foreground missing")
             return respond(False, "Foreground missing",
                            where="gene_ontology_analysis",
-                           hint="Carga el foreground antes de analizar.", code=400)
+                           hint="Load the foreground before running the analysis.",
+                           code=400)
 
         print(f"[GO] Foreground proteins loaded: {len(foreground)}")
         if len(foreground) < 10:
             print(f"[GO] Example foreground IDs: {foreground}")
 
         # -------------------------------
-        # CONSTRUIR id2gos DESDE GOA FILES
+        # BUILD id2gos FROM GOA FILES
         # -------------------------------
         limit_files = list(set(goa_mapping.values())) if goa_mapping else None
         print(f"[GO] Building id2gos from folder={GOA_DOWNLOAD_FOLDER} limit_files={limit_files}")
@@ -2154,7 +2174,7 @@ def gene_ontology_analysis():
         print(f"[GO] id2gos constructed: {len(id2gos)} proteins with GO terms")
 
         # -------------------------------
-        # DEFINIR BACKGROUND
+        # DEFINE BACKGROUND
         # -------------------------------
         if bg_mode == "goa_all":
             background_ids = sorted(id2gos.keys())
@@ -2164,36 +2184,38 @@ def gene_ontology_analysis():
             print("[GO][ERR] ❌ Background missing")
             return respond(False, "Background missing",
                            where="gene_ontology_analysis",
-                           hint="Define el background antes de continuar.", code=400)
+                           hint="Define the background before proceeding.",
+                           code=400)
 
         bg_set = set(background_ids)
         assoc_bg = {str(g): set(gos) for g, gos in id2gos.items() if g in bg_set and gos}
-        print(f"[GO] assoc_bg built: {len(assoc_bg)} proteins with GO")
+        print(f"[GO] assoc_bg built: {len(assoc_bg)} proteins with GO terms")
 
-        # detectar si hay entradas mal formadas
+        # Detect malformed entries
         bad = [(g, type(v)) for g, v in assoc_bg.items() if not isinstance(v, set)]
         if bad:
             print(f"[GO][WARN] Found {len(bad)} non-set entries in assoc_bg. Example: {bad[:5]}")
 
-        # muestra ejemplo
+        # Example association
         if assoc_bg:
             some_gene, some_gos = next(iter(assoc_bg.items()))
             print(f"[GO] Example assoc: {some_gene} -> {list(some_gos)[:5]}")
 
         # -------------------------------
-        # FILTRAR FOREGROUND
+        # FILTER FOREGROUND
         # -------------------------------
         fg_in_bg = [g for g in foreground if g in assoc_bg]
         print(f"[GO] Foreground overlap: {len(fg_in_bg)} / {len(foreground)} in background")
 
         if not fg_in_bg:
             print("[GO][ERR] ❌ Foreground has no overlap with background+GO")
-            return respond(False, "Foreground IDs have no GO in background",
+            return respond(False, "Foreground IDs have no GO terms in background",
                            where="gene_ontology_analysis",
-                           hint="Revisa que tus foreground IDs tengan anotaciones.", code=400)
+                           hint="Check that your foreground IDs have GO annotations.",
+                           code=400)
 
         # -------------------------------
-        # CARGAR ONTOLOGÍA
+        # LOAD ONTOLOGY
         # -------------------------------
         try:
             godag = ensure_godag(GO_ROOT_OBO)
@@ -2203,15 +2225,15 @@ def gene_ontology_analysis():
             raise
 
         # -------------------------------
-        # ANÁLISIS DE ENRIQUECIMIENTO
+        # ENRICHMENT ANALYSIS
         # -------------------------------
         print("[GO] Running GOEnrichmentStudy ...")
-        from goatools.goea.go_enrichment_ns import GOEnrichmentStudy  # ✅ correcto en v1.4.12
+        from goatools.goea.go_enrichment_ns import GOEnrichmentStudy  # ✅ correct for v1.4.12
 
         try:
             goea = GOEnrichmentStudy(
-                list(bg_set),   # universo
-                assoc_bg,       # asociaciones gene->set(GOs)
+                list(bg_set),   # universe
+                assoc_bg,       # gene -> set(GO)
                 godag,
                 methods=['fdr_bh'],
                 log=None
@@ -2224,10 +2246,10 @@ def gene_ontology_analysis():
             raise
 
         results = goea.run_study(fg_in_bg)
-        print(f"[GO] Results raw: {len(results)} terms")
+        print(f"[GO] Raw results: {len(results)} terms")
 
         # -------------------------------
-        # FILTRAR RESULTADOS SIGNIFICATIVOS
+        # FILTER SIGNIFICANT RESULTS
         # -------------------------------
         sig = []
         for r in results:
@@ -2240,7 +2262,7 @@ def gene_ontology_analysis():
         print(f"[GO] Significant after FDR<{p_value_threshold} & depth≥{min_depth}: {len(sig)}")
 
         # -------------------------------
-        # SEPARAR POR NAMESPACE
+        # SPLIT BY NAMESPACE
         # -------------------------------
         def top_by_ns(ns, N=None):
             arr = [r for r in sig if r.goterm.namespace == ns]
@@ -2251,10 +2273,10 @@ def gene_ontology_analysis():
         cc_results = top_by_ns("cellular_component", max_terms)
         mf_results = top_by_ns("molecular_function", max_terms)
 
-        print(f"[GO] Split: BP={len(bp_results)}, CC={len(cc_results)}, MF={len(mf_results)}")
+        print(f"[GO] Split by namespace: BP={len(bp_results)}, CC={len(cc_results)}, MF={len(mf_results)}")
 
         # -------------------------------
-        # FIGURA
+        # FIGURE
         # -------------------------------
         def prep(res, max_label_length=30):
             labels = [(r.name[:max_label_length] + "…") if len(r.name) > max_label_length else r.name for r in res]
@@ -2291,14 +2313,14 @@ def gene_ontology_analysis():
 
         plt.tight_layout()
 
-        # Guardar figura en servidor
+        # Save figure on server
         figure_path = os.path.join("static", "plots", "go_analysis_figure.png")
         plt.savefig(figure_path)
         plt.close(fig)
         print(f"[GO] 📊 Figure generated: {figure_path}")
 
         # -------------------------------
-        # EXCEL
+        # EXCEL OUTPUT
         # -------------------------------
         out_xlsx = os.path.join(RESULTS_FOLDER, "go_enrichment_report.xlsx")
         with pd.ExcelWriter(out_xlsx) as xw:
@@ -2318,11 +2340,11 @@ def gene_ontology_analysis():
                 df.to_excel(xw, sheet_name=ns, index=False)
         print(f"[GO] 📑 Excel generated: {out_xlsx}")
 
-
         # -------------------------------
-        # RESPUESTA FINAL
+        # FINAL RESPONSE
         # -------------------------------
-        return respond(True, "GO analysis completed successfully", where="gene_ontology_analysis",
+        return respond(True, "GO analysis completed successfully",
+                       where="gene_ontology_analysis",
                        payload={
                            "bp_results": [{"GO": r.GO, "name": r.name, "p_fdr_bh": r.p_fdr_bh} for r in bp_results],
                            "cc_results": [{"GO": r.GO, "name": r.name, "p_fdr_bh": r.p_fdr_bh} for r in cc_results],
@@ -2334,14 +2356,16 @@ def gene_ontology_analysis():
     except Exception as e:
         print(f"[GO][ERR] ❌ Unexpected error in gene_ontology_analysis: {e}")
         import traceback; traceback.print_exc()
-        return respond(False, f"Unexpected error: {e}", where="gene_ontology_analysis",
-                       hint="Revisa logs y que el OBO/GOA existan.", code=500)
+        return respond(False, f"Unexpected error: {e}",
+                       where="gene_ontology_analysis",
+                       hint="Check logs and make sure OBO/GOA files exist.",
+                       code=500)
 
 @app.route("/download_go_enrichment_excel")
 def download_go_enrichment_excel():
     excel_path = os.path.join(RESULTS_FOLDER, "go_enrichment_report.xlsx")
     if not os.path.exists(excel_path):
-        return "Excel no disponible", 404
+        return "Excel file not available", 404
     return send_file(excel_path, as_attachment=True)
 
 @app.route("/go_status")
@@ -2364,46 +2388,47 @@ def go_status():
 @app.route("/generate_go_image", methods=["POST"])
 def generate_go_image():
     """
-    Usa el Excel generado en /download_goa_files (RESULTS_FOLDER/Gene_Ontology_Analysis.xlsx)
-    y crea la figura 4-en-1 en static/plots. Devuelve JSON con 'image_file_path'
-    (solo el nombre de archivo) para que el front la muestre como /static/plots/<name>.
+    Uses the Excel generated by /download_goa_files (RESULTS_FOLDER/Gene_Ontology_Analysis.xlsx)
+    and creates the 4-in-1 figure in static/plots.
+    Returns JSON with 'image_file_path' (only filename) for the frontend to display
+    as /static/plots/<name>.
     """
     try:
-        # 1) Rutas
+        # 1) Paths
         excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
         if not os.path.exists(excel_path):
             return respond(
                 False,
                 "Excel not found. Run /download_goa_files first.",
                 where="generate_go_image",
-                hint="Asegúrate de haber descargado los GOA y generado el Excel.",
+                hint="Make sure the GOA files were downloaded and the Excel file was generated.",
                 code=404
             )
 
-        # 2) Asegurar carpeta de gráficos
-        crear_directorio_plots()  # ya definida en tu app
+        # 2) Ensure plots directory
+        crear_directorio_plots()  # already defined in your app
 
-        # 3) Salida (nombre estable para el front)
+        # 3) Output (stable name for frontend)
         image_filename = "go_annotation_distribution.png"
         image_output_path = os.path.join("static", "plots", image_filename)
 
-        # 4) Generar imagen
+        # 4) Generate image
         generate_go_image_from_excel(excel_path, image_output_path)
 
-        # Comprobación rápida
+        # Quick verification
         if not os.path.exists(image_output_path):
             return respond(
                 False,
                 "Image could not be generated.",
                 where="generate_go_image",
-                hint="Revisa que el Excel tenga la hoja 'Initial Groups' y la columna 'Annotation Percentage'.",
+                hint="Check that the Excel file contains 'Initial Groups' and 'Annotation Percentage' columns.",
                 code=500
             )
 
-        # 5) Respuesta para el front
+        # 5) Response for frontend
         return respond(
             True,
-            "GO image generated",
+            "GO image successfully generated",
             where="generate_go_image",
             payload={"image_file_path": image_filename}
         )
@@ -2422,4 +2447,3 @@ if __name__ == "__main__":
     print(f"🚀 Starting Flask on port {port}")
     threading.Timer(1.25, open_browser, args=(port,)).start()
     app.run(debug=True, use_reloader=False, port=port)
-

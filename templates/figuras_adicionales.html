@@ -82,7 +82,7 @@
     }
 
     .scroll-container img {
-        min-width: 800px;     /* o incluso 1000px si quieres forzar más scroll */
+        min-width: 800px;     
         max-width: none;
         display: inline-block;
     }
@@ -128,7 +128,7 @@
     .scaled-figure {
         display: block;
         margin: 20px auto;
-        max-width: 50%;  /* Puedes ajustar a 60% o menos si quieres más pequeño */
+        max-width: 50%;  
         height: auto;
         border: 1px solid #030202;
         box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
@@ -146,13 +146,6 @@
         <p>Figure 5 also uses an UpSet plot, but in this case, it focuses on the total number of proteins present...</p>
         <p>This analysis is useful for understanding the distribution of proteins in orthogroups, allowing for the identification of which species contribute most...</p>
     </div>
-
-    <h3>Figure 3 - Distribution of Unique and Shared Proteins</h3>
-
-    
-    <p style="color: gray; font-style: italic;">
-        *** This figure has been removed from the current version of the analysis as it did not provide clear added value. ***
-    </p>
 
     {% if img_path_4 %}
         <h3>Figure 4 - UpSet Plot of Shared Orthogroups</h3>
@@ -241,8 +234,7 @@
  </main>
 
 
- <script>
-    
+ <script>    
     function toggleProteomeInput() {
         const inputSection = document.getElementById('proteome-input-section');
         inputSection.style.display = inputSection.style.display === 'none' ? 'block' : 'none';
@@ -251,13 +243,12 @@
     function generateNewFigures() {
         const proteomeData = document.getElementById('proteome-input').value;
 
-        // Validación: Asegúrate de que hay datos en el input
         if (!proteomeData.trim()) {
             alert('Please enter data before generating new figures.');
             return;
         }
 
-        document.getElementById('loading-spinner-proteome').style.display = 'block'; // Mostrar spinner
+        document.getElementById('loading-spinner-proteome').style.display = 'block'; 
 
         fetch('{{ url_for("generate_new_figures") }}', {
             method: 'POST',
@@ -269,9 +260,9 @@
             return response.json();
         })
         .then(data => {
-            document.getElementById('loading-spinner-proteome').style.display = 'none'; // Ocultar spinner
+            document.getElementById('loading-spinner-proteome').style.display = 'none'; 
             const newFiguresSection = document.getElementById('new-figures-section');
-            newFiguresSection.innerHTML = ''; // Limpiar la sección para nuevas figuras
+            newFiguresSection.innerHTML = ''; 
 
             if (data.img_path_6) {
                 newFiguresSection.innerHTML += `
@@ -300,35 +291,31 @@
                         <button class="boton-excel" id="create-excel-proteome-btn">Create Proteome Data Excel</button>
                     </div>`;
                 
-                // Ahora añadimos el evento click de forma dinámica usando JavaScript
                 const excelButton = document.getElementById('create-excel-proteome-btn');
-                excelButton.addEventListener('click', createExcelProteomeFiltrado); // Asigna la función JavaScript
+                excelButton.addEventListener('click', createExcelProteomeFiltrado); 
             }
 
         })
         .catch(error => {
             console.error('Error generating new figures:', error);
-            document.getElementById('loading-spinner-proteome').style.display = 'none'; // Ocultar spinner
+            document.getElementById('loading-spinner-proteome').style.display = 'none'; 
             alert('An error occurred while generating new figures. Please try again. Error details: ' + error.message);
         });
     }
 
     function createExcelProteomeFiltrado() {
-        console.log('Botón clicado');
+        console.log('Button clicked');
         const uniprotInput = document.getElementById('proteome-input').value;
         const uniprot_ids = uniprotInput.split(',').map(id => id.trim());
 
-        // Validación: Asegúrate de que los UniProt IDs son válidos
         if (!uniprot_ids.length || uniprot_ids.every(id => id === '')) {
-            alert('Por favor, introduce los UniProt IDs antes de generar el archivo Excel.');
+            alert('Please enter UniProt IDs before generating the Excel file.');
             return;
         }
 
-        // Mostrar el mensaje de carga
         document.getElementById('loading-message-proteome').style.display = 'block'; 
         document.getElementById('download-link-proteome').style.display = 'none';    
 
-        // Deshabilitar el botón para evitar clics múltiples
         const excelButton = document.getElementById('create-excel-proteome-btn');
         excelButton.disabled = true;
 
@@ -338,32 +325,27 @@
             body: JSON.stringify({ uniprot_ids: uniprot_ids })
         })
         .then(response => {
-            if (!response.ok) throw new Error('Error al generar el archivo Excel de Proteome');
+            if (!response.ok) throw new Error('Error generating the Proteome Excel file');
             return response.blob();
         })
         .then(blob => {
-            // Ocultar mensaje de carga
             document.getElementById('loading-message-proteome').style.display = 'none';
 
-            // Crear un enlace temporal para descargar el archivo
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'UpSetPlot_Filtrado.xlsx'; 
+            a.download = 'UpSetPlot_Filtered.xlsx'; 
             document.body.appendChild(a);
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);  
 
-            // Rehabilitar el botón
             excelButton.disabled = false;
-
-            // Mostrar el enlace de descarga
             document.getElementById('download-link-proteome').style.display = 'block';
         })
         .catch(error => {
-            console.error('Error al generar el archivo Excel:', error);
-            alert('Hubo un problema al generar el archivo Excel de Proteome. Por favor, inténtalo de nuevo.');
+            console.error('Error generating the Excel file:', error);
+            alert('There was a problem generating the Proteome Excel file. Please try again.');
             document.getElementById('loading-message-proteome').style.display = 'none';
             excelButton.disabled = false;
         });
@@ -375,16 +357,18 @@
 
         fetch('{{ url_for("create_excel") }}')
         .then(response => {
-            if (!response.ok) throw new Error('Error al generar el archivo Excel');
+            if (!response.ok) throw new Error('Error generating the Excel file');
             document.getElementById('loading-message').style.display = 'none';
             document.getElementById('download-link').style.display = 'block';
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Hubo un problema al generar el archivo Excel. Por favor, inténtalo de nuevo.');
+            alert('There was a problem generating the Excel file. Please try again.');
             document.getElementById('loading-message').style.display = 'none';
         });
     }
- </script>
+</script>
+
+
 </body>
 </html> 
