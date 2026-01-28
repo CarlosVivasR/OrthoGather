@@ -1,30 +1,60 @@
 # 🧬 OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment
 
-**OrthoGather** — compare proteomes with **[OrthoFinder](https://github.com/davidemms/OrthoFinder)** and discover function with **[GOATOOLS](https://github.com/tanghaibao/goatools)** — all in a local web app.  
-Download **UniProt** proteomes, run **OrthoFinder 3.0.1b1**, perform **GO enrichment**, and export figures/Excel.  
+**OrthoGather** — compare proteomes with **OrthoFinder** and discover function with **GOATOOLS** — all in a local web application.  
+Download **UniProt** proteomes, run **OrthoFinder**, perform **Gene Ontology enrichment**, and export publication-ready figures and tables.  
 *Requires Python 3.7.*
-
----
-
-## 🌍 What is OrthoGather?
-
-**OrthoGather** is a local web interface that bridges **orthology inference** with **functional interpretation**. It lets you:
-
-- Run **OrthoFinder 3.0.1b1** locally and explore orthogroups across species.
-- Perform **Gene Ontology enrichment** with **GOATOOLS**.
-- Produce **publication-ready figures** and **tables** for downstream analysis.
-- Keep everything **private/offline** on your machine (no data leaves your computer).
 
 ---
 
 ## 🧩 Overview
 
-**OrthoGather** unifies **orthology-based proteome comparison** with **functional interpretation**.  
-It streamlines the path from species selection to results you can read, share, and reuse: run **OrthoFinder 3.0.1b1**, explore orthogroups across species, and perform **Gene Ontology** enrichment with **GOATOOLS**.  
-The app operates entirely on your machine — favoring **privacy**, **reproducibility**, and **quick iteration**.
+**OrthoGather** is a local web application that integrates **orthology inference** with **functional interpretation** for comparative proteome and proteomics analyses.
+
+It enables users to:
+- Download reference proteomes from **UniProt** and infer orthogroups using **OrthoFinder**.
+- Explore shared and species-specific orthogroups through interactive **UpSet plots**.
+- Perform **Gene Ontology (GO) enrichment** with **GOATOOLS**, leveraging orthogroup relationships to propagate functional information across species.
+- Generate **publication-ready figures** and **Excel tables** for downstream analysis.
+
+All analyses run **locally**, favouring **privacy**, **reproducibility**, and **rapid iteration**, and are particularly useful when working with **poorly annotated or non-model organisms**.
+
+---
+
+## 💡 Why it helps
+
+A substantial fraction of proteins across organisms remain **under-annotated or inconsistently annotated**, which complicates functional interpretation and cross-species comparisons. This is particularly limiting in proteomics experiments involving non-model species or clinical isolates.
+
+**OrthoGather** addresses this gap by exploiting **orthogroup relationships** to transfer functional information from well-annotated proteins to those with limited annotation. By combining orthology-based comparison with Gene Ontology enrichment in a single workflow, the platform moves beyond identifying shared proteins toward inferring **shared and species-specific biological functions**.
+
+Starting from any **UniProt-associated proteome set**, orthology provides evolutionary context, while Gene Ontology enrichment provides a functional readout — both integrated into a single, local interface.
+
+---
+
+## 📖 Citation
+
+If you use **OrthoGather** in your research, please cite:
+
+> **Manuscript in preparation.**
+
+This section will be updated with the bioRxiv preprint and the final journal reference once available.
 
 ---
 ## 🔽 Download and Installation
+
+### Prerequisites
+
+Before installing **OrthoGather**, please ensure that you have:
+
+- **Git**, including **Git LFS**
+  ```bash
+  git lfs install
+  ```
+- **Conda** or **Micromamba**
+- A Unix-based environment (macOS, Linux, or WSL)
+### Clone the repository
+
+## 🔽 Download and Installation
+
 
 To install **OrthoGather**, first clone the repository and move into the project folder:
 
@@ -33,7 +63,7 @@ git clone https://github.com/CarlosVivasR/OrthoGather.git
 cd OrthoGather
 ```
 
-The installation process depends on your operating system. Each method automatically configures the required environment and dependencies, but you can consult installation_guide.pdf for a complete explanation of every step and additional troubleshooting details.
+The installation process depends on your operating system. Each method automatically configures the required environment and dependencies, but you can consult [installation_guide.pdf](Installation_guide.pdf) for a complete explanation of every step and additional troubleshooting details.
 
 ### 🧩 macOS (Intel / Rosetta)
 
@@ -127,23 +157,6 @@ This module turns orthogroup-level findings into **functional hypotheses**.
 - **Run enrichment** with **[GOATOOLS](https://github.com/tanghaibao/goatools)**, then review significant terms and download detailed results.
 
 **Outputs:** the enrichment figure and structured tables for downstream exploration.
-
----
-
-## 💡 Why it helps
-
-A substantial share of proteins across organisms remain **under-annotated or misannotated**, which makes it difficult to reason about function from any single species alone.  
-**OrthoGather** is motivated by that gap: it leverages **orthogroups** to transfer functional signal from well-annotated proteins to those with limited or noisy annotations — moving beyond “who shares what?” toward **“what biology does this imply?”**.
-
-Starting from any **UniProt-associated proteome** set, **orthology** provides the evolutionary context; **Gene Ontology enrichment** provides the functional readout; and both are brought together in **one local interface**.
-
-The tool builds on reliable components — orthology inference with **[OrthoFinder](https://github.com/davidemms/OrthoFinder)**, GO annotations (**GOA**) when available, enrichment analysis with **[GOATOOLS](https://github.com/tanghaibao/goatools)**, and intersection visualisation with **[UpSetPlot](https://upsetplot.readthedocs.io/en/stable/)** — and turns these pieces into a cohesive, **orthogroup-centric** workflow.
-
-You select species, download proteomes, run **OrthoFinder** with live logs, and immediately explore the standard `Orthogroups/` output interactively.  
-You can define a **foreground/background** from pasted UniProt IDs or from **all downloaded GOA**, and you may optionally **expand your sets by orthogroups** to propagate evidence from better-annotated orthologs.  
-An **annotation-coverage panel** helps you judge whether there is enough GO support before running statistics.
-
-Everything runs locally, producing **figures** and **tables** that are easy to reuse and share.
 
 ---
 
