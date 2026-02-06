@@ -1,6 +1,6 @@
-# 🧬 OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18510911.svg)](https://doi.org/10.5281/zenodo.18510911)
+
+# 🧬 OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment
 
 **OrthoGather** — compare proteomes with **OrthoFinder** and discover function with **GOATOOLS** — all in a local web application.  
 Download **UniProt** proteomes, run **OrthoFinder**, perform **Gene Ontology enrichment**, and export publication-ready figures and tables.  
