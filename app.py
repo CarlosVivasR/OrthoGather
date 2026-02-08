@@ -574,38 +574,71 @@ def crear_upset_plot_proteinas(gene_count_df, species, title, ortogrupos_por_com
 
     return f"{title.replace(' ', '_')}.png", protein_counts
 
-def generar_archivo_excel_upsetplots_v2(ortogrupos_por_combinacion, orthogroups_df, species, abreviaturas, filename='UpSetPlot_Data_v2.xlsx'):
-    """Generates an Excel file with multiple sheets, where each sheet represents a combination of species.
-    Each sheet contains a list of orthogroups and the corresponding proteins for each species in separate columns."""
+def _safe_sheet_label(label: str) -> str:
+    # Excel forbids: : \ / ? * [ ]
+    return re.sub(r"[:\\/?*\[\]]", "_", label)
+
+def generar_archivo_excel_upsetplots_v2(
+    ortogrupos_por_combinacion,
+    orthogroups_df,
+    species,
+    abreviaturas,
+    filename='UpSetPlot_Data_v2.xlsx'
+):
+    """
+    Generates an Excel file with one sheet per species combination.
+    Sheets are numbered (01-, 02-, ...) to avoid truncation collisions.
+    Ordering mimics UpSet sort_by='degree':
+      - degree (number of species) ascending
+      - number of orthogroups descending
+      - label ascending (stability)
+    """
+
+    combos = []
+    for combinacion, ortogrupos in ortogrupos_por_combinacion.items():
+        label = (
+            ' + '.join([abreviaturas.get(sp, sp) for sp in combinacion])
+            if abreviaturas else ' + '.join(list(combinacion))
+        )
+        label = label or "Unnamed_Combination"
+        degree = len(combinacion)
+        n_og = len(ortogrupos)
+        combos.append((combinacion, ortogrupos, label, degree, n_og))
+
+    combos.sort(key=lambda x: (x[3], -x[4], x[2]))
 
     with pd.ExcelWriter(filename) as writer:
-        for combinacion, ortogrupos in ortogrupos_por_combinacion.items():
-            # Create a list to store orthogroup and protein data for each species
+        meta_rows = []
+
+        for i, (combinacion, ortogrupos, label, degree, n_og) in enumerate(combos, start=1):
             combinacion_data = []
 
-            # Iterate through orthogroups and extract Orthogroup ID and proteins for each species
             for ortogrupo in ortogrupos:
                 row_data = {'Orthogroup ID': ortogrupo}
-
-                # Add the proteins for each species in their respective columns
                 for sp in species:
                     if sp in orthogroups_df.columns:
-                        proteins = orthogroups_df.at[ortogrupo, sp] if pd.notna(orthogroups_df.at[ortogrupo, sp]) else ""
-                        row_data[sp] = proteins
-
+                        proteins = orthogroups_df.at[ortogrupo, sp]
+                        row_data[sp] = proteins if pd.notna(proteins) else ""
                 combinacion_data.append(row_data)
 
-            # Create a DataFrame for the current combination sheet
             df_combinacion = pd.DataFrame(combinacion_data)
 
-            # Use abbreviations to create the sheet name
-            hoja_nombre = ' + '.join([abreviaturas.get(sp, sp) for sp in combinacion])
-            if not hoja_nombre:  # Check if sheet name is empty
-                hoja_nombre = 'Unnamed_Combination'  # Assign a default name if empty
-            hoja_nombre = hoja_nombre[:31]  # Limit to 31 characters to comply with Excel restrictions
+            prefix = f"{i:02d}-"
+            clean_label = _safe_sheet_label(label)
+            sheet_name = (prefix + clean_label)[:31]
 
-            # Write the combination DataFrame to a new Excel sheet
-            df_combinacion.to_excel(writer, sheet_name=hoja_nombre, index=False)
+            df_combinacion.to_excel(writer, sheet_name=sheet_name, index=False)
+
+            meta_rows.append({
+                "index": i,
+                "sheet_name": sheet_name,
+                "degree": degree,
+                "n_orthogroups": n_og,
+                "label": label,
+                "species_combination": " | ".join(combinacion)
+            })
+
+        pd.DataFrame(meta_rows).to_excel(writer, sheet_name="Meta", index=False)
 
     return filename
 
@@ -683,59 +716,81 @@ def graficar_upset_plots_proteome(orthogroups_df, selected_orthogroups, species)
 
     return 'upset_plot_ortogrupos.png', 'upset_plot_genes.png'
 
-def generar_archivo_excel_upsetplots_filtrado(orthogroups_df, ortogrupos_por_combinacion, species, abreviaturas, selected_orthogroups, filename='UpSetPlot_Filtrado.xlsx'):
-    """Generates a filtered Excel file using the provided selected_orthogroups."""
+def generar_archivo_excel_upsetplots_filtrado(
+    orthogroups_df,
+    ortogrupos_por_combinacion,
+    species,
+    abreviaturas,
+    selected_orthogroups,
+    filename='UpSetPlot_Filtrado.xlsx'
+):
+    """
+    Generates a filtered Excel file (only selected orthogroups),
+    preserving numbered sheet names (01-, 02-, ...) to avoid collisions.
+    """
 
-    # Extract the numeric part of the selected_orthogroups
     selected_numeric_ids = [int(re.search(r'\d+', og).group()) for og in selected_orthogroups]
 
-    # Generate the complete Excel file
-    with pd.ExcelWriter('UpSetPlot_Data_v2.xlsx') as writer:
-        for combinacion, ortogrupos in ortogrupos_por_combinacion.items():
+    base_excel = 'UpSetPlot_Data_v2.xlsx'
+
+    combos = []
+    for combinacion, ortogrupos in ortogrupos_por_combinacion.items():
+        label = (
+            ' + '.join([abreviaturas.get(sp, sp) for sp in combinacion])
+            if abreviaturas else ' + '.join(list(combinacion))
+        )
+        label = label or "Unnamed_Combination"
+        degree = len(combinacion)
+        n_og = len(ortogrupos)
+        combos.append((combinacion, ortogrupos, label, degree, n_og))
+
+    combos.sort(key=lambda x: (x[3], -x[4], x[2]))
+
+    with pd.ExcelWriter(base_excel) as writer:
+        meta_rows = []
+
+        for i, (combinacion, ortogrupos, label, degree, n_og) in enumerate(combos, start=1):
             combinacion_data = []
 
             for ortogrupo in ortogrupos:
                 row_data = {'Orthogroup ID': ortogrupo}
-
                 for sp in species:
                     if sp in orthogroups_df.columns:
-                        proteins = orthogroups_df.at[ortogrupo, sp] if pd.notna(orthogroups_df.at[ortogrupo, sp]) else ""
-                        row_data[sp] = proteins
-
+                        proteins = orthogroups_df.at[ortogrupo, sp]
+                        row_data[sp] = proteins if pd.notna(proteins) else ""
                 combinacion_data.append(row_data)
 
             df_combinacion = pd.DataFrame(combinacion_data)
 
-            # Use abbreviations to create the sheet name
-            hoja_nombre = ' + '.join([abreviaturas.get(sp, sp) for sp in combinacion])
+            prefix = f"{i:02d}-"
+            sheet_name = (prefix + _safe_sheet_label(label))[:31]
+            df_combinacion.to_excel(writer, sheet_name=sheet_name, index=False)
 
-            # If the sheet name is empty, assign a default one
-            if not hoja_nombre:
-                hoja_nombre = 'Unnamed_Combination'
+            meta_rows.append({
+                "index": i,
+                "sheet_name": sheet_name,
+                "degree": degree,
+                "n_orthogroups": n_og,
+                "label": label,
+                "species_combination": " | ".join(combinacion)
+            })
 
-            # Limit to 31 characters to comply with Excel sheet name restrictions
-            hoja_nombre = hoja_nombre[:31]
+        pd.DataFrame(meta_rows).to_excel(writer, sheet_name="Meta", index=False)
 
-            # Write the DataFrame of the current combination to a new Excel sheet
-            df_combinacion.to_excel(writer, sheet_name=hoja_nombre, index=False)
+    original_data = pd.read_excel(base_excel, sheet_name=None)
 
-    # Load the complete Excel file and apply filtering
-    original_data = pd.read_excel('UpSetPlot_Data_v2.xlsx', sheet_name=None)
-
-    # Dictionary to store filtered sheets
     filtered_sheets = {}
-
-    # Filter each sheet in the original file
     for sheet_name, df in original_data.items():
-        # Filter rows containing the selected orthogroups
+        if 'Orthogroup ID' not in df.columns:
+            continue
         filtered_df = df[df['Orthogroup ID'].isin(selected_numeric_ids)]
-
-        # Add to dictionary only if the sheet is not empty
         if not filtered_df.empty:
             filtered_sheets[sheet_name] = filtered_df
 
-    # Create a new Excel file containing only the filtered sheets
     with pd.ExcelWriter(filename) as writer:
+        if "Meta" in original_data:
+            original_data["Meta"].to_excel(writer, sheet_name="Meta", index=False)
+
         for sheet_name, df in filtered_sheets.items():
             df.to_excel(writer, sheet_name=sheet_name, index=False)
 
