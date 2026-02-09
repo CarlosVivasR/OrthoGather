@@ -18,3 +18,8 @@ static/flask_sessions/*
 !static/flask_sessions/README.md
 
 .DS_Store
+
+# Local-only (do not commit)
+.orthogather_sessions/
+UpSetPlot_Data_v2.xlsx
+UpSetPlot_Filtrado.xlsx

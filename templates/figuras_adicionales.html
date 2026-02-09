@@ -6,6 +6,8 @@
   <link rel="icon" href="static/images/1-a668dcaa.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&family=Cinzel&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+  <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
 
   <style>
     * {
@@ -56,7 +58,7 @@
 
     main {
       flex: 1;
-      padding: 40px;
+      padding: clamp(24px, 6vw, 48px);
       max-width: 1200px;
       margin: auto;
       background-color: white;
@@ -66,12 +68,12 @@
 
     h2 {
       color: #003366;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
       text-align: center;
     }
 
     h3 {
-      margin-top: 30px;
+      margin-top: 24px;
     }
 
     .scroll-container {
@@ -138,6 +140,7 @@
 
 <body>
  <main>
+    <div id="status-message" style="display: none;"></div>
     <h2>Results for Species-Based Analysis</h2>
 
     <div class="subtitulo">
@@ -161,7 +164,7 @@
     {% endif %}
 
     <div class="boton-centrado">
-        <button class="boton-excel" id="create-excel-btn" onclick="createExcel()">Create Fig.4 & Fig.5 Data Excel  </button>
+        <button class="boton-excel btn btn-secondary" id="create-excel-btn" onclick="createExcel()">Create Fig.4 & Fig.5 Data Excel  </button>
     </div>
 
     <div id="loading-message" class="boton-centrado" style="display: none;">Loading...</div>
@@ -185,13 +188,13 @@
     <hr class="separador">
 
     <div class="boton-centrado">
-        <button class="boton-especial" id="differential-proteome-btn" onclick="toggleProteomeInput()">Differential Proteome Analysis</button>
+        <button class="boton-especial btn btn-primary" id="differential-proteome-btn" onclick="toggleProteomeInput()">Differential Proteome Analysis</button>
     </div>
 
     <div id="proteome-input-section" style="display: none; text-align: center; margin-top: 20px;">
         <textarea id="proteome-input" rows="4" cols="50" placeholder="Paste your Data [Only Uniprot IDs]"></textarea>
         <br><br>
-        <button class="boton-generar" id="generate-figures-btn" onclick="generateNewFigures()">Generate New Figures</button>
+        <button class="boton-generar btn btn-primary" id="generate-figures-btn" onclick="generateNewFigures()">Generate New Figures</button>
     </div>
 
     <div id="loading-spinner-proteome" class="loading-spinner" style="display: none; text-align: center; margin-top: 20px;">
@@ -223,7 +226,7 @@
 
     {% if img_path_6 and img_path_7 %}
         <div class="boton-centrado" style="margin-top: 30px;">
-            <button class="boton-excel" id="create-excel-proteome-btn" onclick="createExcelProteomeFiltrado()">Create Proteome Data Excel</button>
+            <button class="boton-excel btn btn-secondary" id="create-excel-proteome-btn" onclick="createExcelProteomeFiltrado()">Create Proteome Data Excel</button>
         </div>
     {% endif %}
 
@@ -244,7 +247,7 @@
         const proteomeData = document.getElementById('proteome-input').value;
 
         if (!proteomeData.trim()) {
-            alert('Please enter data before generating new figures.');
+            showStatus("status-message", "error", "Please enter data before generating new figures.");
             return;
         }
 
@@ -288,7 +291,7 @@
             if (data.img_path_6 && data.img_path_7) {
                 newFiguresSection.innerHTML += `
                     <div class="boton-centrado">
-                        <button class="boton-excel" id="create-excel-proteome-btn">Create Proteome Data Excel</button>
+                        <button class="boton-excel btn btn-secondary" id="create-excel-proteome-btn">Create Proteome Data Excel</button>
                     </div>`;
                 
                 const excelButton = document.getElementById('create-excel-proteome-btn');
@@ -299,7 +302,7 @@
         .catch(error => {
             console.error('Error generating new figures:', error);
             document.getElementById('loading-spinner-proteome').style.display = 'none'; 
-            alert('An error occurred while generating new figures. Please try again. Error details: ' + error.message);
+            showStatus("status-message", "error", "An error occurred while generating new figures. Please try again. Error details: " + error.message);
         });
     }
 
@@ -309,7 +312,7 @@
         const uniprot_ids = uniprotInput.split(',').map(id => id.trim());
 
         if (!uniprot_ids.length || uniprot_ids.every(id => id === '')) {
-            alert('Please enter UniProt IDs before generating the Excel file.');
+            showStatus("status-message", "error", "Please enter UniProt IDs before generating the Excel file.");
             return;
         }
 
@@ -345,7 +348,7 @@
         })
         .catch(error => {
             console.error('Error generating the Excel file:', error);
-            alert('There was a problem generating the Proteome Excel file. Please try again.');
+            showStatus("status-message", "error", "There was a problem generating the Proteome Excel file. Please try again.");
             document.getElementById('loading-message-proteome').style.display = 'none';
             excelButton.disabled = false;
         });
@@ -363,7 +366,7 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('There was a problem generating the Excel file. Please try again.');
+            showStatus("status-message", "error", "There was a problem generating the Excel file. Please try again.");
             document.getElementById('loading-message').style.display = 'none';
         });
     }
