@@ -6,6 +6,8 @@
     <title>OrthoGather - Results</title>
     <link rel="icon" href="static/images/1-a668dcaa1.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
     <style>
         :root{
         --font-sans: "Helvetica Neue", Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
@@ -25,19 +27,19 @@
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
         gap: 24px;
-        padding: 20px 40px;
+        padding: 16px 32px;
         background-color: #003366;
         color: #fff;
         }
         header .logo { justify-self: start; }
-        header .logo img { height: 150px; }
+        header .logo img { height: 120px; width: auto; object-fit: contain; display: block; }
 
         header .title {
         justify-self: center;
         text-align: center;
         font-weight: 400;
         letter-spacing: 0.2px;
-        font-size: 80px;
+        font-size: clamp(36px, 6vw, 72px);
         margin: 0;
         }
 
@@ -67,12 +69,12 @@
         }
 
         .subtitulo {
-            font-size: 18px;
+            font-size: 17px;
             line-height: 1.6;
             text-align: justify;
             color: #333;
             background-color: #f2f6fa;
-            padding: 20px 25px;
+            padding: 18px 22px;
             border-left: 6px solid #003366;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
@@ -92,7 +94,7 @@
         }
         main {
             flex: 1;
-            padding: 40px;
+            padding: clamp(24px, 6vw, 48px);
             max-width: 1200px;
             margin: auto;
             background-color: white;
@@ -152,7 +154,7 @@
         footer {
             background-color: #003366;
             color: white;
-            padding: 20px;
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -265,16 +267,24 @@
         </div>
         <div class="title">OrthoGather</div>
         <div class="info">
-          <p>University College Dublin</p>
+          <p>
+            <a href="https://www.ucd.ie/" target="_blank" rel="noopener" class="info-link">
+              University College Dublin
+            </a>
+          </p>
+          <p>
+            <a href="https://www.ucd.ie/conway/" target="_blank" rel="noopener" class="info-link">
+              UCD Conway Institute
+            </a>
+          </p>
           <p>
             <a href="https://cancerdata.ucd.ie/" target="_blank" rel="noopener" class="info-link">
               UCD Cancer Data Lab
             </a>
           </p>
           <p>
-            <span class="muted"></span>
-            <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">
-              carlos.vivasrodriguez@ucdconnect.ie
+            <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener" class="info-link">
+              https://doi.org/10.64898/2026.01.30.702851
             </a>
           </p>
         </div>
@@ -289,6 +299,7 @@
                 The first graph (Figure 1) shows the distribution of proteins by orthogroup, while the second graph (Figure 2) 
                 illustrates the number of species sharing orthogroups.
             </div>
+            <div id="status-message" style="display: none;"></div>
 
             <div class="row" style="display: flex; justify-content: space-around;">
                 <div class="column figura">
@@ -308,7 +319,7 @@
             </div>
 
             <div class="boton-centrado">
-                <button class="boton-especial" id="boton-analisis">Species Analysis</button>
+                <button class="boton-especial btn btn-primary" id="boton-analisis">Species Analysis</button>
             </div>
 
             <div class="especies-imagen-container" id="especies-seleccionadas" style="display: none;">
@@ -334,7 +345,7 @@
             
                     <input type="hidden" name="ruta_carpeta" value="{{ ruta_carpeta }}">
             
-                    <button type="submit" id="btn-generate-figures">Generate Figures</button>
+                    <button type="submit" id="btn-generate-figures" class="btn btn-primary">Generate Figures</button>
                 </form>
                 </div>
             </div>
@@ -370,7 +381,7 @@
                         <input type="number" id="terms-input" min="1" placeholder="All" style="width: 80px;">
                     </div>
                 </div>
-                <button id="regenerate-figure-btn" class="boton-generar">Re-Generate Figure 9</button>
+                <button id="regenerate-figure-btn" class="boton-generar btn btn-secondary">Re-Generate Figure 9</button>
             </div>
 
             <div id="go-excel-container" style="display: none; text-align: center; margin-top: 10px;">
@@ -422,9 +433,9 @@
           &copy; 2025 OrthoGather. All rights reserved.
         </div>
         <div class="social-icons">
-          <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
-          <a href="#">FAQ</a>
-          <a href="#">Contact</a>
+          <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
+          <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">FAQ</a>
+          <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">Contact</a>
         </div>
       </footer>
     
@@ -443,7 +454,7 @@
 
             const seleccionadas = $('input[name="especies"]:checked').length;
             if (seleccionadas < 2) {
-                alert('Please select at least two strains before generating the figures.');
+                showStatus("status-message", "error", "Please select at least two strains before generating the figures.");
                 return;
             }
 
@@ -464,7 +475,7 @@
                 },
                 error: function(xhr) {
                 const msg = xhr && xhr.responseText ? xhr.responseText : 'Error generating figures.';
-                alert(msg);
+                showStatus("status-message", "error", msg);
                 },
                 complete: function() {
                 $('#loading-spinner').hide();
@@ -514,7 +525,7 @@
                 .catch(error => {
                     console.error('Error generating Gene Ontology Image:', error);
                     document.getElementById('loading-spinner-go').style.display = 'none';
-                    alert('An error occurred during Gene Ontology Analysis.');
+                    showStatus("status-message", "error", "An error occurred during Gene Ontology Analysis.");
                 });
             }
   
@@ -552,7 +563,7 @@
                 .catch(error => {
                     console.error('Error generating Gene Ontology Excel:', error);
                     document.getElementById('loading-spinner-go-excel').style.display = 'none';
-                    alert('An error occurred during Gene Ontology Excel Generation.');
+                    showStatus("status-message", "error", "An error occurred during Gene Ontology Excel Generation.");
                 });
             }
 
@@ -562,7 +573,7 @@
                 const useOrthogroups = $('#use-orthogroups').is(':checked');
 
                 if (!uniprotIDs || uniprotIDs.length === 0 || uniprotIDs[0] === "") {
-                    alert('Please enter at least one UniProt ID.');
+                    showStatus("status-message", "error", "Please enter at least one UniProt ID.");
                     console.warn("No UniProt IDs provided.");
                     return;
                 }
@@ -590,7 +601,7 @@
                     error: function(xhr, status, error) {
                         $('#loading-spinner-foreground').hide();
                         console.error('Error during foreground analysis:', error);
-                        alert('An error occurred during the foreground analysis.');
+                        showStatus("status-message", "error", "An error occurred during the foreground analysis.");
                     }
                 });
             });
@@ -612,7 +623,7 @@
                     const customUniProtIDs = $('#custom-uniprot-input-bg').val().trim().split(/\s+/);
 
                     if (!selectedBackground) {
-                        alert('Please select a background option.');
+                        showStatus("status-message", "error", "Please select a background option.");
                         console.warn("No background option selected.");
                         return;
                     }
@@ -638,7 +649,7 @@
                         error: function(xhr, status, error) {
                             $('#loading-spinner-background').hide();
                             console.error('Error during background analysis:', error);
-                            alert('An error occurred during the background analysis.');
+                            showStatus("status-message", "error", "An error occurred during the background analysis.");
                         }
                     });
                 });
@@ -652,7 +663,7 @@
                 const backgroundIDs = window.backgroundIDs || [];
 
                 if (uniprotIDs.length === 0 || backgroundIDs.length === 0) {
-                    alert("Foreground or Background IDs are missing.");
+                    showStatus("status-message", "error", "Foreground or Background IDs are missing.");
                     console.warn("Missing UniProt or Background IDs.");
                     $('#loading-spinner-go-figure').hide(); 
                     return;
@@ -697,17 +708,17 @@
                                 }
                             } else {
                                 console.error("No Excel file path returned in response.");
-                                alert("An error occurred: No Excel file generated.");
+                                showStatus("status-message", "error", "An error occurred: No Excel file generated.");
                             }
                         } else {
                             console.error("No image file path returned in response.");
-                            alert("An error occurred: No new figure generated.");
+                            showStatus("status-message", "error", "An error occurred: No new figure generated.");
                         }
                     },
                     error: function(xhr, status, error) {
                         $('#loading-spinner-go-figure').hide(); 
                         console.error('Error during Gene Ontology Analysis and Figure generation:', error);
-                        alert('An error occurred during the Gene Ontology Analysis and Figure generation.');
+                        showStatus("status-message", "error", "An error occurred during the Gene Ontology Analysis and Figure generation.");
                     }
                 });
             });
@@ -754,13 +765,13 @@
                             excelDownloadLink9.style.display = 'block';
                         }
                     } else {
-                        alert("An error occurred: No new figure generated.");
+                        showStatus("status-message", "error", "An error occurred: No new figure generated.");
                     }
                 })
                 .catch(error => {
                     $('#loading-spinner-go-figure').hide();
                     console.error("Error re-generating Figure 9:", error);
-                    alert("An error occurred while re-generating the figure.");
+                    showStatus("status-message", "error", "An error occurred while re-generating the figure.");
                 });
             });
  

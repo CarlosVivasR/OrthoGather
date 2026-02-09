@@ -10,8 +10,7 @@ import gzip
 import json
 import requests
 import subprocess
-import threading
-import webbrowser
+import secrets
 import traceback
 import datetime
 from pathlib import Path
@@ -64,22 +63,23 @@ def respond(ok: bool, msg: str, *, where=None, hint=None, payload=None, code=200
 # App
 # ------------------------
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  
+app.secret_key = os.getenv("ORTHOGATHER_SECRET") or secrets.token_hex(32)
 
 app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = os.path.join("static", "flask_sessions")
+app.config["SESSION_FILE_DIR"] = os.path.join(".orthogather_sessions")
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
 # ------------------------
 # Working directories
 # ------------------------
+BASE_DIR = Path(__file__).resolve().parent
 STATIC_FOLDER = "static"
 PROTEOMES_FOLDER = "Proteomas"
 GOA_DOWNLOAD_FOLDER = "GOAfiles"
 RESULTS_FOLDER = os.path.join(STATIC_FOLDER, "results")
-JSON_PATH = "static/Proteomes_json/proteomes_list.json"
-GO_ROOT_OBO = "go-basic.obo"  # located in the root directory, next to app.py
+JSON_PATH = str(BASE_DIR / "static" / "Proteomes_json" / "proteomes_list.json")
+GO_ROOT_OBO = str(BASE_DIR / "go-basic.obo")  # located in the root directory, next to app.py
 
 # Create required folders
 os.makedirs(PROTEOMES_FOLDER, exist_ok=True)
@@ -219,7 +219,6 @@ def generar_figura_1(gene_count_df):
         }
         for position in separator_positions.values():
             ax.axvline(x=position, color='black', linestyle='--')
-
         # Explanatory text
         text_positions = {
             (5, 5): 'INC by 1 ',
@@ -260,6 +259,7 @@ def generar_figura_1(gene_count_df):
 
 def generar_figura_2(gene_count_df, axes=None):
     # Create axes if not provided
+    fig = None
     if axes is None:
         fig, axes = plt.subplots(figsize=(10, 6))
 
@@ -288,8 +288,11 @@ def generar_figura_2(gene_count_df, axes=None):
     # Save the image
     crear_directorio_plots()
     image_path = os.path.join('static', 'plots', 'figura_2.png')
-    plt.savefig(image_path)
-    plt.close(fig)
+    if axes is None or fig is not None:
+        plt.savefig(image_path)
+        plt.close(fig)
+    else:
+        axes.figure.savefig(image_path)
 
     return 'figura_2.png'
 

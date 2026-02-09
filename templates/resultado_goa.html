@@ -6,6 +6,8 @@
   <title>GOA Matching + Analysis</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <link rel="icon" href="static/images/1-a668dcaa1.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+  <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
 
   <style>
     :root{
@@ -26,19 +28,19 @@
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       gap: 24px;
-      padding: 20px 40px;
+      padding: 16px 32px;
       background-color: var(--brand);
       color: #fff;
     }
     header .logo { justify-self: start; }
-    header .logo img { height: 150px; }
+    header .logo img { height: 120px; width: auto; object-fit: contain; display: block; }
 
     header .title {
       justify-self: center;
       text-align: center;
       font-weight: 400;
       letter-spacing: 0.2px;
-      font-size: 80px;
+      font-size: clamp(36px, 6vw, 72px);
       margin: 0;
     }
 
@@ -132,6 +134,12 @@
       overflow: visible;
       position: relative;
       z-index: 1;
+    }
+    #species-table tbody tr:nth-child(even){
+      background-color: #f9fbfd;
+    }
+    #species-table tbody tr:hover{
+      background-color: #eef4fb;
     }
 
     #species-table colgroup col.col-species { width: 38%; }
@@ -310,7 +318,7 @@
   
     main{
       flex: 1;
-      padding: 40px;
+      padding: clamp(24px, 6vw, 48px);
       max-width: 1400px;  
       margin: auto;
       background-color: white;
@@ -322,7 +330,7 @@
       max-width: 1300px;     
       margin: 40px auto;
       background-color: white;
-      padding: 30px 40px;
+      padding: 24px 32px;
       border-radius: 10px;
       box-shadow: 0 4px 20px rgba(0,0,0,.1);
     }
@@ -330,7 +338,7 @@
     footer{
       background-color: var(--brand);
       color: white;
-      padding: 20px;
+      padding: 16px 24px;
       display: flex; justify-content: space-between; align-items: center;
     }
     footer .social-icons a{
@@ -390,16 +398,24 @@
     </div>
     <div class="title">OrthoGather</div>
     <div class="info">
-      <p>University College Dublin</p>
+      <p>
+        <a href="https://www.ucd.ie/" target="_blank" rel="noopener" class="info-link">
+          University College Dublin
+        </a>
+      </p>
+      <p>
+        <a href="https://www.ucd.ie/conway/" target="_blank" rel="noopener" class="info-link">
+          UCD Conway Institute
+        </a>
+      </p>
       <p>
         <a href="https://cancerdata.ucd.ie/" target="_blank" rel="noopener" class="info-link">
           UCD Cancer Data Lab
         </a>
       </p>
       <p>
-        <span class="muted"></span>
-        <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">
-          carlos.vivasrodriguez@ucdconnect.ie
+        <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener" class="info-link">
+          https://doi.org/10.64898/2026.01.30.702851
         </a>
       </p>
     </div>
@@ -479,7 +495,7 @@
   
   
       <div class="boton-centrado">
-        <button id="download-btn" class="boton-primario" type="button">📥 Download GOA Files</button>
+        <button id="download-btn" class="boton-primario btn btn-primary" type="button">📥 Download GOA Files</button>
       </div>
   
 
@@ -487,14 +503,14 @@
   
 
       <div class="boton-centrado">
-        <button id="download-goa-excel" class="hidden boton-excel" type="button"
+        <button id="download-goa-excel" class="hidden boton-excel btn btn-secondary" type="button"
                 onclick="window.location.href='/download_go_excel'">
           📥 Download GOA Excel
         </button>
       </div>
 
       <div class="boton-centrado">
-        <button id="toggle-go-analysis" class="hidden boton-primario" type="button">
+        <button id="toggle-go-analysis" class="hidden boton-primario btn btn-primary" type="button">
           🔬 G.O Analysis
         </button>
       </div>
@@ -517,7 +533,7 @@
           <h3>Foreground (UniProt IDs)</h3>
           <textarea id="foreground-ids" rows="4" placeholder="Paste foreground UniProt IDs..." spellcheck="false"></textarea>
           <label><input type="checkbox" id="use-orthogroups-fg" /> Use Orthogroups</label>
-          <button class="boton-secundario" id="submit-foreground" type="button"> Load Foreground</button>
+          <button class="boton-secundario btn btn-secondary" id="submit-foreground" type="button"> Load Foreground</button>
           <div id="fg-msg" class="inline-msg"></div>
         </div>
   
@@ -526,12 +542,12 @@
           <textarea id="background-ids" rows="4" placeholder="Paste background UniProt IDs..." spellcheck="false"></textarea>
           <label><input type="checkbox" id="use-orthogroups-bg" /> Use Orthogroups</label>
           <label style="margin-left: 20px;"><input type="checkbox" id="use-goa-files" /> Use all GOA files</label>
-          <button class="boton-secundario" id="submit-background" type="button"> Load Background</button>
+          <button class="boton-secundario btn btn-secondary" id="submit-background" type="button"> Load Background</button>
           <div id="bg-msg" class="inline-msg"></div>
         </div>
   
         <div style="margin-top: 30px;">
-          <button class="boton-secundario" id="run-full-go-analysis" type="button" disabled style="opacity: 0.5;">
+          <button class="boton-secundario btn btn-primary" id="run-full-go-analysis" type="button" disabled style="opacity: 0.5;">
             🧬 Analyze
           </button>
         </div>
@@ -568,7 +584,7 @@
               <input type="number" id="terms-input" min="1" placeholder="All" style="width: 80px;">
             </div>
           </div>
-          <button id="regenerate-figure-btn" class="boton-generar">
+          <button id="regenerate-figure-btn" class="boton-generar btn btn-secondary">
             Re-Generate Figure 9
             <span class="btn-spinner" aria-hidden="true"></span>
           </button>
@@ -584,9 +600,9 @@
       &copy; 2025 OrthoGather. All rights reserved.
     </div>
     <div class="social-icons">
-      <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
-      <a href="#">FAQ</a>
-      <a href="#">Contact</a>
+      <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
+      <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">FAQ</a>
+      <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">Contact</a>
     </div>
   </footer>
 
@@ -618,15 +634,12 @@
       const loadingSpinner = document.getElementById("loading-spinner-analysis");
   
       function setStatus(text, kind = "info") {
-        if (!statusMsg) return;
-        statusMsg.textContent = text;
-        statusMsg.style.display = "block";
-        if (kind === "error") {
-          statusMsg.style.backgroundColor = "#D55E00";
-        } else if (kind === "ok") {
-          statusMsg.style.backgroundColor = "#009688";
+        if (kind === "ok") {
+          showStatus("status-message", "success", text);
+        } else if (kind === "error") {
+          showStatus("status-message", "error", text);
         } else {
-          statusMsg.style.backgroundColor = "#0072B2";
+          showStatus("status-message", "info", text);
         }
       }
   
@@ -798,7 +811,7 @@
             return;
           }
   
-          downloadBtn.disabled = true;
+          setButtonLoading("download-btn", true, { textLoading: "Preparing..." });
           setStatus("⏳ Preparing GOA Excel...");
   
           try {
@@ -826,7 +839,7 @@
             console.error("GOA flow error:", error);
             setStatus("❌ Error preparing GOA analysis.", "error");
           } finally {
-            downloadBtn.disabled = false;
+            setButtonLoading("download-btn", false);
           }
         });
       }
@@ -850,14 +863,12 @@
         submitForegroundBtn.addEventListener("click", async () => {
           const ids = fgTextArea.value.trim().split(/\s+/).filter(Boolean);
           if (ids.length === 0) {
-            fgMsg.textContent = "Please paste at least one UniProt ID for the foreground.";
-            fgMsg.style.color = "red";
+            showStatus("fg-msg", "error", "Please paste at least one UniProt ID for the foreground.");
             return;
           }
   
-          submitForegroundBtn.disabled = true;
-          fgMsg.textContent = "Saving Foreground...";
-          fgMsg.style.color = "";
+          setButtonLoading("submit-foreground", true, { textLoading: "Saving..." });
+          showStatus("fg-msg", "info", "Saving Foreground...");
   
           try {
             const res = await fetch("/foreground_analysis", {
@@ -874,16 +885,14 @@
               bgBlock.style.opacity = "1";
               bgBlock.style.pointerEvents = "auto";
             }
-            fgMsg.textContent = "✅ Foreground saved.";
-            fgMsg.style.color = "green";
+            showStatus("fg-msg", "success", "Foreground saved.");
             window.foregroundUniProtIDs = ids;
             console.log("[FG] Saved globally foreground IDs:", window.foregroundUniProtIDs);
           } catch (err) {
             console.error(err);
-            fgMsg.textContent = "❌ Error saving Foreground.";
-            fgMsg.style.color = "red";
+            showStatus("fg-msg", "error", "Error saving Foreground.");
           } finally {
-            submitForegroundBtn.disabled = false;
+            setButtonLoading("submit-foreground", false);
           }
         });
       }
@@ -905,8 +914,7 @@
           const ids = bgTextArea.value.trim().split(/\s+/).filter(Boolean);
   
           if (!useGOAFiles && ids.length === 0) {
-            bgMsg.textContent = "Please paste UniProt IDs for the background or tick 'Use all GOA files'.";
-            bgMsg.style.color = "red";
+            showStatus("bg-msg", "error", "Please paste UniProt IDs for the background or tick 'Use all GOA files'.");
             return;
           }
   
@@ -916,9 +924,8 @@
             custom_uniprot_ids: useGOAFiles ? [] : ids
           };
   
-          submitBackgroundBtn.disabled = true;
-          bgMsg.textContent = "Saving Background...";
-          bgMsg.style.color = "";
+          setButtonLoading("submit-background", true, { textLoading: "Saving..." });
+          showStatus("bg-msg", "info", "Saving Background...");
   
           try {
             const res = await fetch("/background_analysis", {
@@ -932,17 +939,15 @@
               runAnalysisBtn.disabled = false;
               runAnalysisBtn.style.opacity = "1";
             }
-            bgMsg.textContent = "✅ Background saved. You can run the GO enrichment now.";
-            bgMsg.style.color = "green";
+            showStatus("bg-msg", "success", "Background saved. You can run the GO enrichment now.");
             // 🔹 Guardar en global
             window.backgroundIDs = useGOAFiles ? "ALL_GOAS" : ids;
             console.log("[BG] Saved globally background IDs:", window.backgroundIDs);
           } catch (err) {
             console.error(err);
-            bgMsg.textContent = "❌ Error saving Background.";
-            bgMsg.style.color = "red";
+            showStatus("bg-msg", "error", "Error saving Background.");
           } finally {
-            submitBackgroundBtn.disabled = false;
+            setButtonLoading("submit-background", false);
           }
         });
       }
@@ -962,7 +967,7 @@
 
       if (runAnalysisBtn) {
         runAnalysisBtn.addEventListener("click", async () => {
-          runAnalysisBtn.disabled = true;
+          setButtonLoading("run-full-go-analysis", true, { textLoading: "Running..." });
           if (loadingSpinner) loadingSpinner.classList.remove("hidden");
           setStatus("⏳ Running GO Enrichment...", "info");
 
@@ -1034,7 +1039,7 @@
             if (loadingSpinner) loadingSpinner.classList.add("hidden");
             setStatus("❌ Network error while contacting /gene_ontology_analysis.", "error");
           } finally {
-            runAnalysisBtn.disabled = false;
+            setButtonLoading("run-full-go-analysis", false);
           }
         });
       }
