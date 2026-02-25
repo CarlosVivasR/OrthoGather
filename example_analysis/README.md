@@ -12,7 +12,11 @@ This directory contains the complete reproducible example analysis described in 
 
 - Foreground: 596 proteins differentially expressed in *Mycolicibacterium smegmatis*  
 - Background: 3,244 proteins detected in the same study  
-- Source: Giddey et al., Scientific Reports (2017)
+- Source:  
+  Giddey, A.D., de Kock, E., Nakedi, K.C. et al. (2017).  
+  *A Temporal Proteome Dynamics Study Reveals the Molecular Basis of Induced Phenotypic Resistance in Mycobacterium smegmatis at Sub-Lethal Rifampicin Concentrations*.  
+  Scientific Reports, 7:43858.  
+  https://doi.org/10.1038/srep43858
 
 This dataset was used to demonstrate the full OrthoGather workflow.
 
