@@ -47,25 +47,25 @@ eval "$(micromamba shell hook -s bash)"
 # ------------------------------------------------------------
 # 3️⃣ Create environment (if not exists)
 # ------------------------------------------------------------
-if micromamba env list | grep -q "orthogather37"; then
-  echo "✅ Environment 'orthogather37' already exists."
+if micromamba env list | grep -q "orthogather"; then
+  echo "✅ Environment 'orthogather' already exists."
 else
-  echo "🧩 Creating environment 'orthogather37' with Python 3.7..."
-  micromamba create -n orthogather37 python=3.7 -y
+  echo "🧩 Creating environment 'orthogather' with Python 3.11..."
+  micromamba create -n orthogather python=3.11 -y
 fi
 
 # ------------------------------------------------------------
 # 4️⃣ Activate and install dependencies
 # ------------------------------------------------------------
-micromamba activate orthogather37
+micromamba activate orthogather
 
 echo ""
 echo "📦 Installing core dependencies from conda-forge..."
 micromamba install -c conda-forge flask flask-session pandas numpy matplotlib seaborn upsetplot goatools requests openpyxl -y
 
 echo ""
-echo "🧬 Installing Orthofinder and bio dependencies from bioconda..."
-micromamba install -c bioconda orthofinder -y
+echo "🧬 Installing OrthoFinder 2.5.5 from bioconda..."
+micromamba install -c bioconda 'orthofinder=2.5.5' -y
 
 # ------------------------------------------------------------
 # 5️⃣ Verify installation
@@ -88,7 +88,7 @@ echo ""
 echo "✅  To use OrthoGather, follow these steps:"
 echo ""
 echo "👉  Every time you want to use OrthoGather, run:"
-echo "        micromamba activate orthogather37"
+echo "        micromamba activate orthogather"
 echo ""
 echo "✅  Then start the tool with:"
 echo "        python app.py"

@@ -4,7 +4,7 @@
 
 **OrthoGather** — compare proteomes with **OrthoFinder** and discover function with **GOATOOLS** — all in a local web application.  
 Download **UniProt** proteomes, run **OrthoFinder**, perform **Gene Ontology enrichment**, and export publication-ready figures and tables.  
-*Requires Python 3.7.*
+*Requires Python 3.11 and OrthoFinder 2.5.5 (runs natively on Apple Silicon, Intel macOS, Linux, and WSL — no Rosetta needed).*
 
 ---
 
@@ -53,10 +53,8 @@ Before installing **OrthoGather**, please ensure that you have:
   ```
 - **Conda** or **Micromamba**
 - A Unix-based environment (macOS, Linux, or WSL)
+
 ### Clone the repository
-
-## 🔽 Download and Installation
-
 
 To install **OrthoGather**, first clone the repository and move into the project folder:
 
@@ -65,49 +63,34 @@ git clone https://github.com/CarlosVivasR/OrthoGather.git
 cd OrthoGather
 ```
 
-The installation process depends on your operating system. Each method automatically configures the required environment and dependencies, but you can consult [installation_guide.pdf](Installation_guide.pdf) for a complete explanation of every step and additional troubleshooting details.
+### ✅ Recommended: one-line install with Conda (all platforms)
 
-### 🧩 macOS (Intel / Rosetta)
+The canonical setup is a single Conda environment defined in [`environment.yml`](environment.yml).
+It installs Python 3.11, OrthoFinder 2.5.5, and every Python dependency — and runs
+**natively** on Apple Silicon, Intel macOS, Linux, and WSL (no Rosetta).
 
-Run the following command to install OrthoGather on macOS systems with Intel chips, or using Rosetta mode on Apple Silicon:
 ```bash
-./install_orthogather_mac.sh
-```
-
-This script will:
-- Check that you are running in Intel (Rosetta) mode.
-- Create a dedicated environment named orthogather37 with Python 3.7.
-- Install all required dependencies (Flask, GOATOOLS, OrthoFinder, etc.).
-- Verify that OrthoGather is correctly installed and ready to use.
-
-⚠️ Note:
-Conda must be installed on macOS before running this script (e.g., via Miniforge, Anaconda, or Miniconda).
-The installation guide (installation_guide.pdf) includes step-by-step instructions on how to install Conda and enable Rosetta mode properly.
-
-Once completed, remember to open your terminal in Rosetta mode and activate the environment each time you want to use the tool:
-```bash
-conda activate orthogather37
-python app.py
-```
-### 🧬 Linux / WSL (Windows Subsystem for Linux)
-
-For Linux or WSL users, run the following command:
-```bash
-./install_orthogather_wsl.sh
-```
-
-The script will automatically:
-- Detect if you are running inside a WSL or Linux environment.
-- Check if Micromamba is installed — if not, it will display the command to install it manually and prompt you to restart the terminal.
-- Create the environment orthogather37 with Python 3.7.
-- Install all required dependencies and verify the OrthoFinder installation.
-- After installation, activate the environment and start the tool:
-``` bash
-micromamba activate orthogather37
+conda env create -f environment.yml
+conda activate orthogather
 python app.py
 ```
 
-For a comprehensive explanation of the setup process, including dependency management, configuration tips, and troubleshooting on both macOS and WSL/Linux, please refer to the detailed installation_guide.pdf included in this repository.
+That's it. Every time you want to use OrthoGather, just `conda activate orthogather` and `python app.py`.
+
+> Using **Micromamba** instead of Conda? Replace `conda` with `micromamba` in the commands above.
+
+### 🧩 Optional: guided install scripts
+
+If you prefer a guided installer that also checks prerequisites, run the script for your platform:
+
+```bash
+./install_orthogather_mac.sh   # macOS (Apple Silicon or Intel)
+./install_orthogather_wsl.sh   # Linux / WSL
+```
+
+Both scripts create the same `orthogather` environment from `environment.yml` and verify that OrthoFinder is detected.
+
+⚠️ **Prerequisite:** Conda or Micromamba must already be installed (e.g. via [Miniforge](https://github.com/conda-forge/miniforge)). For a step-by-step walkthrough and troubleshooting, see [installation_guide.pdf](Installation_guide.pdf).
 
 ---
 
@@ -126,6 +109,16 @@ A ready-to-use example that lets you explore the full workflow immediately (idea
 Upload a `.zip` with previously generated **OrthoFinder** results from another system to reuse completed analyses without recomputation.
 
 > Regardless of the entry point, OrthoGather focuses downstream steps on the standard **Orthogroups** output, keeping only what is needed for analysis and export.
+
+#### OrthoFinder thread tuning
+
+OrthoGather invokes OrthoFinder with `-og` (skip gene/species trees — we only need orthogroups) and **auto-detects your CPU count** for the `-t` (sequence-search) and `-a` (analysis) thread counts. On a 10-core Mac you'll see `-t 10 -a 2`; on a 4-core laptop, `-t 4 -a 1`. Override if you want to leave headroom for other work:
+
+```bash
+ORTHOGATHER_OF_THREADS=6 ORTHOGATHER_OF_ANALYSIS_THREADS=1 python app.py
+```
+
+The convention `-a ≈ -t / 4` follows OrthoFinder's own recommendation: the analysis phase is memory-bound and oversubscription hurts more than it helps.
 
 ---
 
@@ -159,6 +152,46 @@ This module turns orthogroup-level findings into **functional hypotheses**.
 - **Run enrichment** with **[GOATOOLS](https://github.com/tanghaibao/goatools)**, then review significant terms and download detailed results.
 
 **Outputs:** the enrichment figure and structured tables for downstream exploration.
+
+---
+
+## ⚠️ Error system
+
+Every user-visible error in OrthoGather has a stable code, a clear message,
+and an actionable hint. The catalogue lives in
+`orthogather/utils/error_catalog.py` (~60 entries today). Backend routes call
+`respond_error("ERR_CODE", where=..., detail=...)` and the frontend renders
+the response as a uniform toast via `static/js/og-errors.js`.
+
+**Adding a new error**: open `error_catalog.py`, add a new `ErrorSpec` with
+a code starting with `ERR_`, then reference it from your route. The pytest
+suite at `tests/test_error_catalog.py` enforces that every code referenced
+from `app.py` exists in the catalogue.
+
+Categories: `input`, `state`, `data`, `network`, `external`, `not-found`,
+`system`. Severities: `error`, `warning`, `info`. The frontend toast styles
+itself accordingly (red / amber / blue border, matching icon).
+
+Global error handlers (`@app.errorhandler(404)`, `@app.errorhandler(500)`,
+`@app.errorhandler(Exception)`) catch anything that escapes and render
+either JSON (for `Accept: application/json` / `/api/*` paths) or the
+branded `templates/error.html` page (for HTML requests).
+
+---
+
+## 🧪 Running the test suite
+
+OrthoGather ships with a pytest suite that locks in the species-matching contract (see `tests/test_species_matching.py`). To run it:
+
+```bash
+conda activate orthogather
+pip install -r requirements-dev.txt   # installs pytest, selenium, webdriver-manager
+pytest tests/ -v
+```
+
+The same dev requirements file also installs the tools used by
+`tools/capture_tutorial_screenshots.py` to regenerate the tutorial figures
+(headless Chrome via Selenium).
 
 ---
 

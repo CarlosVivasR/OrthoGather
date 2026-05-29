@@ -1,4 +1,12 @@
-python==3.7
+# OrthoGather runtime Python dependencies (Python 3.11).
+#
+# Recommended install is conda via environment.yml — it also pulls OrthoFinder:
+#     conda env create -f environment.yml
+#     conda activate orthogather
+#
+# This pip list is provided as a fallback for the Python packages only.
+# OrthoFinder 2.5.5 is NOT pip-installable; install it via conda/bioconda
+# (see environment.yml) or your system package manager.
 flask
 flask-session
 pandas
@@ -9,4 +17,3 @@ upsetplot
 goatools
 requests
 openpyxl
-orthofinder

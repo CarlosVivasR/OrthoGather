@@ -1,0 +1,9 @@
+# Development-only dependencies (not required to run OrthoGather).
+# Install with:  pip install -r requirements-dev.txt
+#
+# selenium + webdriver-manager are used by tools/capture_tutorial_screenshots.py
+# to drive a headless Chrome and save real PNGs for the tutorial page.
+
+pytest>=7.0
+selenium>=4.0
+webdriver-manager>=4.0

@@ -23,3 +23,10 @@ static/flask_sessions/*
 .orthogather_sessions/
 UpSetPlot_Data_v2.xlsx
 UpSetPlot_Filtrado.xlsx
+
+# Editor / local tooling, caches and scratch (local-only, do not commit)
+.pytest_cache/
+tasks/
+static/mockups/
+templates/*.bak
+*.bak

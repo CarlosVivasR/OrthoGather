@@ -1,10 +1,10 @@
-name: orthogather37
+name: orthogather
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - python=3.7
+  - python=3.11
   - flask
   - flask-session
   - pandas
@@ -15,4 +15,4 @@ dependencies:
   - goatools
   - requests
   - openpyxl
-  - orthofinder 
+  - orthofinder=2.5.5
