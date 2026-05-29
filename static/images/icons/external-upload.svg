@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 80" role="img" aria-label="External data upload — ZIP file">
+  <!-- ZIP file body with folded corner (darker outline for AAA contrast) -->
+  <g stroke="#78350f" stroke-width="2.4" fill="#fef3c7" stroke-linejoin="round">
+    <path d="M30 10 L66 10 L80 24 L80 70 Q80 74 76 74 L30 74 Q26 74 26 70 L26 14 Q26 10 30 10 Z"/>
+    <path d="M66 10 L66 24 L80 24" fill="none"/>
+  </g>
+
+  <!-- ZIP zipper (darker amber for visibility against cream fill) -->
+  <g fill="#92400e">
+    <rect x="36" y="18" width="6" height="5" rx="1"/>
+    <rect x="42" y="24" width="6" height="5" rx="1"/>
+    <rect x="36" y="30" width="6" height="5" rx="1"/>
+    <rect x="42" y="36" width="6" height="5" rx="1"/>
+  </g>
+
+  <!-- File label text rows (higher opacity + slightly darker for legibility) -->
+  <g fill="#854d0e" opacity="0.75">
+    <rect x="52" y="46" width="22" height="3.5" rx="1.5"/>
+    <rect x="52" y="52" width="18" height="3.5" rx="1.5"/>
+    <rect x="52" y="58" width="20" height="3.5" rx="1.5"/>
+  </g>
+
+  <!-- Upload arrow badge (navy = consistent with the "47" badge in Preselected) -->
+  <circle cx="92" cy="62" r="14" fill="#1e40af"/>
+  <g stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <line x1="92" y1="68" x2="92" y2="56"/>
+    <polyline points="86 62 92 56 98 62"/>
+  </g>
+</svg>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compare runs: OrthoGather</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-errors.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/history.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/compare.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
+  <script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+</head>
+<body>
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="compare-main">
+    <section class="compare-intro">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <a href="/history">History</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Compare</span>
+      </nav>
+      <h1>Compare two analyses</h1>
+      <p class="lead">Overlaid figures, side-by-side stats, and computed deltas so reviewers can see exactly how two runs differ without leaving the app.</p>
+    </section>
+
+    {% if error %}
+      <div class="compare-error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <p>{{ error }}</p>
+        {% if runs %}
+          <form class="compare-picker" method="get" action="/compare">
+            <label class="compare-picker-row">
+              <span>Run A</span>
+              <select name="a" required>
+                <option value="" disabled selected>Pick a run…</option>
+                {% for r in runs %}
+                  <option value="{{ r.id }}">{{ r.name or (r.id) }}: {{ r.created_at[:10] }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="compare-picker-row">
+              <span>Run B</span>
+              <select name="b" required>
+                <option value="" disabled selected>Pick a run…</option>
+                {% for r in runs %}
+                  <option value="{{ r.id }}">{{ r.name or (r.id) }}: {{ r.created_at[:10] }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-code-compare"></i> Compare</button>
+          </form>
+        {% endif %}
+      </div>
+    {% else %}
+
+      {# ── Stats side by side ──────────────────────────────────────────── #}
+      <section class="compare-stats" aria-label="Headline statistics">
+        {% set sa = a.summary or {} %}
+        {% set sb = b.summary or {} %}
+        <div class="compare-col compare-col-a">
+          <h2 class="compare-col-title"><span class="compare-tag tag-a">A</span> {{ a.name }}</h2>
+          <p class="compare-col-meta">{{ a.created_at[:10] }} · {{ a.created_at[11:16] }} UTC · {{ (a.duration_s / 60) | round(1) }} min</p>
+          <ul class="compare-stat-list">
+            <li><strong>{{ '{:,}'.format(sa.total_orthogroups or 0) }}</strong> orthogroups</li>
+            <li><strong>{{ '{:,}'.format(sa.single_copy_orthogroups or 0) }}</strong> single-copy</li>
+            <li><strong>{{ '{:,}'.format(sa.species_specific_orthogroups or 0) }}</strong> species-specific</li>
+            <li><strong>{{ sa.mean_pct_in_og if sa.mean_pct_in_og is not none else '' }}%</strong> mean in OG</li>
+            <li><strong>{{ sa.n_species or (sa.species | length) }}</strong> species</li>
+          </ul>
+        </div>
+        <div class="compare-deltas" aria-label="Differences between runs">
+          {% macro delta_row(label, key, fmt='int', suffix='') %}
+            {% set d = deltas[key] %}
+            <li class="delta-row {% if d is none %}is-na{% elif d > 0 %}is-up{% elif d < 0 %}is-down{% else %}is-zero{% endif %}">
+              <span class="delta-label">{{ label }}</span>
+              <span class="delta-value">
+                {% if d is none %}
+                {% elif d > 0 %}
+                  <i class="fa-solid fa-arrow-up"></i>
+                  {% if fmt == 'int' %}+{{ '{:,}'.format(d) }}{% else %}+{{ d | round(1) }}{% endif %}{{ suffix }}
+                {% elif d < 0 %}
+                  <i class="fa-solid fa-arrow-down"></i>
+                  {% if fmt == 'int' %}{{ '{:,}'.format(d) }}{% else %}{{ d | round(1) }}{% endif %}{{ suffix }}
+                {% else %}=
+                {% endif %}
+              </span>
+            </li>
+          {% endmacro %}
+          <ul class="delta-list">
+            {{ delta_row('Orthogroups', 'total_orthogroups') }}
+            {{ delta_row('Single-copy', 'single_copy_orthogroups') }}
+            {{ delta_row('Species-specific', 'species_specific_orthogroups') }}
+            {{ delta_row('Mean % in OG', 'mean_pct_in_og', 'float', '%') }}
+            {{ delta_row('Species', 'n_species') }}
+          </ul>
+        </div>
+        <div class="compare-col compare-col-b">
+          <h2 class="compare-col-title"><span class="compare-tag tag-b">B</span> {{ b.name }}</h2>
+          <p class="compare-col-meta">{{ b.created_at[:10] }} · {{ b.created_at[11:16] }} UTC · {{ (b.duration_s / 60) | round(1) }} min</p>
+          <ul class="compare-stat-list">
+            <li><strong>{{ '{:,}'.format(sb.total_orthogroups or 0) }}</strong> orthogroups</li>
+            <li><strong>{{ '{:,}'.format(sb.single_copy_orthogroups or 0) }}</strong> single-copy</li>
+            <li><strong>{{ '{:,}'.format(sb.species_specific_orthogroups or 0) }}</strong> species-specific</li>
+            <li><strong>{{ sb.mean_pct_in_og if sb.mean_pct_in_og is not none else '' }}%</strong> mean in OG</li>
+            <li><strong>{{ sb.n_species or (sb.species | length) }}</strong> species</li>
+          </ul>
+        </div>
+      </section>
+
+      {# ── Overlaid figures ────────────────────────────────────────────── #}
+      <section class="compare-figures">
+        <article class="compare-figure-card">
+          <header>
+            <h3>Figure 1: Protein distribution per orthogroup</h3>
+            <p class="compare-figure-sub">Bars overlaid: Run A (orange) vs Run B (blue). Drag to zoom.</p>
+          </header>
+          <div id="compare-fig1" class="compare-figure" role="img" aria-label="Protein distribution comparison"></div>
+        </article>
+        <article class="compare-figure-card">
+          <header>
+            <h3>Figure 2: Orthogroup sharing across species</h3>
+            <p class="compare-figure-sub">Bars overlaid: A vs B. X axis is the number of species sharing each orthogroup.</p>
+          </header>
+          <div id="compare-fig2" class="compare-figure" role="img" aria-label="Orthogroup sharing comparison"></div>
+        </article>
+      </section>
+
+      {# ── Per-species comparison ──────────────────────────────────────── #}
+      <section class="compare-species-table" aria-label="Per-species comparison">
+        <header>
+          <h3>Per-species coverage</h3>
+          <p class="compare-figure-sub">Species present in either run. "" means the species wasn't part of that run.</p>
+        </header>
+        {% set names = [] %}
+        {% for sp in (sa.species or []) %}{% if sp.name not in names %}{% set _ = names.append(sp.name) %}{% endif %}{% endfor %}
+        {% for sp in (sb.species or []) %}{% if sp.name not in names %}{% set _ = names.append(sp.name) %}{% endif %}{% endfor %}
+        {% set a_by_name = {} %}{% for sp in (sa.species or []) %}{% set _ = a_by_name.update({sp.name: sp}) %}{% endfor %}
+        {% set b_by_name = {} %}{% for sp in (sb.species or []) %}{% set _ = b_by_name.update({sp.name: sp}) %}{% endfor %}
+        <table>
+          <thead>
+            <tr>
+              <th>Species</th>
+              <th>A · proteins</th>
+              <th>A · % in OG</th>
+              <th>B · proteins</th>
+              <th>B · % in OG</th>
+              <th>Δ % in OG</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for name in names %}
+              {% set sa_sp = a_by_name.get(name) %}
+              {% set sb_sp = b_by_name.get(name) %}
+              {% set d_pct = (sb_sp.pct_in_og - sa_sp.pct_in_og) if (sa_sp and sb_sp and sa_sp.pct_in_og is not none and sb_sp.pct_in_og is not none) else None %}
+              <tr>
+                <td class="sp-name">{{ name | replace('_', ' ') }}</td>
+                <td>{{ '{:,}'.format(sa_sp.n_proteins) if sa_sp and sa_sp.n_proteins is not none else '' }}</td>
+                <td>{{ sa_sp.pct_in_og if sa_sp and sa_sp.pct_in_og is not none else '' }}{% if sa_sp and sa_sp.pct_in_og is not none %}%{% endif %}</td>
+                <td>{{ '{:,}'.format(sb_sp.n_proteins) if sb_sp and sb_sp.n_proteins is not none else '' }}</td>
+                <td>{{ sb_sp.pct_in_og if sb_sp and sb_sp.pct_in_og is not none else '' }}{% if sb_sp and sb_sp.pct_in_og is not none %}%{% endif %}</td>
+                <td class="{% if d_pct is none %}is-na{% elif d_pct > 0 %}is-up{% elif d_pct < 0 %}is-down{% endif %}">
+                  {% if d_pct is none %}
+                  {% elif d_pct > 0 %}<i class="fa-solid fa-arrow-up"></i> +{{ d_pct | round(1) }} pp
+                  {% elif d_pct < 0 %}<i class="fa-solid fa-arrow-down"></i> {{ d_pct | round(1) }} pp
+                  {% else %}=
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      {# ── Plotly data + render ─────────────────────────────────────────── #}
+      <script type="application/json" id="fig1a-data">{{ a.fig1 | tojson if a.fig1 else 'null' }}</script>
+      <script type="application/json" id="fig1b-data">{{ b.fig1 | tojson if b.fig1 else 'null' }}</script>
+      <script type="application/json" id="fig2a-data">{{ a.fig2 | tojson if a.fig2 else 'null' }}</script>
+      <script type="application/json" id="fig2b-data">{{ b.fig2 | tojson if b.fig2 else 'null' }}</script>
+
+      <script>
+      (function () {
+        'use strict';
+        function ready(fn) {
+          if (document.readyState !== 'loading') fn();
+          else document.addEventListener('DOMContentLoaded', fn);
+        }
+        function readData(id) {
+          const el = document.getElementById(id);
+          if (!el) return null;
+          try { return JSON.parse(el.textContent); } catch (e) { return null; }
+        }
+        function whenPlotly(fn, tries) {
+          tries = tries || 0;
+          if (typeof Plotly !== 'undefined') return fn();
+          if (tries > 50) return;
+          setTimeout(function () { whenPlotly(fn, tries + 1); }, 100);
+        }
+        ready(function () { whenPlotly(function () {
+          const f1a = readData('fig1a-data');
+          const f1b = readData('fig1b-data');
+          const f2a = readData('fig2a-data');
+          const f2b = readData('fig2b-data');
+
+          if (f1a && f1b) {
+            const max_x = Math.max(
+              Math.max.apply(null, f1a.xs),
+              Math.max.apply(null, f1b.xs)
+            );
+            const traces = [
+              { type: 'bar', name: 'Run A', x: f1a.xs, y: f1a.ys,
+                marker: { color: 'rgba(245, 158, 11, 0.65)' },
+                hovertemplate: '<b>A · %{x} proteins</b><br>%{y:,} orthogroups<extra></extra>' },
+              { type: 'bar', name: 'Run B', x: f1b.xs, y: f1b.ys,
+                marker: { color: 'rgba(37, 99, 235, 0.65)' },
+                hovertemplate: '<b>B · %{x} proteins</b><br>%{y:,} orthogroups<extra></extra>' }
+            ];
+            const layout = {
+              barmode: 'overlay',
+              margin: { t: 16, r: 30, l: 70, b: 60 },
+              xaxis: { title: { text: 'Proteins per orthogroup' }, range: [0.4, Math.min(20.6, max_x + 0.6)], dtick: 1, gridcolor: '#f1f5f9' },
+              yaxis: { title: { text: 'Number of orthogroups' }, tickformat: ',d', gridcolor: '#f1f5f9' },
+              bargap: 0.15,
+              plot_bgcolor: '#ffffff', paper_bgcolor: '#ffffff',
+              font: { family: 'Inter, system-ui, sans-serif', color: '#1f2937' },
+              legend: { orientation: 'h', x: 0, y: 1.12 },
+              hovermode: 'closest'
+            };
+            Plotly.newPlot('compare-fig1', traces, layout,
+              { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'] });
+          }
+
+          if (f2a && f2b) {
+            const N = Math.max(f2a.N, f2b.N);
+            const traces = [
+              { type: 'bar', name: 'Run A', x: f2a.xs, y: f2a.ys,
+                marker: { color: 'rgba(245, 158, 11, 0.65)' },
+                hovertemplate: '<b>A · shared by %{x} species</b><br>%{y:,} orthogroups<extra></extra>' },
+              { type: 'bar', name: 'Run B', x: f2b.xs, y: f2b.ys,
+                marker: { color: 'rgba(37, 99, 235, 0.65)' },
+                hovertemplate: '<b>B · shared by %{x} species</b><br>%{y:,} orthogroups<extra></extra>' }
+            ];
+            const layout = {
+              barmode: 'overlay',
+              margin: { t: 16, r: 30, l: 70, b: 60 },
+              xaxis: { title: { text: 'Species sharing the orthogroup' }, dtick: N > 20 ? Math.ceil(N / 20) : 1, range: [0.3, N + 0.7], gridcolor: '#f1f5f9' },
+              yaxis: { title: { text: 'Number of orthogroups' }, tickformat: ',d', gridcolor: '#f1f5f9' },
+              bargap: 0.20,
+              plot_bgcolor: '#ffffff', paper_bgcolor: '#ffffff',
+              font: { family: 'Inter, system-ui, sans-serif', color: '#1f2937' },
+              legend: { orientation: 'h', x: 0, y: 1.12 },
+              hovermode: 'closest'
+            };
+            Plotly.newPlot('compare-fig2', traces, layout,
+              { responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'] });
+          }
+        }); });
+      })();
+      </script>
+
+    {% endif %}
+  </main>
+
+  </div><!-- /.app-shell -->
+
+</body>
+</html>

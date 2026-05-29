@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 150"
+     font-family="Inter, system-ui, -apple-system, sans-serif">
+
+  <!-- ─── Step 1: Species (UniProt-sourced catalogue) ─── -->
+  <g transform="translate(15, 25)">
+    <rect x="0" y="0" width="145" height="110" rx="12" fill="#ffffff" stroke="#1e40af" stroke-width="2.4"/>
+
+    <!-- Species list (left): 3 rows with bullet + line -->
+    <g>
+      <g fill="#1e40af">
+        <circle cx="18" cy="20" r="2.8"/>
+        <circle cx="18" cy="34" r="2.8"/>
+        <circle cx="18" cy="48" r="2.8"/>
+      </g>
+      <g stroke="#1e40af" stroke-width="2.6" stroke-linecap="round" opacity="0.55">
+        <line x1="26" y1="20" x2="76" y2="20"/>
+        <line x1="26" y1="34" x2="60" y2="34"/>
+        <line x1="26" y1="48" x2="68" y2="48"/>
+      </g>
+    </g>
+
+    <!-- Magnifying glass (top-right): search in UniProt -->
+    <g stroke="#1e40af" stroke-linecap="round" fill="none">
+      <circle cx="108" cy="24" r="10" stroke-width="2.6" fill="#ffffff"/>
+      <line x1="115.5" y1="31.5" x2="125" y2="41" stroke-width="3.2"/>
+    </g>
+
+    <!-- UniProt source pill (centered horizontally) -->
+    <g transform="translate(72.5, 71)">
+      <rect x="-32" y="-10" width="64" height="20" rx="10" fill="#1e40af"/>
+      <text x="0" y="3.8" text-anchor="middle"
+            font-size="10" font-weight="700" letter-spacing="0.04em" fill="#ffffff">UniProt</text>
+    </g>
+
+    <!-- Main label -->
+    <text x="72.5" y="98" text-anchor="middle"
+          font-size="13" font-weight="700" fill="#1e40af">Species</text>
+
+    <!-- Step number badge -->
+    <circle cx="-2" cy="-2" r="13" fill="#1e40af"/>
+    <text x="-2" y="3" text-anchor="middle"
+          font-size="13" font-weight="800" fill="#ffffff">1</text>
+  </g>
+
+  <!-- Arrow 1 → 2 -->
+  <path d="M163 80 L198 80" stroke="#94a3b8" stroke-width="2.8" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ─── Step 2: OrthoFinder ─── -->
+  <g transform="translate(202, 25)">
+    <rect x="0" y="0" width="145" height="110" rx="12" fill="#003366"/>
+
+    <!-- Terminal-like lines -->
+    <g stroke-width="2" stroke-linecap="round" fill="none">
+      <line x1="16" y1="20" x2="20" y2="20" stroke="#10b981"/>
+      <line x1="25" y1="20" x2="80" y2="20" stroke="#7dd3fc"/>
+      <line x1="16" y1="32" x2="105" y2="32" stroke="#7dd3fc" opacity="0.6"/>
+      <line x1="16" y1="44" x2="118" y2="44" stroke="#0ea5e9"/>
+      <line x1="16" y1="56" x2="90" y2="56" stroke="#7dd3fc" opacity="0.6"/>
+      <line x1="16" y1="68" x2="72" y2="68" stroke="#7dd3fc" opacity="0.45"/>
+    </g>
+
+    <!-- Main label -->
+    <text x="72.5" y="98" text-anchor="middle"
+          font-size="13" font-weight="700" fill="#ffffff">OrthoFinder</text>
+
+    <!-- Step number badge -->
+    <circle cx="-2" cy="-2" r="13" fill="#0c9488"/>
+    <text x="-2" y="3" text-anchor="middle"
+          font-size="13" font-weight="800" fill="#ffffff">2</text>
+  </g>
+
+  <!-- Arrow 2 → 3 -->
+  <path d="M350 80 L385 80" stroke="#94a3b8" stroke-width="2.8" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ─── Step 3: Orthogroups (mini UpSet) ─── -->
+  <g transform="translate(388, 25)">
+    <rect x="0" y="0" width="145" height="110" rx="12" fill="#ffffff" stroke="#b45309" stroke-width="2.4"/>
+
+    <!-- Mini UpSet bars: 4 bars decreasing, no baseline crossing the label -->
+    <g fill="#003366">
+      <rect x="28" y="18" width="14" height="40" rx="2"/>
+      <rect x="48" y="26" width="14" height="32" rx="2" opacity="0.8"/>
+      <rect x="68" y="34" width="14" height="24" rx="2" opacity="0.6"/>
+      <rect x="88" y="42" width="14" height="16" rx="2" opacity="0.45"/>
+      <rect x="108" y="48" width="14" height="10" rx="2" opacity="0.35"/>
+    </g>
+
+    <!-- Main label -->
+    <text x="72.5" y="80" text-anchor="middle"
+          font-size="13" font-weight="700" fill="#b45309">Orthogroups</text>
+
+    <!-- Step number badge -->
+    <circle cx="-2" cy="-2" r="13" fill="#b45309"/>
+    <text x="-2" y="3" text-anchor="middle"
+          font-size="13" font-weight="800" fill="#ffffff">3</text>
+  </g>
+
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto">
+      <path d="M0 0 L9 4.5 L0 9 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+</svg>

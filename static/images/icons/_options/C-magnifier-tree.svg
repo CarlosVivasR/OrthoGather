@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200">
+  <!-- Soft circular background -->
+  <circle cx="110" cy="100" r="92" fill="#f0f9ff"/>
+
+  <!-- Phylogenetic tree (left, larger) -->
+  <g stroke="#0369a1" stroke-width="2.6" fill="none" stroke-linecap="round">
+    <path d="M22 100 L45 100 L45 68 L45 132
+             M45 68 L65 50 L100 50
+             M45 68 L65 75 L100 75
+             M45 68 L65 95 L100 95
+             M45 132 L65 118 L100 118
+             M45 132 L65 138 L100 138
+             M45 132 L65 158 L100 158"/>
+  </g>
+  <g fill="#0369a1">
+    <circle cx="103" cy="50" r="4"/>
+    <circle cx="103" cy="75" r="4"/>
+    <circle cx="103" cy="95" r="4"/>
+    <circle cx="103" cy="118" r="4"/>
+    <circle cx="103" cy="138" r="4"/>
+    <circle cx="103" cy="158" r="4"/>
+  </g>
+
+  <!-- Magnifying glass over the tree -->
+  <g transform="translate(135, 95)">
+    <!-- White fill so tree behind shows blurred -->
+    <circle cx="0" cy="0" r="48" fill="#ffffff" stroke="#003366" stroke-width="5"/>
+    <!-- Inside the lens: a mini result chart -->
+    <g clip-path="circle(44 at 0 0)">
+      <text x="0" y="-22" text-anchor="middle"
+            font-family="Inter, system-ui, sans-serif"
+            font-size="8" font-weight="700" letter-spacing="0.05em"
+            fill="#6b7280">RESULTS</text>
+      <g fill="#003366">
+        <rect x="-26" y="-8" width="7" height="22" rx="1.5"/>
+        <rect x="-15" y="-2" width="7" height="16" rx="1.5" opacity="0.78"/>
+        <rect x="-4"  y="3"  width="7" height="11" rx="1.5" opacity="0.58"/>
+        <rect x="7"   y="7"  width="7" height="7"  rx="1.5" opacity="0.42"/>
+        <rect x="18"  y="10" width="7" height="4"  rx="1.5" opacity="0.32"/>
+      </g>
+    </g>
+    <!-- Handle -->
+    <line x1="34" y1="34" x2="62" y2="62" stroke="#003366" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>

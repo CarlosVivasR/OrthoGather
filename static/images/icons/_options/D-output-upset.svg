@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 220">
+  <!-- Section heading -->
+  <text x="14" y="14" font-family="Inter, system-ui, sans-serif"
+        font-size="10" font-weight="700" letter-spacing="0.05em" fill="#6b7280">
+    ORTHOGROUP INTERSECTIONS — YOUR ANALYSIS RESULT
+  </text>
+
+  <!-- Y-axis label -->
+  <text x="14" y="35" font-family="Inter, sans-serif"
+        font-size="9" fill="#9ca3af">Intersection size</text>
+
+  <!-- Bars (top of UpSet) -->
+  <g transform="translate(100, 30)">
+    <rect x="0"   y="0"   width="32" height="105" rx="3" fill="#003366"/>
+    <rect x="40"  y="34"  width="32" height="71"  rx="3" fill="#1e40af" opacity="0.85"/>
+    <rect x="80"  y="52"  width="32" height="53"  rx="3" fill="#0369a1" opacity="0.7"/>
+    <rect x="120" y="65"  width="32" height="40"  rx="3" fill="#0ea5e9" opacity="0.55"/>
+    <rect x="160" y="78"  width="32" height="27"  rx="3" fill="#94a3b8" opacity="0.7"/>
+    <rect x="200" y="86"  width="32" height="19"  rx="3" fill="#94a3b8" opacity="0.5"/>
+    <rect x="240" y="92"  width="32" height="13"  rx="3" fill="#cbd5e1"/>
+
+    <!-- Counts above each bar -->
+    <text x="16"  y="-6" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#003366">11135</text>
+    <text x="56"  y="28" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#003366">3402</text>
+    <text x="96"  y="46" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#0369a1">1475</text>
+    <text x="136" y="60" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#0369a1">817</text>
+    <text x="176" y="73" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#475569">336</text>
+    <text x="216" y="81" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#475569">127</text>
+    <text x="256" y="87" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">42</text>
+  </g>
+
+  <!-- Species labels (italic, left) -->
+  <g transform="translate(0, 156)" font-family="Inter, sans-serif" font-size="9" font-style="italic" fill="#374151">
+    <text x="95" y="0"  text-anchor="end">E. coli K12</text>
+    <text x="95" y="18" text-anchor="end">E. coli O157H7</text>
+    <text x="95" y="36" text-anchor="end">A. baumannii</text>
+  </g>
+
+  <!-- Dot matrix (which species are in each intersection) -->
+  <g transform="translate(100, 156)">
+    <!-- Column 1: all 3 -->
+    <circle cx="16" cy="0"  r="4" fill="#003366"/>
+    <circle cx="16" cy="18" r="4" fill="#003366"/>
+    <circle cx="16" cy="36" r="4" fill="#003366"/>
+    <line x1="16" y1="0" x2="16" y2="36" stroke="#003366" stroke-width="2.5"/>
+
+    <!-- Col 2: 1+2 -->
+    <circle cx="56" cy="0"  r="4" fill="#003366"/>
+    <circle cx="56" cy="18" r="4" fill="#003366"/>
+    <circle cx="56" cy="36" r="4" fill="#d1d5db"/>
+    <line x1="56" y1="0" x2="56" y2="18" stroke="#003366" stroke-width="2.5"/>
+
+    <!-- Col 3: 1+3 -->
+    <circle cx="96" cy="0"  r="4" fill="#0369a1"/>
+    <circle cx="96" cy="18" r="4" fill="#d1d5db"/>
+    <circle cx="96" cy="36" r="4" fill="#0369a1"/>
+    <line x1="96" y1="0" x2="96" y2="36" stroke="#0369a1" stroke-width="2.5"/>
+
+    <!-- Col 4: only 2 -->
+    <circle cx="136" cy="0"  r="4" fill="#d1d5db"/>
+    <circle cx="136" cy="18" r="4" fill="#0369a1"/>
+    <circle cx="136" cy="36" r="4" fill="#d1d5db"/>
+
+    <!-- Col 5: only 3 -->
+    <circle cx="176" cy="0"  r="4" fill="#d1d5db"/>
+    <circle cx="176" cy="18" r="4" fill="#d1d5db"/>
+    <circle cx="176" cy="36" r="4" fill="#475569"/>
+
+    <!-- Col 6: only 1 -->
+    <circle cx="216" cy="0"  r="4" fill="#475569"/>
+    <circle cx="216" cy="18" r="4" fill="#d1d5db"/>
+    <circle cx="216" cy="36" r="4" fill="#d1d5db"/>
+
+    <!-- Col 7: 2+3 -->
+    <circle cx="256" cy="0"  r="4" fill="#d1d5db"/>
+    <circle cx="256" cy="18" r="4" fill="#94a3b8"/>
+    <circle cx="256" cy="36" r="4" fill="#94a3b8"/>
+    <line x1="256" y1="18" x2="256" y2="36" stroke="#94a3b8" stroke-width="2.5"/>
+  </g>
+</svg>

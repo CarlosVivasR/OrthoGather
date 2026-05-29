@@ -1,0 +1,1372 @@
+/* ============================================================================
+   OrthoGather — Species selection page
+   Search a proteome catalog, select species, download FASTAs, run OrthoFinder.
+   ============================================================================ */
+
+.species-main {
+  flex: 1;
+  /* Bottom padding clears the sticky action bar (~90px tall + 16px gap to
+     viewport bottom), so the last lines of the OrthoFinder log and the
+     post-analysis cards don't sit underneath it when scrolled to bottom. */
+  padding: var(--space-10) 0 140px;
+}
+
+/* --- Page intro --- */
+.species-intro {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+}
+
+.species-intro .breadcrumb {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.species-intro .breadcrumb a { color: var(--color-text-secondary); }
+.species-intro .breadcrumb a:hover { color: var(--color-primary); }
+.species-intro .breadcrumb i { font-size: 10px; opacity: 0.5; }
+
+.species-intro h1 {
+  font-size: var(--text-display);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+
+.species-intro .lead {
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 720px;
+}
+
+/* --- Workflow steps --- */
+.workflow-steps {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.workflow-steps .step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 14px 6px 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.workflow-steps .step .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.workflow-steps .step.is-active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.workflow-steps .step.is-active .num {
+  background: rgba(255,255,255,0.2);
+  color: var(--color-text-inverse);
+}
+
+.workflow-steps .step.is-done {
+  background-color: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: #065f46;
+}
+
+.workflow-steps .step.is-done .num { background: var(--color-success); color: var(--color-text-inverse); }
+.workflow-steps .step-divider { color: var(--color-text-muted); font-size: 10px; align-self: center; }
+
+/* --- Main content card --- */
+.species-card {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+.species-card h2 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-1);
+}
+
+.species-card .section-helper {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-4);
+}
+
+.species-card .section-divider {
+  border: none;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-5) 0;
+}
+
+/* --- Search input --- */
+.search-wrap {
+  position: relative;
+}
+
+.search-wrap .search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.search-wrap .input {
+  padding-left: 44px;
+  font-size: var(--text-body-lg);
+}
+
+/* Catalogue meta block (version + update mechanism) */
+.catalogue-meta {
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.catalogue-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.catalogue-meta-label {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.catalogue-meta-version {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+}
+
+.catalogue-meta-sep {
+  color: var(--color-text-muted);
+}
+
+.catalogue-meta-age { font-style: italic; }
+
+.catalogue-meta #catalogue-check-btn {
+  margin-left: auto;
+}
+
+.catalogue-update-area {
+  margin-top: var(--space-3);
+}
+
+.catalogue-update-area:empty {
+  margin-top: 0;
+}
+
+.catalogue-update-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-info-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.catalogue-update-card .update-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  color: var(--color-info);
+  margin-bottom: var(--space-2);
+}
+
+.catalogue-update-card dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px var(--space-4);
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: var(--text-body-sm);
+}
+
+.catalogue-update-card dt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.catalogue-update-card dd {
+  color: var(--color-text);
+  font-family: var(--font-mono);
+}
+
+.catalogue-update-card .actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.catalogue-update-card .actions .text-secondary {
+  align-self: center;
+  font-size: var(--text-body-sm);
+}
+
+.catalogue-update-progress {
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.catalogue-update-progress .progress {
+  margin: var(--space-2) 0;
+}
+
+.catalogue-update-progress .progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* Catalogue hint below the search box */
+#catalogue-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  transition: color var(--duration) var(--easing-standard);
+}
+
+#catalogue-hint::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--color-warning);
+}
+
+#catalogue-hint.is-loading {
+  color: var(--color-warning);
+  font-weight: 500;
+}
+#catalogue-hint.is-loading::before {
+  background-color: var(--color-warning);
+  animation: og-pulse 1.5s ease-in-out infinite;
+}
+
+#catalogue-hint.is-ready {
+  color: var(--color-success);
+  font-weight: 500;
+}
+#catalogue-hint.is-ready::before {
+  background-color: var(--color-success);
+}
+/* Version tail is informational, not the main signal — keep it muted so the
+   eye reads "Catalogue ready" first, version second. */
+#catalogue-hint .catalogue-version-tail {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  margin-left: 4px;
+}
+
+#catalogue-hint.is-error {
+  color: var(--color-error);
+  font-weight: 500;
+}
+#catalogue-hint.is-error::before {
+  background-color: var(--color-error);
+}
+
+/* --- Results dropdown --- */
+#results {
+  margin-top: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+#results:empty { display: none; }
+
+#results .option {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--text-body-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+#results .option::after {
+  content: 'Reference';
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: #065f46;
+  background-color: var(--color-success-bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+#results .option.non-reference::after {
+  content: 'Non-reference';
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface-alt);
+}
+
+#results .option:hover {
+  background-color: var(--color-primary-soft);
+}
+
+/* --- Selected species chips --- */
+#selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 48px;
+}
+
+#selected:empty::before {
+  content: 'No species selected yet. Start by searching above.';
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  font-style: italic;
+}
+
+.selected-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 8px 6px 14px;
+  background-color: var(--color-primary-soft);
+  color: var(--color-text);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.selected-item .badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.85);
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.selected-item .badge.non-reference {
+  color: var(--color-text-secondary);
+}
+
+.remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  border: none;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard);
+}
+
+.remove-btn:hover {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.remove-btn:focus-visible {
+  outline: none;
+  background-color: var(--color-error-bg);
+}
+
+/* --- Counters / metadata row --- */
+.selected-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+}
+
+.selected-meta .count {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.selected-meta .count strong {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Subtle "/ 50" suffix next to the counter (Point 7). */
+.selected-meta .count-max {
+  color: var(--color-text-muted);
+  margin: 0 4px 0 2px;
+}
+.selected-meta .count-max span {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Soft warning state: the counter goes amber when ≥ 80% (40/50). */
+.selected-meta.is-near-limit .count strong  { color: var(--color-warning, #ea580c); }
+.selected-meta.is-near-limit .count-max    { color: var(--color-warning, #ea580c); }
+
+/* Hard limit state: red counter + an inline warning chip. */
+.selected-meta.is-at-limit .count strong   { color: var(--color-error, #c0392b); }
+.selected-meta.is-at-limit .count-max      { color: var(--color-error, #c0392b); }
+
+.selected-meta .hint {
+  font-size: var(--text-body-sm);
+  color: var(--color-warning);
+  display: none;
+}
+
+.selected-meta.is-empty .hint { display: inline; }
+
+.selected-clear-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  padding: 2px 6px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: color 120ms ease, background 120ms ease;
+}
+.selected-clear-btn:hover {
+  color: var(--color-error, #c0392b);
+  background: rgba(192, 57, 43, 0.06);
+}
+.selected-clear-btn[hidden] { display: none; }
+.selected-clear-btn i { font-size: 10px; }
+
+/* --- Action bar (Download / Run buttons) --- */
+.action-bar {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: 0 var(--space-6);
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#downloadStatus {
+  max-width: var(--width-content);
+  margin: var(--space-4) auto 0;
+  padding: 0 var(--space-6);
+}
+
+/* --- Log panel container --- */
+.species-log-section {
+  max-width: var(--width-content);
+  margin: var(--space-6) auto 0;
+  padding: 0 var(--space-6);
+  display: none;
+}
+
+.species-log-section.is-active { display: block; }
+
+/* --- Download progress panel --- */
+.download-progress {
+  max-width: var(--width-content);
+  margin: var(--space-6) auto 0;
+  padding: var(--space-5) var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  display: none;
+}
+
+.download-progress.is-active { display: block; }
+
+.download-progress-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.download-progress-header h3 {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.download-progress-header h3 i {
+  color: var(--color-primary);
+  font-size: 14px;
+}
+
+.download-progress-current {
+  margin: 4px 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.download-progress-current span {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.download-progress-counter {
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.download-progress .progress {
+  margin-bottom: var(--space-4);
+}
+
+.download-progress #downloadLog {
+  max-height: 240px;
+  font-size: 12px;
+}
+
+.download-progress #downloadLog:empty {
+  display: none;
+}
+
+#download-summary {
+  margin-top: var(--space-4);
+}
+
+.species-log-section .log-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.species-log-section .log-header h3 {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.species-log-section .log-header .pulse-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: #78350f;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+}
+
+.species-log-section .pulse-indicator .pulse-dot {
+  width: 6px; height: 6px;
+  background-color: var(--color-warning);
+  border-radius: 50%;
+  animation: og-pulse 1.5s ease-in-out infinite;
+}
+
+#logPanel {
+  display: none;
+}
+
+#logPanel.is-visible {
+  display: block;
+}
+
+#loadingGif {
+  display: none;
+  text-align: center;
+  padding: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+#loadingGif.is-visible { display: block; }
+
+#loadingGif img {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-2);
+}
+
+/* --- Post-analysis actions (Protein / GO subaction cards) --- */
+#postAnalysisButtons {
+  max-width: var(--width-content);
+  margin: var(--space-8) auto 0;
+  padding: 0 var(--space-6);
+  display: none;
+}
+
+#postAnalysisButtons.is-visible { display: block; }
+
+#postAnalysisButtons h3 {
+  text-align: center;
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-2);
+}
+
+#postAnalysisButtons p.subtitle {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+#postAnalysisButtons .post-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  #postAnalysisButtons .post-actions { grid-template-columns: 1fr; }
+}
+
+#postAnalysisButtons .subaction-card {
+  padding: var(--space-5);
+}
+
+#postAnalysisButtons .subaction-card .subaction-icon {
+  width: 48px; height: 48px;
+  font-size: 20px;
+}
+
+#postAnalysisButtons .subaction-card .subaction-title {
+  font-size: var(--text-h3);
+}
+
+/* ============================================================================
+   v2 — Split-card layout, kebab catalogue menu, italic-chips, state-machine
+   action bar.  Built on top of the original styles above.
+   ============================================================================ */
+
+/* ─── Shared card chrome (both search + selected) ─── */
+.card-search,
+.card-selected {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-5);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 6px 14px rgba(15, 23, 42, 0.06);
+  position: relative;
+}
+
+.card-selected {
+  /* Slightly tinted so the two cards read as distinct sections */
+  background-color: #fafbfd;
+  border-color: rgba(15, 23, 42, 0.10);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 10px rgba(15, 23, 42, 0.04);
+}
+
+.card-search .card-head,
+.card-selected .card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.card-head-tight { margin-bottom: var(--space-3); }
+.card-head-text  { flex: 1; min-width: 0; }
+.card-head-text h2 { font-size: var(--text-h2); margin-bottom: var(--space-1); }
+.card-head-text .section-helper { color: var(--color-text-secondary); font-size: var(--text-body-sm); margin: 0; }
+
+/* ─── Kebab menu (3 dots) for catalogue version + update ─── */
+.kebab-wrap { position: relative; flex-shrink: 0; }
+
+.kebab-btn {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard);
+}
+.kebab-btn:hover { background-color: var(--color-surface-alt); color: var(--color-text); }
+.kebab-btn[aria-expanded="true"] { background-color: var(--color-surface-alt); border-color: var(--color-border); color: var(--color-text); }
+.kebab-btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+.kebab-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 260px;
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.06),
+    0 12px 32px rgba(15, 23, 42, 0.14);
+  padding: var(--space-3);
+  z-index: 20;
+}
+.kebab-menu[hidden] { display: none; }
+
+.kebab-menu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--text-body-sm);
+  padding: 4px 6px;
+}
+.kbm-label { color: var(--color-text-muted); }
+.kbm-value { color: var(--color-text); font-family: var(--font-mono); font-weight: 500; }
+
+.kebab-action-btn {
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+.kebab-action-btn:hover { background-color: var(--color-surface-alt); }
+.kebab-action-btn i { color: var(--color-primary); }
+
+/* When the catalogue is brand-new / outdated, dot indicator on the kebab */
+.kebab-btn.has-update::after {
+  content: '';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-warning);
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+/* ─── Selected species chips (v2 — italic + proteome id + remove) ─── */
+.species-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard);
+}
+.species-chip:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+}
+
+.species-chip .chip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--color-success);  /* reference */
+}
+.species-chip.is-non-reference .chip-dot { background-color: #94a3b8; }
+
+.species-chip .chip-name {
+  font-style: italic;
+  color: var(--color-text);
+  font-weight: 500;
+}
+.species-chip .chip-id {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+.species-chip .chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard);
+}
+.species-chip .chip-remove:hover {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+/* Empty state of selected — arrow points to where the search lives.
+   Side-by-side (≥1024px) → search is to the LEFT, so use ←
+   Stacked (<1024px)      → search is ABOVE, so use ↑ */
+#selected:empty::before {
+  content: '←  Search on the left and click a result to add a species.';
+  display: block;
+  padding: 14px 16px;
+  border: 1px dashed rgba(15, 23, 42, 0.18);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  font-style: normal;
+  background: rgba(15, 23, 42, 0.025);
+}
+@media (max-width: 1023px) {
+  #selected:empty::before {
+    content: '↑  Search above and click a result to add a species.';
+  }
+}
+
+.card-selected .selected-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+.card-selected .selected-meta .count strong { color: var(--color-primary); font-weight: 700; }
+.card-selected .selected-meta .hint { color: #b45309; font-weight: 500; }   /* amber — soft warning */
+.card-selected .selected-meta:not(.is-empty) .hint { display: none; }
+
+/* ─── Action bar with state-machine buttons (v2) ─── */
+.action-bar-sticky {
+  position: sticky;
+  bottom: var(--space-4);
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.10);
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+  max-width: var(--width-content);
+  margin: var(--space-6) auto;
+}
+
+.action-bar-arrow {
+  align-self: center;
+  color: rgba(15, 23, 42, 0.30);
+  font-size: 13px;
+}
+
+.action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 18px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid transparent;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color var(--duration) var(--easing-standard),
+    border-color     var(--duration) var(--easing-standard),
+    color            var(--duration) var(--easing-standard),
+    transform        var(--duration-fast) var(--easing-standard),
+    box-shadow       var(--duration) var(--easing-standard);
+}
+
+.action-btn-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--color-text-muted);
+  font-size: 15px;
+  transition: background-color var(--duration) var(--easing-standard),
+              color var(--duration) var(--easing-standard);
+}
+
+.action-btn-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.action-btn-label { font-weight: 600; font-size: var(--text-body); color: var(--color-text); line-height: 1.2; }
+.action-btn-state {
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;             /* Sentence case — feels sober & scientific, not shouty */
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* —— STATE: pending (disabled, very muted) ——
+   The "next-up" pending button (the one the user can act on once a
+   precondition is met) gets a slightly stronger opacity + dashed accent,
+   so the eye knows where to look first when both buttons are pending. */
+.action-btn.is-pending {
+  background: var(--color-surface);
+  border-color: rgba(15, 23, 42, 0.10);
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+/* When two pending buttons sit next to each other in the same bar, the
+   FIRST one is the immediate next step → bring it forward a notch. */
+.action-bar-sticky .action-btn.is-pending:first-of-type {
+  opacity: 0.7;
+  border-style: dashed;
+  border-color: rgba(30, 64, 175, 0.35);
+}
+.action-bar-sticky .action-btn.is-pending:first-of-type .action-btn-icon {
+  background: rgba(30, 64, 175, 0.10);
+  color: rgba(30, 64, 175, 0.7);
+}
+.action-bar-sticky .action-btn.is-pending:first-of-type .action-btn-state {
+  color: rgba(30, 64, 175, 0.75);
+}
+
+/* —— STATE: ready (CTA — bright lighter navy, NOT the dark #003366) —— */
+.action-btn.is-ready {
+  background: #e7eef9;
+  border-color: #1e40af;
+  cursor: pointer;
+  opacity: 1;
+}
+.action-btn.is-ready .action-btn-icon { background: #1e40af; color: #ffffff; }
+.action-btn.is-ready .action-btn-label { color: #1e3a8a; }
+.action-btn.is-ready .action-btn-state { color: #1e40af; }
+.action-btn.is-ready:hover { background: #d6e2f5; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(30,64,175,0.18); }
+
+/* —— STATE: in-progress (pulse animation) —— */
+.action-btn.is-progress {
+  background: #e7eef9;
+  border-color: #1e40af;
+  cursor: progress;
+  opacity: 1;
+  position: relative;
+  overflow: hidden;
+}
+.action-btn.is-progress .action-btn-icon {
+  background: #1e40af; color: #ffffff;
+  animation: action-pulse 1.4s ease-in-out infinite;
+}
+.action-btn.is-progress .action-btn-label { color: #1e3a8a; }
+.action-btn.is-progress .action-btn-state { color: #1e40af; }
+@keyframes action-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30,64,175,0.45); }
+  50%      { box-shadow: 0 0 0 10px rgba(30,64,175,0); }
+}
+
+/* —— STATE: done (green outlined, lighter, lower visual weight) —— */
+.action-btn.is-done {
+  background: #ecfdf5;
+  border-color: #10b981;
+  cursor: default;
+  opacity: 1;
+}
+.action-btn.is-done .action-btn-icon { background: #10b981; color: #ffffff; }
+.action-btn.is-done .action-btn-icon i { display: none; }
+.action-btn.is-done .action-btn-icon::before { content: '✓'; font-weight: 800; font-size: 16px; }
+.action-btn.is-done .action-btn-label { color: #065f46; }
+.action-btn.is-done .action-btn-state { color: #10b981; }
+
+/* Override the old btn-primary/btn-secondary in the action-bar */
+.action-bar .btn { all: revert-layer; }
+
+/* On narrow screens, action bar stacks */
+@media (max-width: 720px) {
+  .action-bar-sticky { flex-direction: column; align-items: stretch; }
+  .action-bar-arrow { transform: rotate(90deg); align-self: center; }
+}
+
+/* ─── v2.1 — Side-by-side cards (Search left | Selected right) ─── */
+.cards-row {
+  max-width: var(--width-content);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;     /* equal widths */
+  gap: var(--space-5);
+  align-items: start;                 /* each card keeps its own height (no auto-stretching) */
+}
+.cards-row .card-search,
+.cards-row .card-selected {
+  max-width: none;
+  margin: 0;
+  padding-left: var(--space-6);
+  padding-right: var(--space-6);
+  min-height: 260px;                  /* same baseline at rest → balanced */
+  display: flex;
+  flex-direction: column;
+}
+/* #selected keeps its own internal scroll cap (152px, set by the v2.2 block above).
+   When the user searches and #results pops open, only the search card grows;
+   Selected stays exactly where it is. */
+@media (max-width: 1023px) {
+  .cards-row {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  .cards-row .card-search,
+  .cards-row .card-selected {
+    margin: 0 auto var(--space-5);
+    max-width: var(--width-content);
+  }
+}
+
+/* ─── v2.1 — Workflow step state machine ───
+   Pending = clearly muted, dotted-light feel
+   Active  = bright primary (already there)
+   Progress = same as active + pulse
+   Done    = green check (already there) */
+.workflow-steps .step.is-pending {
+  background-color: var(--color-surface);
+  border-style: dashed;
+  border-color: rgba(15, 23, 42, 0.18);
+  color: rgba(15, 23, 42, 0.45);
+  opacity: 0.75;
+}
+.workflow-steps .step.is-pending .num {
+  background: transparent;
+  border: 1px dashed rgba(15, 23, 42, 0.22);
+  color: rgba(15, 23, 42, 0.4);
+}
+
+.workflow-steps .step.is-progress {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  animation: step-pulse 1.6s ease-in-out infinite;
+}
+.workflow-steps .step.is-progress .num {
+  background: rgba(255,255,255,0.25);
+  color: var(--color-text-inverse);
+}
+@keyframes step-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 51, 102, 0.45); }
+  50%      { box-shadow: 0 0 0 8px rgba(0, 51, 102, 0); }
+}
+
+/* Show a tiny ✓ next to the number when done */
+.workflow-steps .step.is-done .num::after {
+  /* keep number; the green colouring already says "done" */
+}
+
+/* Brighten the active step slightly so it pops harder vs pending neighbours */
+.workflow-steps .step.is-active {
+  box-shadow: 0 4px 12px rgba(0, 51, 102, 0.18);
+}
+
+/* ─── v2.2 — Density tweaks for many species ───
+   Chip drops the visible proteome ID (now in tooltip) → fits 2–3 per row.
+   #selected container caps at 480px with internal scroll. */
+.species-chip { padding: 4px 8px 4px 10px; gap: 6px; }
+.species-chip .chip-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.species-chip .chip-id { display: none; }     /* hidden — see tooltip */
+.species-chip .chip-dot { width: 6px; height: 6px; }
+.species-chip .chip-remove { width: 18px; height: 18px; font-size: 11px; }
+
+.card-selected #selected {
+  /* Cap height so the box doesn't grow past ~6 chips (3 rows × 2/row) before scrolling. */
+  max-height: 152px;
+  overflow-y: auto;
+  padding: 2px;                  /* gives the scrollbar a tiny margin */
+  /* Fade hint at the bottom edge when content overflows */
+  mask-image: linear-gradient(180deg, #000 calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 28px), transparent 100%);
+}
+.card-selected #selected:not(.is-overflowing) { mask-image: none; -webkit-mask-image: none; }
+
+/* Cleaner scrollbar (WebKit) */
+.card-selected #selected::-webkit-scrollbar { width: 8px; }
+.card-selected #selected::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.20); border-radius: 4px; }
+.card-selected #selected::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.35); }
+.card-selected #selected::-webkit-scrollbar-track { background: transparent; }
+
+/* ============================================================================
+   v3 — Run summary card (post-OrthoFinder factual diagnostic)
+   ============================================================================ */
+.run-summary {
+  max-width: var(--width-content);
+  margin: var(--space-6) auto;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 14px rgba(15, 23, 42, 0.06);
+  display: none;
+}
+.run-summary.is-visible { display: block; }
+.run-summary[hidden]    { display: none !important; }
+.run-summary.is-visible[hidden] { display: block !important; }
+
+.run-summary-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.run-summary-head h3 {
+  margin: 0;
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.run-summary-head h3 i { color: var(--color-success); margin-right: 8px; }
+.run-summary-meta {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.run-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+@media (max-width: 720px) {
+  .run-summary-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-block {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.stat-sub {
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
+
+/* Per-species table */
+.run-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+}
+.run-summary-table th,
+.run-summary-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+.run-summary-table th {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.run-summary-table td.num,
+.run-summary-table th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.run-summary-table .sp-name {
+  font-style: italic;
+  color: var(--color-text);
+  font-weight: 500;
+}
+.run-summary-table tr.is-issue td {
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+}
+.run-summary-table tr.is-issue .sp-name { color: #7f1d1d; font-weight: 600; }
+.run-summary-table .issue-cell { font-style: italic; font-size: 12px; }
+.run-summary-table .issue-cell i { margin-right: 4px; color: var(--color-error); }
+
+/* Footnotes */
+.run-summary-hint {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-info-bg, #eff6ff);
+  border-left: 3px solid var(--color-info, #2563eb);
+  border-radius: var(--radius-sm);
+  color: var(--color-info, #1e40af);
+  font-size: var(--text-body-sm);
+}
+.run-summary-hint i { margin-right: 6px; }
+
+.run-summary-issue-note {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+}
+.run-summary-issue-note i { margin-right: 6px; }
+
+/* ─── v3 — Search results: empty state + keyboard highlight ─── */
+#results.is-empty-state { display: flex; }   /* override the :empty hide */
+
+.results-empty {
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  border: 1px dashed rgba(15, 23, 42, 0.18);
+  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.025);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+.results-empty i {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+.results-empty strong {
+  color: var(--color-text);
+  font-weight: 600;
+  font-style: italic;
+}
+.results-empty-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Keyboard-highlighted result (also applied on mouseenter so cursor+arrow agree) */
+#results .option.is-highlighted {
+  background-color: var(--color-primary-soft);
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* ─── v3.1 — Intro top row (breadcrumb on the left, history link on the right) ─── */
+.species-intro-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.species-intro-top .breadcrumb { margin-bottom: 0; }
+
+/* Discreet link, visually a peer of the breadcrumb (same size + muted colour,
+   no pill background). The breadcrumb is the "where am I" trail; this is the
+   "or jump back" escape hatch. Tied together by both being slim text links. */
+.intro-history-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: 2px 0;
+  transition: color var(--duration-fast) var(--easing-standard);
+}
+.intro-history-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.intro-history-link i { font-size: 11px; opacity: 0.7; }
+.intro-history-link:hover i { opacity: 1; }

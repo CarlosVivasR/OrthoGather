@@ -1,0 +1,55 @@
+{# Global navigation sidebar — single source of truth, included on every page.
+   Active state derives from request.endpoint (real endpoints: index, history_page,
+   tutorial). history_count + orthogather_version come from context processors. #}
+<aside class="app-sidebar" aria-label="Primary navigation">
+
+  <a href="{{ url_for('index') }}" class="sb-brand">
+    <img src="{{ url_for('static', filename='images/orthogather-mark.svg') }}" alt="" />
+    <div class="sb-brand-text">
+      <div class="sb-brand-name">OrthoGather</div>
+      <div class="sb-brand-sub">Local · v{{ orthogather_version or '1.0.0' }}</div>
+    </div>
+  </a>
+
+  <nav class="sb-nav" aria-label="Workspace">
+    <a class="sb-item {% if request.endpoint == 'index' %}is-active{% endif %}"
+       href="{{ url_for('index') }}"
+       {% if request.endpoint == 'index' %}aria-current="page"{% endif %}>
+      <i class="fa-solid fa-house" aria-hidden="true"></i> Home
+    </a>
+    <a class="sb-item {% if request.endpoint == 'history_page' %}is-active{% endif %}"
+       href="{{ url_for('history_page') }}"
+       {% if request.endpoint == 'history_page' %}aria-current="page"{% endif %}>
+      <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> History
+      {% if history_count and history_count > 0 %}<span class="sb-pill">{{ history_count }}</span>{% endif %}
+    </a>
+  </nav>
+
+  <div class="sb-section">Resources</div>
+  <nav class="sb-nav" aria-label="Resources">
+    <a class="sb-item {% if request.endpoint == 'tutorial' %}is-active{% endif %}"
+       href="{{ url_for('tutorial') }}"
+       {% if request.endpoint == 'tutorial' %}aria-current="page"{% endif %}>
+      <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Tutorial
+    </a>
+    <a class="sb-item" href="https://github.com/CarlosVivasR/OrthoGather#readme" target="_blank" rel="noopener">
+      <i class="fa-solid fa-book" aria-hidden="true"></i> Docs
+    </a>
+    <a class="sb-item" href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener">
+      <i class="fa-brands fa-github" aria-hidden="true"></i> GitHub
+    </a>
+    <a class="sb-item" href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">
+      <i class="fa-solid fa-circle-question" aria-hidden="true"></i> Report issue
+    </a>
+  </nav>
+
+  <div class="sb-foot">
+    <div class="sb-foot-row"><span class="sb-foot-dot"></span> Local engine · ready</div>
+    <div class="sb-foot-inst">UCD Conway Institute<br/>UCD Cancer Data Lab</div>
+    <div class="sb-foot-cite">
+      <a href="https://github.com/CarlosVivasR/OrthoGather#readme" target="_blank" rel="noopener">Cite</a> ·
+      <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener">DOI</a>
+    </div>
+  </div>
+
+</aside>

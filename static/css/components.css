@@ -1,0 +1,943 @@
+/* ============================================================================
+   OrthoGather — Component library
+   Reusable UI components built on the design system tokens.
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   Button
+   ---------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px 20px;
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.2;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              color           var(--duration-fast) var(--easing-standard),
+              border-color    var(--duration-fast) var(--easing-standard),
+              transform       var(--duration-fast) var(--easing-standard),
+              box-shadow      var(--duration-fast) var(--easing-standard);
+}
+
+.btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+
+.btn i, .btn svg {
+  flex-shrink: 0;
+}
+
+/* Sizes */
+.btn-sm { padding: 6px 12px; font-size: var(--text-body-sm); border-radius: var(--radius-sm); }
+.btn-md { padding: 10px 20px; font-size: var(--text-body); }
+.btn-lg { padding: 14px 28px; font-size: var(--text-body-lg); border-radius: var(--radius-lg); }
+
+/* Variants */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+.btn-primary:hover:not(:disabled) { background-color: var(--color-primary-hover); }
+.btn-primary:active:not(:disabled) { background-color: var(--color-primary-active); }
+
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.btn-secondary:hover:not(:disabled) { background-color: var(--color-primary-soft); }
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-primary);
+}
+.btn-ghost:hover:not(:disabled) { background-color: var(--color-primary-soft); }
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: var(--color-text);
+}
+.btn-accent:hover:not(:disabled) { background-color: var(--color-accent-hover); color: var(--color-text-inverse); }
+
+.btn-danger {
+  background-color: var(--color-error);
+  color: var(--color-text-inverse);
+}
+.btn-danger:hover:not(:disabled) { filter: brightness(0.92); }
+
+.btn-block { width: 100%; }
+
+/* Loading state */
+.btn.is-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+.btn.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 16px; height: 16px;
+  margin-top: -8px; margin-left: -8px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+  animation: og-spin 0.7s linear infinite;
+}
+.btn-secondary.is-loading::after, .btn-ghost.is-loading::after { color: var(--color-primary); }
+
+/* ----------------------------------------------------------------------------
+   Card
+   ---------------------------------------------------------------------------- */
+
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--duration) var(--easing-standard),
+              box-shadow   var(--duration) var(--easing-standard),
+              transform    var(--duration) var(--easing-standard);
+}
+
+.card-elevated { box-shadow: var(--shadow-md); border: none; }
+
+.card-hover:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-5);
+}
+
+.card-title {
+  font-size: var(--text-h3);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.card-description {
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+/* ----------------------------------------------------------------------------
+   Entry card (home-page action cards)
+   ---------------------------------------------------------------------------- */
+
+.entry-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--duration) var(--easing-standard),
+              box-shadow var(--duration) var(--easing-standard),
+              border-color var(--duration) var(--easing-standard);
+  width: 100%;
+  min-height: 280px;
+  color: inherit;
+  font: inherit;
+}
+
+.entry-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.entry-card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus), var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.entry-card .entry-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.entry-card .entry-title {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.entry-card .entry-description {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+}
+
+.entry-card .entry-actions {
+  margin-top: auto;
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.entry-card .entry-arrow {
+  position: absolute;
+  top: var(--space-6);
+  right: var(--space-6);
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--easing-standard),
+              transform var(--duration-fast) var(--easing-standard);
+}
+
+.entry-card:hover .entry-arrow {
+  color: var(--color-primary);
+  transform: translateX(4px);
+}
+
+/* Entry card variants */
+.entry-card.has-subactions { padding-bottom: var(--space-6); }
+
+/* ----------------------------------------------------------------------------
+   Subaction card (Protein / Gene Ontology selectors inside entry cards)
+   ---------------------------------------------------------------------------- */
+
+.subaction-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  transition: transform var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard),
+              background-color var(--duration-fast) var(--easing-standard);
+}
+
+.subaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+}
+
+.subaction-card.is-protein:hover { border-color: #003366; background-color: #e6ecf2; }
+.subaction-card.is-go:hover      { border-color: #0c9488; background-color: #ccfbf1; }
+.subaction-card:hover .subaction-title { color: var(--color-primary); }
+
+.subaction-card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-primary);
+}
+
+.subaction-card .subaction-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  font-size: 18px;
+  padding: 6px;
+}
+
+.subaction-card .subaction-icon img,
+.subaction-card .subaction-icon svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.subaction-card .subaction-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.subaction-card .subaction-title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.subaction-card .subaction-sub {
+  font-size: var(--text-caption);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+.subaction-card .subaction-arrow {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  transition: transform var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard);
+}
+
+.subaction-card:hover .subaction-arrow {
+  color: var(--color-primary);
+  transform: translateX(2px);
+}
+
+/* Theme: Protein analysis (navy) */
+.subaction-card.is-protein {
+  border-left-color: #003366;
+}
+.subaction-card.is-protein .subaction-icon {
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+/* Theme: Gene Ontology (teal) */
+.subaction-card.is-go {
+  border-left-color: #0c9488;
+}
+.subaction-card.is-go .subaction-icon {
+  background-color: #ccfbf1;
+  color: #115e59;
+}
+
+/* Legacy alias — keep working for any template still using .subaction-btn */
+.subaction-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 10px 16px;
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard);
+}
+.subaction-btn:hover { background-color: var(--color-primary); border-color: var(--color-primary); color: var(--color-text-inverse); }
+
+/* ----------------------------------------------------------------------------
+   Hero (page-leading text)
+   ---------------------------------------------------------------------------- */
+
+.hero {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto var(--space-12);
+}
+
+.hero .hero-eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.hero h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-4);
+}
+
+.hero p {
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* ----------------------------------------------------------------------------
+   Alerts / status messages
+   ---------------------------------------------------------------------------- */
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-normal);
+  animation: og-fade-in var(--duration) var(--easing-standard);
+}
+
+.alert i, .alert .alert-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alert-message { flex: 1; }
+.alert-title { font-weight: 600; margin-bottom: 2px; }
+
+.alert-success { background: var(--color-success-bg); border-color: var(--color-success-border); color: #064e3b; }
+.alert-success .alert-icon { color: var(--color-success); }
+
+.alert-warning { background: var(--color-warning-bg); border-color: var(--color-warning-border); color: #78350f; }
+.alert-warning .alert-icon { color: var(--color-warning); }
+
+.alert-error { background: var(--color-error-bg); border-color: var(--color-error-border); color: #7f1d1d; }
+.alert-error .alert-icon { color: var(--color-error); }
+
+.alert-info { background: var(--color-info-bg); border-color: var(--color-info-border); color: #1e3a8a; }
+.alert-info .alert-icon { color: var(--color-info); }
+
+/* ----------------------------------------------------------------------------
+   Badge / chip
+   ---------------------------------------------------------------------------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.badge-primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: transparent; }
+.badge-success { background: var(--color-success-bg); color: #065f46; border-color: transparent; }
+.badge-warning { background: var(--color-warning-bg); color: #92400e; border-color: transparent; }
+.badge-error   { background: var(--color-error-bg); color: #991b1b; border-color: transparent; }
+.badge-info    { background: var(--color-info-bg); color: #1e40af; border-color: transparent; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 8px 6px 12px;
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.chip .chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.chip .chip-remove:hover { background-color: rgba(0, 51, 102, 0.15); }
+
+/* ----------------------------------------------------------------------------
+   Inputs
+   ---------------------------------------------------------------------------- */
+
+.input,
+.textarea,
+.select {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              box-shadow   var(--duration-fast) var(--easing-standard);
+}
+
+.input::placeholder, .textarea::placeholder { color: var(--color-text-muted); }
+
+.input:hover, .textarea:hover, .select:hover { border-color: var(--color-border-strong); }
+
+.input:focus, .textarea:focus, .select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+.input:disabled, .textarea:disabled, .select:disabled {
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.textarea { min-height: 96px; resize: vertical; font-family: inherit; }
+
+.input-lg { padding: 14px 18px; font-size: var(--text-body-lg); }
+
+.search-input {
+  position: relative;
+}
+
+.search-input .input {
+  padding-left: 40px;
+}
+
+.search-input .search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.label {
+  display: block;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.label-helper {
+  margin-top: 4px;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Checkbox & radio */
+.checkbox, .radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-body);
+  color: var(--color-text);
+  user-select: none;
+}
+
+.checkbox input[type="checkbox"],
+.radio input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------------------------
+   Log panel (dark monospace output)
+   ---------------------------------------------------------------------------- */
+
+.log-panel {
+  background-color: var(--color-surface-dark);
+  color: #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.55;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-panel .log-line { padding: 1px 0; }
+.log-panel .log-info { color: #cbd5e1; }
+.log-panel .log-success { color: #6ee7b7; }
+.log-panel .log-warning { color: #fcd34d; }
+.log-panel .log-error { color: #fca5a5; }
+.log-panel .log-muted { color: #64748b; }
+
+.log-panel::-webkit-scrollbar { width: 8px; }
+.log-panel::-webkit-scrollbar-track { background: transparent; }
+.log-panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+/* ----------------------------------------------------------------------------
+   Progress bar
+   ---------------------------------------------------------------------------- */
+
+.progress {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: inherit;
+  transition: width var(--duration) var(--easing-standard);
+}
+
+.progress-bar.is-success { background-color: var(--color-success); }
+.progress-bar.is-warning { background-color: var(--color-warning); }
+.progress-bar.is-error   { background-color: var(--color-error); }
+
+.progress-indeterminate .progress-bar {
+  width: 40% !important;
+  animation: og-progress-indeterminate 1.4s var(--easing-standard) infinite;
+}
+
+@keyframes og-progress-indeterminate {
+  0%   { margin-left: -40%; }
+  100% { margin-left: 100%; }
+}
+
+/* ----------------------------------------------------------------------------
+   Stepper (multi-step indicator)
+   ---------------------------------------------------------------------------- */
+
+.stepper {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stepper .step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  background-color: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.stepper .step.is-active {
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+
+.stepper .step.is-completed {
+  background-color: var(--color-success-bg);
+  color: #065f46;
+  border-color: var(--color-success-border);
+}
+
+.stepper .step-divider {
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+  max-width: 24px;
+}
+
+/* ----------------------------------------------------------------------------
+   Table
+   ---------------------------------------------------------------------------- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+}
+
+.table thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface-alt);
+  position: sticky;
+  top: 0;
+}
+
+.table tbody td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover { background-color: var(--color-surface-alt); }
+.table tbody tr:last-child td { border-bottom: none; }
+
+/* ============================================================================
+   View tabs — toggle between Protein Analysis and Gene Ontology
+   Used on resultado.html and resultado_goa.html. Same orthogroups data
+   underneath; the tabs are just two perspectives on the same run.
+   ============================================================================ */
+.view-tabs {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: 0 var(--space-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.view-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 1.5px solid rgba(15, 23, 42, 0.14);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform     var(--duration-fast) var(--easing-standard),
+    border-color  var(--duration-fast) var(--easing-standard),
+    background    var(--duration-fast) var(--easing-standard),
+    box-shadow    var(--duration-fast) var(--easing-standard);
+}
+.view-tab > i:first-child {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+.view-tab-body { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.view-tab-label { font-weight: 600; font-size: var(--text-body); color: var(--color-text); line-height: 1.2; }
+.view-tab-sub   { font-size: 12px; color: var(--color-text-muted); }
+.view-tab-arrow { color: var(--color-text-muted); font-size: 13px; transition: transform var(--duration-fast); }
+
+.view-tab:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+.view-tab:hover .view-tab-arrow { transform: translateX(3px); color: var(--color-primary); }
+.view-tab:hover > i:first-child { background: var(--color-primary); color: #ffffff; }
+
+/* Active tab — current view, not clickable */
+.view-tab.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  cursor: default;
+}
+.view-tab.is-active > i:first-child {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+.view-tab.is-active .view-tab-label { color: var(--color-primary); }
+.view-tab.is-active:hover { transform: none; box-shadow: none; }
+
+/* On narrow viewports, stack the tabs vertically */
+@media (max-width: 720px) {
+  .view-tabs { grid-template-columns: 1fr; }
+}
+
+/* ----------------------------------------------------------------------------
+   Provenance strip (reproducibility record at the bottom of results pages)
+   ---------------------------------------------------------------------------- */
+.provenance {
+  max-width: var(--width-content);
+  margin: var(--space-6) auto var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface-alt, #f8fafc);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.provenance-title {
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 2px;
+}
+.provenance-title i { color: var(--color-text-muted, #94a3b8); margin-right: 6px; }
+.provenance-lead {
+  font-size: var(--text-caption, 12px);
+  color: var(--color-text-muted, #94a3b8);
+  margin: 0 0 var(--space-3);
+}
+.provenance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+}
+.provenance-item dt {
+  font-size: var(--text-caption, 12px);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide, 0.04em);
+  color: var(--color-text-muted, #94a3b8);
+  font-weight: 600;
+}
+.provenance-item dd {
+  margin: 1px 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.provenance-item dd a { color: var(--color-primary); text-decoration: none; }
+.provenance-item dd a:hover { text-decoration: underline; }
+.provenance-muted { color: var(--color-text-muted, #94a3b8); font-style: italic; }
+
+/* ----------------------------------------------------------------------------
+   Global navigation shell — dark fixed sidebar + content column.
+   Replaces the old top .app-header / .app-footer on every page. Markup lives in
+   templates/partials/_sidebar.html; tokens (--sb-*) are in design-system.css.
+   ---------------------------------------------------------------------------- */
+/* The sidebar is viewport-fixed (it never scrolls); the shell reserves its
+   width with padding-left so the content column sits beside it and scrolls
+   independently. */
+.app-shell {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-left: 248px;
+}
+/* The landing's .app-main carries no padding of its own (it was just flex:1),
+   so give it some breathing room. It fills the content column; the inner
+   hero/bento are centred by their own --width-content cap. Page-specific mains
+   (history-main, results, etc.) keep their own padding. */
+.app-shell > .app-main { padding: 28px 40px 56px; }
+
+.app-sidebar {
+  background: var(--sb-bg);
+  color: var(--sb-text);
+  padding: 22px 18px;
+  display: flex; flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  width: 248px;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+/* Landing exception: the sidebar lives inside stage-2 and is meant to be hidden
+   during the 3D intro, then revealed as the curtain scrolls up. So there it must
+   NOT be viewport-fixed — keep the original grid + sticky model. */
+.stage-2 .app-shell {
+  display: grid;
+  grid-template-columns: 248px 1fr;
+  padding-left: 0;
+}
+.stage-2 .app-sidebar {
+  position: sticky;
+  left: auto;
+  width: auto;
+}
+
+.sb-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 4px 6px 22px;
+  border-bottom: 1px solid var(--sb-rule);
+  margin-bottom: 14px;
+  text-decoration: none; color: inherit;
+}
+.sb-brand img { width: 32px; height: 32px; }
+.sb-brand-name { font-weight: 700; font-size: 16px; color: #fff; letter-spacing: -0.01em; }
+.sb-brand-sub  { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sb-muted); margin-top: 2px; }
+
+.sb-section {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--sb-muted);
+  padding: 18px 8px 8px;
+}
+.sb-nav { display: flex; flex-direction: column; gap: 2px; }
+.sb-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 10px; border-radius: 7px;
+  font-size: 13px; color: var(--sb-text);
+  text-decoration: none;
+  transition: background .12s;
+}
+.sb-item i { width: 16px; font-size: 14px; opacity: 0.85; text-align: center; }
+.sb-item:hover { background: var(--sb-hover); }
+.sb-item.is-active { background: var(--sb-active); color: #fff; box-shadow: inset 2px 0 0 var(--sb-accent); }
+.sb-item.is-active i { opacity: 1; color: var(--sb-accent); }
+.sb-pill {
+  margin-left: auto;
+  font-size: 10px; padding: 1px 7px;
+  border-radius: 99px;
+  background: rgba(255,255,255,0.10); color: var(--sb-text);
+}
+.sb-foot {
+  margin-top: auto;
+  padding: 14px 8px 4px;
+  border-top: 1px solid var(--sb-rule);
+  font-size: 11px; color: var(--sb-muted);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.sb-foot-row { display: flex; align-items: center; gap: 8px; }
+.sb-foot-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.18); }
+.sb-foot-inst { line-height: 1.5; color: var(--sb-text); opacity: 0.65; }
+.sb-foot-cite a { color: var(--sb-muted); text-decoration: none; }
+.sb-foot-cite a:hover { color: #fff; text-decoration: underline; }
+
+/* Mobile: sidebar → horizontal scrolling top bar (no JS, no hamburger).
+   Drop the fixed positioning and the reserved left gutter on both the regular
+   pages and the landing. */
+@media (max-width: 880px) {
+  .app-shell, .stage-2 .app-shell {
+    display: block;
+    grid-template-columns: none;
+    padding-left: 0;
+  }
+  .app-sidebar, .stage-2 .app-sidebar {
+    position: static; width: auto; height: auto;
+    flex-direction: row; align-items: center; gap: 8px;
+    padding: 14px 18px; overflow-x: auto;
+  }
+  .sb-section, .sb-foot { display: none; }
+  .sb-brand { padding: 0 14px 0 0; margin: 0; border-bottom: none; border-right: 1px solid var(--sb-rule); }
+  .sb-nav { flex-direction: row; }
+}

@@ -1,0 +1,450 @@
+/* ============================================================================
+   OrthoGather — History page (past analyses)
+   ============================================================================ */
+
+.history-main {
+  flex: 1;
+  padding: var(--space-10) 0 var(--space-12);
+}
+
+.history-intro {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+}
+.history-intro .breadcrumb {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+.history-intro .breadcrumb a { color: var(--color-text-secondary); }
+.history-intro .breadcrumb a:hover { color: var(--color-primary); }
+.history-intro .breadcrumb i { font-size: 10px; opacity: 0.5; }
+.history-intro h1 {
+  font-size: var(--text-display);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+.history-intro .lead {
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 720px;
+}
+
+/* List of runs */
+.history-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  max-width: var(--width-content);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.history-item {
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 14px rgba(15, 23, 42, 0.06);
+  transition: transform var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard);
+  /* Minimum height keeps the cards visually rhythmic even when one has
+     more chips / a tech-issues badge and another doesn't. Without this,
+     a card with 19 species + flagged issues towered over a 3-species
+     one and the list looked uneven. */
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.history-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.07), 0 12px 24px rgba(15, 23, 42, 0.10);
+}
+
+.history-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.history-item-title { flex: 1; min-width: 0; }
+.history-item-title .run-name {
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+.history-item-title .run-date {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+.history-item-title .run-date i { margin-right: 4px; }
+
+.history-item-actions {
+  display: flex; gap: var(--space-2); align-items: center; flex-shrink: 0;
+}
+.history-item-actions .btn-sm {
+  padding: 6px 14px;
+  font-size: var(--text-body-sm);
+}
+
+/* Stats line */
+.history-item-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.hi-stat strong {
+  color: var(--color-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-right: 4px;
+}
+.hi-stat-mute { color: var(--color-text-muted); }
+.hi-stat-mute i { margin-right: 4px; }
+
+/* Species chips inside the history item (re-use the species-chip class from species-selection) */
+.history-item-species {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-2);
+}
+.history-item-species .species-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px;
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+}
+.history-item-species .chip-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--color-success);
+}
+.history-item-species .chip-name {
+  font-style: italic;
+  color: var(--color-text);
+}
+
+.history-item-issues {
+  margin: var(--space-2) 0 0;
+  padding: 6px 10px;
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-sm);
+  display: inline-block;
+}
+.history-item-issues i { margin-right: 4px; }
+
+/* Empty state */
+.history-empty {
+  max-width: 540px;
+  margin: var(--space-12) auto;
+  text-align: center;
+  padding: 0 var(--space-6);
+}
+.history-empty i { font-size: 48px; color: var(--color-text-muted); margin-bottom: var(--space-4); }
+.history-empty h2 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-2);
+  color: var(--color-text);
+}
+.history-empty p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-5);
+}
+
+/* Re-use kebab styles from species-selection */
+.history-kebab {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+.history-kebab:hover { background-color: var(--color-surface-alt); }
+
+/* ─── Kebab dropdown menu (Rename / Delete) ─── */
+.history-kebab-wrap { position: relative; }
+
+.history-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.08), 0 16px 32px rgba(15, 23, 42, 0.14);
+  padding: 6px;
+  z-index: 20;
+}
+.history-menu[hidden] { display: none; }
+
+.history-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-body-sm);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+.history-menu-item:hover { background-color: var(--color-surface-alt); }
+.history-menu-item i { color: var(--color-text-muted); width: 14px; text-align: center; }
+.history-menu-item.is-danger { color: var(--color-error); }
+.history-menu-item.is-danger:hover { background-color: var(--color-error-bg); }
+.history-menu-item.is-danger i { color: var(--color-error); }
+
+/* ─── Rename input (replaces .run-name h2) ─── */
+.run-name-edit {
+  font: inherit;
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  padding: 4px 10px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  margin: -4px 0 4px;
+  width: 100%;
+  max-width: 480px;
+  outline: none;
+}
+.run-name-edit:focus { box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.18); }
+
+/* ─── Inline status bar (after rename / delete error) ─── */
+.history-item-status {
+  margin-top: var(--space-3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.history-item-status.is-success {
+  background: var(--color-success-bg);
+  color: #065f46;
+}
+.history-item-status.is-success i { color: var(--color-success); }
+.history-item-status.is-error {
+  background: var(--color-error-bg);
+  color: #7f1d1d;
+}
+.history-item-status.is-error i { color: var(--color-error); }
+
+/* ── Citation modal (Innovation #3) ───────────────────────────────────── */
+.cite-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+.cite-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+}
+.cite-modal-card {
+  position: relative;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  max-width: 720px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cite-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+.cite-modal-head h2 {
+  margin: 0;
+  font-size: var(--text-h3);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.cite-modal-head h2 i { color: var(--color-primary); }
+.cite-modal-close {
+  background: none;
+  border: 0;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+.cite-modal-close:hover { background: var(--color-surface-muted); color: var(--color-text); }
+.cite-modal-hint {
+  margin: 0;
+  padding: var(--space-4) var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+}
+.cite-preview {
+  margin: 0 var(--space-6);
+  padding: var(--space-4);
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: var(--radius-md);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  overflow: auto;
+  max-height: 45vh;
+  white-space: pre-wrap;
+}
+.cite-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Compare mode toolbar (Innovation #2) ─────────────────────────────── */
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+/* Compare-mode toolbar — light/integrated style instead of the old dark
+   pill, so the "0/2 selected · Compare · Cancel" reads as one cohesive
+   toolbar in the same visual register as the rest of the page. */
+.compare-mode-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 14px;
+  background: var(--color-primary-soft, #eef4ff);
+  color: var(--color-text);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+}
+/* The [hidden] attribute on anything inside the toolbar needs to win
+   over the inline-flex display rules from .btn / .compare-mode-status.
+   Otherwise the JS toggle leaves both the button AND the status pill
+   visible at the same time. */
+.history-toolbar [hidden] { display: none !important; }
+.compare-mode-status strong {
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+.compare-mode-status .compare-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--color-primary);
+  opacity: 0.3;
+}
+
+.history-item.compare-mode {
+  cursor: pointer;
+  position: relative;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.history-item.compare-mode:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+.history-item.compare-mode::after {
+  content: '';
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  background: #fff;
+}
+.history-item.is-compare-selected {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+.history-item.is-compare-selected::after {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 4px #fff;
+}
+
+/* ── Flash messages stack at the top of the page ─────────────────────────
+   Used when /history/<id>/load fails (e.g. the run's Orthogroups.zip is
+   missing on disk). Replaces the previous raw-JSON error response with a
+   styled alert that lets the user keep browsing. */
+.history-flash-stack {
+  max-width: var(--width-content);
+  margin: var(--space-4) auto 0;
+  padding: 0 var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.history-flash {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+}
+.history-flash.is-error {
+  background: var(--color-error-bg, #fee2e2);
+  border-color: var(--color-error, #c0392b);
+  color: #7f1d1d;
+}
+.history-flash.is-info {
+  background: var(--color-primary-soft, #eef4ff);
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+.history-flash > i { font-size: 16px; margin-top: 2px; flex-shrink: 0; }
+.history-flash > span { flex: 1; }
+.history-flash-dismiss {
+  border: none; background: none; cursor: pointer;
+  font-size: 18px; line-height: 1; color: currentColor;
+  opacity: 0.6; padding: 0 var(--space-2);
+}
+.history-flash-dismiss:hover { opacity: 1; }

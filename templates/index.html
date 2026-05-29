@@ -1,335 +1,904 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OrthoGather</title>
-  <link rel="icon" href="static/images/1-a668dcaa1.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-  <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
-  <style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>OrthoGather: Orthology-based proteome comparison, locally</title>
+<meta name="description" content="A local workbench for orthology-based proteome comparison and Gene Ontology enrichment. Pick species from UniProt, run OrthoFinder locally, get publication-ready figures." />
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-    :root{
-      --font-sans: "Helvetica Neue", Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    }
-  
-    html, body { height: 100%; }
-    html, body, button, input, select, textarea {
-      font-family: var(--font-sans);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+<!-- Open Graph (Twitter / Slack / LinkedIn preview) -->
+<meta property="og:type"        content="website" />
+<meta property="og:title"       content="OrthoGather: Run OrthoFinder locally" />
+<meta property="og:description" content="A local workbench for orthology-based proteome comparison and Gene Ontology enrichment." />
+<meta property="og:image"       content="/static/images/orthogather-mark.svg" />
+<meta property="og:image:alt"   content="OrthoGather logo: four interconnected spheres" />
+<meta property="og:locale"      content="en_GB" />
 
-  
-    body {
-      background-color: #fffcfc;
-      display: flex;
-      flex-direction: column;
-    }
-  
+<meta name="twitter:card"        content="summary_large_image" />
+<meta name="twitter:title"       content="OrthoGather: Run OrthoFinder locally" />
+<meta name="twitter:description" content="A local workbench for orthology-based proteome comparison and Gene Ontology enrichment." />
+<meta name="twitter:image"       content="/static/images/orthogather-mark.svg" />
 
-    header {
-      display: grid;                         
-      grid-template-columns: 1fr auto 1fr;    
-      align-items: center;
-      gap: 24px;
-      padding: 16px 32px;
-      background-color: #003366;
-      color: #fff;
-    }
-  
-    header .logo { justify-self: start; }
-    header img { height: 120px; width: auto; object-fit: contain; display: block; }
-  
-    header .title {
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-      font-weight: 400 !important;
-      font-size: clamp(36px, 6vw, 72px);
-      margin: 0;
-      letter-spacing: 0.2px;
-    }
+<!-- Theme colour for browser UI on mobile -->
+<meta name="theme-color" content="#060f22" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<!-- Production styles + scripts (so the bento works exactly as the classic home) -->
+<link rel="stylesheet" href="/static/css/design-system.css" />
+<link rel="stylesheet" href="/static/css/og-errors.css" />
+<link rel="stylesheet" href="/static/css/components.css" />
+<link rel="stylesheet" href="/static/css/pages/index.css" />
+<link rel="stylesheet" href="/static/base.css" />
 
+<script src="{{ url_for('static', filename='js/og-base.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/pages/index.js') }}" defer></script>
+<style>
+  *, *:before, *:after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #050d1c;
+    color: #e6ecf2;
+  }
 
-  
-    header .info {
-      justify-self: end;
-      text-align: right;
-      line-height: 1.25;
-      font-size: 14px;
-      color: inherit;                        
-      max-width: 36ch;                        
-    }
-    header .info p { margin: 2px 0; }
-    header .info a { color: inherit; text-decoration: none; }
-    header .info a:hover, header .info a:focus {
-      color: #ffd700; text-decoration: underline;
-    }
-    header .info a.email-link { overflow-wrap: anywhere; }
-    header .info .muted { opacity: 0.85; }
-  
+  /* ════════════════════════════════════════════════════════════════
+     STAGE 1 — full-viewport 3D hero, PINNED in the background
+     (Stage 2 rises over it like a curtain as you scroll down)
+     ════════════════════════════════════════════════════════════════ */
+  .stage-1 {
+    position: fixed;        /* ← pinned to viewport, doesn't scroll away */
+    top: 0; left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1;
+    background: radial-gradient(circle at 50% 45%, #0e2747 0%, #060f22 60%, #03070f 100%);
+  }
+  #stage {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0;                        /* hidden until first frame renders */
+    transition: opacity 0.6s ease;
+  }
+  #stage.is-ready { opacity: 1; }
+  #stage canvas { display: block; cursor: default; touch-action: none; }
+  #stage canvas.is-hovering-protein { cursor: grab; }
+  #stage canvas.is-hovering-logo    { cursor: pointer; }
 
-    .main-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: clamp(24px, 6vw, 96px);
-      padding: clamp(48px, 10vw, 100px) 32px;
-      flex: 1;
-    }
-  
-    .menu { position: relative; text-align: center; }
-  
-    .menu img {
-      width: clamp(180px, 20vw, 240px);
-      height: clamp(180px, 20vw, 240px);
-      object-fit: contain;
-      border-radius: 16px;
-      transition: transform 0.3s ease;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-    }
-    .menu:hover img { transform: scale(1.05); }
-  
-    .menu:hover .submenu, .submenu:hover { display: flex; }
-  
-    .submenu {
-      display: none;
-      flex-direction: row;
-      gap: 60px;
-      padding: 30px 0 0;
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 100;
-    }
-  
-    .submenu img {
-      width: clamp(110px, 12vw, 140px);
-      height: clamp(110px, 12vw, 140px);
-      object-fit: cover;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      transition: transform 0.2s;
-      cursor: pointer;
-    }
-    .submenu img:hover { transform: scale(1.08); }
-  
-    .connector { position: absolute; top: 90%; left: 50%; transform: translateX(-50%); width: 0; height: 0; pointer-events: none; }
-    .connector svg { overflow: visible; }
-    .connector path { stroke: #003366; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-  
+  /* Static SVG fallback / loading placeholder.
+     Visible by default → covers the "Three.js loading" gap.
+     Stays visible permanently for reduced-motion / mobile users. */
+  .static-logo-wrap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, calc(-50% - 30px));
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .static-logo-wrap img {
+    width: 200px; height: auto;
+    filter:
+      drop-shadow(0 20px 40px rgba(0,0,0,0.55))
+      drop-shadow(0 0 24px rgba(124,184,238,0.30));
+  }
+  .static-logo-wrap.is-hidden { opacity: 0; }
 
-    footer {
-      background-color: #003366;
-      color: white;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    footer .social-icons a { color: white; margin-left: 15px; font-size: 20px; text-decoration: none; }
-    footer .social-icons a:hover { color: #ffd700; }
+  /* Protein tooltip (shown on hover) */
+  .protein-tooltip {
+    position: absolute;
+    z-index: 4;
+    pointer-events: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(10, 26, 47, 0.92);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: #ffffff;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.40);
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 14px));
+    transition: opacity 0.18s ease;
+    backdrop-filter: blur(6px);
+  }
+  .protein-tooltip.is-visible { opacity: 1; }
+  .protein-tooltip .name   { font-weight: 700; }
+  .protein-tooltip .meta   { font-size: 10.5px; opacity: 0.7; letter-spacing: 0.04em; }
 
-    #loading-overlay {
-      display: none;
-      position: fixed;
-      top:0; left:0; width:100%; height:100%;
-      background: rgba(255,255,255,0.8);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
+  /* HUD overlay above the canvas */
+  .hud {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    padding: 36px 48px;
+  }
+  .hud .top {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+  .hud .center {
+    text-align: center;
+    pointer-events: auto;  /* button must be clickable */
+  }
+  .hud .wordmark {
+    font-size: 32px; font-weight: 700; letter-spacing: 0.04em; color: #ffffff;
+    margin-bottom: 10px;
+    opacity: 0; transform: translateY(8px);
+    animation: fadeUp 1.6s 0.6s ease forwards;
+  }
+  .hud .sub {
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 28px;
+    opacity: 0; transform: translateY(8px);
+    animation: fadeUp 1.6s 1.0s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Primary CTA */
+  .btn-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 24px;
+    background: #f5f0e6;
+    color: #0a1a2f;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600; font-size: 15px; font-family: inherit;
+    border: 1px solid transparent;
+    transition: transform .15s ease, background-color .15s ease;
+    opacity: 0; transform: translateY(8px);
+    animation: fadeUp 1.6s 1.4s ease forwards;
+  }
+  .btn-cta:hover { background: #ffffff; transform: translateY(-1px); }
+  .btn-cta:active { transform: translateY(0); }
+  .btn-cta .arrow { transition: transform .15s ease; }
+  .btn-cta:hover .arrow { transform: translateX(3px); }
+
+  /* Scroll cue */
+  .scroll-cue {
+    position: absolute; left: 50%; bottom: 30px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    z-index: 3;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: cueBounce 2.2s ease-in-out infinite;
+    opacity: 0;
+    animation-delay: 2.0s;
+    animation-fill-mode: both;
+  }
+  .scroll-cue .chev {
+    width: 12px; height: 12px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+  }
+  @keyframes cueBounce {
+    0%   { opacity: 0; transform: translate(-50%, 0); }
+    20%  { opacity: 0.7; }
+    50%  { opacity: 1; transform: translate(-50%, 6px); }
+    80%  { opacity: 0.7; }
+    100% { opacity: 0.7; transform: translate(-50%, 0); }
+  }
+
+  /* Mockup tag (debugging label, top right) */
+  .mockup-tag {
+    position: fixed; top: 36px; right: 48px;
+    z-index: 10;
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 6px;
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(6px);
+  }
+
+  /* ───── REDUCED MOTION ─────
+     Stop animations for users who request it (epilepsy, vestibular issues) */
+  @media (prefers-reduced-motion: reduce) {
+    .hud .wordmark,
+    .hud .sub,
+    .btn-cta,
+    .scroll-cue {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
     }
-    #loading-overlay .spinner {
-      width: 80px; height: 80px;
-      border: 8px solid #ccc; border-top: 8px solid #003366;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);} }
-  </style>
-  
+    .static-logo-wrap { animation: none !important; }
+    #stage { display: none !important; }   /* hide canvas; static SVG stays */
+    .static-logo-wrap.is-hidden { opacity: 1 !important; }
+  }
+
+  /* ───── MOBILE LAYOUT (< 768px) ─────
+     Keep the 3D canvas — just tighten paddings and shrink the wordmark.
+     The static SVG fallback only shows for users with prefers-reduced-motion. */
+  @media (max-width: 768px) {
+    .hud { padding: 24px; }
+    .hud .top { font-size: 10px; }
+    .hud .wordmark { font-size: 24px; }
+    .scroll-cue { bottom: 18px; }
+    .mockup-tag { display: none; }
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     STAGE 2 — sits ABOVE stage-1 in z, pushed down by 100vh.
+     As the user scrolls, stage-2 rises over stage-1 like a curtain.
+     ════════════════════════════════════════════════════════════════ */
+  .stage-2 {
+    position: relative;
+    z-index: 2;
+    margin-top: 100vh;                /* leaves stage-1 visible initially */
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #1f2937);
+    box-shadow: 0 -24px 48px rgba(0,0,0,0.30);  /* soft seam where curtain meets hero */
+  }
+
+  /* Sober section eyebrow above the bento — "─── PICK YOUR STARTING POINT ───" */
+  .bento-section-eyebrow {
+    max-width: var(--width-page, 1280px);
+    margin: 28px auto 24px;            /* raised closer to the hero above */
+    padding: 0 var(--space-6, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-size: 11px;
+    font-weight: 700;                   /* slightly heavier */
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #334155;                     /* darker than muted — slate-700 */
+  }
+  .bento-section-eyebrow::before,
+  .bento-section-eyebrow::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: rgba(15, 23, 42, 0.28); /* matching line tone */
+  }
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <img src="static/images/1-a668dcaa1.ico" alt="Tool Logo" />
-    </div>
-    <div class="title">OrthoGather</div>
-    <div class="info">
-      <p>
-        <a href="https://www.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-          University College Dublin
-        </a>
-      </p>
-      <p>
-        <a href="https://www.ucd.ie/conway/" target="_blank" rel="noopener" class="info-link">
-          UCD Conway Institute
-        </a>
-      </p>
-      <p>
-        <a href="https://cancerdata.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-          UCD Cancer Data Lab
-        </a>
-      </p>
-      <p>
-        <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener" class="info-link">
-          https://doi.org/10.64898/2026.01.30.702851
-        </a>
-      </p>
-    </div>    
-  </header>
 
-  <div class="main-container">
-    <div class="menu">
-      <img src="static/images/folder.png" alt="Upload ZIP" />
-      <div class="submenu">
-        <img src="static/images/boton1.png" alt="Protein Analysis"
-             onclick="document.getElementById('zipInput').click();" />
-        <img src="static/images/boton2.png" alt="Gene Ontology Analysis"
-          onclick="document.getElementById('zipInputGO').click();" />
+  <!-- ═══════════════════════════════════════════════════════════════
+       STAGE 1: 3D hero
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="stage-1">
+    <div id="stage"></div>
+
+    <!-- Static SVG (loading placeholder + reduced-motion / mobile fallback) -->
+    <div class="static-logo-wrap" id="static-logo">
+      <img src="/static/images/orthogather-mark.svg" alt="OrthoGather" />
+    </div>
+
+    <!-- Protein hover tooltip -->
+    <div class="protein-tooltip" id="protein-tooltip" aria-hidden="true">
+      <div class="name"></div>
+      <div class="meta"></div>
+    </div>
+
+    <div class="hud">
+      <div class="top">
+        <span>OrthoGather</span>
+        <span>Local · Open · Reproducible</span>
       </div>
-      <div class="connector">
-        <svg width="0" height="0">
-          <defs>
-            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#003366" />
-            </marker>
-          </defs>
-          <path d="M0 0 C 0 20, -60 40, -90 60" />
-          <path d="M0 0 C 0 20, 60 40, 90 60" />
-        </svg>
+      <div class="center">
+        <div class="wordmark">OrthoGather</div>
+        <div class="sub">Local · Open · Reproducible</div>
+        <a class="btn-cta" href="#stage-2">
+          Get started
+          <span class="arrow">→</span>
+        </a>
       </div>
     </div>
-  
-    <form id="uploadForm" action="/cargar_carpeta?modo=upload" method="POST" enctype="multipart/form-data" style="display:none;">
-      <input type="file" id="zipInput" name="file" accept=".zip"
-             onchange="document.getElementById('uploadForm').submit();" />
+
+    <a class="scroll-cue" href="#stage-2" aria-label="Scroll to analyses">
+      <span>Scroll</span>
+      <span class="chev"></span>
+    </a>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       STAGE 2: the full production home (header + hero + bento + footer)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="stage-2" id="stage-2">
+
+    <!-- Global navigation shell: dark sidebar + content. Replaces the old top header. -->
+    <div class="app-shell">
+      {% include 'partials/_sidebar.html' %}
+    <main class="app-main">
+
+      <!-- Home hero (OrthoGather title + tagline + system-overview) -->
+      <section class="home-hero">
+        <div class="home-hero-inner">
+          <div class="home-hero-text">
+            <div class="eyebrow">
+              <span class="pulse-dot"></span>
+              Local engine · OrthoFinder 2.5.5
+            </div>
+            <h1 class="home-headline">
+              <span class="headline-line">Compare <span class="headline-noun">proteomes.</span></span>
+              <span class="headline-line">Test <span class="headline-noun accent">enrichment.</span></span>
+            </h1>
+            <p class="tagline tagline-italic">A local platform for orthology and Gene Ontology enrichment — no command line.</p>
+
+            <div class="home-stats" aria-label="Catalogue scope">
+              <div class="home-stat">
+                <span class="home-stat-num">843,532</span>
+                <span class="home-stat-label">UniProt proteomes</span>
+              </div>
+              <div class="home-stat">
+                <span class="home-stat-num">44,296</span>
+                <span class="home-stat-label">Gene Ontology terms</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="home-hero-visual" aria-hidden="true">
+            <div class="visual-frame">
+              <div class="browser-bar">
+                <span class="dot red"></span>
+                <span class="dot amber"></span>
+                <span class="dot green"></span>
+                <span class="url">orthogather · system overview</span>
+              </div>
+              <div class="visual-canvas">
+                <img class="system-overview-illu"
+                     src="/static/images/icons/system-overview.svg"
+                     alt="OrthoGather system overview" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section eyebrow + bento (3 cards) -->
+      <div class="bento-section-eyebrow" aria-hidden="true">Pick your starting point</div>
+
+      <section class="home-bento" aria-label="Start an analysis">
+
+        <button type="button" class="bento-card is-feature theme-primary" data-action="new-analysis" aria-label="New Analysis: 1 of 3: start from scratch">
+          <div class="bento-visual">
+            <img class="workflow-illu" src="/static/images/icons/new-analysis-pipeline.svg" alt="" />
+          </div>
+          <div class="bento-body">
+            <span class="bento-eyebrow"><i class="fa-solid fa-bolt" aria-hidden="true"></i> 1 of 3 · Start from scratch</span>
+            <h2 class="bento-title">New Analysis</h2>
+            <p class="bento-desc">Run the full OrthoGather pipeline locally in three steps: from species selection to publication-ready orthogroups.</p>
+          </div>
+          <span class="bento-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+        </button>
+
+        <button type="button" class="bento-card theme-teal is-side-top has-side-layout" data-action="preselected-protein" aria-label="Preselected dataset: 2 of 3: bundled example">
+          <div class="bento-head">
+            <div class="bento-visual">
+              <img class="bento-illustration" src="/static/images/icons/preselected.svg" alt="" />
+            </div>
+            <div class="bento-body">
+              <span class="bento-eyebrow"><i class="fa-solid fa-database" aria-hidden="true"></i> 2 of 3 · Bundled example</span>
+              <h2 class="bento-title">Preselected Dataset</h2>
+              <p class="bento-desc">47 species ready to explore. Opens Protein Analysis; switch to Gene Ontology with the tab at the top.</p>
+            </div>
+          </div>
+          <span class="bento-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+        </button>
+
+        <button type="button" class="bento-card theme-warm is-side-bottom has-side-layout" data-action="upload-protein-zip" aria-label="External data upload: 3 of 3: reuse existing results">
+          <div class="bento-head">
+            <div class="bento-visual">
+              <img class="bento-illustration" src="/static/images/icons/external-upload.svg" alt="" />
+            </div>
+            <div class="bento-body">
+              <span class="bento-eyebrow"><i class="fa-solid fa-file-zipper" aria-hidden="true"></i> 3 of 3 · Reuse existing results</span>
+              <h2 class="bento-title">External Upload</h2>
+              <p class="bento-desc">Upload an OrthoFinder ZIP, or an OrthoXML file from OrthoDB / OMA / eggNOG. OrthoGather picks up from the analysis stage.</p>
+            </div>
+          </div>
+          <span class="bento-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+        </button>
+
+      </section>
+
+      <nav class="home-quick-links" aria-label="Helpful links">
+        <a href="#"><i class="fa-solid fa-book"></i> Read the docs</a>
+        <a href="#"><i class="fa-solid fa-quote-left"></i> Cite OrthoGather</a>
+        <a href="#"><i class="fa-solid fa-circle-question"></i> Get help</a>
+      </nav>
+
+    </main>
+    </div><!-- /.app-shell -->
+
+    <!-- Hidden file inputs for the upload sub-actions (External Upload bento).
+         Accepts either an OrthoFinder .zip OR an OrthoXML .xml / .orthoxml
+         (Quest-for-Orthologs standard, exported by OrthoDB / OMA / eggNOG / OrthoFinder). -->
+    <form id="uploadForm" action="/cargar_carpeta?modo=upload" method="POST" enctype="multipart/form-data" hidden>
+      <input type="file" id="zipInput" name="file"
+             accept=".zip,.xml,.orthoxml,application/zip,application/xml,text/xml"
+             aria-hidden="true" />
     </form>
+    <input type="file" id="zipInputGO" name="file"
+           accept=".zip,.xml,.orthoxml,application/zip,application/xml,text/xml,application/x-zip-compressed"
+           hidden aria-hidden="true" />
 
-    <input type="file" id="zipInputGO" name="file" accept=".zip,application/zip,application/x-zip-compressed" style="display:none;"
-      onchange="handleGOZipChange(event)" />
-  
-    <div class="menu">
-      <img src="static/images/NewAnalysis.png" alt="New Analysis" onclick="location.href='/1-seleccion_especies'"/>
+    <div id="status-message" style="display: none;" role="status" aria-live="polite"></div>
+
+    <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+      <div class="spinner" aria-hidden="true"></div>
     </div>
-  
-    <div class="menu">
-      <img src="static/images/Preselected.png" alt="Use Preselected" />
-      <div class="submenu">
-        <img src="static/images/boton1.png" alt="Protein Analysis" onclick="location.href='/cargar_carpeta?filename=Orthogroups.zip&modo=preselected'" />
-        <img src="static/images/boton2.png" alt="Gene Ontology Analysis" onclick="runGeneOntologyPreselected()" />
-      </div>
-      <div class="connector">
-        <svg width="0" height="0">
-          <path d="M0 0 C 0 20, -60 40, -90 60" />
-          <path d="M0 0 C 0 20, 60 40, 90 60" />
-        </svg>
-      </div>
-    </div>
-  </div>
-  <div id="status-message" style="display: none;"></div>
-  
-  <div id="loading-overlay">
-    <div class="spinner"></div>
-  </div>
-  
-  <script>
-    function showSpinner() {
-      document.getElementById('loading-overlay').style.display = 'flex';
+
+  </section>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
     }
-    function hideSpinner() {
-      document.getElementById('loading-overlay').style.display = 'none';
-    }
-  
-    async function handleGOZipChange(ev) {
-      const file = ev.target.files && ev.target.files[0];
-      if (!file) { return; }
-      try {
-        showSpinner();
-        const fd = new FormData();
-        fd.append('file', file);
-        const res = await fetch('/cargar_carpeta?modo=upload', {
-          method: 'POST',
-          body: fd
-        });
-        if (!res.ok) {
-          hideSpinner();
-          showStatus("status-message", "error", "Error uploading Orthogroups.zip for GO (upload).");
-          return;
-        }
-        window.location.href = '/resultado_goa';
-      } catch (e) {
-        hideSpinner();
-        showStatus("status-message", "error", "Error: " + e.message);
-      }
-    }
-  
-    async function runGeneOntologyPreselected() {
-      try {
-        showSpinner();
-        const prepResponse = await fetch('/cargar_carpeta?filename=Orthogroups.zip&modo=preselected');
-  
-        if (!prepResponse.ok) {
-          hideSpinner();
-          showStatus("status-message", "error", "Error preparing data for GO analysis.");
-          return;
-        }
-  
-        window.location.href = '/resultado_goa';
-      } catch (e) {
-        hideSpinner();
-        showStatus("status-message", "error", "Unexpected error: " + e.message);
-      }
-    }
-  
-    const dropdowns = document.querySelectorAll('.menu');
-    dropdowns.forEach(menu => {
-      const submenu = menu.querySelector('.submenu');
-      if (!submenu) return;
-      let timeout;
-  
-      menu.addEventListener('mouseenter', () => {
-        clearTimeout(timeout);
-        submenu.style.display = 'flex';
-      });
-      menu.addEventListener('mouseleave', () => {
-        timeout = setTimeout(() => {
-          submenu.style.display = 'none';
-        }, 200);
-      });
-      submenu.addEventListener('mouseenter', () => {
-        clearTimeout(timeout);
-        submenu.style.display = 'flex';
-      });
-      submenu.addEventListener('mouseleave', () => {
-        timeout = setTimeout(() => {
-          submenu.style.display = 'none';
-        }, 200);
-      });
-    });
-  
-    window.onload = function () {
-      const overlay = document.getElementById('loading-overlay');
-      if (overlay) overlay.style.display = 'none';
-    };
+  }
   </script>
-  
-  
 
-  <footer>
-    <div>
-      &copy; 2025 OrthoGather. All rights reserved.
-    </div>
-    <div class="social-icons">
-      <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
-      <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">FAQ</a>
-      <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">Contact</a>
-    </div>
-  </footer>
+  <script type="module">
+    import * as THREE from 'three';
 
+    /* ================================================================
+       Early exits — accessibility (we always build the scene otherwise;
+       responsive hiding on small viewports is handled by CSS, and the
+       IntersectionObserver pauses rendering when the canvas isn't visible)
+       ================================================================ */
+    const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (REDUCED_MOTION) {
+      console.info('[OrthoGather] 3D hero disabled: prefers-reduced-motion');
+    }
+
+    /* ================================================================
+       Scene setup
+       ================================================================ */
+    const stage = document.getElementById('stage');
+    const tooltipEl = document.getElementById('protein-tooltip');
+    const staticLogo = document.getElementById('static-logo');
+    const sizeOf = () => ({ w: stage.clientWidth || window.innerWidth, h: stage.clientHeight || window.innerHeight });
+
+    if (REDUCED_MOTION) {
+      // Don't build the 3D scene. The static SVG logo + HUD overlay are enough.
+    } else {
+      buildScene();
+    }
+
+    function buildScene() {
+    /* (the whole 3D scene lives inside this function from here on) */
+
+    const scene = new THREE.Scene();
+
+    const { w: w0, h: h0 } = sizeOf();
+    const camera = new THREE.PerspectiveCamera(40, w0 / h0, 0.1, 100);
+    camera.position.set(0, 0, 18);
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(w0, h0);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    stage.appendChild(renderer.domElement);
+
+    /* ================================================================
+       Lighting — key, fill, rim
+       ================================================================ */
+    scene.add(new THREE.AmbientLight(0x9ab5d4, 0.35));
+
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    keyLight.position.set(6, 9, 8);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0x7cb8ee, 0.55);
+    fillLight.position.set(-7, -2, 6);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0xfce58a, 0.45);
+    rimLight.position.set(-2, -4, -7);
+    scene.add(rimLight);
+
+    /* ================================================================
+       Logo geometry — 4 spheres + 3 connectors
+       Coordinates derived from the SVG (viewBox 0 0 100 110), centered,
+       and y axis flipped because Three.js Y is up.
+       ================================================================ */
+    const logo = new THREE.Group();
+    scene.add(logo);
+
+    const balls = {
+      blue:   { pos: new THREE.Vector3(-1.1,  0.3, 0),   radius: 1.7, color: 0x7cb8ee, roughness: 0.32, metalness: 0.06, clearcoat: 0.4 },
+      green:  { pos: new THREE.Vector3( 2.1,  3.3, 0.5), radius: 1.1, color: 0x5fa84f, roughness: 0.38, metalness: 0.06, clearcoat: 0.3 },
+      pink:   { pos: new THREE.Vector3(-2.1, -3.3, 0.5), radius: 1.1, color: 0xee9c9c, roughness: 0.50, metalness: 0.02, clearcoat: 0.3 },
+      yellow: { pos: new THREE.Vector3( 1.7, -3.3, 0.5), radius: 1.1, color: 0xfce58a, roughness: 0.38, metalness: 0.06, clearcoat: 0.3 }
+    };
+
+    const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
+
+    const ballMeshes = [];
+    let centralBall = null;
+    for (const [name, b] of Object.entries(balls)) {
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: b.color,
+        roughness: b.roughness,
+        metalness: b.metalness,
+        clearcoat: b.clearcoat,
+        clearcoatRoughness: 0.25,
+        sheen: 0.1,
+        sheenColor: new THREE.Color(0xffffff)
+      });
+      const mesh = new THREE.Mesh(sphereGeo, mat);
+      mesh.scale.setScalar(b.radius);
+      mesh.position.copy(b.pos);
+      mesh.userData.basePos = b.pos.clone();
+      mesh.userData.isCentralBall = (name === 'blue');
+      logo.add(mesh);
+      ballMeshes.push(mesh);
+      if (name === 'blue') centralBall = mesh;
+    }
+
+    // Connectors: blue → each smaller ball
+    const cylGeo = new THREE.CylinderGeometry(0.16, 0.16, 1, 24);
+
+    function makeConnector(a, b) {
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: 0x3b78b9,
+        roughness: 0.42,
+        metalness: 0.10,
+        clearcoat: 0.2
+      });
+      const mesh = new THREE.Mesh(cylGeo, mat);
+      const mid = a.clone().add(b).multiplyScalar(0.5);
+      const dir = b.clone().sub(a);
+      const len = dir.length();
+      mesh.scale.y = len;
+      mesh.position.copy(mid);
+      mesh.quaternion.setFromUnitVectors(
+        new THREE.Vector3(0, 1, 0),
+        dir.clone().normalize()
+      );
+      logo.add(mesh);
+    }
+
+    makeConnector(balls.blue.pos, balls.green.pos);
+    makeConnector(balls.blue.pos, balls.pink.pos);
+    makeConnector(balls.blue.pos, balls.yellow.pos);
+
+    /* Slight initial tilt for a more "3D feeling" first frame */
+    logo.rotation.x = -0.08;
+    logo.rotation.y =  0.20;
+
+    /* ================================================================
+       AlphaFold proteins — backbone ribbon traces
+       Loaded from pre-extracted JSON (CA atom coordinates, centred at 0)
+       ================================================================ */
+    const proteinGroup = new THREE.Group();
+    scene.add(proteinGroup);
+
+    /* Each protein orbits the scene with a unique radius / angular speed / phase / tilt.
+       Position computed each frame. Rainbow coloured N→C.
+       9 proteins distributed at 40° intervals around the logo, all behind it in z. */
+    const TAU = Math.PI * 2;
+    const proteinDefs = [
+      { url: '/static/proteins/P0CG48.json', orbitR:  8.5, orbitTilt:  0.15, angSpeed: 0.16, vertAmp: 1.4, vertSpeed: 0.55, phase: TAU * (0/9), scale: 0.060, rotSpeed: 0.30 },  // Ubiquitin
+      { url: '/static/proteins/P01308.json', orbitR: 11.5, orbitTilt: -0.10, angSpeed: 0.18, vertAmp: 1.2, vertSpeed: 0.60, phase: TAU * (1/9), scale: 0.055, rotSpeed: 0.36 },  // Insulin
+      { url: '/static/proteins/P00698.json', orbitR: 10.0, orbitTilt: -0.20, angSpeed: 0.12, vertAmp: 1.8, vertSpeed: 0.45, phase: TAU * (2/9), scale: 0.045, rotSpeed: 0.22 },  // Lysozyme
+      { url: '/static/proteins/P99999.json', orbitR: 13.0, orbitTilt:  0.20, angSpeed: 0.14, vertAmp: 1.6, vertSpeed: 0.50, phase: TAU * (3/9), scale: 0.055, rotSpeed: 0.34 },  // Cytochrome C
+      { url: '/static/proteins/P0AA25.json', orbitR:  9.0, orbitTilt:  0.25, angSpeed: 0.20, vertAmp: 1.5, vertSpeed: 0.55, phase: TAU * (4/9), scale: 0.055, rotSpeed: 0.32 },  // Thioredoxin
+      { url: '/static/proteins/P02185.json', orbitR: 11.0, orbitTilt:  0.30, angSpeed: 0.13, vertAmp: 1.2, vertSpeed: 0.60, phase: TAU * (5/9), scale: 0.045, rotSpeed: 0.28 },  // Myoglobin
+      { url: '/static/proteins/P02766.json', orbitR: 12.5, orbitTilt: -0.15, angSpeed: 0.17, vertAmp: 1.3, vertSpeed: 0.50, phase: TAU * (6/9), scale: 0.045, rotSpeed: 0.26 },  // Transthyretin
+      { url: '/static/proteins/P0A9P0.json', orbitR: 10.5, orbitTilt:  0.10, angSpeed: 0.11, vertAmp: 1.7, vertSpeed: 0.40, phase: TAU * (7/9), scale: 0.040, rotSpeed: 0.24 },  // DHFR
+      { url: '/static/proteins/P00761.json', orbitR: 14.0, orbitTilt: -0.25, angSpeed: 0.10, vertAmp: 1.5, vertSpeed: 0.45, phase: TAU * (8/9), scale: 0.032, rotSpeed: 0.20 }   // Trypsin (largest)
+    ];
+
+    async function loadProtein(def) {
+      const data = await fetch(def.url).then(r => r.json());
+      const pts = data.ca.map(p => new THREE.Vector3(p[0], p[1], p[2]));
+      const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
+
+      const tubularSegments = Math.max(80, pts.length * 6);
+      const radius = 0.7;
+      const radialSegments = 10;
+      const geo = new THREE.TubeGeometry(curve, tubularSegments, radius, radialSegments, false);
+
+      // ── Rainbow vertex colours: N → C terminus, HSL hue 0.66 → 0.0
+      const positions = geo.attributes.position;
+      const colors = new Float32Array(positions.count * 3);
+      const ringSize = radialSegments + 1;
+      const tmpColor = new THREE.Color();
+      for (let i = 0; i < positions.count; i++) {
+        const segment = Math.floor(i / ringSize);            // 0..tubularSegments
+        const t = segment / tubularSegments;                  // 0..1
+        const hue = 0.66 - 0.66 * t;                          // blue → red
+        tmpColor.setHSL(hue, 0.78, 0.55);
+        colors[i*3    ] = tmpColor.r;
+        colors[i*3 + 1] = tmpColor.g;
+        colors[i*3 + 2] = tmpColor.b;
+      }
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const mat = new THREE.MeshPhysicalMaterial({
+        vertexColors: true,
+        roughness: 0.38,
+        metalness: 0.05,
+        clearcoat: 0.30,
+        clearcoatRoughness: 0.25,
+        transparent: true,
+        opacity: 0.55
+      });
+
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.scale.setScalar(def.scale);
+      mesh.userData = {
+        orbitR: def.orbitR,
+        baseOrbitR: def.orbitR,           // saved for easter-egg explosion
+        orbitTilt: def.orbitTilt,
+        angSpeed: def.angSpeed,
+        vertAmp: def.vertAmp,
+        vertSpeed: def.vertSpeed,
+        phase: def.phase,
+        rotSpeed: def.rotSpeed,
+        scale: def.scale,
+        name: data.name,
+        residues: data.ca.length,
+        isProtein: true
+      };
+      proteinGroup.add(mesh);
+    }
+
+    // Kick off all 4 loads in parallel (non-blocking)
+    Promise.all(proteinDefs.map(loadProtein)).then(() => {
+      console.log('Proteins loaded:', proteinGroup.children.map(p => p.userData.name));
+    });
+
+    /* ================================================================
+       Interactivity state
+       ================================================================ */
+    const mouse        = new THREE.Vector2();         // smoothed parallax offset
+    const mouseTarget  = new THREE.Vector2();         // raw, for lerping
+    const ndcMouse     = new THREE.Vector2();         // PROPER NDC for raycaster (y inverted)
+    let   scrollProg   = 0;                            // 0..1 over first viewport
+    let   isVisible    = true;                         // IntersectionObserver
+    let   explodeStart = -1;                           // easter-egg timer
+    let   hoveredProtein = null;
+    let   draggedProtein = null;                       // protein being dragged
+    let   dragOffsetZ    = 0;                          // dragged protein's z plane
+
+    const raycaster = new THREE.Raycaster();
+
+    function updatePointer(e) {
+      const r = stage.getBoundingClientRect();
+      const sx = (e.clientX - r.left) / r.width;       // 0..1
+      const sy = (e.clientY - r.top)  / r.height;      // 0..1 (top=0)
+      mouseTarget.x = sx * 2 - 1;                       // -1..+1 (parallax)
+      mouseTarget.y = sy * 2 - 1;
+      ndcMouse.x    = sx * 2 - 1;                       // -1..+1
+      ndcMouse.y    = -(sy * 2 - 1);                    // INVERTED for raycaster
+    }
+
+    /* ───── Pointermove: parallax + hover detection + drag ───── */
+    stage.addEventListener('pointermove', (e) => {
+      updatePointer(e);
+
+      // Drag in progress: move the protein to where the cursor projects
+      if (draggedProtein) {
+        // Build a ray from camera through cursor; intersect with the plane z = dragOffsetZ
+        raycaster.setFromCamera(ndcMouse, camera);
+        const ray = raycaster.ray;
+        const denom = ray.direction.z;
+        if (Math.abs(denom) > 1e-6) {
+          const tParam = (dragOffsetZ - ray.origin.z) / denom;
+          const px = ray.origin.x + ray.direction.x * tParam;
+          const py = ray.origin.y + ray.direction.y * tParam;
+          draggedProtein.userData.dragTargetPos.set(px, py, dragOffsetZ);
+        }
+        return;   // skip hover work while dragging
+      }
+
+      // Hover detection
+      raycaster.setFromCamera(ndcMouse, camera);
+      const hits = raycaster.intersectObjects([...proteinGroup.children, centralBall], false);
+      const proteinHit = hits.find(h => h.object.userData.isProtein);
+      const ballHit    = hits.find(h => h.object.userData.isCentralBall);
+      const canvas = renderer.domElement;
+      canvas.classList.toggle('is-hovering-protein', !!proteinHit);
+      canvas.classList.toggle('is-hovering-logo',    !!ballHit && !proteinHit);
+
+      if (proteinHit) {
+        hoveredProtein = proteinHit.object;
+        const u = hoveredProtein.userData;
+        tooltipEl.querySelector('.name').textContent = u.name;
+        tooltipEl.querySelector('.meta').textContent = `${u.residues} aa · click & drag`;
+        tooltipEl.style.left = e.clientX + 'px';
+        tooltipEl.style.top  = e.clientY + 'px';
+        tooltipEl.classList.add('is-visible');
+      } else {
+        hoveredProtein = null;
+        tooltipEl.classList.remove('is-visible');
+      }
+    });
+
+    stage.addEventListener('pointerleave', () => {
+      mouseTarget.set(0, 0);
+      tooltipEl.classList.remove('is-visible');
+    });
+
+    /* ───── Pointerdown: start drag on protein, or trigger easter-egg on central ball ───── */
+    stage.addEventListener('pointerdown', (e) => {
+      updatePointer(e);
+      raycaster.setFromCamera(ndcMouse, camera);
+      const hits = raycaster.intersectObjects([...proteinGroup.children, centralBall], false);
+      const proteinHit = hits.find(h => h.object.userData.isProtein);
+      const ballHit    = hits.find(h => h.object.userData.isCentralBall);
+
+      if (proteinHit) {
+        draggedProtein = proteinHit.object;
+        dragOffsetZ = draggedProtein.position.z;       // keep the same depth plane
+        draggedProtein.userData.dragTargetPos = draggedProtein.position.clone();
+        draggedProtein.userData.releaseT = -1;
+        renderer.domElement.style.cursor = 'grabbing';
+        tooltipEl.classList.remove('is-visible');
+      } else if (ballHit && explodeStart < 0) {
+        explodeStart = clock.getElapsedTime();
+      }
+    });
+
+    stage.addEventListener('pointerup', () => {
+      if (draggedProtein) {
+        // Mark release time → animate-loop will smoothly send it back to orbit
+        draggedProtein.userData.releaseT = clock.getElapsedTime();
+        draggedProtein.userData.releasePos = draggedProtein.position.clone();
+        draggedProtein = null;
+        renderer.domElement.style.cursor = '';
+      }
+    });
+
+    /* ───── Scroll-driven camera dolly ───── */
+    window.addEventListener('scroll', () => {
+      scrollProg = Math.min(1, Math.max(0, window.scrollY / window.innerHeight));
+    }, { passive: true });
+
+    /* ───── Pause when stage-1 is fully covered ───── */
+    const stage1El = document.querySelector('.stage-1');
+    const observer = new IntersectionObserver((entries) => {
+      isVisible = entries[0].intersectionRatio > 0.05;
+    }, { threshold: [0, 0.05, 0.5, 1] });
+    observer.observe(stage1El);
+
+    /* ───── Reveal canvas + fade out static SVG once first frame is rendered ───── */
+    let firstFrameRendered = false;
+
+    /* ================================================================
+       Animation loop
+       ================================================================ */
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Skip work when stage-1 is not in viewport (curtain has covered the hero).
+      // Saves CPU/battery when scrolled past.
+      if (!isVisible) return;
+
+      const t = clock.getElapsedTime();
+
+      // Smooth mouse parallax (lerp). Higher factor → snappier response.
+      mouse.x += (mouseTarget.x - mouse.x) * 0.08;
+      mouse.y += (mouseTarget.y - mouse.y) * 0.08;
+
+      // Camera dolly: 18 → 24 as scrollProg 0 → 1
+      camera.position.z = 18 + scrollProg * 6;
+      // Subtle camera tilt from mouse position — calmer than before
+      camera.position.x = mouse.x * 1.2;
+      camera.position.y = -mouse.y * 0.8;
+      camera.lookAt(0, 0, 0);
+
+      // Easter-egg explosion: animate orbitR scale over ~1.3s, then back
+      let explodeMult = 1;
+      if (explodeStart >= 0) {
+        const dt = t - explodeStart;
+        if (dt < 0.5)        explodeMult = 1 + (dt / 0.5) * 1.5;             // grow
+        else if (dt < 1.3)   explodeMult = 2.5 - ((dt - 0.5) / 0.8) * 1.5;   // return
+        else                 { explodeMult = 1; explodeStart = -1; }
+      }
+
+      // ───── Logo ─────
+      logo.rotation.y = 0.20 + Math.sin(t * 0.45) * 0.55 + mouse.x * 0.18;
+      logo.rotation.x = -0.05 + Math.sin(t * 0.32) * 0.06 + mouse.y * 0.12;
+      logo.position.y = Math.sin(t * 0.55) * 0.18;
+
+      // ───── Proteins: elliptical orbit behind the logo
+      //       z component is squashed and offset so proteins NEVER cross in front
+      const Z_BASE  = -14;     // orbit centre far behind logo
+      const Z_RANGE =   3;     // ± in z (very shallow) → guarantees z < -8 always
+      const proteinExplodeScale = 1 + (explodeMult - 1) * 0.4;
+      for (const p of proteinGroup.children) {
+        const u = p.userData;
+
+        // ───── Compute this protein's natural orbital target position ─────
+        const r = u.baseOrbitR * explodeMult;
+        const theta = t * u.angSpeed + u.phase;
+        const x = Math.cos(theta) * r;
+        const zEllipse = Math.sin(theta) * Z_RANGE;
+        const cosT = Math.cos(u.orbitTilt), sinT = Math.sin(u.orbitTilt);
+        const yTilt = -sinT * zEllipse;
+        const zTilt =  cosT * zEllipse;
+        const yWave = Math.sin(t * u.vertSpeed + u.phase * 1.3) * u.vertAmp;
+        const targetX = x, targetY = yTilt + yWave, targetZ = zTilt + Z_BASE;
+
+        // ───── Three states: dragging / releasing / orbiting ─────
+        if (p === draggedProtein) {
+          // Smoothly chase the cursor's projected target (gives a slight "rubber" feel)
+          p.position.x += (u.dragTargetPos.x - p.position.x) * 0.25;
+          p.position.y += (u.dragTargetPos.y - p.position.y) * 0.25;
+          p.position.z += (u.dragTargetPos.z - p.position.z) * 0.25;
+          // Faster self-rotation while held → feels "alive"
+          p.rotation.x += 0.03;
+          p.rotation.y += 0.04;
+        } else if (u.releaseT >= 0) {
+          // Released → ease back to orbital target over RETURN_DURATION seconds
+          const RETURN_DURATION = 1.5;
+          const dt = t - u.releaseT;
+          if (dt >= RETURN_DURATION) {
+            u.releaseT = -1;  // done
+            p.position.set(targetX, targetY, targetZ);
+          } else {
+            const k = dt / RETURN_DURATION;
+            const ease = k < 0.5 ? 2*k*k : 1 - Math.pow(-2*k + 2, 2)/2;  // easeInOutQuad
+            p.position.set(
+              u.releasePos.x + (targetX - u.releasePos.x) * ease,
+              u.releasePos.y + (targetY - u.releasePos.y) * ease,
+              u.releasePos.z + (targetZ - u.releasePos.z) * ease
+            );
+          }
+          p.rotation.x = t * u.rotSpeed * 0.7;
+          p.rotation.y = t * u.rotSpeed + u.phase;
+        } else {
+          // Normal orbit
+          p.position.set(targetX, targetY, targetZ);
+          p.rotation.x = t * u.rotSpeed * 0.7;
+          p.rotation.y = t * u.rotSpeed + u.phase;
+        }
+
+        p.scale.setScalar((u.scale || 0.05) * proteinExplodeScale);
+      }
+
+      renderer.render(scene, camera);
+
+      // First-frame fade-in: reveal canvas, hide static SVG
+      if (!firstFrameRendered) {
+        firstFrameRendered = true;
+        stage.classList.add('is-ready');
+        staticLogo.classList.add('is-hidden');
+      }
+    }
+    animate();
+
+    /* ================================================================
+       Responsive
+       ================================================================ */
+    window.addEventListener('resize', () => {
+      const { w, h } = sizeOf();
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    }  /* end of buildScene() */
+  </script>
 </body>
 </html>

@@ -1,0 +1,1018 @@
+/* ============================================================================
+   OrthoGather — Results page (resultado.html)
+   ============================================================================ */
+
+.results-main {
+  flex: 1;
+  padding: var(--space-10) 0 var(--space-12);
+}
+
+.results-intro {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+  text-align: center;
+}
+
+/* Breadcrumb sits ABOVE the centered title block and reads left-to-right.
+   Centering the trail under "Home > New Analysis > Protein Analysis" feels
+   unnatural — breadcrumbs are navigation, not display copy. */
+.results-breadcrumb {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  text-align: left;
+  margin-bottom: var(--space-4);
+}
+.results-breadcrumb a { color: var(--color-text-secondary); text-decoration: none; }
+.results-breadcrumb a:hover { color: var(--color-primary); }
+.results-breadcrumb i.fa-chevron-right { font-size: 10px; opacity: 0.5; }
+
+.results-intro .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: var(--color-success-bg);
+  color: #065f46;
+  border-radius: var(--radius-full);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.results-intro h1 {
+  font-size: var(--text-display);
+  margin-bottom: var(--space-3);
+  letter-spacing: var(--tracking-tight);
+}
+
+.results-intro .lead {
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* Figures grid */
+.figures-grid {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 768px) {
+  .figures-grid { grid-template-columns: 1fr; }
+}
+
+.figure-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--duration) var(--easing-standard);
+}
+
+.figure-card:hover { box-shadow: var(--shadow-md); }
+
+.figure-card h3 {
+  font-size: var(--text-h3);
+  margin-bottom: var(--space-3);
+  color: var(--color-text);
+}
+
+.figure-card img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-3);
+}
+
+.figure-card a.download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.figure-card a.download:hover { text-decoration: underline; }
+
+.figure-card a.download::before {
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  content: '\f019';
+}
+
+/* Section blocks */
+.results-section {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+}
+
+.results-section + .results-section { margin-top: var(--space-4); }
+
+.results-section h2 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-1);
+}
+
+.results-section .section-helper {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-5);
+}
+
+.results-section hr.section-divider {
+  border: none;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-5) 0;
+}
+
+/* ============================================================================
+   Compare specific species — UpSet section (Streamlit/Seqera inline pattern)
+   Replaces the legacy slide-down + checkbox-list flow.
+   ============================================================================ */
+.upset-section {
+  max-width: var(--width-content);
+  margin: var(--space-6) auto var(--space-6);
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 14px rgba(15, 23, 42, 0.06);
+}
+.upset-section-head { margin-bottom: var(--space-4); }
+.upset-section-head h2 {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+.upset-section-head .section-helper {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  margin: 0;
+}
+
+/* ── Picker toolbar ─────────────────────────────────────────────────── */
+.upset-picker {
+  margin-top: var(--space-3);
+}
+.upset-picker-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+.upset-picker-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+.upset-picker-search-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+.upset-picker-search-wrap input {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  font-size: var(--text-body-sm);
+  font-family: inherit;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              box-shadow var(--duration-fast) var(--easing-standard);
+}
+.upset-picker-search-wrap input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.10);
+}
+.upset-picker-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+.upset-selected-count strong { color: var(--color-text); font-weight: 700; }
+
+/* ── Chips grid ─────────────────────────────────────────────────────── */
+.upset-picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: var(--space-3);
+  background: #fafbfc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.upset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-family: inherit;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard),
+              transform var(--duration-fast) var(--easing-standard);
+}
+.upset-chip:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.upset-chip.is-selected {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-color: var(--color-primary);
+}
+.upset-chip.is-selected .upset-chip-dot {
+  background: #fff;
+  box-shadow: inset 0 0 0 4px var(--color-primary);
+}
+.upset-chip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+.upset-chip-label { font-style: italic; }
+
+/* ── Actions row ────────────────────────────────────────────────────── */
+.upset-actions {
+  margin-top: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.upset-actions-hint {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+/* ── UniProt-ID filter section (Figs 5 & 6) ─────────────────────────
+   Standalone card that appears between the unfiltered figures and the
+   filtered figures. Hidden until Figs 3+4 have been generated. */
+.upset-filter-section {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 14px rgba(15, 23, 42, 0.06);
+}
+.upset-filter-section[hidden] { display: none !important; }
+.upset-filter-section .upset-section-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.upset-filter-section .upset-section-head h2 i.fa-filter {
+  color: var(--color-primary);
+  font-size: 22px;
+}
+.upset-filter-section .upset-filter-body {
+  padding: 0;            /* No nested padding — the section already has one */
+  border-top: none;
+  background: transparent;
+}
+.upset-filter-section .upset-filter-body textarea {
+  margin-top: var(--space-4);
+}
+
+/* (Legacy) Old <details> styling — kept in case we go back to a collapsed
+   variant later. Currently not referenced by any element. */
+.upset-filter {
+  margin-top: var(--space-4);
+  background: #fafbfc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.upset-filter > summary {
+  cursor: pointer;
+  padding: 12px 16px;
+  font-weight: 500;
+  font-size: var(--text-body);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+  list-style: none;       /* Hide native triangle on WebKit */
+}
+.upset-filter > summary::-webkit-details-marker { display: none; }
+.upset-filter > summary::before {
+  content: '\f078';       /* fa-chevron-down */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  transition: transform .15s ease;
+}
+.upset-filter[open] > summary::before { transform: rotate(180deg); }
+.upset-filter > summary i.fa-filter { color: var(--color-primary); }
+.upset-filter-hint {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  font-size: var(--text-body-sm);
+}
+.upset-filter-body {
+  padding: 4px 16px 16px;
+  border-top: 1px solid var(--color-border);
+  background: #fff;
+}
+.upset-filter-body textarea {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: var(--text-body-sm);
+  resize: vertical;
+  min-height: 90px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.upset-filter-body textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.10);
+}
+.upset-filter-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.upset-filter-count {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  margin-right: auto;
+}
+
+/* Result banner after a filtered run */
+.upset-filter-result:not([hidden]) {
+  margin-top: var(--space-3);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upset-filter-result.is-success {
+  background: var(--color-success-bg);
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.upset-filter-result.is-partial {
+  background: #fffbeb;
+  color: #78350f;
+  border: 1px solid #fde68a;
+}
+.upset-filter-result i { margin-right: 6px; }
+.upset-not-found {
+  font-size: var(--text-body-sm);
+  color: inherit;
+}
+.upset-not-found code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+  word-break: break-all;
+}
+.upset-copy-missing {
+  margin-left: 10px;
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+}
+.upset-copy-missing:hover { background: rgba(0,0,0,0.05); }
+
+/* IMPORTANT: use :not([hidden]) so the [hidden] attribute on the HTML element
+   actually wins over our display rule. Plain `.upset-progress { display: ... }`
+   would override the browser's [hidden] { display: none } default and the
+   spinner would show through on initial page load. Same trick on .upset-error
+   and .upset-figures below. */
+.upset-progress:not([hidden]) {
+  margin-top: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+}
+.spinner-inline {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: og-spin 0.8s linear infinite;
+}
+
+.upset-error:not([hidden]) {
+  margin-top: var(--space-3);
+  padding: 10px 14px;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Generated figures container ───────────────────────────────────── */
+.upset-figures:not([hidden]) {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+  display: grid;
+  gap: var(--space-5);
+}
+.upset-figure-card {
+  padding: var(--space-5);
+  /* Grid items have `min-width: auto` by default — that lets them grow as
+     wide as their content (here a 1300+ px SVG), defeating the scroll
+     pattern. min-width: 0 forces the card to stay at its grid track width,
+     so .upset-host overflows and scrolls horizontally instead. */
+  min-width: 0;
+}
+.upset-host {
+  width: 100%;
+  /* Placeholder footprint. Smaller than the previous 600 px because the SVG
+     now sizes adaptively (down to ~280 px for 2–3-species charts); a tall
+     blank box during loading made small analyses look broken. The SVG will
+     push the host taller when the actual chart needs it. */
+  min-height: 300px;
+  overflow-x: auto;
+}
+/* Manual hover highlight — amber overlay rect added by our JS, plus
+   matrix dots that switch from black to amber while the species is hovered. */
+.og-highlight-overlay {
+  fill: #fbbf24;
+  pointer-events: none;
+}
+circle.og-dot-highlighted {
+  fill: #fbbf24 !important;
+}
+
+/* Floating tooltip that follows the cursor when hovering a combo bar.
+   Shows the intersection name + total + per-species breakdown (Fig 4). */
+#og-upset-tooltip {
+  position: fixed;
+  z-index: 9999;
+  /* Semi-transparent slate background with a backdrop blur so the bar /
+     matrix dots underneath stay visible but text remains crisp. The blur
+     stops chart elements from "shining through" as raw colour and turning
+     into noise behind the text. */
+  background: rgba(15, 23, 42, 0.78);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.30);
+  /* Tooltip itself doesn't catch the cursor, but the inner list might be
+     scrollable for 20+ species. We give the inner UL a max-height so the
+     tooltip never overflows the viewport even on small screens. */
+  pointer-events: none;
+  max-width: 360px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+#og-upset-tooltip[hidden] { display: none !important; }
+#og-upset-tooltip h5 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fbbf24;
+  letter-spacing: 0;
+}
+#og-upset-tooltip .upset-tooltip-total {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+#og-upset-tooltip ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 8px;
+  /* Lets the inner list scroll if there are many species without making the
+     tooltip itself overflow the viewport. */
+  overflow-y: auto;
+  flex: 1;
+  pointer-events: auto;  /* re-enable wheel scroll inside the otherwise-passive tooltip */
+}
+#og-upset-tooltip li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 3px 0;
+}
+#og-upset-tooltip .sp-name {
+  font-style: italic;
+  color: #cbd5e1;
+}
+#og-upset-tooltip .sp-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+#og-upset-tooltip .sp-pct {
+  color: #94a3b8;
+  font-size: 11px;
+  margin-left: 6px;
+}
+
+/* "?" help button + popover */
+.figure-help-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.figure-help-btn:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.figure-help-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: min(420px, 90vw);
+  background: #0f172a;
+  /* Body text in pure white so it reads cleanly against the dark popover —
+     the title keeps its amber accent. */
+  color: #ffffff;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.25);
+  font-size: var(--text-body-sm);
+  line-height: 1.55;
+}
+.figure-help-popover h4 {
+  margin: 0 0 var(--space-2);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fbbf24;
+  letter-spacing: 0;
+}
+.figure-help-popover p {
+  margin: 0 0 var(--space-2);
+  color: #ffffff;
+}
+.figure-help-popover p:last-child { margin: 0; }
+.figure-help-popover strong { color: #ffffff; font-weight: 600; }
+.figure-help-popover em      { color: #fbbf24; font-style: normal; }
+.figure-help-popover code {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px;
+}
+.figure-help-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ROOT CAUSE: UpSetJS injects its own CSS that sets `max-width: 100%` on the
+   rendered <svg>, so the SVG was scaling DOWN to fit the host instead of
+   keeping its intrinsic width (e.g. 1351 px) and letting .upset-host scroll
+   horizontally. Without this override the figure renders compressed, hover
+   barely shows, and the PNG export comes out at the visible width — three
+   symptoms, one cause. */
+.upset-host > svg,
+.figure-modal-plot > svg {
+  max-width: none !important;
+  width: auto !important;
+  height: auto !important;
+}
+.upset-host-error {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  text-align: center;
+  padding: var(--space-6);
+}
+
+/* Group of head-right controls (download dropdown + expand button) */
+.figure-card-head-controls {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ── Per-figure download dropdown ──────────────────────────────────── */
+.figure-card-actions {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+}
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+.download-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.download-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10);
+  z-index: 10;
+}
+.download-menu li { margin: 0; }
+.download-menu a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  text-decoration: none;
+}
+.download-menu a:hover { background: var(--color-primary-soft); color: var(--color-primary); }
+
+#status-message {
+  max-width: var(--width-content);
+  margin: var(--space-4) auto;
+  padding: 0 var(--space-6);
+}
+
+/* ============================================================================
+   v2 — Plotly figures (side-by-side cards + interactive lightbox)
+   Replaces the static <img> PNGs with Plotly.js charts.
+   ============================================================================ */
+.figures-grid {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: 0 var(--space-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+@media (max-width: 1100px) {
+  .figures-grid { grid-template-columns: 1fr; }
+}
+
+.figure-card {
+  background: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 6px 14px rgba(15, 23, 42, 0.06);
+}
+/* Head is now just the title + subtitle block at full card width — no more
+   side-by-side competition with the control cluster. */
+.figure-card-head {
+  margin-bottom: var(--space-2);
+}
+.figure-card-head-text { min-width: 0; }
+
+/* Stats chip + controls share one row below the title: stats on the left,
+   Data / Image / expand on the right. When the stats chip is hidden, the
+   controls' margin-left:auto keeps them flush right. */
+.figure-stats-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.figure-card .figure-stats-row .figure-card-head-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.figure-card-head h3 {
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+.figure-card-sub {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin: 0;
+}
+
+/* Stats chip under the figure subtitle. Replaces the unreadable 11 px grey
+   Plotly annotation that used to live at the top-right corner of the chart
+   (would get cropped or sit on top of the toolbar). Real HTML → sharp at any
+   zoom, controlled by CSS, never collides with the figure canvas. */
+.figure-stats {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;                 /* whole pairs wrap; pair never splits */
+  row-gap: 4px;
+  column-gap: 10px;
+  padding: 4px 12px;
+  background: var(--color-surface-alt, #f8fafc);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);  /* pill curve looked off when 2 lines */
+  font-size: var(--text-body-sm);
+  max-width: 100%;
+}
+.figure-stats[hidden] { display: none; }
+.figure-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  /* Keep "1627 max proteins" together — was breaking after "max" in the
+     narrow 2-column figures grid. */
+  white-space: nowrap;
+}
+.figure-stat-num {
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.figure-stat-label { color: var(--color-text-secondary); }
+.figure-stat-sep { color: var(--color-text-muted); }
+
+.figure-expand-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.figure-expand-btn:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.figure-help-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+.figure-help-chip i { color: var(--color-primary); font-size: 13px; }
+.figure-help-chip kbd {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: 4px; padding: 1px 6px;
+  font-size: 11px; font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+.plot-host {
+  width: 100%;
+  height: 420px;
+}
+
+/* ─── Lightbox modal — full-screen single figure ─── */
+.figure-modal {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* var(--z-modal) is 1000 — strictly above the sticky header (200) and
+     dropdowns (100). The bare `100` we had let the header float through. */
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center; justify-content: center;
+  padding: var(--space-6);
+  animation: figModalIn .2s ease;
+}
+.figure-modal[hidden] { display: none !important; }
+@keyframes figModalIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.figure-modal-inner {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  /* Lightbox is intentionally large — UpSet plots with many combinations can
+     be several thousand pixels wide. The modal body scrolls horizontally
+     inside this fixed window. */
+  width: min(1600px, 96vw);
+  height: min(1000px, 94vh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.figure-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+.figure-modal-head h3 {
+  margin: 0;
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.figure-modal-head .sub {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+.figure-modal-close {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--color-text-secondary);
+}
+.figure-modal-close:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+.figure-modal-body {
+  flex: 1;
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  min-height: 0;
+  /* UpSet figs can be wider than the modal (many combinations). Plotly figs
+     are auto-fit, so the overflow only kicks in when there's an actual SVG
+     wider than the modal body. */
+  overflow: auto;
+}
+.figure-modal-plot { width: 100%; height: 100%; min-width: 0; }
+
+/* ============================================================================
+   Gene Ontology page styles — resultado_goa.html still uses these classes
+   ============================================================================ */
+.boton-centrado {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: 0 var(--space-6);
+  display: flex;
+  justify-content: center;
+}
+
+.hover-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  font-size: var(--text-body-sm);
+  position: relative;
+  transition: background-color var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+.hover-box:hover {
+  background-color: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+.hover-box input[type="checkbox"],
+.hover-box input[type="radio"] {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+.hover-box input[type="checkbox"]:checked + *,
+.hover-box input[type="radio"]:checked + * {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+#go-figure-container {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+#go-figure-container h3 { font-size: var(--text-h2); margin-bottom: var(--space-2); }
+#go-figure-container p { color: var(--color-text-secondary); font-size: var(--text-body-sm); margin-bottom: var(--space-4); }
+#go-figure-container img { max-width: 100%; border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+#go-figure-container a { display: inline-flex; align-items: center; gap: 6px; margin: var(--space-3) var(--space-3) 0 0; font-weight: 500; }
+
+#figure-parameters-container {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+#figure-parameters-container h4 { font-size: var(--text-h3); margin-bottom: var(--space-4); }
+#figure-parameters-container input[type="number"] {
+  display: block;
+  margin: 6px auto 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body);
+  text-align: center;
+  width: 100px;
+}
+#figure-parameters-container label {
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}

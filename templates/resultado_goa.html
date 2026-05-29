@@ -3,428 +3,128 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GOA Matching + Analysis</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link rel="icon" href="static/images/1-a668dcaa1.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-  <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
+  <title>Gene Ontology Analysis: OrthoGather</title>
 
-  <style>
-    :root{
-      --brand: #003366;            
-      --brand-dark: #002244;
-      --font-sans: "Helvetica Neue", Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    }
-    html, body, button, input, select, textarea {
-      font-family: var(--font-sans) !important;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
 
-    h1 { font-family: var(--font-sans) !important; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
-    header {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 24px;
-      padding: 16px 32px;
-      background-color: var(--brand);
-      color: #fff;
-    }
-    header .logo { justify-self: start; }
-    header .logo img { height: 120px; width: auto; object-fit: contain; display: block; }
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    header .title {
-      justify-self: center;
-      text-align: center;
-      font-weight: 400;
-      letter-spacing: 0.2px;
-      font-size: clamp(36px, 6vw, 72px);
-      margin: 0;
-    }
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-errors.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/go-analysis.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-taxonomy-tree.css') }}" />
 
-    header .info {
-      justify-self: end;
-      text-align: right;
-      line-height: 1.25;
-      font-size: 14px;
-      color: inherit;
-      max-width: 36ch;
-    }
-    header .info p { margin: 2px 0; }
-    header .info a { color: inherit; text-decoration: none; }
-    header .info a:hover, header .info a:focus { color: #ffd700; text-decoration: underline; }
-    header .info a.email-link { overflow-wrap: anywhere; }
-    header .info .muted { opacity: 0.85; }
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
 
-    :root{
-      --brand: #003366;
-      --brand-dark: #002244;
-      --accent: #0072B2;
-      --success: #009688;
-      --danger: #D55E00;
-      --bg: #fffcfc;
-      --muted: #f7f9fc;
-      --border: #e6e6e6;
-      --border-strong: #dfe3e8;
-      --neutral: #6b7280;    
-      --neutral-dark: #4b5563;
-    }
-  
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; }
-  
-    body {
-      font-family: 'Raleway', sans-serif;
-      background-color: var(--bg);
-      display: flex;
-      flex-direction: column;
-    }
+  <!-- Plotly.js (MIT): for interactive enrichment chart -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <!-- D3 v7 for the taxonomic-tree dendrogram (Point 11) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" defer></script>
 
-    h1 {
-      color: var(--brand);
-      text-align: center;
-      margin-bottom: 18px;
-      font-family: 'Cinzel', serif;
-    }
-    h2, h3 { margin-bottom: 10px; color: var(--brand); }
-  
-
-    .table-container{
-      max-width: 1300px;     
-      margin: 20px auto;
-      height: 420px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .table-container:focus-within{
-      outline: 2px solid rgba(0,114,178,.25);
-      outline-offset: 2px;
-    }
-  
-    #species-table{
-      width: 100%;
-      table-layout: fixed;
-      border-collapse: collapse;
-      font-size: 16px;
-    }
-    #species-table thead th{
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background-color: var(--muted);
-      border-bottom: 1px solid var(--border-strong);
-    }
-    #species-table th,
-    #species-table td{
-      border-bottom: 1px solid #eee;
-      padding: 12px 14px;
-      vertical-align: middle;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    #species-table td:first-child,
-    #species-table td.status-cell{
-      overflow: visible;
-      position: relative;
-      z-index: 1;
-    }
-    #species-table tbody tr:nth-child(even){
-      background-color: #f9fbfd;
-    }
-    #species-table tbody tr:hover{
-      background-color: #eef4fb;
-    }
-
-    #species-table colgroup col.col-species { width: 38%; }
-    #species-table colgroup col.col-match   { width: 38%; }
-    #species-table colgroup col.col-goa     { width: 8%; }
-    #species-table colgroup col.col-fix     { width: 16%; }
-  
-    .ok   { color: var(--accent); font-weight: bold; }
-    .fail { color: var(--danger); font-weight: bold; }
-    .icon { font-size: 20px; vertical-align: middle; }
-  
-    .status-cell .ok{
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      max-width: 100%;
-    }
-    .status-cell .hover-box{
-      flex: 1 1 auto;
-      min-width: 0;
-      max-width: 100%;
-    }
-  
-    .taxon-input{
-      width: 90px;             
-      padding: 6px 6px;
-      font-size: 13px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-    }
-    .taxon-input:focus-visible{
-      outline: 2px solid rgba(0,114,178,.35);
-      outline-offset: 1px;
-    }
-    .fix-btn{
-      padding: 6px 8px;
-      border: none;
-      background: var(--neutral);     
-      color: #fff;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-left: 6px;
-      font-size: 13px;
-      line-height: 1;
-    }
-    .fix-btn:hover{ background: var(--neutral-dark); }
-    .fix-btn:disabled{ opacity: .6; cursor: not-allowed; }
-  
-    #species-table td:last-child{
-      white-space: nowrap;
-      overflow: visible;
-      position: relative;
-    }
-  
-    .hidden { display: none; }
-  
-    #status-message{
-      display: none;
-      margin-top: 20px;
-      padding: 12px;
-      background-color: var(--accent);
-      color: white;
-      font-weight: bold;
-      border-radius: 5px;
-      text-align: center;
-      max-width: 1000px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-  
-    .tooltip{ position: relative; display: inline-block; cursor: help; }
-    .tooltip .tooltiptext{
-      visibility: hidden;
-      width: 220px;
-      background-color: #555;
-      color: #fff;
-      text-align: center;
-      padding: 6px;
-      border-radius: 6px;
-      position: absolute;
-      z-index: 3;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -110px;
-      opacity: 0;
-      transition: opacity .3s;
-    }
-    .tooltip .tooltiptext::after{
-      content: "";
-      position: absolute;
-      top: 100%; left: 50%;
-      margin-left: -6px;
-      border-width: 6px;
-      border-style: solid;
-      border-color: #555 transparent transparent transparent;
-    }
-    .tooltip:hover .tooltiptext{ visibility: visible; opacity: 1; }
-  
-    .hover-box{
-      position: relative;
-      display: inline-block;
-      cursor: help;
-      max-width: 100%;
-    }
-    .hover-box .name-tooltip{
-      position: fixed;        
-      left: 0; top: 0;            
-      transform: none;
-      visibility: hidden;
-      opacity: 0;
-      pointer-events: none;      
-      transition: opacity 0.15s ease;
-      background-color: #f9f9f9;
-      color: #333;
-      text-align: left;
-      padding: 6px 10px;
-      border-radius: 6px;
-      z-index: 9999;              
-      white-space: normal;
-      min-width: 280px;
-      max-width: min(520px, 95vw);
-      font-size: 13px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border: 1px solid var(--border);
-    }
-    .hover-box.show-tip .name-tooltip{
-      visibility: visible;
-      opacity: 1;
-    }
-  
-    .name-ellipsis,
-    .clip{
-      display: inline-block;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      vertical-align: bottom;
-    }
-  
-    hr.separador{ margin: 40px 0; border: none; border-top: 2px solid #ccc; }
-    textarea{
-      width: 100%;
-      font-size: 16px;
-      margin: 10px 0;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-    }
-    textarea:focus-visible{
-      outline: 2px solid rgba(0,114,178,.35);
-      outline-offset: 2px;
-    }
-  
-    button.boton-secundario{
-      margin-top: 10px;
-      padding: 10px 18px;
-      font-size: 16px;
-      background: var(--success);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button.boton-secundario:hover{ filter: brightness(.95); }
-  
-    #loading-spinner-analysis{ text-align: center; margin-top: 20px; }
-    .spinner{
-      width: 50px; height: 50px;
-      border: 6px solid #ccc; border-top: 6px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite; margin: auto;
-    }
-    @keyframes spin{ 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
-  
-  
-    main{
-      flex: 1;
-      padding: clamp(24px, 6vw, 48px);
-      max-width: 1400px;  
-      margin: auto;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
-      position: relative;
-    }
-    .card{
-      max-width: 1300px;     
-      margin: 40px auto;
-      background-color: white;
-      padding: 24px 32px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,.1);
-    }
-  
-    footer{
-      background-color: var(--brand);
-      color: white;
-      padding: 16px 24px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    footer .social-icons a{
-      color: white; margin-left: 15px; font-size: 20px; text-decoration: none;
-    }
-    footer .social-icons a:hover{ color: #ffd700; }
-  
-    .boton-primario, .boton-excel{
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: var(--brand);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin: 20px 0;
-    }
-    .boton-primario:hover, .boton-excel:hover{ background-color: var(--brand-dark); }
-    .boton-centrado{ text-align: center; margin-top: 10px; }
-  
-    .boton-primario:disabled,
-    .boton-excel:disabled,
-    .boton-secundario:disabled{
-      opacity: .6;
-      cursor: not-allowed;
-    }
-  
-    .inline-msg{
-      text-align: center;
-      margin-top: 8px;
-      font-weight: 600;
-    }
-  
-    @media (max-width: 768px){
-      .taxon-input{ width: 80px; }
-      #species-table{ font-size: 15px; }
-    }
-    .btn-spinner{
-      display: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #ccc;
-      border-top: 2px solid var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-  </style>
-  
+  <script src="{{ url_for('static', filename='js/og-base.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-taxonomy-tree.js') }}" defer></script>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <img src="static/images/1-a668dcaa1.ico" alt="Tool Logo" />
-    </div>
-    <div class="title">OrthoGather</div>
-    <div class="info">
-      <p>
-        <a href="https://www.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-          University College Dublin
-        </a>
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="goa-main">
+
+    <section class="goa-intro">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Gene Ontology analysis</span>
+      </nav>
+      <h1>Gene Ontology analysis</h1>
+      <p class="lead">Match your species to GOA annotation files, then run functional enrichment with GOATOOLS using a custom foreground and background.</p>
+      <p class="lead-aux">
+        New here? See the <a href="{{ url_for('tutorial') }}#gene-ontology">Gene Ontology tutorial</a> for a step-by-step walkthrough.
       </p>
-      <p>
-        <a href="https://www.ucd.ie/conway/" target="_blank" rel="noopener" class="info-link">
-          UCD Conway Institute
-        </a>
+    </section>
+
+    <!-- View switcher: same data, two perspectives -->
+    <nav class="view-tabs" aria-label="Analysis view">
+      <a class="view-tab" href="{{ url_for('cargar_carpeta', filename='Orthogroups.zip', modo=session.get('modo', 'generated')) }}">
+        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+        <span class="view-tab-body">
+          <span class="view-tab-label">Protein Analysis</span>
+          <span class="view-tab-sub">UpSet plots, intersections, Excel exports</span>
+        </span>
+        <i class="fa-solid fa-arrow-right view-tab-arrow" aria-hidden="true"></i>
+      </a>
+      <a class="view-tab is-active" href="#" aria-current="page">
+        <i class="fa-solid fa-dna" aria-hidden="true"></i>
+        <span class="view-tab-body">
+          <span class="view-tab-label">Gene Ontology</span>
+          <span class="view-tab-sub">Functional enrichment with GOATOOLS</span>
+        </span>
+      </a>
+    </nav>
+
+    <ol class="goa-stepper" aria-label="Workflow steps">
+      <li class="step is-active"><span class="num">1</span>Match species</li>
+      <span class="step-divider"><i class="fa-solid fa-chevron-right"></i></span>
+      <li class="step"><span class="num">2</span>Download GOA</li>
+      <span class="step-divider"><i class="fa-solid fa-chevron-right"></i></span>
+      <li class="step"><span class="num">3</span>Foreground</li>
+      <span class="step-divider"><i class="fa-solid fa-chevron-right"></i></span>
+      <li class="step"><span class="num">4</span>Background</li>
+      <span class="step-divider"><i class="fa-solid fa-chevron-right"></i></span>
+      <li class="step"><span class="num">5</span>Settings &amp; run</li>
+    </ol>
+
+    <!-- ─── Taxonomic context (collapsed by default) ─── -->
+    <details class="tax-collapse" id="taxCollapse">
+      <summary class="tax-collapse-summary">
+        <i class="fa-solid fa-sitemap tax-collapse-icon" aria-hidden="true"></i>
+        <span class="tax-collapse-label">Taxonomic tree</span>
+        <span class="tax-collapse-sub">NCBI classification of the species in this analysis · not a sequence-based phylogeny</span>
+        <i class="fa-solid fa-chevron-down tax-collapse-chev" aria-hidden="true"></i>
+      </summary>
+      <section class="tax-section" aria-label="Taxonomic context">
+        <button id="taxGenerateBtn" type="button" class="tax-generate-btn">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+          <span id="taxGenerateBtnLabel">Loading tree…</span>
+        </button>
+        <div id="taxTree" class="tax-tree" hidden>
+          <button id="taxExpandBtn" type="button" class="tax-expand-btn"
+                  aria-label="Open taxonomic tree full-screen" title="Open full-screen">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+          </button>
+          <div id="taxTreeSvg" class="tax-tree-inner"></div>
+        </div>
+        <div id="taxActions" class="tax-actions" hidden>
+          <span class="tax-hint">Drag to pan · scroll to zoom</span>
+          <button type="button" id="taxResetViewBtn">Reset view</button>
+          <button type="button" id="taxDownloadNewickBtn">Download .nwk</button>
+        </div>
+        <button type="button" class="tax-collapse-close" id="taxCollapseCloseBtn">
+          <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+          Hide taxonomic tree
+        </button>
+      </section>
+    </details>
+
+    <section class="goa-card">
+      <h2>Species match</h2>
+      <p class="section-helper">
+        For each species in your dataset, OrthoGather looked for a matching proteome in the UniProt
+        catalogue. Abbreviations like <em>E. coli</em>, <em>S. cerevisiae</em>, etc. are expanded automatically.
+        If a species shows <i class="fa-solid fa-xmark text-error" aria-hidden="true"></i> <strong>No match</strong>,
+        use the <strong>Fix</strong> field: paste a Taxon ID <em>or</em> the full Latin name.
       </p>
-      <p>
-        <a href="https://cancerdata.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-          UCD Cancer Data Lab
-        </a>
-      </p>
-      <p>
-        <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener" class="info-link">
-          https://doi.org/10.64898/2026.01.30.702851
-        </a>
-      </p>
-    </div>
-  </header>
-  
-  <main>
-    <div class="card">
-      <h1>GOA Species Matching Result</h1>
-  
+
       <div class="table-container">
         <table id="species-table">
           <colgroup>
@@ -435,204 +135,630 @@
           </colgroup>
           <thead>
             <tr>
-              <th>Species to Analyze</th>
-              <th>Matched Entry in JSON</th>
-              <th>GOA File Exists</th>
+              <th>Species to analyse</th>
+              <th>Matched entry in catalogue</th>
+              <th>GOA file</th>
               <th>
                 <div class="tooltip">Fix
-                  <span class="tooltiptext">Manually provide a Taxon ID if no match was found</span>
+                  <span class="tooltiptext">Provide a Taxon ID or a species name if no match was found</span>
                 </div>
               </th>
             </tr>
           </thead>
           <tbody>
             {% for row in results %}
-            {% if row.original|lower != 'total' %}
-            <tr data-original="{{ row.original }}">
-              <td>
-                <span class="hover-box">
-                  <span class="name-ellipsis">{{ row.original }}</span>
-                  <span class="name-tooltip">{{ row.original }}</span>
-                </span>
-              </td>                
-              <td class="status-cell">
-                {% if row.match %}
-                  <span class="ok clip">
-                    ✔
+              {% if row.original|lower != 'total' %}
+                <tr data-original="{{ row.original }}">
+                  <td>
                     <span class="hover-box">
-                      <span class="name-ellipsis">{{ row.match.label }}</span>
-                      <span class="name-tooltip" role="tooltip">{{ row.match.label }}</span>
+                      <span class="name-ellipsis">{{ row.original }}</span>
+                      <span class="name-tooltip">{{ row.original }}</span>
                     </span>
-                  </span>
-                {% else %}
-                  <span class="fail">✘ No match</span>
-                {% endif %}
-              </td>              
-              <td class="goa-cell" style="text-align:center;">
-                {% if row.match and row.match.file_url and row.match.file_url != "NA" %}
-                  <span class="ok icon" aria-label="GOA file found">✔</span>
-                  <input type="hidden" class="file-url" value="{{ row.match.file_url }}" />
-                {% else %}
-                  <span class="fail icon" aria-label="GOA file missing">✘</span>
-                  <input type="hidden" class="file-url" value="" />
-                {% endif %}
-              </td>
-  
-              <td>
-                {% if not row.match or not row.match.file_url or row.match.file_url == "NA" %}
-                  <input type="text" class="taxon-input" placeholder="Taxon ID" aria-label="Taxon ID" />
-                  <button class="fix-btn" type="button" aria-label="Apply Taxon ID">Fix</button>
-                {% else %}
-                  ✅
-                {% endif %}
-              </td>
-            </tr>
-            {% endif %}
+                  </td>
+                  <td class="status-cell">
+                    {% if row.match %}
+                      <span class="ok clip">
+                        <i class="fa-solid fa-check"></i>
+                        <span class="hover-box">
+                          <span class="name-ellipsis">{{ row.match.label }}</span>
+                          <span class="name-tooltip" role="tooltip">{{ row.match.label }}</span>
+                        </span>
+                      </span>
+                    {% else %}
+                      <span class="fail"><i class="fa-solid fa-xmark"></i> No match</span>
+                    {% endif %}
+                  </td>
+                  <td class="goa-cell">
+                    {% if row.match and row.match.file_url and row.match.file_url != "NA" %}
+                      <span class="ok icon" aria-label="GOA file found"><i class="fa-solid fa-check"></i></span>
+                      <input type="hidden" class="file-url" value="{{ row.match.file_url }}" />
+                    {% else %}
+                      <span class="fail icon" aria-label="GOA file missing"><i class="fa-solid fa-xmark"></i></span>
+                      <input type="hidden" class="file-url" value="" />
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not row.match or not row.match.file_url or row.match.file_url == "NA" %}
+                      <input type="text" class="fix-input" placeholder="Taxon ID or species name" aria-label="Taxon ID or species name" />
+                      <button class="fix-btn btn btn-secondary btn-sm" type="button" aria-label="Apply fix">Fix</button>
+                    {% else %}
+                      <i class="fa-solid fa-check-double text-success" aria-label="OK"></i>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endif %}
             {% endfor %}
           </tbody>
         </table>
       </div>
-  
-  
-      <div class="boton-centrado">
-        <button id="download-btn" class="boton-primario btn btn-primary" type="button">📥 Download GOA Files</button>
+
+      <div class="goa-action-row">
+        <button id="download-btn" class="btn btn-primary btn-lg" type="button">
+          <i class="fa-solid fa-download"></i> Download GOA files
+        </button>
       </div>
-  
+
+      <div id="goa-download-progress" class="goa-download-progress" hidden role="status" aria-live="polite">
+        <div class="spinner spinner-md" aria-hidden="true"></div>
+        <div class="goa-download-progress-text" id="goa-dl-text">Downloading GOA files…</div>
+        <div class="goa-download-progress-count">
+          <span id="goa-dl-done">0</span> / <span id="goa-dl-total">0</span> species
+        </div>
+      </div>
 
       <div id="status-message" role="status" aria-live="polite"></div>
-  
 
-      <div class="boton-centrado">
-        <button id="download-goa-excel" class="hidden boton-excel btn btn-secondary" type="button"
+      <div id="goa-download-notice" class="goa-download-notice" hidden></div>
+
+      <div class="goa-action-row">
+        <button id="download-goa-excel" class="btn btn-secondary" type="button" hidden
                 onclick="window.location.href='/download_go_excel'">
-          📥 Download GOA Excel
+          <i class="fa-solid fa-file-excel"></i> Download GOA Excel
+        </button>
+        <button id="toggle-go-analysis" class="btn btn-primary" type="button" hidden>
+          <i class="fa-solid fa-microscope"></i> Continue to GO enrichment
         </button>
       </div>
 
-      <div class="boton-centrado">
-        <button id="toggle-go-analysis" class="hidden boton-primario btn btn-primary" type="button">
-          🔬 G.O Analysis
-        </button>
+      <div id="go-distribution-container" hidden>
+        <h3>Annotation overview</h3>
+        <p class="section-helper">
+          A quick check on how well-annotated the dataset you just downloaded is —
+          whether a GO enrichment will have enough signal to be meaningful.
+        </p>
+        <div id="go-distribution-summary" class="go-dist-summary"></div>
+
+        <details class="go-dist-collapse" id="goDistCollapse">
+          <summary class="go-dist-collapse-summary">
+            <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+            <span class="go-dist-collapse-label">Annotation distribution chart</span>
+            <i class="fa-solid fa-chevron-down go-dist-collapse-chev" aria-hidden="true"></i>
+          </summary>
+          <p class="section-helper">
+            Distribution of per-orthogroup annotation percentage among orthogroups that
+            received any annotation, with each bar coloured by how many of your annotated
+            species contributed proteins — a "breadth of evidence" axis. Hover for exact
+            values; use the camera icon to export PNG/SVG.
+          </p>
+          <div id="go-distribution-plot" class="go-distribution-plot"></div>
+        </details>
       </div>
 
-      <div id="go-distribution-container" style="display: none; text-align: center; margin-top: 30px;">
-        <h3>Annotation Distribution across Orthogroups</h3>
-        <img
-          id="go-distribution-img"
-          src=""
-          alt="Annotation Distribution"
-          style="max-width: 90%; border: 1px solid #ccc; border-radius: 8px;"
-        />
-      </div>
-  
-      <div id="go-analysis-block" style="display: none; margin-top: 40px;">
-        <hr class="separador" />
-        <h2>Gene Ontology Enrichment Analysis</h2>
-  
+      <div id="go-analysis-block" hidden>
+        <hr class="section-divider" />
+        <h2>Gene Ontology enrichment</h2>
+        <p class="section-helper">
+          Define your <strong>foreground</strong> (proteins of interest) and a <strong>background</strong>
+          (reference set). Then choose how strict the propagation should be, and run the analysis.
+        </p>
+
+        <!-- ============================================================== -->
+        <!-- Phase E: Foreground explainer + textarea                       -->
+        <!-- ============================================================== -->
+        <div class="goa-explainer">
+          <h3 class="goa-explainer-title"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> What is the Foreground?</h3>
+          <p>
+            The <strong>foreground</strong> is the list of UniProt IDs you are interested in: for example,
+            proteins that are differentially expressed in your experiment, candidates from a pathway, or hits
+            from a screen. OrthoGather looks up their GO annotations and (optionally) expands the set to their
+            orthologs across the species you analysed.
+          </p>
+          <p class="goa-explainer-tip">
+            <strong>Tip:</strong> paste UniProt accession IDs, one per line or space-separated
+            (e.g. <code>P0A6F5</code>, <code>P00350</code>). FASTA headers are also accepted.
+          </p>
+        </div>
+
         <div>
           <h3>Foreground (UniProt IDs)</h3>
           <textarea id="foreground-ids" rows="4" placeholder="Paste foreground UniProt IDs..." spellcheck="false"></textarea>
-          <label><input type="checkbox" id="use-orthogroups-fg" /> Use Orthogroups</label>
-          <button class="boton-secundario btn btn-secondary" id="submit-foreground" type="button"> Load Foreground</button>
+          <div class="goa-inline-options">
+            <label><input type="checkbox" id="use-orthogroups-fg" /> Expand to full orthogroups</label>
+          </div>
+          <button class="btn btn-secondary" id="submit-foreground" type="button">
+            <i class="fa-solid fa-upload"></i> Load foreground
+          </button>
           <div id="fg-msg" class="inline-msg"></div>
         </div>
-  
-        <div id="background-block" style="margin-top: 30px; opacity: 0.5; pointer-events: none;">
-          <h3>Background (Using UniProt IDs or pre-downloaded GOA files))</h3>
+
+        <!-- ============================================================== -->
+        <!-- Phase E: Background explainer + textarea                       -->
+        <!-- ============================================================== -->
+        <div id="background-block" class="is-disabled">
+          <div class="goa-explainer">
+            <h3 class="goa-explainer-title"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> What is the Background?</h3>
+            <p>
+              The <strong>background</strong> is the reference universe against which enrichment is tested.
+              A meaningful background represents <em>"every protein that could have been picked"</em>. For most
+              users, the easiest choice is <strong>"Use all GOA files"</strong>: the full annotated proteome of
+              every species in your analysis.
+            </p>
+            <p class="goa-explainer-tip">
+              <strong>When to paste a custom list:</strong> if your experiment was restricted to a specific subset
+              (e.g. only membrane proteins, only kinases), paste those IDs to avoid inflating enrichment.
+            </p>
+          </div>
+
+          <h3>Background (UniProt IDs or pre-downloaded GOA files)</h3>
           <textarea id="background-ids" rows="4" placeholder="Paste background UniProt IDs..." spellcheck="false"></textarea>
-          <label><input type="checkbox" id="use-orthogroups-bg" /> Use Orthogroups</label>
-          <label style="margin-left: 20px;"><input type="checkbox" id="use-goa-files" /> Use all GOA files</label>
-          <button class="boton-secundario btn btn-secondary" id="submit-background" type="button"> Load Background</button>
+          <div class="goa-inline-options">
+            <label><input type="checkbox" id="use-orthogroups-bg" /> Expand to full orthogroups</label>
+            <label><input type="checkbox" id="use-goa-files" /> Use all GOA files</label>
+          </div>
+          <button class="btn btn-secondary" id="submit-background" type="button">
+            <i class="fa-solid fa-upload"></i> Load background
+          </button>
           <div id="bg-msg" class="inline-msg"></div>
         </div>
-  
-        <div style="margin-top: 30px;">
-          <button class="boton-secundario btn btn-primary" id="run-full-go-analysis" type="button" disabled style="opacity: 0.5;">
-            🧬 Analyze
+
+        <!-- ============================================================== -->
+        <!-- Phase D: Analysis settings card                                -->
+        <!-- ============================================================== -->
+        <details class="goa-settings" open>
+          <summary>
+            <span class="goa-settings-title">
+              <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+              Analysis settings
+            </span>
+            <span class="goa-settings-sub">Stringency choices: defaults are sensible. Adjust if you know what you want.</span>
+          </summary>
+
+          <div class="goa-settings-grid">
+            <!-- Evidence quality -->
+            <fieldset class="goa-setting">
+              <legend>
+                Evidence quality
+                <button type="button" class="figure-help-btn" data-help="evidence" aria-label="Help: evidence quality">?</button>
+              </legend>
+              <label class="goa-radio">
+                <input type="radio" name="evidence_preset" value="all" checked>
+                <span><strong>All</strong>: every annotation, including IEA (electronic)</span>
+              </label>
+              <label class="goa-radio">
+                <input type="radio" name="evidence_preset" value="curated">
+                <span><strong>Curated</strong>: experimental + author-statement + PAINT (IBA)</span>
+              </label>
+              <label class="goa-radio">
+                <input type="radio" name="evidence_preset" value="experimental">
+                <span><strong>Experimental only</strong>: strictest (EXP, IDA, IPI, IMP, IGI, IEP, HEP/HDA/HMP/HGI)</span>
+              </label>
+              <div class="figure-help-popover" data-help-for="evidence" hidden>
+                GO annotations carry an <em>evidence code</em>. <strong>All</strong> includes
+                IEA (Inferred from Electronic Annotation): the bulk of annotations in any GOA file,
+                but the lowest quality. <strong>Curated</strong> keeps human-curated entries plus
+                PAINT-derived IBA: a good default if you can spare some recall.
+                <strong>Experimental only</strong> is the safest choice when you have well-annotated
+                model organisms; expect fewer hits but with strong wet-lab support.
+              </div>
+            </fieldset>
+
+            <!-- Orthogroups -->
+            <fieldset class="goa-setting">
+              <legend>
+                Orthogroups
+                <button type="button" class="figure-help-btn" data-help="orthogroups" aria-label="Help: orthogroups">?</button>
+              </legend>
+              <label class="goa-radio">
+                <input type="radio" name="orthogroup_filter" value="all" checked>
+                <span><strong>All orthogroups</strong>: include every orthogroup that overlaps</span>
+              </label>
+              <label class="goa-radio">
+                <input type="radio" name="orthogroup_filter" value="single_copy">
+                <span><strong>Single-copy only</strong>: keep 1:1:1 orthologs (more conservative)</span>
+              </label>
+              <div class="figure-help-popover" data-help-for="orthogroups" hidden>
+                Single-copy orthogroups have <strong>exactly one protein per species</strong>. These are
+                the safest orthology relationships: no risk of conflating paralogs with orthologs.
+                For comparative-functional studies across model organisms, this is a defensible default.
+                For exploratory analyses or when including non-model species, "All orthogroups" gives more recall.
+              </div>
+            </fieldset>
+
+            <!-- Counting -->
+            <fieldset class="goa-setting">
+              <legend>
+                Counting
+                <button type="button" class="figure-help-btn" data-help="counting" aria-label="Help: counting">?</button>
+              </legend>
+              <label class="goa-radio">
+                <input type="radio" name="counting_mode" value="per_protein" checked>
+                <span><strong>Per protein</strong>: each protein counts as one observation (default)</span>
+              </label>
+              <label class="goa-radio">
+                <input type="radio" name="counting_mode" value="per_orthogroup">
+                <span><strong>Per orthogroup</strong>: collapse orthologs into one observation</span>
+              </label>
+              <div class="figure-help-popover" data-help-for="counting" hidden>
+                In "per protein" mode, an orthogroup with 10 members contributes 10 observations to the
+                enrichment statistic. This can <strong>inflate significance</strong> (pseudoreplication).
+                "Per orthogroup" collapses each OG to a single observation: more conservative p-values,
+                but tighter against false positives. Useful when many species share large families.
+              </div>
+            </fieldset>
+          </div>
+        </details>
+
+        <div class="goa-action-row">
+          <button class="btn btn-primary" id="run-full-go-analysis" type="button" disabled>
+            <i class="fa-solid fa-dna"></i> Run GO enrichment
           </button>
         </div>
-        <div id="loading-spinner-analysis" class="hidden" style="text-align:center; margin-top: 10px;">
+
+        <div id="loading-spinner-analysis" class="hidden">
           <div class="spinner"></div>
-          <p style="margin-top: 10px;">Running GO Enrichment…</p>
-        </div>´
+          <span>Running GO enrichment…</span>
+        </div>
 
-        <div id="go-figure-container" style="display: none; text-align: center; margin-top: 20px;">
-          <h3>Figure 9 - Gene Ontology Enrichment Analysis</h3>
-          <p style="font-size: smaller; color: gray;">
-            * This figure displays the enriched GO terms in Biological Process, Cellular Component, and Molecular Function categories.
+        <!-- ============================================================== -->
+        <!-- Phase C: Interactive results: Plotly chart + sortable table    -->
+        <!-- ============================================================== -->
+        <div id="go-results-container" hidden>
+          <h3>Figure 9: Gene Ontology enrichment</h3>
+          <p class="section-helper">
+            Bars show <strong>−log₁₀(FDR)</strong> for each enriched GO term, grouped by namespace.
+            Hover for full names, p-values, and evidence breakdown. Use the table below to filter and export.
           </p>
-          <img src="" alt="Figure 9" id="go-figure-9" style="max-width: 80%; height: auto; border:1px solid #ccc; border-radius:6px;">
-          <div style="margin-top:10px;">
-            <a href="#" id="go-figure-download-link-9" style="display: none; margin-right:20px;">📥 Download Figure 9</a>
-            <a href="#" id="go-excel-download-link-9" style="display: none;">📊 Download GO Enrichment Excel</a>
-          </div>
-        </div>
 
-        <div id="figure-parameters-container" style="display: none; text-align: center; margin-top: 20px;">
-          <h4>Adjust Parameters for Re-Generating Figure 9</h4>
-          <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
-            <div>
-              <label for="depth-input">Depth:</label><br>
-              <input type="number" id="depth-input" min="1" value="2" style="width: 80px;">
+          <!-- Annotation-coverage banner. Populated by JS from response.annotation_stats. -->
+          <div id="go-coverage-banner" class="go-coverage-banner" hidden>
+            <div class="go-coverage-row">
+              <div class="go-coverage-cell">
+                <span class="go-coverage-label">You pasted</span>
+                <span class="go-coverage-value" id="go-cov-input">–</span>
+                <span class="go-coverage-unit">UniProt IDs</span>
+              </div>
+              <div class="go-coverage-cell" id="go-cov-expansion-cell">
+                <span class="go-coverage-label">After orthogroup expansion</span>
+                <span class="go-coverage-value" id="go-cov-expanded">–</span>
+                <span class="go-coverage-unit">proteins</span>
+              </div>
+              <div class="go-coverage-cell">
+                <span class="go-coverage-label">With GO annotations</span>
+                <span class="go-coverage-value" id="go-cov-annotated">–</span>
+                <span class="go-coverage-unit">(<span id="go-cov-pct">–</span>)</span>
+              </div>
+              <div class="go-coverage-cell">
+                <span class="go-coverage-label">Background universe</span>
+                <span class="go-coverage-value" id="go-cov-bg">–</span>
+                <span class="go-coverage-unit">proteins</span>
+              </div>
             </div>
-            <div>
-              <label for="pvalue-input">P-value:</label><br>
-              <input type="number" id="pvalue-input" step="0.01" min="0" max="1" value="0.05" style="width: 80px;">
+            <p class="go-coverage-note" id="go-cov-note"></p>
+          </div>
+
+          <div id="go-plot-controls" class="go-plot-controls">
+            <div class="go-plot-tabs" role="tablist" aria-label="Namespace">
+              <button class="go-ns-btn is-active" data-ns="all" role="tab" aria-selected="true">All</button>
+              <button class="go-ns-btn" data-ns="biological_process" role="tab">Biological Process</button>
+              <button class="go-ns-btn" data-ns="cellular_component" role="tab">Cellular Component</button>
+              <button class="go-ns-btn" data-ns="molecular_function" role="tab">Molecular Function</button>
             </div>
-            <div>
-              <label for="terms-input">Number of Terms:</label><br>
-              <input type="number" id="terms-input" min="1" placeholder="All" style="width: 80px;">
+            <div class="go-plot-actions">
+              <label class="go-plot-limit-label" title="Show only the top N most significant terms in the chart. Use the table below for the full list.">
+                Top
+                <select id="go-plot-limit" aria-label="Bars to show in the chart">
+                  <option value="20" selected>20</option>
+                  <option value="30">30</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="all">All</option>
+                </select>
+                by FDR
+              </label>
+              <button id="go-download-png" class="btn btn-secondary btn-sm" type="button">
+                <i class="fa-solid fa-download"></i> PNG
+              </button>
+              <button id="go-download-svg" class="btn btn-secondary btn-sm" type="button">
+                <i class="fa-solid fa-download"></i> SVG
+              </button>
+              <a id="go-excel-download-link" class="btn btn-secondary btn-sm" href="#" hidden>
+                <i class="fa-solid fa-file-excel"></i> Excel
+              </a>
             </div>
           </div>
-          <button id="regenerate-figure-btn" class="boton-generar btn btn-secondary">
-            Re-Generate Figure 9
-            <span class="btn-spinner" aria-hidden="true"></span>
-          </button>
-          
+
+          <div id="go-plot" class="go-plot"></div>
+          <p id="go-plot-truncation" class="go-plot-truncation" hidden></p>
+
+          <!-- Adjust thresholds — sits RIGHT under the plot so the user can
+               re-run without scrolling to the bottom of the page. -->
+          <div id="figure-parameters-container" class="goa-rerun-bar" hidden>
+            <div class="goa-rerun-inputs">
+              <div class="goa-param">
+                <label for="depth-input">
+                  Min depth
+                  <button type="button" class="figure-help-btn" data-help="rerun-depth" aria-label="Help: minimum GO depth">?</button>
+                </label>
+                <input type="number" id="depth-input" min="1" value="2">
+                <div class="figure-help-popover" data-help-for="rerun-depth" hidden>
+                  Skip GO terms shallower than this depth in the ontology graph.
+                  Depth 1 means top-level categories like "metabolic process"; depth 5+
+                  gives specific terms like "cellular response to oxidative stress".
+                  Useful when the result is dominated by trivially broad terms.
+                </div>
+              </div>
+              <div class="goa-param">
+                <label for="pvalue-input">
+                  P-value (FDR)
+                  <button type="button" class="figure-help-btn" data-help="rerun-pvalue" aria-label="Help: FDR threshold">?</button>
+                </label>
+                <input type="number" id="pvalue-input" step="0.01" min="0" max="1" value="0.05">
+                <div class="figure-help-popover" data-help-for="rerun-pvalue" hidden>
+                  Maximum Benjamini-Hochberg corrected p-value (FDR) for a term to
+                  be considered significant. <code>0.05</code> is the field default;
+                  drop it to <code>0.01</code> for a tighter set, or raise to
+                  <code>0.10</code> when looking at hypothesis-generating exploratory data.
+                </div>
+              </div>
+              <div class="goa-param">
+                <label for="terms-input">
+                  Max terms per NS
+                  <button type="button" class="figure-help-btn" data-help="rerun-terms" aria-label="Help: term cap per namespace">?</button>
+                </label>
+                <input type="number" id="terms-input" min="1" placeholder="All">
+                <div class="figure-help-popover" data-help-for="rerun-terms" hidden>
+                  Keep only the top N significant terms (ranked by FDR) per
+                  namespace (BP, CC, MF). Leave blank for "all". Useful when the
+                  chart has so many bars that labels stop being readable.
+                </div>
+              </div>
+            </div>
+            <button id="regenerate-figure-btn" class="btn btn-primary">
+              <i class="fa-solid fa-rotate"></i> Re-run with new thresholds
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <h3>Enriched terms: interactive table</h3>
+          <div class="go-ev-legend" role="note">
+            <span class="go-ev-legend-label">Evidence tier:</span>
+            <span class="go-ev-chip is-experimental" title="Experimental evidence codes (EXP, IDA, IPI, IMP, IGI, IEP and high-throughput variants). Strongest support.">Experimental</span>
+            <span class="go-ev-chip is-curated" title="Author-statement and PAINT-curated annotations (TAS, IC, IBA, NAS). Medium-strong support.">Curated</span>
+            <span class="go-ev-chip is-computational" title="Inferred from Electronic Annotation and sequence-similarity codes (IEA, ISS, ISA, ISM, ISO). Lowest confidence.">Computational</span>
+          </div>
+          <div class="go-table-toolbar">
+            <input type="search" id="go-table-search" placeholder="Filter by name or GO ID…" aria-label="Filter terms" />
+            <div class="go-chip-filters">
+              <button class="go-chip is-active" data-ns="all">All</button>
+              <button class="go-chip" data-ns="biological_process">BP</button>
+              <button class="go-chip" data-ns="cellular_component">CC</button>
+              <button class="go-chip" data-ns="molecular_function">MF</button>
+            </div>
+            <label class="go-range-label">
+              FDR ≤ <input type="number" id="go-fdr-input" step="0.01" min="0" max="1" value="0.05" />
+            </label>
+            <label class="go-range-label">
+              Depth ≥ <input type="number" id="go-depth-input" min="0" value="0" />
+            </label>
+            <label class="go-range-label" title="How many rows to show on screen. Use the search box and filters to narrow down before showing more.">
+              Show
+              <select id="go-page-size" aria-label="Rows to show">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+              </select>
+            </label>
+            <div class="go-table-export">
+              <button class="btn btn-secondary btn-sm" data-export="csv" type="button">CSV</button>
+              <button class="btn btn-secondary btn-sm" data-export="tsv" type="button">TSV</button>
+              <button class="btn btn-secondary btn-sm" data-export="json" type="button">JSON</button>
+            </div>
+          </div>
+
+          <!-- "Showing X of Y" counter sits between the toolbar and the table -->
+          <div class="go-table-meta">
+            <span id="go-table-counter" class="go-table-counter">n/a</span>
+          </div>
+
+          <div class="go-table-wrap">
+            <table id="go-table">
+              <thead>
+                <tr>
+                  <th data-sort="GO"
+                      title="The GO term identifier (e.g. GO:0006412). Click the link in the cell to open the term in AmiGO.">
+                    GO ID <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="name"
+                      title="The human-readable name of the GO term (e.g. 'translation').">
+                    Name <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="namespace"
+                      title="GO namespace: BP (Biological Process), CC (Cellular Component), or MF (Molecular Function).">
+                    NS <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="depth" class="num"
+                      title="Depth of the term in the GO ontology graph. 0 = ontology root; 5+ = very specific terms.">
+                    Depth <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="study_count" class="num"
+                      title="study_count / study_n: how many of your foreground proteins are annotated with this term, out of how many were tested.">
+                    Study <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="pop_count" class="num"
+                      title="pop_count / pop_n: how many proteins in the background (universe) are annotated with this term, out of how many were tested.">
+                    Pop <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="neg_log10_fdr" class="num"
+                      title="−log₁₀ of the Benjamini-Hochberg FDR p-value. Higher = more significant. 1.3 ≈ FDR 0.05; 2 = 0.01; 5 = 1e-5.">
+                    −log₁₀FDR <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th title="Breakdown of GO evidence codes contributing to this term among your foreground proteins. Hover any chip for the code name.">
+                    Evidence <span class="go-th-hint">(?)</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <p id="go-table-empty" class="go-table-empty" hidden>No terms match the current filters.</p>
+          </div>
         </div>
-        
       </div>
-    </div>
+    </section>
+
+    {% include '_provenance.html' %}
+
   </main>
 
-  <footer>
-    <div>
-      &copy; 2025 OrthoGather. All rights reserved.
-    </div>
-    <div class="social-icons">
-      <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
-      <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">FAQ</a>
-      <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">Contact</a>
-    </div>
-  </footer>
+  <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+    <div class="spinner" aria-hidden="true"></div>
+  </div>
 
-  
+  </div><!-- /.app-shell -->
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // ── Point 11 (v3): Auto-generate tree on page load + manual Refresh ──
+      // The user lands on the results page and immediately sees the taxonomic
+      // context of the species in this analysis. The button remains so they
+      // can refresh (re-fetch on demand if they suspect cache staleness).
+      (function wireTaxonomyTree() {
+        const btn = document.getElementById("taxGenerateBtn");
+        if (!btn) return;
+        const label = document.getElementById("taxGenerateBtnLabel");
+        const treeEl = document.getElementById("taxTree");
+        const actions = document.getElementById("taxActions");
+        // Single source of truth: the SAME endpoint the Protein Analysis page
+        // uses (/api/session_species_taxids). Both views therefore render an
+        // identical tree from the active session's species — no divergence
+        // between the GO inline-JSON list and the Protein Analysis list.
+        async function runFetchAndRender() {
+          if (!(window.OGTaxonomyTree && window.d3)) return;
+          btn.disabled = true;
+          const svgHost = document.getElementById("taxTreeSvg");
+          if (treeEl) treeEl.hidden = false;
+          if (svgHost) svgHost.innerHTML = `<div class="tax-tree-loading">Fetching lineages…</div>`;
+          try {
+            const s = await fetch("/api/session_species_taxids").then(r => r.json());
+            const sp = (s.species || []).filter(x => x.taxon_id && /^\d+$/.test(x.taxon_id));
+            if (sp.length < 2) {
+              if (svgHost) svgHost.innerHTML = `<div class="tax-tree-empty">Need ≥ 2 species with valid taxon IDs.</div>`;
+              if (label) label.textContent = "Not enough species";
+              return;
+            }
+            const resp = await OGTaxonomyTree.fetchTree(sp);
+            if (!resp || !resp.success || !resp.tree) {
+              if (svgHost) svgHost.innerHTML = `<div class="tax-tree-empty">${(resp && resp.message) || "Tree unavailable"}</div>`;
+              return;
+            }
+            if (svgHost) svgHost.innerHTML = "";
+            OGTaxonomyTree.render({ containerId: "taxTreeSvg", treeData: resp.tree });
+            if (actions) actions.hidden = false;
+            // Wire Expand → lightbox
+            const ex = document.getElementById("taxExpandBtn");
+            if (ex) {
+              const fresh = ex.cloneNode(true);
+              ex.parentNode.replaceChild(fresh, ex);
+              fresh.addEventListener("click", () => OGTaxonomyTree.openLightbox(resp.tree, { title: `Taxonomic tree — ${sp.length} species` }));
+            }
+            const dl = document.getElementById("taxDownloadNewickBtn");
+            if (dl) {
+              const fresh = dl.cloneNode(true);
+              dl.parentNode.replaceChild(fresh, dl);
+              fresh.addEventListener("click", () => OGTaxonomyTree.downloadNewick(resp.newick, sp.length));
+            }
+            const rv = document.getElementById("taxResetViewBtn");
+            if (rv) {
+              const fresh = rv.cloneNode(true);
+              rv.parentNode.replaceChild(fresh, rv);
+              fresh.addEventListener("click", () => {
+                const tEl = document.getElementById("taxTreeSvg");
+                if (tEl && typeof tEl.__resetZoom === "function") tEl.__resetZoom();
+              });
+            }
+            if (label) label.textContent = `Refresh tree (${sp.length} species)`;
+          } catch (e) {
+            console.error(e);
+            if (svgHost) svgHost.innerHTML = `<div class="tax-tree-empty">Network error.</div>`;
+          } finally {
+            btn.disabled = false;
+          }
+        }
+
+        // Manual refresh button + auto-fire on page load.
+        // Manual refresh button always works.
+        btn.addEventListener("click", runFetchAndRender);
+
+        // Lazy-fire: only fetch + render the first time the user opens the
+        // collapse (closed by default). Saves a round-trip + d3 layout for
+        // users who never open it, and keeps the page from being dominated by
+        // a large dendrogram.
+        const collapse = document.getElementById("taxCollapse");
+        if (collapse) {
+          let fired = false;
+          collapse.addEventListener("toggle", () => {
+            if (collapse.open && !fired) {
+              fired = true;
+              runFetchAndRender();
+            }
+          });
+        }
+
+        // "Hide taxonomic tree" button at the bottom of the open tree. Capture
+        // the summary's absolute Y BEFORE collapsing, then scroll there after
+        // the layout settles — otherwise the page shortens and the browser
+        // clamps scrollY to the new bottom, cancelling a naive scrollIntoView.
+        const closeBtn = document.getElementById("taxCollapseCloseBtn");
+        if (closeBtn && collapse) {
+          closeBtn.addEventListener("click", () => {
+            const sum = collapse.querySelector(".tax-collapse-summary");
+            const targetY = sum
+              ? window.scrollY + sum.getBoundingClientRect().top - 16
+              : 0;
+            collapse.open = false;
+            requestAnimationFrame(() => {
+              window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+            });
+          });
+        }
+      })();
+
       const statusMsg   = document.getElementById("status-message");
       const downloadBtn = document.getElementById("download-btn");
-  
+
       const distContainer = document.getElementById("go-distribution-container");
-      const distImg       = document.getElementById("go-distribution-img");
+      const distPlotEl    = document.getElementById("go-distribution-plot");
+      const distSummaryEl = document.getElementById("go-distribution-summary");
       const dlExcelBtn    = document.getElementById("download-goa-excel");
       const toggleGO      = document.getElementById("toggle-go-analysis");
       const goBlock       = document.getElementById("go-analysis-block");
-  
+
       const fgTextArea    = document.getElementById("foreground-ids");
       const fgCheckbox    = document.getElementById("use-orthogroups-fg");
       const submitForegroundBtn = document.getElementById("submit-foreground");
       const fgMsg         = document.getElementById("fg-msg");
-  
+
       const bgBlock       = document.getElementById("background-block");
       const bgTextArea    = document.getElementById("background-ids");
       const bgCheckbox    = document.getElementById("use-orthogroups-bg");
       const useGOACheck   = document.getElementById("use-goa-files");
       const submitBackgroundBtn = document.getElementById("submit-background");
       const bgMsg         = document.getElementById("bg-msg");
-  
+
       const runAnalysisBtn = document.getElementById("run-full-go-analysis");
       const loadingSpinner = document.getElementById("loading-spinner-analysis");
-  
+
       function setStatus(text, kind = "info") {
         if (kind === "ok") {
           showStatus("status-message", "success", text);
@@ -642,48 +768,44 @@
           showStatus("status-message", "info", text);
         }
       }
-  
+
+      // Clean stray 'total' row
       document.querySelectorAll('#species-table tbody tr').forEach(tr => {
         const first = tr.querySelector('td');
         if (first && first.textContent.trim().toLowerCase() === 'total') tr.remove();
       });
-  
+
+      // ------------------------------------------------------------------
+      // Hover-box tooltips for species names
+      // ------------------------------------------------------------------
       function positionTooltipForBox(box, tip) {
         if (!box || !tip) return;
-  
         box.classList.add("show-tip");
         tip.style.visibility = "hidden";
         tip.style.opacity = "0";
         tip.style.left = "0px";
         tip.style.top  = "0px";
-  
         const pad = 8;
         const boxRect = box.getBoundingClientRect();
         const tipRect = tip.getBoundingClientRect();
-  
         let left = boxRect.left + (boxRect.width - tipRect.width) / 2;
         let top  = boxRect.top - tipRect.height - pad;
-
         if (top < pad) top = boxRect.bottom + pad;
-  
         if (left < pad) left = pad;
         const maxLeft = window.innerWidth - tipRect.width - pad;
         if (left > maxLeft) left = Math.max(pad, maxLeft);
-  
         tip.style.left = `${left}px`;
         tip.style.top  = `${top}px`;
         tip.style.visibility = "visible";
         tip.style.opacity = "1";
       }
-  
+
       function wireOneHoverBox(box) {
         if (!box || box.dataset.bound === "1") return;
         box.dataset.bound = "1";
         const tip = box.querySelector(".name-tooltip");
         if (!tip) return;
-  
         let over = false;
-  
         const onEnter = () => {
           over = true;
           tip.style.zIndex = "9999";
@@ -691,7 +813,6 @@
             if (over) positionTooltipForBox(box, tip);
           });
         };
-  
         const onLeave = () => {
           over = false;
           box.classList.remove("show-tip");
@@ -701,61 +822,91 @@
           tip.style.top = "";
           tip.style.zIndex = "";
         };
-
         const onReposition = () => {
-          if (!over) return;
-          positionTooltipForBox(box, tip);
+          if (over) positionTooltipForBox(box, tip);
         };
-  
         box.addEventListener("mouseenter", onEnter);
         box.addEventListener("mouseleave", onLeave);
         window.addEventListener("scroll", onReposition, { passive: true });
         window.addEventListener("resize", onReposition);
       }
-  
+
       function wireTooltips(scope = document) {
         scope.querySelectorAll(".hover-box").forEach(wireOneHoverBox);
       }
       wireTooltips();
-  
+
+      // ------------------------------------------------------------------
+      // Help "?" popovers (Analysis settings card)
+      // ------------------------------------------------------------------
+      document.querySelectorAll('.figure-help-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = btn.dataset.help;
+          const pop = document.querySelector(`.figure-help-popover[data-help-for="${key}"]`);
+          if (!pop) return;
+          // Toggle this one, close others
+          document.querySelectorAll('.figure-help-popover').forEach(p => {
+            if (p !== pop) p.hidden = true;
+          });
+          pop.hidden = !pop.hidden;
+        });
+      });
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.figure-help-popover, .figure-help-btn')) return;
+        document.querySelectorAll('.figure-help-popover').forEach(p => p.hidden = true);
+      });
+
+      // ------------------------------------------------------------------
+      // Fix species — accepts Taxon ID *or* species name (Phase A)
+      // ------------------------------------------------------------------
       function bindFixButtons() {
         document.querySelectorAll(".fix-btn").forEach(btn => {
           if (btn.dataset.bound === "1") return;
           btn.dataset.bound = "1";
-  
+
           btn.addEventListener("click", async (e) => {
             const row = e.currentTarget.closest("tr");
             const original = row?.dataset?.original;
-            const input = row.querySelector(".taxon-input");
-            const taxon_id = input?.value?.trim();
-  
+            const input = row.querySelector(".fix-input") || row.querySelector(".taxon-input");
+            const raw = input?.value?.trim();
+
             if (!original) return;
-            if (!taxon_id) {
-              setStatus("⚠️ Please enter a Taxon ID.", "error");
+            if (!raw) {
+              setStatus("⚠️ Please enter a Taxon ID or a species name.", "error");
               return;
             }
-  
+
+            // Decide payload: if pure digits → taxon_id, else species_name
+            const payload = { original };
+            if (/^\d+$/.test(raw)) {
+              payload.taxon_id = raw;
+            } else {
+              payload.species_name = raw;
+            }
+
             btn.disabled = true;
             input.disabled = true;
-            setStatus(`⏳ Resolving Taxon ID ${taxon_id} for “${original}”...`);
-  
+            setStatus(`⏳ Resolving "${raw}" for "${original}"...`);
+
             try {
               const res = await fetch("/fix_taxid", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ taxon_id, original })
+                body: JSON.stringify(payload)
               });
-              const data = await res.json();
-  
+              const respData = await res.json();
+              const data = respData?.payload || respData;  // tolerate wrapped/unwrapped
+
               const statusCell = row.querySelector(".status-cell");
               const goaCell    = row.querySelector(".goa-cell");
-  
+
               if (data.found) {
-                const label = data.label || taxon_id;
+                const label = data.label || raw;
                 if (statusCell) {
                   statusCell.innerHTML =
                     `<span class="ok clip">
-                       ✔
+                       <i class="fa-solid fa-check"></i>
                        <span class="hover-box">
                          <span class="name-ellipsis">${label}</span>
                          <span class="name-tooltip" role="tooltip">${label}</span>
@@ -766,34 +917,37 @@
                 if (goaCell) {
                   const hasFile = data.has_file && data.file_url && data.file_url !== "NA";
                   goaCell.innerHTML = hasFile
-                    ? `<span class="ok icon" aria-label="GOA file found">✔</span>
+                    ? `<span class="ok icon" aria-label="GOA file found"><i class="fa-solid fa-check"></i></span>
                        <input type="hidden" class="file-url" value="${data.file_url}">`
-                    : `<span class="fail icon" aria-label="GOA file missing">✘</span>
+                    : `<span class="fail icon" aria-label="GOA file missing"><i class="fa-solid fa-xmark"></i></span>
                        <input type="hidden" class="file-url" value="">`;
                 }
                 const fixCell = btn.parentElement;
-                if (fixCell) fixCell.innerHTML = "✅";
-                setStatus("✅ Taxon fixed and GOA file mapped.", "ok");
+                if (fixCell) fixCell.innerHTML = '<i class="fa-solid fa-check-double text-success" aria-label="OK"></i>';
+                setStatus("✅ Match resolved.", "ok");
               } else {
-                if (statusCell) statusCell.innerHTML = `<span class="fail">✘ No match</span>`;
+                if (statusCell) statusCell.innerHTML = `<span class="fail"><i class="fa-solid fa-xmark"></i> No match</span>`;
                 if (goaCell) {
-                  goaCell.innerHTML = `<span class="fail icon">✘</span><input type="hidden" class="file-url" value="">`;
+                  goaCell.innerHTML = `<span class="fail icon"><i class="fa-solid fa-xmark"></i></span><input type="hidden" class="file-url" value="">`;
                 }
                 btn.disabled = false;
                 input.disabled = false;
-                setStatus("⚠️ No match for that Taxon ID.", "error");
+                setStatus("⚠️ No match for that value.", "error");
               }
             } catch (err) {
               console.error(err);
               btn.disabled = false;
               input.disabled = false;
-              setStatus("❌ Error fixing Taxon ID.", "error");
+              setStatus("❌ Error resolving species.", "error");
             }
           });
         });
       }
       bindFixButtons();
-  
+
+      // ------------------------------------------------------------------
+      // Download GOA files
+      // ------------------------------------------------------------------
       if (downloadBtn) {
         downloadBtn.addEventListener("click", async () => {
           const rows = document.querySelectorAll("#species-table tbody tr");
@@ -805,41 +959,131 @@
               species_to_url[species] = url;
             }
           });
-  
-          if (Object.keys(species_to_url).length === 0) {
-            setStatus("⚠️ No GOA URLs found in table. Fix missing Taxon IDs or matches.", "error");
+
+          const total = Object.keys(species_to_url).length;
+          if (total === 0) {
+            setStatus("⚠️ No GOA URLs found in table. Fix missing matches first.", "error");
             return;
           }
-  
-          setButtonLoading("download-btn", true, { textLoading: "Preparing..." });
-          setStatus("⏳ Preparing GOA Excel...");
-  
+
+          // Live progress UI: spinner + "k / total species" counter, driven by
+          // the Server-Sent Events streamed from /download_goa_files.
+          const progEl  = document.getElementById("goa-download-progress");
+          const doneEl  = document.getElementById("goa-dl-done");
+          const totalEl = document.getElementById("goa-dl-total");
+          const textEl  = document.getElementById("goa-dl-text");
+          if (totalEl) totalEl.textContent = total;
+          if (doneEl)  doneEl.textContent  = "0";
+          if (textEl)  textEl.textContent  = "Downloading GOA files…";
+          if (progEl)  progEl.hidden = false;
+
+          setButtonLoading("download-btn", true);
+          if (window.OG && OG.clearStatus) OG.clearStatus("status-message");
+          const noticeEl = document.getElementById("goa-download-notice");
+          if (noticeEl) { noticeEl.hidden = true; noticeEl.innerHTML = ""; }
+
           try {
             const res = await fetch("/download_goa_files", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ species_to_url })
             });
-            const result = await res.json();
-            if (!result.success) throw new Error(result.message || "GOA preparation failed");
-  
-            setStatus("🖼️ Generating figure...");
+            if (!res.ok || !res.body) throw new Error("Download request failed");
+
+            // Parse the SSE stream manually (EventSource is GET-only; we need POST
+            // for the large species→URL body). Events are "data: {...}\n\n".
+            const reader  = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+            let finalEvent = null;
+
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              let sep;
+              while ((sep = buffer.indexOf("\n\n")) !== -1) {
+                const frame = buffer.slice(0, sep);
+                buffer = buffer.slice(sep + 2);
+                const dataLine = frame.split("\n").find(l => l.startsWith("data:"));
+                if (!dataLine) continue;
+                let evt;
+                try { evt = JSON.parse(dataLine.slice(5).trim()); } catch (e) { continue; }
+
+                if (evt.phase === "start") {
+                  if (totalEl) totalEl.textContent = evt.total;
+                  if (doneEl)  doneEl.textContent  = "0";
+                } else if (evt.phase === "progress") {
+                  if (doneEl)  doneEl.textContent  = evt.done;
+                  if (totalEl) totalEl.textContent = evt.total;
+                } else if (evt.phase === "excel") {
+                  if (textEl) textEl.textContent = "Building GOA Excel…";
+                } else if (evt.phase === "done") {
+                  finalEvent = evt;
+                } else if (evt.phase === "error") {
+                  throw new Error(evt.reason || "GOA download failed");
+                }
+              }
+            }
+
+            if (!finalEvent || !finalEvent.success) {
+              throw new Error("GOA preparation did not complete");
+            }
+
+            if (textEl) textEl.textContent = "Computing annotation distribution…";
             const gen = await fetch("/generate_go_image", { method: "POST" });
             const data = await gen.json();
-            if (!data.success || !data.image_file_path) throw new Error(data.message || "Image generation failed");
-  
-            if (distImg) distImg.src = `/static/plots/${data.image_file_path}?t=${Date.now()}`;
-            if (distContainer) distContainer.style.display = "block";
-  
-            if (dlExcelBtn) dlExcelBtn.classList.remove("hidden");
-            if (toggleGO) toggleGO.classList.remove("hidden");
-  
-            setStatus("✅ Ready. You can proceed to G.O Analysis.", "ok");
+            if (!data.success || !data.distribution) {
+              throw new Error(data.message || "Could not compute annotation distribution");
+            }
+            renderAnnotationDistribution(data.distribution);
+            if (distContainer) distContainer.hidden = false;
+
+            if (dlExcelBtn) dlExcelBtn.hidden = false;
+            if (toggleGO) toggleGO.hidden = false;
+
+            const okCount = (finalEvent.downloaded != null) ? finalEvent.downloaded : total;
+            const parts = [`${okCount}/${total} GOA files downloaded`];
+            if (finalEvent.missing) parts.push(`${finalEvent.missing} not available at EBI`);
+            if (finalEvent.failed)  parts.push(`${finalEvent.failed} network error${finalEvent.failed > 1 ? "s" : ""}`);
+            const kind = finalEvent.failed ? "info" : "ok";
+            const tail = finalEvent.failed
+              ? " Re-run the download to retry the network errors."
+              : " You can proceed to GO analysis.";
+            setStatus(`✅ Ready. ${parts.join(" · ")}.${tail}`, kind);
+
+            // Spell out exactly which species came up short, so the user knows
+            // which ones won't carry GO annotations into the analysis.
+            const esc = (s) => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+            const blocks = [];
+            const missingSp = finalEvent.missing_species || [];
+            const failedSp  = finalEvent.failed_species  || [];
+            if (missingSp.length) {
+              blocks.push(
+                `<div class="goa-notice-block">
+                   <span class="goa-notice-head"><i class="fa-solid fa-circle-info"></i> No GOA file at EBI (${missingSp.length})</span>
+                   <span class="goa-notice-list">${missingSp.map(esc).join(", ")}</span>
+                   <span class="goa-notice-hint">These species have no annotation file in EBI's GOA set, so they contribute no GO terms.</span>
+                 </div>`);
+            }
+            if (failedSp.length) {
+              blocks.push(
+                `<div class="goa-notice-block goa-notice-block--warn">
+                   <span class="goa-notice-head"><i class="fa-solid fa-triangle-exclamation"></i> Network error (${failedSp.length})</span>
+                   <span class="goa-notice-list">${failedSp.map(esc).join(", ")}</span>
+                   <span class="goa-notice-hint">Temporary download failure — re-run "Download GOA files" to retry these.</span>
+                 </div>`);
+            }
+            if (noticeEl && blocks.length) {
+              noticeEl.innerHTML = blocks.join("");
+              noticeEl.hidden = false;
+            }
           } catch (error) {
             console.error("GOA flow error:", error);
             setStatus("❌ Error preparing GOA analysis.", "error");
           } finally {
             setButtonLoading("download-btn", false);
+            if (progEl) progEl.hidden = true;
           }
         });
       }
@@ -847,11 +1091,13 @@
       if (toggleGO) {
         toggleGO.addEventListener("click", () => {
           if (!goBlock) return;
-          const visible = goBlock.style.display !== "none";
-          goBlock.style.display = visible ? "none" : "block";
-          toggleGO.textContent = visible ? "🔬 G.O Analysis" : "🔽 Hide G.O Analysis";
-  
-          if (!visible) {
+          const visible = !goBlock.hasAttribute("hidden");
+          if (visible) {
+            goBlock.setAttribute("hidden", "");
+            toggleGO.innerHTML = '<i class="fa-solid fa-microscope"></i> Continue to GO enrichment';
+          } else {
+            goBlock.removeAttribute("hidden");
+            toggleGO.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Hide GO enrichment';
             requestAnimationFrame(() => {
               goBlock.scrollIntoView({ behavior: "smooth", block: "start" });
             });
@@ -859,6 +1105,20 @@
         });
       }
 
+      // ------------------------------------------------------------------
+      // Settings readers
+      // ------------------------------------------------------------------
+      function readSetting(name, fallback) {
+        const el = document.querySelector(`input[name="${name}"]:checked`);
+        return el ? el.value : fallback;
+      }
+      function readSingleCopyOnly() {
+        return readSetting("orthogroup_filter", "all") === "single_copy";
+      }
+
+      // ------------------------------------------------------------------
+      // Foreground submit
+      // ------------------------------------------------------------------
       if (submitForegroundBtn) {
         submitForegroundBtn.addEventListener("click", async () => {
           const ids = fgTextArea.value.trim().split(/\s+/).filter(Boolean);
@@ -866,28 +1126,27 @@
             showStatus("fg-msg", "error", "Please paste at least one UniProt ID for the foreground.");
             return;
           }
-  
+
           setButtonLoading("submit-foreground", true, { textLoading: "Saving..." });
           showStatus("fg-msg", "info", "Saving Foreground...");
-  
+
           try {
             const res = await fetch("/foreground_analysis", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 uniprot_ids: ids,
-                use_orthogroups: !!fgCheckbox?.checked
+                use_orthogroups: !!fgCheckbox?.checked,
+                single_copy_only: readSingleCopyOnly()
               })
             });
             if (!res.ok) throw new Error("Foreground save failed");
-  
+
             if (bgBlock) {
-              bgBlock.style.opacity = "1";
-              bgBlock.style.pointerEvents = "auto";
+              bgBlock.classList.remove("is-disabled");
             }
             showStatus("fg-msg", "success", "Foreground saved.");
             window.foregroundUniProtIDs = ids;
-            console.log("[FG] Saved globally foreground IDs:", window.foregroundUniProtIDs);
           } catch (err) {
             console.error(err);
             showStatus("fg-msg", "error", "Error saving Foreground.");
@@ -896,7 +1155,7 @@
           }
         });
       }
-  
+
       if (useGOACheck) {
         useGOACheck.addEventListener("change", function () {
           if (this.checked) {
@@ -907,26 +1166,30 @@
           }
         });
       }
-  
+
+      // ------------------------------------------------------------------
+      // Background submit
+      // ------------------------------------------------------------------
       if (submitBackgroundBtn) {
         submitBackgroundBtn.addEventListener("click", async () => {
           const useGOAFiles = !!useGOACheck?.checked;
           const ids = bgTextArea.value.trim().split(/\s+/).filter(Boolean);
-  
+
           if (!useGOAFiles && ids.length === 0) {
             showStatus("bg-msg", "error", "Please paste UniProt IDs for the background or tick 'Use all GOA files'.");
             return;
           }
-  
+
           const payload = {
             background_choice: useGOAFiles ? "5" : "4",
             use_orthogroups: !!bgCheckbox?.checked,
+            single_copy_only: readSingleCopyOnly(),
             custom_uniprot_ids: useGOAFiles ? [] : ids
           };
-  
+
           setButtonLoading("submit-background", true, { textLoading: "Saving..." });
           showStatus("bg-msg", "info", "Saving Background...");
-  
+
           try {
             const res = await fetch("/background_analysis", {
               method: "POST",
@@ -934,15 +1197,13 @@
               body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error("Background save failed");
-  
+
             if (runAnalysisBtn) {
               runAnalysisBtn.disabled = false;
               runAnalysisBtn.style.opacity = "1";
             }
             showStatus("bg-msg", "success", "Background saved. You can run the GO enrichment now.");
-            // 🔹 Guardar en global
             window.backgroundIDs = useGOAFiles ? "ALL_GOAS" : ids;
-            console.log("[BG] Saved globally background IDs:", window.backgroundIDs);
           } catch (err) {
             console.error(err);
             showStatus("bg-msg", "error", "Error saving Background.");
@@ -952,190 +1213,673 @@
         });
       }
 
-      function pickImagePath(resp) {
-        const p = resp?.payload || {};
-        return p.image_file_path || p.image_path || resp.image_file_path || resp.image_path || resp.image || null;
+      // ------------------------------------------------------------------
+      // GO analysis run — now wires Plotly + interactive table
+      // ------------------------------------------------------------------
+      const NS_COLOR = {
+        biological_process: "#1f77b4",
+        cellular_component: "#4CB44C",
+        molecular_function: "#ce4242"
+      };
+      const NS_LABEL = {
+        biological_process: "BP",
+        cellular_component: "CC",
+        molecular_function: "MF"
+      };
+
+      // Holds the last analysis response so the table/filters can refresh without
+      // a refetch.
+      window.__goResults = { all: [], settings: null, excelUrl: null };
+
+      // -----------------------------------------------------------------
+      // Annotation-distribution chart (Point 10, v2) — Plotly 2-panel.
+      // The v1 4-panel layout had redundant pairs (boxplot ≈ histogram of the
+      // same series, with-zero ≈ without-zero). v2 replaces it with the two
+      // scientifically distinct views a reviewer actually asks for:
+      //   (a) stacked histogram of nonzero OGs, coloured by how many
+      //       *annotated species* contributed proteins to each OG. Tells you
+      //       whether the annotation signal is broad-based or concentrated
+      //       in one well-studied species.
+      //   (b) horizontal bar of total annotated proteins per species, sorted
+      //       desc. Makes the "who's doing the work?" question explicit.
+      // -----------------------------------------------------------------
+      function renderAnnotationDistribution(dist) {
+        if (!dist || !window.Plotly) return;
+
+        const sAll = dist.stats_all     || {};
+        const sNz  = dist.stats_nonzero || {};
+        const strat   = dist.stratified || {};
+        const nAnnotatedSpecies = Number.isFinite(dist.n_annotated_species) ? dist.n_annotated_species : 0;
+        const nZeroOG = Number.isFinite(dist.n_zero_og) ? dist.n_zero_og : ((sAll.n || 0) - (sNz.n || 0));
+
+        // --- Summary cards (refreshed sub-labels) -----------------------
+        if (distSummaryEl) {
+          distSummaryEl.innerHTML = `
+            <div class="go-dist-stat">
+              <span class="go-dist-stat-label">Orthogroups</span>
+              <span class="go-dist-stat-value">${(sAll.n || 0).toLocaleString()}</span>
+              <span class="go-dist-stat-sub">${nZeroOG.toLocaleString()} have 0% annotation</span>
+            </div>
+            <div class="go-dist-stat">
+              <span class="go-dist-stat-label">With ≥ 1% annotation</span>
+              <span class="go-dist-stat-value">${(sNz.n || 0).toLocaleString()}</span>
+              <span class="go-dist-stat-sub">
+                ${sAll.n ? Math.round(100 * sNz.n / sAll.n) : 0}% of total
+              </span>
+            </div>
+            <div class="go-dist-stat">
+              <span class="go-dist-stat-label">Median annotation %</span>
+              <span class="go-dist-stat-value">${(sNz.median || 0).toFixed(1)}%</span>
+              <span class="go-dist-stat-sub">among annotated OGs</span>
+            </div>
+            <div class="go-dist-stat">
+              <span class="go-dist-stat-label">Annotated species</span>
+              <span class="go-dist-stat-value">${nAnnotatedSpecies.toLocaleString()}</span>
+              <span class="go-dist-stat-sub">had a GOA file</span>
+            </div>
+          `;
+        }
+
+        // Sequential palette (light → dark) so "more species contributing"
+        // reads as "more solid evidence" at a glance.
+        const STRATUM_COLORS = ["#cfe2f3", "#9ec5e8", "#6fa8dc", "#3d85c6", "#0b5394"];
+
+        const strata     = strat.strata     || [];
+        const counts     = strat.counts     || [];
+        const binLabels  = strat.bin_labels || [];
+
+        const histTraces = strata.map((label, i) => ({
+          type: "bar",
+          name: label,
+          x: binLabels,
+          y: counts[i] || [],
+          marker: {
+            color: STRATUM_COLORS[i] || STRATUM_COLORS[STRATUM_COLORS.length - 1],
+            line:  { color: "#0b3d6c", width: 0.5 },
+          },
+          hovertemplate:
+            `<b>${label}</b><br>` +
+            "Annotation: %{x}%<br>" +
+            "OGs: %{y}<extra></extra>",
+          xaxis: "x1", yaxis: "y1",
+        }));
+
+        // Locate median + mean on the categorical x-axis by bin index.
+        const binIndexFor = (pct) => {
+          if (!Number.isFinite(pct)) return 0;
+          return Math.min(Math.floor(pct / 10), Math.max(binLabels.length - 1, 0));
+        };
+        const medianBin = binIndexFor(sNz.median);
+        const meanBin   = binIndexFor(sNz.mean);
+
+        // Panel (b) (per-species annotated-protein bars) was dropped: it mostly
+        // restated that model organisms are better annotated — expected, and it
+        // doubled the figure height. The histogram alone carries the QC signal,
+        // and it now lives behind a collapse so it stays out of the main flow.
+        const filenameStem = (typeof descriptiveFilename === "function")
+          ? descriptiveFilename("GOA-annotation-distribution", "", [`${sAll.n}OGs`])
+          : "GOA-annotation-distribution";
+
+        // Stash and draw lazily — the chart sits inside a closed <details>, and
+        // Plotly sizes to 0 width if drawn while hidden.
+        _annotChart = { traces: histTraces, filenameStem, medianBin, meanBin,
+                        median: sNz.median || 0, mean: sNz.mean || 0 };
+        _annotChartDrawn = false;
+        drawAnnotChartIfVisible();
       }
-      function pickExcelPath(resp) {
-        const p = resp?.payload || {};
-        return p.excel_file_path || resp.excel_file_path || null;
+
+      // Single-panel histogram, drawn the first time it becomes visible (from
+      // renderAnnotationDistribution if already open, else from the collapse).
+      let _annotChart = null;
+      let _annotChartDrawn = false;
+
+      function drawAnnotChartIfVisible() {
+        if (_annotChartDrawn || !_annotChart || !window.Plotly) return;
+        const gd = document.getElementById("go-distribution-plot");
+        if (!gd || gd.offsetParent === null) return;  // collapse still closed
+        const c = _annotChart;
+        const layout = {
+          height: 340,
+          margin: { l: 64, r: 24, t: 44, b: 56 },
+          barmode: "stack",
+          paper_bgcolor: "rgba(0,0,0,0)",
+          plot_bgcolor:  "rgba(0,0,0,0)",
+          legend: {
+            title: { text: "<b># species in OG</b>" },
+            orientation: "h",
+            x: 0, y: 1.0, xanchor: "left", yanchor: "bottom",
+            bgcolor: "rgba(0,0,0,0)",
+          },
+          annotations: [
+            { x: c.medianBin, y: 0.97, xref: "x", yref: "y domain",
+              text: `<b>Median</b> ${c.median.toFixed(1)}%`,
+              showarrow: false, font: { size: 11, color: "#c0392b" },
+              bgcolor: "rgba(255,255,255,0.85)", borderpad: 2,
+              xanchor: "center", yanchor: "top" },
+            { x: c.meanBin, y: 0.86, xref: "x", yref: "y domain",
+              text: `<b>Mean</b> ${c.mean.toFixed(1)}%`,
+              showarrow: false, font: { size: 11, color: "#1f5f9c" },
+              bgcolor: "rgba(255,255,255,0.85)", borderpad: 2,
+              xanchor: "center", yanchor: "top" },
+          ],
+          shapes: [
+            { type: "line", xref: "x", yref: "y domain",
+              x0: c.medianBin, x1: c.medianBin, y0: 0, y1: 1,
+              line: { color: "#c0392b", width: 2, dash: "dash" } },
+            { type: "line", xref: "x", yref: "y domain",
+              x0: c.meanBin, x1: c.meanBin, y0: 0, y1: 1,
+              line: { color: "#1f5f9c", width: 2, dash: "dot" } },
+          ],
+          xaxis: { title: "Annotation % per orthogroup", tickfont: { size: 11 } },
+          yaxis: { title: "Number of orthogroups", gridcolor: "#eee" },
+        };
+        const config = {
+          responsive: true,
+          displaylogo: false,
+          toImageButtonOptions: { format: "png", filename: c.filenameStem, scale: 2 },
+          modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        };
+        Plotly.newPlot("go-distribution-plot", c.traces, layout, config);
+        _annotChartDrawn = true;
       }
-      function ensureAbsolute(url) {
-        if (!url) return null;
-        return url.startsWith("/") ? url : `/${url}`;
-      }
 
-      if (runAnalysisBtn) {
-        runAnalysisBtn.addEventListener("click", async () => {
-          setButtonLoading("run-full-go-analysis", true, { textLoading: "Running..." });
-          if (loadingSpinner) loadingSpinner.classList.remove("hidden");
-          setStatus("⏳ Running GO Enrichment...", "info");
-
-          try {
-            const res = await fetch("/gene_ontology_analysis", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" }
-            });
-            const data = await res.json();
-            console.log("[GO] Respuesta /gene_ontology_analysis:", data);
-
-            if (loadingSpinner) loadingSpinner.classList.add("hidden");
-
-            if (!data || data.success !== true) {
-              setStatus(`❌ ${data?.message || "GO analysis failed."} (where=${data?.where || "?"})`, "error");
-              return;
-            }
-
-            const imgPathRaw = pickImagePath(data);
-            if (!imgPathRaw) {
-              console.warn("[GO] No image path found in response keys.");
-              setStatus("❌ No image path received (image_file_path / image_path / image).", "error");
-              return;
-            }
-
-            const imgURL = ensureAbsolute(imgPathRaw);
-            const imgEl = document.getElementById("go-figure-9");
-            const figContainer = document.getElementById("go-figure-container");
-
-            if (!imgEl || !figContainer) {
-              console.error("Missing elements #go-figure-9 or #go-figure-container in the DOM.");
-              setStatus("❌ Figure containers not found in the DOM.", "error");
-              return;
-            }
-
-            imgEl.onload = () => {
-              console.log("[IMG] Loaded successfully:", imgURL);
-              figContainer.style.display = "block";
-              setStatus("✅ GO Enrichment generated.", "ok");
-            };
-            imgEl.onerror = () => {
-              console.error("[IMG] Error rendering:", imgURL);
-              setStatus(`⚠️ Image exists but could not be rendered. Try opening: ${imgURL}`, "error");
-              figContainer.style.display = "block";
-            };
-            imgEl.src = `${imgURL}?t=${Date.now()}`;
-
-            const figLink = document.getElementById("go-figure-download-link-9");
-            if (figLink) {
-              figLink.href = imgURL;
-              figLink.style.display = "inline";
-            }
-
-            const excelPathRaw = pickExcelPath(data);
-            if (excelPathRaw) {
-              const excelURL = ensureAbsolute(excelPathRaw);
-              const excelLink = document.getElementById("go-excel-download-link-9");
-              if (excelLink) {
-                excelLink.href = excelURL;
-                excelLink.style.display = "inline";
-              }
-            }
-
-            const paramsBox = document.getElementById("figure-parameters-container");
-            if (paramsBox) paramsBox.style.display = "block";
-
-          } catch (err) {
-            console.error(err);
-            if (loadingSpinner) loadingSpinner.classList.add("hidden");
-            setStatus("❌ Network error while contacting /gene_ontology_analysis.", "error");
-          } finally {
-            setButtonLoading("run-full-go-analysis", false);
+      // Draw + size the chart the first time the user opens the collapse.
+      (function wireDistCollapse() {
+        const det = document.getElementById("goDistCollapse");
+        if (!det) return;
+        det.addEventListener("toggle", () => {
+          if (!det.open) return;
+          drawAnnotChartIfVisible();
+          if (_annotChartDrawn && window.Plotly) {
+            const gd = document.getElementById("go-distribution-plot");
+            if (gd) Plotly.Plots.resize(gd);
           }
         });
+      })();
+      // Expose for E2E tests + debugging from devtools.
+      window.renderAnnotationDistribution = renderAnnotationDistribution;
+
+      function renderCoverageBanner(stats) {
+        const banner = document.getElementById("go-coverage-banner");
+        if (!banner) return;
+        if (!stats) { banner.hidden = true; return; }
+        const setText = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = v;
+        };
+        setText("go-cov-input",     stats.original_input ?? "–");
+        setText("go-cov-expanded",  stats.after_expansion ?? "–");
+        setText("go-cov-annotated", stats.with_annotations ?? "–");
+        setText("go-cov-bg",        (stats.background_size ?? 0).toLocaleString());
+
+        const pct = stats.after_expansion
+          ? Math.round((stats.with_annotations / stats.after_expansion) * 100)
+          : 0;
+        setText("go-cov-pct", `${pct}% of foreground`);
+
+        // Hide the expansion cell when the user did NOT tick "Expand to full orthogroups"
+        // (in that case original_input == after_expansion and the cell is noise).
+        const expCell = document.getElementById("go-cov-expansion-cell");
+        if (expCell) {
+          expCell.hidden = !stats.used_orthogroups
+            || (stats.after_expansion === stats.original_input);
+        }
+
+        // Note line — picks the most useful interpretation
+        let note = "";
+        if (pct < 30) {
+          note = `Heads up: only ${pct}% of your foreground has GO annotations. ` +
+            `Enrichment power will be limited. Consider broadening the foreground or ` +
+            `(if you didn't already) tick "Expand to full orthogroups".`;
+        } else if (pct < 60) {
+          note = `${pct}% of your foreground carries GO annotations. ` +
+            `Enrichment will work but expect modest statistical power.`;
+        } else {
+          note = `${pct}% of your foreground has GO annotations. Good coverage.`;
+        }
+        setText("go-cov-note", note);
+        banner.hidden = false;
       }
+
+      function flattenResults(data) {
+        const p = data?.payload || data || {};
+        return [
+          ...(p.bp_results || []),
+          ...(p.cc_results || []),
+          ...(p.mf_results || [])
+        ];
+      }
+
+      // GO evidence-code tier classification.
+      // Mirrors backend EVIDENCE_PRESETS in app.py — keep in sync.
+      const EVIDENCE_TIER = {
+        // Experimental
+        "EXP": "experimental", "IDA": "experimental", "IPI": "experimental",
+        "IMP": "experimental", "IGI": "experimental", "IEP": "experimental",
+        "HEP": "experimental", "HDA": "experimental", "HMP": "experimental",
+        "HGI": "experimental", "HTP": "experimental",
+        // Curated (author statement, curator, PAINT)
+        "TAS": "curated", "NAS": "curated", "IC": "curated", "IBA": "curated",
+        // Computational (electronic / sequence similarity)
+        "IEA": "computational", "ISS": "computational", "ISA": "computational",
+        "ISM": "computational", "ISO": "computational", "IGC": "computational",
+        "RCA": "computational", "IKR": "computational", "IRD": "computational",
+        "ND":  "computational",
+      };
+
+      const TIER_LABEL = {
+        experimental:  "experimental",
+        curated:       "curated",
+        computational: "computational",
+      };
+
+      function evidenceChips(breakdown) {
+        if (!breakdown) return "";
+        const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
+        if (!entries.length) return '<span class="go-no-ev">n/a</span>';
+        return entries.map(([code, n]) => {
+          const tier = EVIDENCE_TIER[code] || "computational";
+          const tierLabel = TIER_LABEL[tier];
+          return `<span class="go-ev-chip is-${tier}" title="${code} (${tierLabel}): ${n} annotation(s)">${code}<span>${n}</span></span>`;
+        }).join("");
+      }
+
+      function getPlotLimit() {
+        const v = document.getElementById("go-plot-limit")?.value || "20";
+        return v === "all" ? Infinity : parseInt(v, 10) || 20;
+      }
+
+      function renderPlot(filterNs) {
+        const results = window.__goResults.all || [];
+        const traces = [];
+        const groups = filterNs === "all"
+          ? ["biological_process", "cellular_component", "molecular_function"]
+          : [filterNs];
+
+        const perNsLimit = getPlotLimit();
+        let totalAvailable = 0;
+        let totalShown = 0;
+
+        groups.forEach(ns => {
+          // Sort by FDR ASC = most significant first. Take top-N. Then re-sort
+          // ascending by neg_log10_fdr so the BIGGEST bar sits at the TOP of
+          // the horizontal chart (Plotly draws from y[0] at the bottom).
+          const all = results
+            .filter(r => r.namespace === ns)
+            .sort((a, b) => b.neg_log10_fdr - a.neg_log10_fdr);
+          totalAvailable += all.length;
+          if (!all.length) return;
+          const topN = isFinite(perNsLimit) ? all.slice(0, perNsLimit) : all;
+          const subset = topN.slice().sort((a, b) => a.neg_log10_fdr - b.neg_log10_fdr);
+          totalShown += subset.length;
+          traces.push({
+            type: "bar",
+            orientation: "h",
+            name: `${NS_LABEL[ns]} (${subset.length}${isFinite(perNsLimit) && all.length > perNsLimit ? ` of ${all.length}` : ""})`,
+            y: subset.map(r => r.name.length > 50 ? r.name.slice(0, 50) + "…" : r.name),
+            x: subset.map(r => r.neg_log10_fdr),
+            marker: { color: NS_COLOR[ns] },
+            customdata: subset.map(r => [r.GO, r.namespace, r.depth, r.study_count, r.study_n, r.p_fdr_bh]),
+            hovertemplate:
+              "<b>%{y}</b><br>" +
+              "GO: %{customdata[0]}<br>" +
+              "NS: %{customdata[1]}<br>" +
+              "Depth: %{customdata[2]}<br>" +
+              "Study: %{customdata[3]}/%{customdata[4]}<br>" +
+              "FDR: %{customdata[5]:.2e}<br>" +
+              "−log₁₀(FDR): %{x:.2f}<extra></extra>"
+          });
+        });
+
+        // Cap chart height so the PNG export is sensible. 22px per bar +
+        // 100px of padding; absolute max ~1200px (Plotly's downloadImage on
+        // anything taller squishes the labels and corrupts the PNG).
+        const totalBars = traces.reduce((s, t) => s + t.y.length, 0);
+        const computedH = 22 * totalBars + 100;
+        const layout = {
+          barmode: "group",
+          margin: { l: 240, r: 24, t: 12, b: 48 },
+          xaxis: { title: "−log₁₀(FDR)", zeroline: true, gridcolor: "#eee" },
+          yaxis: { automargin: true },
+          height: Math.min(1200, Math.max(360, computedH)),
+          showlegend: traces.length > 1,
+          legend: { orientation: "h", y: -0.12 },
+          paper_bgcolor: "rgba(0,0,0,0)",
+          plot_bgcolor: "rgba(0,0,0,0)"
+        };
+
+        Plotly.newPlot("go-plot", traces, layout, { responsive: true, displayModeBar: false });
+
+        // Truncation note below the chart
+        const note = document.getElementById("go-plot-truncation");
+        if (note) {
+          if (isFinite(perNsLimit) && totalShown < totalAvailable) {
+            note.textContent =
+              `Showing top ${totalShown} of ${totalAvailable} terms in the chart. ` +
+              `Increase the "Top N" selector above, or use the table below for the full list.`;
+            note.hidden = false;
+          } else {
+            note.hidden = true;
+          }
+        }
+      }
+
+      function getTableFilters() {
+        const ns = document.querySelector(".go-chip.is-active")?.dataset.ns || "all";
+        const q  = (document.getElementById("go-table-search")?.value || "").toLowerCase().trim();
+        const fdr = parseFloat(document.getElementById("go-fdr-input")?.value) || 1;
+        const depth = parseInt(document.getElementById("go-depth-input")?.value) || 0;
+        return { ns, q, fdr, depth };
+      }
+
+      let sortState = { key: "neg_log10_fdr", dir: "desc" };
+
+      function applyFilters(rows) {
+        const f = getTableFilters();
+        const filtered = rows.filter(r => {
+          if (f.ns !== "all" && r.namespace !== f.ns) return false;
+          if (r.p_fdr_bh > f.fdr) return false;
+          if (r.depth < f.depth) return false;
+          if (f.q) {
+            const hay = `${r.GO} ${r.name}`.toLowerCase();
+            if (!hay.includes(f.q)) return false;
+          }
+          return true;
+        });
+        filtered.sort((a, b) => {
+          const av = a[sortState.key], bv = b[sortState.key];
+          if (av === bv) return 0;
+          const cmp = (av < bv ? -1 : 1);
+          return sortState.dir === "desc" ? -cmp : cmp;
+        });
+        return filtered;
+      }
+
+      function getPageSize() {
+        const v = document.getElementById("go-page-size")?.value || "20";
+        return v === "all" ? Infinity : parseInt(v, 10) || 20;
+      }
+
+      function updateTableCounter(shown, total) {
+        const el = document.getElementById("go-table-counter");
+        if (!el) return;
+        if (total === 0) {
+          el.textContent = "No terms match the current filters.";
+        } else if (shown >= total) {
+          el.textContent = `Showing all ${total} terms.`;
+        } else {
+          el.textContent =
+            `Showing ${shown} of ${total} terms. ` +
+            `Use the "Show" dropdown above, or narrow with the search/FDR/depth filters.`;
+        }
+      }
+
+      function renderTable() {
+        const tbody = document.querySelector("#go-table tbody");
+        const empty = document.getElementById("go-table-empty");
+        if (!tbody) return;
+        const allFiltered = applyFilters(window.__goResults.all || []);
+        const pageSize = getPageSize();
+        const rows = allFiltered.slice(0, pageSize);
+        tbody.innerHTML = "";
+        updateTableCounter(rows.length, allFiltered.length);
+        if (!rows.length) {
+          empty.hidden = false;
+          return;
+        }
+        empty.hidden = true;
+        const frag = document.createDocumentFragment();
+        rows.forEach(r => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><a href="https://amigo.geneontology.org/amigo/term/${r.GO}" target="_blank" rel="noopener">${r.GO}</a></td>
+            <td>${r.name}</td>
+            <td><span class="go-ns-pill" style="--ns-color:${NS_COLOR[r.namespace]}">${NS_LABEL[r.namespace]}</span></td>
+            <td class="num">${r.depth}</td>
+            <td class="num">${r.study_count}/${r.study_n}</td>
+            <td class="num">${r.pop_count}/${r.pop_n}</td>
+            <td class="num">${(r.neg_log10_fdr || 0).toFixed(2)}</td>
+            <td class="go-ev-cell">${evidenceChips(r.evidence_breakdown)}</td>
+          `;
+          frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
+      }
+
+      // Wire filters
+      document.querySelectorAll(".go-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll(".go-chip").forEach(c => c.classList.remove("is-active"));
+          chip.classList.add("is-active");
+          renderTable();
+        });
+      });
+      document.getElementById("go-table-search")?.addEventListener("input", renderTable);
+      document.getElementById("go-fdr-input")?.addEventListener("input", renderTable);
+      document.getElementById("go-depth-input")?.addEventListener("input", renderTable);
+      document.getElementById("go-page-size")?.addEventListener("change", renderTable);
+
+      // Sort by header click
+      document.querySelectorAll("#go-table thead th[data-sort]").forEach(th => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.sort;
+          if (sortState.key === key) {
+            sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+          } else {
+            sortState.key = key;
+            sortState.dir = "desc";
+          }
+          document.querySelectorAll("#go-table thead th").forEach(x => x.classList.remove("is-sort-asc", "is-sort-desc"));
+          th.classList.add(sortState.dir === "asc" ? "is-sort-asc" : "is-sort-desc");
+          renderTable();
+        });
+      });
+
+      // Namespace tabs above the plot
+      document.querySelectorAll(".go-ns-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".go-ns-btn").forEach(b => {
+            b.classList.remove("is-active");
+            b.setAttribute("aria-selected", "false");
+          });
+          btn.classList.add("is-active");
+          btn.setAttribute("aria-selected", "true");
+          renderPlot(btn.dataset.ns);
+        });
+      });
+
+      // Chart top-N selector
+      document.getElementById("go-plot-limit")?.addEventListener("change", () => {
+        const activeNs = document.querySelector(".go-ns-btn.is-active")?.dataset.ns || "all";
+        renderPlot(activeNs);
+      });
+
+      // Export visible table rows
+      document.querySelectorAll(".go-table-export [data-export]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const fmt = btn.dataset.export;
+          const rows = applyFilters(window.__goResults.all || []);
+          if (!rows.length) return;
+          let body = "", mime = "text/plain", ext = "txt";
+          if (fmt === "json") {
+            body = JSON.stringify(rows, null, 2);
+            mime = "application/json"; ext = "json";
+          } else {
+            const sep = fmt === "tsv" ? "\t" : ",";
+            const cols = ["GO", "name", "namespace", "depth", "study_count", "study_n", "pop_count", "pop_n", "p_fdr_bh", "neg_log10_fdr"];
+            const esc = (v) => {
+              const s = String(v ?? "");
+              if (fmt === "csv" && /[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+              return s;
+            };
+            body = cols.join(sep) + "\n" +
+              rows.map(r => cols.map(c => esc(r[c])).join(sep)).join("\n");
+            mime = fmt === "tsv" ? "text/tab-separated-values" : "text/csv";
+            ext = fmt;
+          }
+          const blob = new Blob([body], { type: mime });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          // Descriptive filename: namespace filter + #rows + evidence preset
+          const filters = getTableFilters();
+          const ns = filters.ns === "all" ? "all-NS" : NS_LABEL[filters.ns] || "all-NS";
+          const settings = window.__goResults.settings || {};
+          a.href = url;
+          a.download = descriptiveFilename("GOenrichment-table", ext, [
+            ns,
+            `${rows.length}rows`,
+            settings.evidence_preset ? `evidence-${settings.evidence_preset}` : null,
+          ]);
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+        });
+      });
+
+      // -----------------------------------------------------------------
+      // Descriptive filename helper. Mirrors orthogather.utils.filenames
+      // on the backend: "orthogather_<artifact>_<ctx>_<YYYY-MM-DD>.<ext>"
+      // -----------------------------------------------------------------
+      function descriptiveFilename(artifact, ext, contextParts) {
+        const today = new Date().toISOString().slice(0, 10);
+        const slug = (s) => String(s || "").replace(/[^A-Za-z0-9._-]+/g, "-")
+                                            .replace(/^[-_.]+|[-_.]+$/g, "");
+        const parts = ["orthogather", slug(artifact)];
+        (contextParts || []).forEach(p => {
+          const s = slug(p);
+          if (s) parts.push(s);
+        });
+        parts.push(today);
+        return parts.filter(Boolean).join("_") + "." + slug(ext);
+      }
+
+      // Plot downloads. We use Plotly.toImage + an anchor click rather than
+      // Plotly.downloadImage because the latter silently fails for SVG when
+      // the chart contains many bars (>~100). The size is computed from the
+      // ACTUAL chart height (capped by renderPlot) so the export isn't squished.
+      function chartExportSize() {
+        const el = document.getElementById("go-plot");
+        const h = Math.max(360, Math.min(1400, el.getBoundingClientRect().height || 600));
+        return { width: 1600, height: Math.round(h) };
+      }
+      function downloadChart(format) {
+        const { width, height } = chartExportSize();
+        Plotly.toImage("go-plot", { format, width, height, scale: format === "png" ? 2 : 1 })
+          .then(dataUrl => {
+            // Convert the data URL to a Blob URL — Chrome reliably downloads
+            // Blob URLs but silently drops large SVG data: URIs.
+            return fetch(dataUrl).then(r => r.blob()).then(blob => {
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              // Descriptive filename: namespace tab + chart Top-N + evidence preset
+              const activeNs = document.querySelector(".go-ns-btn.is-active")?.dataset.ns || "all";
+              const nsLabel = activeNs === "all" ? "all-NS" : (NS_LABEL[activeNs] || "all-NS");
+              const topN = document.getElementById("go-plot-limit")?.value || "20";
+              const settings = window.__goResults.settings || {};
+              a.download = descriptiveFilename("GOenrichment-chart", format, [
+                nsLabel,
+                `top${topN}`,
+                settings.evidence_preset ? `evidence-${settings.evidence_preset}` : null,
+              ]);
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              setTimeout(() => URL.revokeObjectURL(url), 1000);
+            });
+          })
+          .catch(err => {
+            console.error("[GO] downloadChart failed:", err);
+            const code = format === 'svg' ? 'ERR_EXPORT_SVG_FAILED' : 'ERR_EXPORT_PNG_FAILED';
+            if (window.OG) OG.showError({
+              error_code: code, severity: 'error', category: 'system',
+              message: 'Could not export the chart as ' + format.toUpperCase(),
+              hint: 'Refresh the page and try again. Try the other format if the issue persists.',
+            });
+          });
+      }
+      document.getElementById("go-download-png")?.addEventListener("click", () => downloadChart("png"));
+      document.getElementById("go-download-svg")?.addEventListener("click", () => downloadChart("svg"));
+
+      async function runGOAnalysis(extraParams = {}) {
+        setButtonLoading("run-full-go-analysis", true, { textLoading: "Running..." });
+        if (loadingSpinner) loadingSpinner.classList.remove("hidden");
+        setStatus("⏳ Running GO Enrichment...", "info");
+
+        const body = Object.assign({
+          evidence_preset: readSetting("evidence_preset", "all"),
+          counting_mode:   readSetting("counting_mode", "per_protein"),
+          p_value: 0.05,
+          min_depth: 2
+        }, extraParams);
+
+        try {
+          const res = await fetch("/gene_ontology_analysis", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+
+          if (loadingSpinner) loadingSpinner.classList.add("hidden");
+
+          if (!data || data.success !== true) {
+            setStatus(`❌ ${data?.message || "GO analysis failed."} (where=${data?.where || "?"})`, "error");
+            return;
+          }
+
+          const flat = flattenResults(data);
+          window.__goResults.all = flat;
+          window.__goResults.settings = data.payload?.settings || data.settings || null;
+          window.__goResults.excelUrl = (data.payload?.excel_file_path || data.excel_file_path) || null;
+          window.__goResults.stats = data.payload?.annotation_stats || data.annotation_stats || null;
+
+          // Reveal results
+          document.getElementById("go-results-container").hidden = false;
+          document.getElementById("figure-parameters-container").hidden = false;
+
+          // Annotation-coverage banner
+          renderCoverageBanner(window.__goResults.stats);
+
+          // Sync table filter inputs with run thresholds
+          document.getElementById("go-fdr-input").value = body.p_value;
+          document.getElementById("go-depth-input").value = body.min_depth;
+
+          // Excel link
+          const excelLink = document.getElementById("go-excel-download-link");
+          if (excelLink && window.__goResults.excelUrl) {
+            const url = window.__goResults.excelUrl.startsWith("/")
+              ? window.__goResults.excelUrl
+              : `/${window.__goResults.excelUrl}`;
+            excelLink.href = url;
+            excelLink.hidden = false;
+          }
+
+          renderPlot("all");
+          renderTable();
+          const notice = data.payload?.notice || data.notice;
+          if (notice) {
+            setStatus(`ℹ️ ${notice}`, "info");
+          } else {
+            setStatus(`✅ GO Enrichment generated (${flat.length} terms).`, "ok");
+          }
+        } catch (err) {
+          console.error(err);
+          if (loadingSpinner) loadingSpinner.classList.add("hidden");
+          setStatus("❌ Network error while contacting /gene_ontology_analysis.", "error");
+        } finally {
+          setButtonLoading("run-full-go-analysis", false);
+        }
+      }
+
+      runAnalysisBtn?.addEventListener("click", () => runGOAnalysis());
 
       document.getElementById("regenerate-figure-btn")?.addEventListener("click", function () {
         const minDepth = parseInt(document.getElementById("depth-input").value) || 2;
         const pValue   = parseFloat(document.getElementById("pvalue-input").value) || 0.05;
         const maxTerms = parseInt(document.getElementById("terms-input").value) || null;
-
-        console.log("▶ Re-generating Figure 9 with params:", {minDepth, pValue, maxTerms});
-        const regenBtn = document.getElementById("regenerate-figure-btn");
-        const regenBtnSpin = regenBtn?.querySelector(".btn-spinner");
-        if (regenBtn) {
-          regenBtn.disabled = true;
-          regenBtn.setAttribute("aria-busy", "true");
-        }
-        if (regenBtnSpin) regenBtnSpin.style.display = "inline-block";
-
-        fetch("/gene_ontology_analysis", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ min_depth: minDepth, p_value: pValue, max_terms: maxTerms })
-        })
-        .then(r => r.json())
-        .then(data => {
-          if (!data || data.success !== true) {
-            console.warn("[GO] Regenerate failed:", data);
-            setStatus(`❌ ${data?.message || "Re-generation failed."} (where=${data?.where || "?"})`, "error");
-            return;
-          }
-
-          const imgPathRaw = pickImagePath(data);
-          if (!imgPathRaw) {
-            setStatus("❌ No image returned on re-generation.", "error");
-            return;
-          }
-
-          const imgURL = ensureAbsolute(imgPathRaw);
-          const figContainer = document.getElementById("go-figure-container");
-          const imgEl = document.getElementById("go-figure-9");
-
-          if (!imgEl || !figContainer) {
-            console.error("Faltan elementos #go-figure-9 o #go-figure-container en el DOM.");
-            setStatus("❌ Figure container not found.", "error");
-            return;
-          }
-
-          imgEl.onload = () => {
-            console.log("[IMG] Figure 9 updated:", imgURL);
-            figContainer.style.display = "block";
-            setStatus("✅ Figure 9 updated.", "ok");
-          };
-          imgEl.onerror = () => {
-            console.error("[IMG] Error rendering Figure 9:", imgURL);
-            setStatus(`⚠️ Image generated but failed to render. Try opening: ${imgURL}`, "error");
-            figContainer.style.display = "block";
-          };
-          imgEl.src = `${imgURL}?t=${Date.now()}`;
-
-          const figLink = document.getElementById("go-figure-download-link-9");
-          if (figLink) {
-            figLink.href = imgURL;
-            figLink.style.display = "inline";
-          }
-
-          const excelPathRaw = pickExcelPath(data);
-          if (excelPathRaw) {
-            const excelURL = ensureAbsolute(excelPathRaw);
-            const excelLink = document.getElementById("go-excel-download-link-9");
-            if (excelLink) {
-              excelLink.href = excelURL;
-              excelLink.style.display = "inline";
-            }
-          }
-
-          const paramsBox = document.getElementById("figure-parameters-container");
-          if (paramsBox) paramsBox.style.display = "block";
-        })
-        .catch(err => {
-          console.error(err);
-          setStatus("❌ Network error during re-generation.", "error");
-        })
-        .finally(() => {
-          if (regenBtn) {
-            regenBtn.disabled = false;
-            regenBtn.removeAttribute("aria-busy");
-          }
-          if (regenBtnSpin) regenBtnSpin.style.display = "none";
-        });
+        runGOAnalysis({ min_depth: minDepth, p_value: pValue, max_terms: maxTerms });
       });
     });
   </script>
- 
-
 </body>
-
-
-
 </html>

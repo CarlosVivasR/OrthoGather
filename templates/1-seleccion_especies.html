@@ -2,559 +2,269 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OrthoGather</title>
-  <link rel="icon" href="static/images/1-a668dcaa1.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-  <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root{
-      --font-sans: "Helvetica Neue", Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    }
-    html, body { height: 100%; }
-    html, body, button, input, select, textarea {
-      font-family: var(--font-sans);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>New Analysis: OrthoGather</title>
 
-    body {
-      background-color: #fffcfc;
-      display: flex;
-      flex-direction: column;
-    }
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
 
-    header {
-      background-color: #003366;
-      color: white;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
-    header .title {
-      font-family: var(--font-sans);
-      font-weight: 400;
-      font-size: clamp(36px, 6vw, 72px);
-      margin: 0;
-      letter-spacing: 0.2px;
-    }
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    header .logo img { height: 120px; width: auto; object-fit: contain; display: block; }
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-errors.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/species-selection.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-taxonomy-tree.css') }}" />
 
-    header .info {
-      justify-self: end;
-      text-align: right;
-      line-height: 1.25;
-      font-size: 14px;
-      color: inherit;                         
-      max-width: 36ch;                        
-    }
-    header .info p { margin: 2px 0; }
-    header .info a { color: inherit; text-decoration: none; }
-    header .info a:hover, header .info a:focus {
-      color: #ffd700; text-decoration: underline;
-    }
-    header .info a.email-link { overflow-wrap: anywhere; }
-    header .info .muted { opacity: 0.85; }
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
 
-    main {
-      flex: 1;
-      padding: clamp(24px, 6vw, 48px);
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;     
-    }
+  <!-- D3 v7 for the taxonomic-tree dendrogram (also reused by Plotly internally) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" defer></script>
 
-    .card {
-      max-width: 1000px;
-      width: min(1000px, 92vw); 
-      margin: 0 auto;           
-      background-color: white;
-      padding: 24px 32px;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-
-    h2, h3 {
-      margin-bottom: 10px;
-      color: #003366;
-      text-align: center;
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid #ccc;
-      margin: 20px 0;
-    }
-
-    #search {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    #results {
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 20px;
-    }
-
-    .option {
-      padding: 10px;
-      cursor: pointer;
-      border-bottom: 1px solid #eee;
-    }
-
-    .option:hover {
-      background-color: #f5f5f5;
-    }
-
-    .selected-item {
-      border-bottom: 1px solid #ccc;
-      padding: 8px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .badge {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      margin-left: 10px;
-    }
-
-    .reference { background: #d7e9f3; color: #084081; }
-    .non-reference { background: #fdeacc; color: #7a3e00; }
-
-    .button-group {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin: 20px auto;       
-    }
-
-    .button-group button {
-      min-width: 220px;
-      text-align: center;
-    }
-
-    button {
-      padding: 10px 20px;
-      background-color: #003366;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    button:hover:enabled {
-      background-color: #002244;
-    }
-
-    .status-message {
-      text-align: center;
-      padding: 10px;
-      border-radius: 6px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .status-message.success {
-      background-color: #d1e7dd;
-      color: #0f5132;
-    }
-
-    .status-message.error {
-      background-color: #f8d7da;
-      color: #842029;
-    }
-
-    .log-panel {
-      background-color: #1e1e1e;
-      color: #dcdcdc;
-      padding: 20px;
-      border-radius: 6px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      max-height: 300px;
-      overflow-y: auto;
-      display: none;
-      max-width: 1000px;
-      width: min(1000px, 92vw);
-      margin: 20px auto 0;   
-    }
-
-
-    #loadingGif {
-      text-align: center;
-      margin-top: 10px;
-      display: none;
-    }
-
-    #postAnalysisButtons {
-      display: none;
-      text-align: center;
-      margin: 40px 0;
-    }
-
-    #postAnalysisButtons img {
-      width: 160px;
-      margin: 0 20px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    #postAnalysisButtons img:hover {
-      transform: scale(1.05);
-    }
-
-    footer {
-      background-color: #003366;
-      color: white;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    footer .social-icons a {
-      color: white;
-      margin-left: 15px;
-      font-size: 20px;
-      text-decoration: none;
-    }
-
-    footer .social-icons a:hover {
-      color: #ffd700;
-    }
-    .remove-btn {
-      all: unset;                  
-      display: inline-flex;        
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #888;
-      font-size: 16px;
-      padding: 4px;              
-      border-radius: 4px;          
-      transition: color 0.2s, transform 0.2s, background-color 0.2s;
-    }
-
-    .remove-btn:hover {
-      color: #e73d09;
-      transform: scale(1.15);
-      background-color: #f0f0f0;   
-    }
-
-
-    .remove-btn:focus,
-    .remove-btn:focus-visible {
-      outline: none;
-      background-color: #e0e0e0;   
-    }
-
-    #downloadStatus {
-      margin-top: 6px;               
-      text-align: center;
-      font-weight: 600;
-      text-decoration: none;          
-      background: transparent !important;
-      border: 0 !important;
-      padding: 0 !important;
-      border-radius: 0 !important;
-    }
-
-
-    #downloadStatus.success { color: #0f5132; } 
-    #downloadStatus.error   { color: #842029; }  
-
-  </style>
+  <script src="{{ url_for('static', filename='js/og-base.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-taxonomy-tree.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/pages/species-selection.js') }}" defer></script>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <img src="static/images/1-a668dcaa1.ico" alt="Tool Logo" />
-    </div>
-    <div class="title">OrthoGather</div>
-    <div class="info">
-      <p>
-        <a href="https://www.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-          University College Dublin
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="species-main">
+
+    <section class="species-intro">
+      <div class="species-intro-top">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span>New Analysis</span>
+        </nav>
+        <a class="intro-history-link" href="/history">
+          <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+          View past analyses
         </a>
-      </p>
-      <p>
-        <a href="https://www.ucd.ie/conway/" target="_blank" rel="noopener" class="info-link">
-          UCD Conway Institute
-        </a>
-      </p>
-      <p>
-        <a href="https://cancerdata.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-          UCD Cancer Data Lab
-        </a>
-      </p>
-      <p>
-        <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener" class="info-link">
-          https://doi.org/10.64898/2026.01.30.702851
-        </a>
-      </p>
-    </div>    
-  </header>
+      </div>
+      <h1>Pick your species</h1>
+      <p class="lead">Search the UniProt catalogue and add at least two species to compare.</p>
+    </section>
 
-  <main>
-    <div class="card">
-      <h2>Select species from UniProt catalog</h2>
-      <hr>
-      <input type="text" id="search" placeholder="Type organism name or proteome ID...">
-      <div id="results"></div>
+    <ol class="workflow-steps" aria-label="Workflow steps">
+      <li class="step"><span class="num">1</span>Select species</li>
+      <span class="step-divider"><i class="fa-solid fa-chevron-right"></i></span>
+      <li class="step"><span class="num">2</span>Download proteomes</li>
+      <span class="step-divider"><i class="fa-solid fa-chevron-right"></i></span>
+      <li class="step"><span class="num">3</span>Run OrthoFinder</li>
+    </ol>
 
-      <h3>Selected species</h3>
-      <hr>
-      <div id="selected"></div>
-    </div> 
-    <div class="button-group">
-      <button id="downloadBtn" class="btn btn-primary">📥 Download Proteomes</button>
-      <button id="runOrthofinderBtn" class="btn btn-secondary" disabled>⚙️ Run OrthoFinder</button>
+    <div class="cards-row">
+
+    <!-- ─── CARD 1: Search ─── -->
+    <section class="card-search" aria-labelledby="search-heading">
+      <header class="card-head">
+        <div class="card-head-text">
+          <h2 id="search-heading">Search the UniProt catalogue</h2>
+          <p class="section-helper">Type at least two characters of an organism name or a UniProt proteome ID (e.g. <code class="font-mono">UP000000625</code>).</p>
+        </div>
+
+        <!-- Kebab menu (catalogue version + check for updates, hidden by default) -->
+        <div class="kebab-wrap">
+          <button id="catalogue-kebab" type="button" class="kebab-btn" aria-label="Catalogue options" aria-haspopup="true" aria-expanded="false">
+            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+          </button>
+          <div id="catalogue-menu" class="kebab-menu" role="menu" hidden>
+            <div class="kebab-menu-row">
+              <span class="kbm-label">Version</span>
+              <span id="catalogue-version" class="kbm-value"></span>
+            </div>
+            <div class="kebab-menu-row">
+              <span class="kbm-label">Last updated</span>
+              <span id="catalogue-age" class="kbm-value"></span>
+            </div>
+            <button id="catalogue-check-btn" type="button" class="kebab-action-btn">
+              <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+              <span>Check for updates</span>
+            </button>
+            <div id="catalogue-update-area" class="catalogue-update-area"></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+        <label for="search" class="sr-only">Search the UniProt proteome catalogue</label>
+        <input type="text" id="search" class="input"
+               placeholder="Loading proteome catalogue..." autocomplete="off"
+               aria-label="Search the UniProt proteome catalogue"
+               role="combobox" aria-autocomplete="list" aria-controls="results" />
+      </div>
+      <p id="catalogue-hint" class="label-helper is-loading">
+        Loading the catalogue (~166 MB). This can take 20–60 s the first time.
+      </p>
+
+      <div id="results" role="listbox" aria-label="Search results"></div>
+    </section>
+
+    <!-- ─── CARD 2: Selected species ─── -->
+    <section class="card-selected" aria-labelledby="selected-heading">
+      <header class="card-head card-head-tight">
+        <div class="card-head-text">
+          <h2 id="selected-heading">Selected species</h2>
+        </div>
+        <div class="selected-meta is-empty">
+          <span class="count">
+            <strong id="selectedCount">0</strong>
+            <span class="count-max">/ <span id="selectedMax">50</span></span>
+            selected
+          </span>
+          <span class="hint">· need ≥ 2 to continue</span>
+          <button type="button" id="selectedClearBtn" class="selected-clear-btn" hidden>
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            Clear all
+          </button>
+        </div>
+      </header>
+
+      <div id="selected" role="list" aria-live="polite"></div>
+    </section>
+
+    </div><!-- /.cards-row -->
+
+    <!-- ─── Taxonomic tree (Point 11, simplified) ─── -->
+    <section class="tax-section" aria-label="Taxonomic context">
+      <div class="tax-section-actions">
+        <button id="taxGenerateBtn" type="button" class="tax-generate-btn" disabled>
+          <i class="fa-solid fa-sitemap" aria-hidden="true"></i>
+          <span id="taxGenerateBtnLabel">Generate tree (≥ 2 species)</span>
+        </button>
+        <details class="tax-info-pop">
+          <summary aria-label="What kind of tree is this?">
+            <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+          </summary>
+          <div class="tax-info-pop-body" role="tooltip">
+            <p class="tax-info-pop-title">Taxonomic, not phylogenetic.</p>
+            <p>
+              The dendrogram is built from each species' UniProt
+              <code>lineage</code> field (which UniProt sources from NCBI
+              Taxonomy). It reflects classification, not sequence-based
+              evolutionary inference — no alignment or model is computed.
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div id="taxTree" class="tax-tree" hidden>
+        <button id="taxExpandBtn" type="button" class="tax-expand-btn"
+                aria-label="Open taxonomic tree full-screen" title="Open full-screen">
+          <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+        </button>
+        <div id="taxTreeSvg" class="tax-tree-inner"></div>
+      </div>
+      <div id="taxActions" class="tax-actions" hidden>
+        <span class="tax-hint">Drag to pan · scroll to zoom</span>
+        <button type="button" id="taxResetViewBtn">Reset view</button>
+        <button type="button" id="taxDownloadNewickBtn">Download .nwk</button>
+      </div>
+    </section>
+
+    <!-- ─── Action bar (sticky bottom) ─── -->
+    <div class="action-bar action-bar-sticky">
+      <button id="downloadBtn" type="button" class="action-btn is-pending" disabled aria-describedby="action-bar-help">
+        <span class="action-btn-icon"><i class="fa-solid fa-download" aria-hidden="true"></i></span>
+        <span class="action-btn-body">
+          <span class="action-btn-label">Download proteomes</span>
+          <span class="action-btn-state">Add at least 2 species first</span>
+        </span>
+      </button>
+
+      <i class="fa-solid fa-arrow-right action-bar-arrow" aria-hidden="true"></i>
+
+      <button id="runOrthofinderBtn" type="button" class="action-btn is-pending" disabled>
+        <span class="action-btn-icon"><i class="fa-solid fa-circle-play" aria-hidden="true"></i></span>
+        <span class="action-btn-body">
+          <span class="action-btn-label">Run OrthoFinder</span>
+          <span class="action-btn-state">Available after download</span>
+        </span>
+      </button>
     </div>
 
-    <div id="downloadStatus" class="status-message hidden"></div>
+    <div id="downloadStatus" style="display: none;" role="status" aria-live="polite"></div>
 
-    <div id="loadingGif">
-      <img src="static/images/loading.gif" alt="Loading..." style="width: 60px; height: 60px;">
-      <p style="color: #003366; font-weight: bold;"> Running OrthoFinder...</p>
-    </div>
+    <!-- Download progress panel: appears while /stream_download is running -->
+    <section class="download-progress" aria-label="Download progress">
+      <div class="download-progress-header">
+        <div>
+          <h3><i class="fa-solid fa-download" aria-hidden="true"></i> Downloading proteomes</h3>
+          <p class="download-progress-current">Now: <span id="download-current"></span></p>
+        </div>
+        <div class="download-progress-counter">
+          <span id="download-bar-label">0 / 0</span>
+        </div>
+      </div>
 
-    <div id="logPanel" class="log-panel"></div>
+      <div class="progress" role="progressbar" aria-label="Download progress" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" id="download-bar" style="width: 0%;"></div>
+      </div>
 
-    <div id="postAnalysisButtons">
-      <h3 style="color: #003366; margin-bottom: 20px;">Choose further analysis:</h3>
-      <img src="static/images/boton1.png" alt="Protein Analysis"
-          onclick="goProteinAnalysisGenerated()" />
-      <img src="static/images/boton2.png" alt="Gene Ontology Analysis"
-          onclick="goGeneOntologyGenerated()" />
-    </div>
+      <div id="downloadLog" class="log-panel" aria-live="polite"></div>
+
+      <div id="download-summary" style="display: none;"></div>
+    </section>
+
+    <!-- Run summary (post-OrthoFinder factual diagnostic): appears ABOVE the log
+         because once OrthoFinder finishes, the metrics + CTAs are the primary focus. -->
+    <section id="run-summary" class="run-summary" aria-label="Run summary" hidden></section>
+
+    <section class="species-log-section" aria-label="OrthoFinder output">
+      <div class="log-header">
+        <h3><i class="fa-solid fa-terminal" aria-hidden="true"></i> Live output</h3>
+        <span class="pulse-indicator">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          Streaming
+        </span>
+      </div>
+      <p class="ortho-running-note" id="loadingGif">
+        OrthoFinder is running. This can take several minutes for large datasets.
+      </p>
+      <div id="logPanel" class="log-panel" aria-live="polite"></div>
+    </section>
+
+    <section id="postAnalysisButtons" aria-label="Continue with the results">
+      <h3>OrthoFinder finished: what next?</h3>
+      <p class="subtitle">Pick the type of analysis you want to run on the orthogroups.</p>
+      <div class="post-actions">
+        <button type="button" class="subaction-card is-protein" data-action="generated-protein">
+          <span class="subaction-icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+          <span class="subaction-body">
+            <span class="subaction-title">Protein Analysis</span>
+            <span class="subaction-sub">UpSet plots, intersections, Excel exports</span>
+          </span>
+          <i class="fa-solid fa-arrow-right subaction-arrow" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="subaction-card is-go" data-action="generated-go">
+          <span class="subaction-icon" aria-hidden="true"><i class="fa-solid fa-dna"></i></span>
+          <span class="subaction-body">
+            <span class="subaction-title">Gene Ontology</span>
+            <span class="subaction-sub">Functional enrichment with GOATOOLS</span>
+          </span>
+          <i class="fa-solid fa-arrow-right subaction-arrow" aria-hidden="true"></i>
+        </button>
+      </div>
+    </section>
 
   </main>
 
-  <footer>
-    <div>
-      &copy; 2025 OrthoGather. All rights reserved.
-    </div>
-    <div class="social-icons">
-      <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
-      <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">FAQ</a>
-      <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">Contact</a>
-    </div>
-  </footer>
+  <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+    <div class="spinner" aria-hidden="true"></div>
+  </div>
 
-  <script>
-    let proteomeData = [];
-    let selectedTemp = [];
-  
-    const resultsDiv = document.getElementById("results");
-    const selectedDiv = document.getElementById("selected");
-  
-
-    function postAndRedirect(url, params) {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = url;
-      for (const key in params) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = params[key];
-        form.appendChild(input);
-      }
-      document.body.appendChild(form);
-      form.submit();
-    }
-
-    function goProteinAnalysisGenerated() {
-      postAndRedirect('/cargar_carpeta', { modo: 'generated' });
-    }
-  
-    async function goGeneOntologyGenerated() {
-      try {
-        await fetch('/cargar_carpeta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ modo: 'generated' })
-        });
-        window.location.href = '/resultado_goa';
-      } catch (e) {
-        showStatus("downloadStatus", "error", "Error preparing data for GO (generated): " + e.message);
-      }
-    }
-  
-    window.goProteinAnalysisGenerated = goProteinAnalysisGenerated;
-    window.goGeneOntologyGenerated = goGeneOntologyGenerated;
-  
-    fetch("static/Proteomes_json/proteomes_list.json")
-      .then(res => res.json())
-      .then(data => { proteomeData = data; })
-      .catch(err => {
-        const status = document.getElementById("downloadStatus");
-        showStatus("downloadStatus", "error", "Error loading proteomes_list.json: " + err);
-      });
-  
-    document.getElementById("search").addEventListener("input", function () {
-      const searchTerm = this.value.toLowerCase();
-      resultsDiv.innerHTML = "";
-      if (searchTerm.length < 2) return;
-  
-      const matches = proteomeData.filter(item =>
-        item.label.toLowerCase().includes(searchTerm) ||
-        item["Proteome Id"].toLowerCase().includes(searchTerm)
-      ).slice(0, 20);
-  
-      if (matches.length === 0) {
-        showStatus("downloadStatus", "info", "No matches found.");
-        return;
-      }
-  
-      matches.forEach(item => {
-        const div = document.createElement("div");
-        div.className = `option ${item.type}`;
-        div.textContent = item.label;
-        div.setAttribute("data-id", item["Proteome Id"]);
-        div.setAttribute("data-label", item.label);
-  
-        resultsDiv.appendChild(div);
-  
-        div.addEventListener("click", function () {
-          const id = this.getAttribute("data-id");
-          if (!selectedTemp.find(x => x.id === id)) {
-            selectedTemp.push({
-              id,
-              label: this.getAttribute("data-label"),
-              type: this.classList.contains("reference") ? "reference" : "non-reference"
-            });
-            updateSelected();
-          }
-          document.getElementById("search").value = "";
-          resultsDiv.innerHTML = "";
-        });
-      });
-    });
-  
-    function updateSelected() {
-      selectedDiv.innerHTML = selectedTemp.map((item, index) => `
-        <div class="selected-item">
-          <div>${item.label} <span class="badge ${item.type}">${item.type}</span></div>
-          <button class="remove-btn" onclick="removeSelected(${index})">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      `).join("");
-    }
-  
-    function removeSelected(index) {
-      selectedTemp.splice(index, 1);
-      updateSelected();
-    }
-
-    document.getElementById("downloadBtn").addEventListener("click", function () {
-      const ids = selectedTemp.map(item => item.id);
-      const status = document.getElementById("downloadStatus");
-      const runBtn = document.getElementById("runOrthofinderBtn");
-  
-      if (ids.length === 0) {
-        showStatus("downloadStatus", "error", "No proteomes selected.");
-        return;
-      }
-  
-      showStatus("downloadStatus", "info", "Downloading...");
-      setButtonLoading("downloadBtn", true, { textLoading: "Downloading..." });
-
-      fetch("/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proteome_ids: ids })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.vacios && data.vacios.length > 0) {
-          showStatus("downloadStatus", "info", `Removed empty proteomes (${data.vacios.length}): ${data.vacios.join(", ")}`);
-        } else {
-          showStatus("downloadStatus", "success", "All proteomes downloaded successfully.");
-        }
-        runBtn.disabled = false;
-      })
-      .catch(err => {
-        showStatus("downloadStatus", "error", "Error: " + err);
-      })
-      .finally(() => {
-        setButtonLoading("downloadBtn", false);
-      });
-    });
-  
-
-    document.getElementById("runOrthofinderBtn").addEventListener("click", function () {
-      const logPanel = document.getElementById("logPanel");
-      const gif = document.getElementById("loadingGif");
-      const postBtns = document.getElementById("postAnalysisButtons");
-
-      setButtonLoading("runOrthofinderBtn", true, { textLoading: "Running..." });
-      logPanel.style.display = "block";
-      gif.style.display = "block";
-      logPanel.textContent = "🟡 Starting OrthoFinder...\n";
-  
-      const eventSource = new EventSource("/stream_orthofinder");
-  
-      eventSource.onmessage = function (event) {
-        if (event.data === "DONE") {
-          logPanel.textContent += "\n✅ Analysis complete!";
-          gif.style.display = "none";
-          postBtns.style.display = "block";
-          setButtonLoading("runOrthofinderBtn", false);
-          eventSource.close();
-        } else {
-          logPanel.textContent += event.data + "\n";
-          logPanel.scrollTop = logPanel.scrollHeight;
-        }
-      };
-  
-      eventSource.onerror = function () {
-        logPanel.textContent += "\n❌ Error receiving data.";
-        gif.style.display = "none";
-        setButtonLoading("runOrthofinderBtn", false);
-        eventSource.close();
-      };
-    });
-  
-    function runGeneOntologyPreselected() {
-      fetch('/cargar_carpeta?filename=Orthogroups.zip&modo=preselected')
-        .then(response => {
-          if (!response.ok) {
-            showStatus("downloadStatus", "error", "Error preparing data for GO analysis.");
-            return;
-          }
-          window.location.href = '/resultado_goa';
-        })
-        .catch(error => {
-          showStatus("downloadStatus", "error", "Unexpected error: " + error.message);
-        });
-    }
-    window.runGeneOntologyPreselected = runGeneOntologyPreselected;
-  </script>
+  </div><!-- /.app-shell -->
 
 </body>
 </html>

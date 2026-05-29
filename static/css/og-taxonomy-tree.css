@@ -1,0 +1,408 @@
+/* ============================================================================
+   OrthoGather taxonomic tree — minimalist styles (Point 11, v2 reset).
+   Companion to static/js/og-taxonomy-tree.js. Designed to look like a
+   discrete scientific-figure dendrogram, not a dashboard widget.
+   ============================================================================ */
+
+.tax-section {
+  margin-top: var(--space-5);
+  text-align: center;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Collapsible wrapper around the tree on the Protein Analysis page.
+   Closed by default — the tree is curiosity, not part of the main read.
+   ────────────────────────────────────────────────────────────────────────── */
+.tax-collapse {
+  max-width: var(--width-content, 1100px);
+  margin: var(--space-5) auto;
+  padding: 0 var(--space-6);
+}
+.tax-collapse-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text);
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.tax-collapse-summary::-webkit-details-marker { display: none; }
+.tax-collapse-summary:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.tax-collapse-icon { color: var(--color-primary); }
+.tax-collapse-label { font-weight: 600; }
+.tax-collapse-sub {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+  font-size: 12.5px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tax-collapse-chev {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  transition: transform 160ms ease;
+}
+.tax-collapse[open] .tax-collapse-chev { transform: rotate(180deg); }
+.tax-collapse[open] .tax-collapse-summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+.tax-collapse[open] .tax-section {
+  border: 1px solid var(--color-border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding: var(--space-5);
+  margin-top: 0;
+  background: var(--color-surface);
+}
+
+/* Mirror of the top toggle, placed at the bottom of the opened tree so the
+   user doesn't have to scroll back up to the summary to close it. */
+.tax-collapse-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-4) auto 0;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.tax-collapse-close:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.tax-collapse-close i { font-size: 10px; }
+
+.tax-section-helper {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 auto var(--space-3);
+  max-width: 680px;
+}
+
+/* Inline row: [ Generate tree ] (?) — the button is the visual anchor;
+   the (?) reveals the "what kind of tree is this" disclaimer on click. */
+.tax-section-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tax-info-pop {
+  position: relative;
+  display: inline-block;
+}
+.tax-info-pop > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  transition: color 120ms ease, background 120ms ease;
+}
+.tax-info-pop > summary::-webkit-details-marker { display: none; }
+.tax-info-pop > summary:hover,
+.tax-info-pop[open] > summary {
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+.tax-info-pop > summary:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.tax-info-pop-body {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  z-index: 20;
+}
+.tax-info-pop-body p { margin: 0; }
+.tax-info-pop-body p + p { margin-top: 6px; }
+.tax-info-pop-title {
+  color: var(--color-text);
+  font-weight: 600;
+  font-size: 13px;
+}
+.tax-info-pop-body code {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--color-surface-2, #f1f5f9);
+}
+
+/* The Generate / refresh button */
+.tax-generate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tax-generate-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.tax-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The tree itself — a small, bordered panel, centered horizontally
+   within its section. `width: fit-content` makes the box shrink-wrap to
+   the SVG (like inline-block) while still being a block element so the
+   `margin: 0 auto` actually centers it. */
+.tax-tree {
+  position: relative;
+  margin: var(--space-3) auto 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.tax-tree[hidden] { display: none; }
+
+/* Small "expand" button overlaid in the top-right corner of the tree
+   panel — same shape/colors as the .figure-expand-btn used on the
+   Protein Analysis figures, so it reads as the same affordance. */
+.tax-expand-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 30px; height: 30px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  transition: background-color .15s, border-color .15s, color .15s;
+  z-index: 2;
+}
+.tax-expand-btn:hover {
+  background: var(--color-primary-soft, #eef4ff);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ──────────  Tax-tree lightbox (mirrors the figure-modal pattern
+   used by resultado.html for Figures 1–4)  ────────── */
+.tax-figure-modal {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px;
+}
+.tax-figure-modal[hidden] { display: none !important; }
+.tax-figure-modal-inner {
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 100%; max-width: 1400px;
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.tax-figure-modal-head {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.tax-figure-modal-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.tax-figure-modal-head .sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+.tax-figure-modal-close {
+  margin-left: auto;
+  width: 32px; height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.tax-figure-modal-close:hover {
+  background: var(--color-surface-alt, #f9fafb);
+  color: var(--color-text);
+}
+.tax-figure-modal-body {
+  flex: 1; overflow: auto;
+  padding: var(--space-5);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* SVG styling — applies to BOTH the inline panel tree (.tax-tree) AND
+   the lightbox modal (.tax-figure-modal-body) so the look stays
+   consistent when expanded. */
+.tax-tree svg,
+.tax-figure-modal-body svg {
+  display: block;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tax-tree path.link,
+.tax-figure-modal-body path.link {
+  fill: none;
+  stroke: var(--color-border-strong, #d1d5db);
+  stroke-width: 1px;
+}
+
+.tax-tree circle.internal,
+.tax-figure-modal-body circle.internal {
+  fill: var(--color-surface);
+  stroke: var(--color-border-strong, #d1d5db);
+  stroke-width: 1px;
+}
+
+.tax-tree g.leaf circle,
+.tax-figure-modal-body g.leaf circle {
+  fill: var(--color-primary);
+  stroke: var(--color-primary-dark, #0b3d6c);
+  stroke-width: 1px;
+}
+
+.tax-tree g.leaf text.leaf-name,
+.tax-figure-modal-body g.leaf text.leaf-name {
+  font-size: 12px;
+  fill: var(--color-text);
+  font-weight: 500;
+}
+
+/* Subtle download row below the tree */
+.tax-actions {
+  margin-top: var(--space-3);
+  display: flex; gap: var(--space-4); align-items: center;
+  justify-content: center;
+}
+.tax-actions a, .tax-actions button {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  text-decoration: underline;
+}
+.tax-actions a:hover, .tax-actions button:hover {
+  color: var(--color-primary);
+}
+.tax-actions .tax-hint {
+  text-decoration: none;
+  font-size: 11px;
+  font-style: italic;
+  cursor: default;
+}
+.tax-actions .tax-hint:hover { color: var(--color-text-muted); }
+
+/* ──────────  Custom hover tooltip  ────────── */
+/* Replaces the native SVG <title> (which has a ~1 s browser delay). */
+.og-tax-tooltip {
+  position: absolute;
+  display: none;
+  background: var(--color-text, #111827);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 320px;
+  pointer-events: none;
+  z-index: 10000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+.og-tax-tooltip b { font-weight: 600; }
+.og-tax-tip-rank {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+/* Hint the user that the nodes are interactive */
+.tax-tree g.internal,
+.tax-tree g.leaf,
+.tax-figure-modal-body g.internal,
+.tax-figure-modal-body g.leaf { cursor: pointer; }
+
+/* Loading / empty states */
+.tax-tree-loading,
+.tax-tree-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.tax-tree-loading::before {
+  content: "";
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: tax-spin 700ms linear infinite;
+  margin-right: 8px;
+  vertical-align: -2px;
+}
+@keyframes tax-spin { to { transform: rotate(360deg); } }

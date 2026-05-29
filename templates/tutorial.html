@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tutorial · OrthoGather</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-errors.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/tutorial.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
+  <script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+</head>
+<body>
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="tutorial-main">
+
+    <!-- Intro hero -->
+    <section class="tutorial-hero">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Tutorial</span>
+      </nav>
+      <h1>OrthoGather tutorial</h1>
+      <p class="lead">
+        A step-by-step walkthrough of every screen: from launching a comparison to interpreting
+        the GO enrichment table. If you just want to try the tool, follow
+        <a href="#quick-start">Quick start</a>. If you're stuck on a specific page, jump to
+        <a href="#protein-analysis">Protein Analysis</a> or
+        <a href="#gene-ontology">Gene Ontology</a>.
+      </p>
+    </section>
+
+    <div class="tutorial-layout">
+
+      <!-- Sticky TOC -->
+      <aside class="tutorial-toc" aria-label="Table of contents">
+        <p class="toc-title">On this page</p>
+        <ol>
+          <li><a href="#what-is">What is OrthoGather</a></li>
+          <li><a href="#quick-start">Quick start</a></li>
+          <li><a href="#protein-analysis">Protein Analysis page</a></li>
+          <li><a href="#gene-ontology">Gene Ontology page</a></li>
+          <li><a href="#history">History &amp; reproducibility</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#citation">Citing OrthoGather</a></li>
+        </ol>
+      </aside>
+
+      <article class="tutorial-content">
+
+        <!-- ================================================================== -->
+        <section id="what-is" class="tutorial-section">
+          <h2>What is OrthoGather</h2>
+          <p>
+            OrthoGather is a local Flask web app that combines <strong>OrthoFinder</strong>
+            (orthology inference) with <strong>GOATOOLS</strong> (Gene Ontology enrichment).
+            It lets you compare protein sets across many species (UpSet plots,
+            shared/unique orthogroups, exports) and then ask functional questions over
+            the same dataset: <em>what biological processes are enriched in this subset?</em>
+          </p>
+          <p>
+            Everything runs on your machine; no data leaves your laptop. The only outgoing
+            traffic is downloading reference proteomes (UniProt) and GO annotation files
+            (GOA), and the GO basic ontology.
+          </p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_00_home.png') }}"
+                 alt="OrthoGather home page showing the Preselected, Pick species and Upload entry-point cards"
+                 loading="lazy" />
+            <figcaption>Home page with the three entry points: New Analysis, Preselected Dataset, and External Upload.</figcaption>
+          </figure>
+        </section>
+
+        <!-- ================================================================== -->
+        <section id="quick-start" class="tutorial-section">
+          <h2>Quick start: your first analysis</h2>
+          <p>From the home page you have three entry points (in the same order as the cards on the landing page):</p>
+          <div class="tutorial-paths">
+            <div class="tutorial-path">
+              <h3><i class="fa-solid fa-bolt"></i> New Analysis</h3>
+              <p>Start from scratch. Search UniProt's proteome catalogue, tick the species you want,
+                and OrthoGather downloads the FASTAs and runs OrthoFinder locally.</p>
+            </div>
+            <div class="tutorial-path">
+              <h3><i class="fa-solid fa-database"></i> Preselected Dataset</h3>
+              <p>Try a curated example with 47 bacterial species. Best to learn the
+                interface without waiting for OrthoFinder to finish.</p>
+            </div>
+            <div class="tutorial-path">
+              <h3><i class="fa-solid fa-file-zipper"></i> External Upload</h3>
+              <p>Already have orthogroups? Drop an OrthoFinder ZIP, or an
+                <strong>OrthoXML</strong> file from OrthoDB / OMA / eggNOG /
+                Ensembl Compara, and skip straight to the analysis screens.</p>
+            </div>
+          </div>
+          <div class="tutorial-callout">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>
+              <strong>Heads up:</strong> running OrthoFinder on more than ~10 species can take
+              tens of minutes. Use the <a href="/history">History page</a> to re-open completed
+              runs without recomputing.
+            </div>
+          </div>
+
+          <h3>External Upload: ZIP or OrthoXML</h3>
+          <p>
+            The External Upload entry point accepts two formats:
+          </p>
+          <ul>
+            <li>
+              <strong>OrthoFinder ZIP</strong>: the output folder of an OrthoFinder run,
+              zipped (must contain <code>Orthogroups.tsv</code> and
+              <code>Orthogroups.GeneCount.tsv</code> at the top level).
+            </li>
+            <li>
+              <strong>OrthoXML</strong> (<code>.xml</code> or <code>.orthoxml</code>):
+              the <a href="http://www.orthoxml.org/" target="_blank" rel="noopener">Quest for
+              Orthologs (QfO) standard</a> for representing orthology relationships. Exported by
+              <strong>OrthoDB</strong>, <strong>OMA</strong>, <strong>eggNOG</strong>,
+              <strong>Ensembl Compara</strong>, <strong>PANTHER</strong>, <strong>InParanoid</strong>
+              and <strong>OrthoFinder</strong> itself.
+            </li>
+          </ul>
+          <p>
+            With OrthoXML support you can plug in <em>precomputed</em> orthogroups from any of
+            these databases without rerunning OrthoFinder locally. Useful when:
+          </p>
+          <ul>
+            <li>you have an OrthoDB <code>.orthoxml</code> covering hundreds of species and just
+              want to do UpSet plots / GO enrichment on a subset;</li>
+            <li>you want to compare two orthology methods (e.g. OrthoFinder vs OMA) on the same
+              species set — upload each one separately;</li>
+            <li>you trust an external curation pipeline more than what OrthoFinder would produce
+              on your laptop.</li>
+          </ul>
+          <p class="tutorial-note">
+            <strong>How it works under the hood:</strong> OrthoGather parses the XML, flattens any
+            nested <code>&lt;paralogGroup&gt;</code> blocks (every gene inside an
+            <code>&lt;orthologGroup&gt;</code> ends up in the same orthogroup row), and writes the
+            same <code>Orthogroups.tsv</code> / <code>Orthogroups.GeneCount.tsv</code> files that
+            OrthoFinder produces. Everything downstream (UpSet plots, GO enrichment, history,
+            compare, citations) works identically.
+          </p>
+        </section>
+
+        <!-- ================================================================== -->
+        <section id="protein-analysis" class="tutorial-section">
+          <h2>Protein Analysis page</h2>
+          <p>
+            After a successful run you land on Protein Analysis. The page is organised
+            top-to-bottom as a series of figures with an action bar above each.
+          </p>
+
+          <h3>Figures 1 &amp; 2: orthogroup landscape</h3>
+          <ul>
+            <li><strong>Figure 1</strong>: distribution of orthogroup sizes (number of proteins per orthogroup).</li>
+            <li><strong>Figure 2</strong>: orthogroup sharing across species (how many orthogroups are
+              present in 1, 2, 3, … species).</li>
+          </ul>
+          <p class="tutorial-note">
+            Throughout OrthoGather we count <strong>proteins</strong>, not genes. OrthoFinder operates
+            on protein FASTA sequences, and an orthogroup is a set of proteins inferred to descend
+            from a common ancestral sequence. The two terms are sometimes used interchangeably in
+            the GO literature, but in this app "size of an orthogroup" always means
+            "number of proteins it contains".
+          </p>
+          <p>Both are interactive Plotly charts. Hover for exact counts; use the camera icon
+            (top right of the chart) to export PNG/SVG. The "?" button on each figure shows a
+            popover with what the figure means and how it's computed.</p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_01_protein_figures.png') }}"
+                 alt="Figure 1 (orthogroup-size distribution) and Figure 2 (per-species orthogroup sharing)"
+                 loading="lazy" />
+            <figcaption>Figures 1 and 2: orthogroup-size distribution (left) and species sharing (right).</figcaption>
+          </figure>
+
+          <h3>Species picker &amp; action bar</h3>
+          <p>
+            Below Figure 2 you'll find a chip-based species picker. Click a chip to include
+            a species in the comparison; click again to remove it. The chips are the same
+            ones that drive Figures 3, 4, 5 and 6.
+          </p>
+          <p>The action bar offers: <strong>Run UpSet</strong>, <strong>Download Excel</strong>,
+            <strong>Save view</strong>, and <strong>Copy link</strong> (so you can share the exact
+            selection with a colleague).</p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_02_protein_species_picker.png') }}"
+                 alt="Chip-based species picker with the action bar below"
+                 loading="lazy" />
+            <figcaption>Species picker: click chips to add or remove species, then "Generate UpSet figures".</figcaption>
+          </figure>
+
+          <h3>Figures 3 and 4: UpSet plots</h3>
+          <p>
+            UpSet plots show set intersections without the visual chaos of large Venn diagrams.
+            Each row at the bottom-left is a species; the matrix in the middle shows which
+            combination ("which species share this set?"); the bar at the top is the count.
+          </p>
+          <p>Hover a bar to see the exact orthogroup count, click to drill into that intersection.
+            Use the camera icon to download the figure, or the data icon to grab the underlying
+            table as CSV/TSV/JSON/XLSX.</p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_03_protein_upset.png') }}"
+                 alt="UpSet plot showing shared and species-specific orthogroups across three species"
+                 loading="lazy" />
+            <figcaption>Figure 3: UpSet plot for three <em>Achromobacter</em> species. The big bar on the right is the core (orthogroups shared by all three).</figcaption>
+          </figure>
+
+          <h3>Figures 5 and 6: UniProt filter</h3>
+          <p>
+            Paste UniProt accession IDs in the filter box and Figures 5 / 6 show only orthogroups
+            that contain at least one of your IDs. Useful when you have a hit list and want to
+            know which species share each hit's orthogroup.
+          </p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_04_protein_uniprot_filter.png') }}"
+                 alt="UniProt filter input field for Figures 5 and 6"
+                 loading="lazy" />
+            <figcaption>UniProt-filtered view: paste IDs to restrict the UpSet to orthogroups containing your hits.</figcaption>
+          </figure>
+        </section>
+
+        <!-- ================================================================== -->
+        <section id="gene-ontology" class="tutorial-section">
+          <h2>Gene Ontology page</h2>
+          <p>
+            The Gene Ontology page (top-right tab in Protein Analysis, or the
+            <em>Run GO enrichment</em> button at the bottom of the page) walks you through
+            five steps. Each step unlocks when the previous one succeeds.
+          </p>
+
+          <h3>1. Species match</h3>
+          <p>
+            OrthoGather looks up every species in your OrthoFinder dataset against the
+            UniProt proteome catalogue, so it knows which GOA file to download.
+          </p>
+          <p>
+            Common abbreviations like <em>E. coli</em>, <em>S. cerevisiae</em>,
+            <em>D. melanogaster</em>, <em>C. elegans</em> are expanded automatically. If a row
+            shows <i class="fa-solid fa-xmark text-error" aria-hidden="true"></i> <strong>No match</strong>,
+            use the <strong>Fix</strong> field. You can paste either an NCBI <strong>Taxon ID</strong>
+            (e.g. <code>83333</code>) or the full <strong>species name</strong> (e.g.
+            <em>Escherichia coli K-12</em>), and OrthoGather will retry the match.
+          </p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_05_go_match_table.png') }}"
+                 alt="Species match table with each input species resolved to a UniProt proteome"
+                 loading="lazy" />
+            <figcaption>Step 1: every species in your dataset is matched against a UniProt proteome. Use the Fix field for any "No match" row.</figcaption>
+          </figure>
+
+          <h4>What the two columns mean</h4>
+          <p>
+            The table has two independent checks per row. Read them as a pair:
+          </p>
+          <ul>
+            <li><strong>Matched entry in catalogue</strong> (green tick with the proteome label):
+              a UniProt proteome exists for this species. The match is good.</li>
+            <li><strong>GOA file</strong> (green tick): the matched proteome <em>also</em> has a GO
+              annotation file published by EBI/UniProt-GOA. This is what OrthoGather will
+              download for enrichment.</li>
+          </ul>
+          <p>
+            A species can be <strong>matched but still have no GOA file</strong> (green name on the
+            left, red <i class="fa-solid fa-xmark text-error" aria-hidden="true"></i> on the right).
+            This happens when UniProt knows the proteome exists but UniProt-GOA hasn't curated GO
+            annotations for it yet, which is common for non-model organisms (environmental
+            <em>Burkholderia</em>, exotic <em>Mycobacterium</em>, clinical isolates, etc.).
+            It is a <strong>data-source limitation</strong>, not a bug in OrthoGather. Those
+            species will still appear in the orthogroup tables but contribute no GO annotations
+            during enrichment.
+          </p>
+
+          <h3>2. Download GOA</h3>
+          <p>
+            Clicking <strong>Download GOA files</strong> pulls the matched annotation files from
+            EBI and builds an Excel summary (<em>Gene_Ontology_Analysis.xlsx</em>) listing every
+            orthogroup, its members, and their annotation status. This Excel is the on-disk
+            record of which proteins carry GO terms.
+          </p>
+          <h4>GOA, GAF, UniProt: who provides what?</h4>
+          <ul>
+            <li><strong>UniProt</strong> publishes the protein sequences (the FASTAs that
+              OrthoFinder consumes) and curates protein metadata.</li>
+            <li><strong>GAF</strong> (Gene Association Format) is a tab-separated file format
+              defined by the GO Consortium. It has 17 columns: protein ID, GO term, evidence
+              code, namespace, etc.</li>
+            <li><strong>GOA</strong> (Gene Ontology Annotation) is the dataset published by the
+              <strong>EBI UniProt-GOA</strong> project, a collaboration between EBI/UniProt and
+              the GO Consortium. The files are distributed in GAF format, with extension
+              <code>.goa</code> or <code>.gaf</code>. OrthoGather downloads them from
+              <code>ftp.ebi.ac.uk/pub/databases/GO/goa/proteomes/</code>.</li>
+          </ul>
+          <p>
+            In short: GAF is the format, GOA is the dataset, and both come from the
+            EBI/UniProt-GOA project.
+          </p>
+
+          <h3>3. Foreground</h3>
+          <p>
+            The <strong>foreground</strong> is your hit list: the proteins you want to enrich.
+            Paste UniProt IDs (one per line or space-separated; FASTA headers are accepted too).
+          </p>
+          <p>
+            Tick <strong>Expand to full orthogroups</strong> to broaden the test: any orthogroup
+            that contains one of your hits contributes <em>all</em> its members to the foreground.
+            This is the heart of orthogroup-based propagation. You're asking
+            <em>"what functions are enriched across these protein families?"</em> rather than
+            <em>"what functions are enriched in this exact set of human proteins?"</em>.
+          </p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_06_go_explainers.png') }}"
+                 alt="Foreground and Background explainer cards above the input textareas"
+                 loading="lazy" />
+            <figcaption>Steps 3 and 4: explainer cards above each textarea tell you what to paste and when to tick "Expand to full orthogroups".</figcaption>
+          </figure>
+
+          <h3>4. Background</h3>
+          <p>
+            The <strong>background</strong> is the universe against which enrichment is tested.
+            Three common choices:
+          </p>
+          <ul>
+            <li><strong>"Use all GOA files"</strong>: the simplest default, every protein in
+              every species' GOA file. Good when your foreground could have come from anywhere.</li>
+            <li><strong>Custom IDs without orthogroup expansion</strong>: paste a restricted
+              list (e.g. only kinases). Use when your experiment was technically restricted.</li>
+            <li><strong>Custom IDs with orthogroup expansion</strong>: same idea, but propagated
+              across orthogroups. Symmetrical to the foreground.</li>
+          </ul>
+
+          <h3>5. Analysis settings &amp; run</h3>
+          <p>
+            The <strong>Analysis settings</strong> card exposes three stringency choices.
+            Defaults are sensible for most users; adjust knowingly.
+          </p>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_07_go_settings.png') }}"
+                 alt="Analysis settings card with three radio groups: Evidence quality, Orthogroups, Counting"
+                 loading="lazy" />
+            <figcaption>Step 5: Analysis settings. Pick stringency for evidence quality, orthogroup filtering, and counting mode. Each "?" reveals a popover with the trade-off.</figcaption>
+          </figure>
+
+          <h4>Evidence quality</h4>
+          <ul>
+            <li><strong>All</strong>: every annotation, including IEA (Inferred from Electronic
+              Annotation). Most permissive. The vast majority of annotations in any GOA file are
+              IEA. They propagate by sequence similarity from a small number of curated
+              annotations.</li>
+            <li><strong>Curated</strong>: keeps human-curated entries plus IBA
+              (Inferred from Biological aspect of Ancestor, i.e. <em>PAINT-curated</em>
+              phylogenetic propagation done by GO Consortium biocurators). A defensible middle
+              ground that includes high-quality computational inference.</li>
+            <li><strong>Experimental only</strong>: strictest. Just experimental codes (EXP, IDA,
+              IPI, IMP, IGI, IEP) and high-throughput experimental codes (HEP, HDA, HMP, HGI).
+              Expect fewer hits but very high confidence.</li>
+          </ul>
+          <p>
+            <strong>When to use which?</strong> If you study a single well-annotated model organism
+            (human, mouse, yeast), Experimental only often gives a cleaner story.
+            If you study a non-model species, Curated lets you leverage PAINT-derived inferences
+            without drowning in IEA noise.
+          </p>
+
+          <h4>Orthogroups</h4>
+          <ul>
+            <li><strong>All orthogroups</strong>: every OG that contains at least one foreground
+              hit is propagated. Maximises recall.</li>
+            <li><strong>Single-copy only</strong>: restrict to OGs with exactly one protein per
+              species (the safest 1:1:1 orthology relationships). More conservative but immune
+              to paralog confusion.</li>
+          </ul>
+
+          <h4>Counting</h4>
+          <ul>
+            <li><strong>Per protein</strong> (default): every protein in the propagated foreground
+              counts as one observation. Compatible with most published enrichment workflows.</li>
+            <li><strong>Per orthogroup</strong>: collapse each OG to a single observation
+              (one anchor protein per OG). Mitigates pseudoreplication: an OG with 10 species
+              members would otherwise contribute 10 near-identical observations.</li>
+          </ul>
+
+          <h3>Reading the output</h3>
+          <p>
+            After clicking <strong>Run GO enrichment</strong> the page reveals four
+            sections, top to bottom: a <strong>coverage banner</strong>, the
+            <strong>Plotly bar chart</strong>, the <strong>re-run bar</strong>, and the
+            <strong>interactive table</strong>.
+          </p>
+
+          <h4>Coverage banner</h4>
+          <p>
+            The first thing you see is a four-column banner that summarises how usable your
+            foreground is:
+          </p>
+          <ul>
+            <li><strong>You pasted</strong>: the raw count of UniProt IDs you submitted.</li>
+            <li><strong>After orthogroup expansion</strong> (only shown when you ticked
+              "Expand to full orthogroups"): the propagated foreground size, i.e. how many
+              proteins the test actually runs on.</li>
+            <li><strong>With GO annotations</strong>: the subset that has at least one GO
+              term in the background, plus the percentage. Below 30% triggers a warning
+              note; above 60% is "good coverage".</li>
+            <li><strong>Background universe</strong>: the total size of the universe the
+              hypergeometric test runs against.</li>
+          </ul>
+
+          <h4>Bar chart</h4>
+          <ul>
+            <li><strong>Namespace tabs</strong> (All / BP / CC / MF) at the top-left.
+              "All" overlays the three namespaces; the individual tabs zoom into one.</li>
+            <li><strong>"Top N" selector</strong> at the top-right (default 20 per namespace).
+              The chart caps at the top-N most significant terms so the figure stays
+              readable; raise the selector to 50 / 100 / All, or use the full table below.
+              When truncated, a note below the chart tells you "Showing top 60 of 696 terms".</li>
+            <li><strong>Hover</strong> any bar for the full term name, GO ID, depth, study /
+              population counts, and exact p-value.</li>
+            <li><strong>PNG and SVG download buttons</strong> on the right. The PNG is scaled 2×
+              for crisp output; the SVG is publication-ready vector graphics.</li>
+          </ul>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_08_go_results_plot.png') }}"
+                 alt="Plotly horizontal bar chart of enriched Cellular Component GO terms, sorted by -log10(FDR), with namespace tabs and Top N selector"
+                 loading="lazy" />
+            <figcaption>Plotly chart with namespace tabs, "Top N" selector, and PNG/SVG download buttons.</figcaption>
+          </figure>
+
+          <h4>Re-run bar</h4>
+          <p>
+            Sits directly under the chart so you can tighten the analysis without scrolling.
+            Tweak <strong>Min depth</strong>, <strong>P-value (FDR)</strong>, or
+            <strong>Max terms per NS</strong> and click <strong>Re-run with new thresholds</strong>.
+            Each input has a <code>?</code> popover explaining when to use it.
+          </p>
+
+          <h4>Interactive table</h4>
+          <ul>
+            <li><strong>Column tooltips</strong>: every header has a "(?)" hint. Hover to
+              see what the column means (e.g. <em>"study_count / study_n: how many of your
+              foreground proteins are annotated with this term, out of how many were tested"</em>).</li>
+            <li><strong>Sort</strong>: click any column header to sort ascending / descending.</li>
+            <li><strong>Filter</strong>: search box (free text on GO ID + name), namespace
+              chips (All / BP / CC / MF), FDR and Depth numeric inputs all update the
+              table live.</li>
+            <li><strong>"Show" selector</strong>: 10 / 20 / 50 / 100 / All rows on screen.
+              Default 20 so the page doesn't dump 700 rows by default. A counter below the
+              toolbar shows "Showing 20 of 696 terms" so you know what you're looking at.</li>
+            <li><strong>Evidence chips</strong>, colour-coded by GO Consortium tier:
+              <span style="color:#16653a;font-weight:600">green = experimental</span> (EXP, IDA, IPI, IMP, IGI, IEP and high-throughput variants),
+              <span style="color:#1d4ed8;font-weight:600">blue = curated</span> (TAS, NAS, IC, IBA / PAINT), and
+              <span style="color:#4b5563;font-weight:600">gray = computational</span> (IEA, ISS and other sequence-similarity codes).
+              Hover any chip for the code name and count.</li>
+            <li><strong>Export</strong>: CSV / TSV / JSON of the currently <em>filtered</em>
+              rows (i.e. only what the table is showing), or the full Excel of every
+              significant term from the GOATOOLS run.</li>
+          </ul>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_09_go_results_table.png') }}"
+                 alt="Interactive table with GO ID, name, namespace pill, depth, study and pop counts, -log10(FDR), and colour-coded evidence chips"
+                 loading="lazy" />
+            <figcaption>Interactive table with per-column tooltips, evidence-tier legend on top, page-size selector, and colour-coded evidence chips per row.</figcaption>
+          </figure>
+        </section>
+
+        <!-- ================================================================== -->
+        <section id="history" class="tutorial-section">
+          <h2>History &amp; reproducibility</h2>
+          <p>
+            Every completed analysis is recorded in <a href="/history">History</a>. From there
+            you can:
+          </p>
+          <ul>
+            <li><strong>Reproduce</strong>: re-open the run with its original species, OrthoFinder
+              parameters and selection state.</li>
+            <li><strong>Cite</strong>: export a BibTeX or RIS entry with the exact OrthoGather
+              version and date.</li>
+            <li><strong>Compare</strong>: load two runs side-by-side to see differences in
+              orthogroup composition, foreground hits, etc.</li>
+            <li><strong>Rename / delete</strong>: keep your history tidy.</li>
+          </ul>
+
+          <figure class="tutorial-figure">
+            <img src="{{ url_for('static', filename='images/tutorial/tut_10_history.png') }}"
+                 alt="History page listing completed OrthoGather runs"
+                 loading="lazy" />
+            <figcaption>History: every completed analysis with a timestamp, species set, and per-run actions (Reproduce, Cite, Compare, Rename, Delete).</figcaption>
+          </figure>
+        </section>
+
+        <!-- ================================================================== -->
+        <section id="faq" class="tutorial-section">
+          <h2>Frequently asked questions</h2>
+
+          <details class="tutorial-faq">
+            <summary>Why didn't <em>E. coli</em> match in the species table?</summary>
+            <p>
+              OrthoGather automatically expands common Latin abbreviations (E. coli →
+              Escherichia coli, S. cerevisiae → Saccharomyces cerevisiae, etc.). If a row
+              still shows "No match", the species name might be ambiguous or unusual.
+              Type either the NCBI Taxon ID (e.g. <code>83333</code>) or the full Latin
+              name in the Fix field and click "Fix".
+            </p>
+          </details>
+
+          <details class="tutorial-faq">
+            <summary>What is orthogroup-based propagation?</summary>
+            <p>
+              When you tick "Expand to full orthogroups", OrthoGather pulls in every other
+              member of each foreground orthogroup (across all species in your analysis)
+              and unions their GO annotations. This is how a protein in a poorly annotated
+              species can "inherit" GO terms from its well-annotated orthologs.
+            </p>
+            <p>
+              <strong>Note:</strong> this is propagation by <em>union</em>, not by majority vote.
+              If 9 out of 10 orthologs say "DNA repair" and 1 says "kinase activity", the OG
+              gets both annotations. If you want stricter propagation, pair this with
+              <em>Experimental only</em> evidence + <em>Single-copy</em> orthogroups.
+            </p>
+          </details>
+
+          <details class="tutorial-faq">
+            <summary>How is OrthoGather different from PAINT?</summary>
+            <p>
+              <strong>PAINT</strong> is a desktop Java tool used by the GO Consortium's
+              biocurators (humans, with biology backgrounds) to manually curate phylogenetic
+              annotations across protein families. The result of their work is the
+              <strong>IBA</strong> evidence code that you see in GOA files.
+            </p>
+            <p>
+              OrthoGather doesn't replace PAINT; it <em>uses</em> PAINT-curated annotations
+              when you select the "Curated" evidence preset. PAINT is upstream curation;
+              OrthoGather is downstream analysis.
+            </p>
+          </details>
+
+          <details class="tutorial-faq">
+            <summary>What do the GO evidence codes mean?</summary>
+            <p>
+              <strong>Experimental</strong>: EXP (Inferred from Experiment), IDA (Direct Assay),
+              IPI (Physical Interaction), IMP (Mutant Phenotype), IGI (Genetic Interaction),
+              IEP (Expression Pattern). <strong>High-throughput experimental</strong>: HEP, HDA,
+              HMP, HGI. <strong>Author statement</strong>: TAS (Traceable), NAS (Non-traceable).
+              <strong>Curator</strong>: IC (Inferred by Curator). <strong>Phylogenetic</strong>:
+              IBA (Inferred from Biological aspect of Ancestor, i.e. PAINT). <strong>Computational</strong>:
+              IEA (Inferred from Electronic Annotation).
+            </p>
+            <p>
+              The full reference is at <a href="https://geneontology.org/docs/guide-go-evidence-codes/" target="_blank" rel="noopener">geneontology.org</a>.
+            </p>
+          </details>
+
+          <details class="tutorial-faq">
+            <summary>Per protein vs per orthogroup: which should I use?</summary>
+            <p>
+              If your foreground has many large orthogroups, per-protein counting can inflate
+              significance (the same annotation gets counted N times, once per orthologous
+              copy). Per-orthogroup counting is more conservative; each OG contributes one
+              observation. We default to per-protein for compatibility with published
+              workflows; switch to per-orthogroup when you want to be statistically careful.
+            </p>
+          </details>
+        </section>
+
+        <!-- ================================================================== -->
+        <section id="citation" class="tutorial-section">
+          <h2>Citing OrthoGather</h2>
+          <p>If OrthoGather contributed to your published work, please cite it as:</p>
+          <pre><code>{% raw %}@article{VivasRodriguez2026OrthoGather,
+  author  = {Carlos Vivas-Rodriguez, David Matallanas, Colm J. Ryan,
+             Siobhán McClean, Olivier Dennler, Joanna Drabińska},
+  title   = {{OrthoGather}: a local platform for orthology-based proteome
+             and proteomics comparisons and Gene Ontology enrichment},
+  year    = {2026},
+  journal = {bioRxiv},
+  url     = {https://github.com/CarlosVivasR/OrthoGather},
+  doi     = {10.64898/2026.01.30.702851}
+}{% endraw %}</code></pre>
+          <p>
+            Per-run citations (with exact version + parameters) can be exported from the
+            <a href="/history">History</a> page.
+          </p>
+        </section>
+
+      </article>
+    </div>
+
+  </main>
+
+  </div><!-- /.app-shell -->
+
+</body>
+</html>

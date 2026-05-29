@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Protein analysis — UpSet plot">
+  <!-- Bars representing intersection sizes -->
+  <g fill="#003366">
+    <rect x="8"  y="10" width="7" height="22" rx="1.5"/>
+    <rect x="19" y="16" width="7" height="16" rx="1.5" opacity="0.78"/>
+    <rect x="30" y="22" width="7" height="10" rx="1.5" opacity="0.58"/>
+    <rect x="41" y="26" width="7" height="6"  rx="1.5" opacity="0.4"/>
+    <rect x="51" y="29" width="7" height="3"  rx="1.5" opacity="0.3"/>
+  </g>
+
+  <!-- Separator line -->
+  <line x1="6" y1="36" x2="60" y2="36" stroke="#003366" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Dot matrix -->
+  <g fill="#003366" stroke="#003366" stroke-width="1.6">
+    <!-- Col 1 -->
+    <circle cx="11.5" cy="42" r="2.2"/>
+    <circle cx="11.5" cy="49" r="2.2"/>
+    <circle cx="11.5" cy="56" r="2.2"/>
+    <line x1="11.5" y1="42" x2="11.5" y2="56" />
+
+    <!-- Col 2 -->
+    <circle cx="22.5" cy="42" r="2.2"/>
+    <circle cx="22.5" cy="49" r="2.2"/>
+    <circle cx="22.5" cy="56" r="2.2" fill="#003366" fill-opacity="0.22" stroke="none"/>
+    <line x1="22.5" y1="42" x2="22.5" y2="49" />
+
+    <!-- Col 3 -->
+    <circle cx="33.5" cy="42" r="2.2"/>
+    <circle cx="33.5" cy="49" r="2.2" fill-opacity="0.22" stroke="none"/>
+    <circle cx="33.5" cy="56" r="2.2"/>
+    <line x1="33.5" y1="42" x2="33.5" y2="56" />
+
+    <!-- Col 4 -->
+    <circle cx="44.5" cy="42" r="2.2" fill-opacity="0.22" stroke="none"/>
+    <circle cx="44.5" cy="49" r="2.2"/>
+    <circle cx="44.5" cy="56" r="2.2" fill-opacity="0.22" stroke="none"/>
+
+    <!-- Col 5 -->
+    <circle cx="55"   cy="42" r="2.2" fill-opacity="0.22" stroke="none"/>
+    <circle cx="55"   cy="49" r="2.2" fill-opacity="0.22" stroke="none"/>
+    <circle cx="55"   cy="56" r="2.2"/>
+  </g>
+</svg>

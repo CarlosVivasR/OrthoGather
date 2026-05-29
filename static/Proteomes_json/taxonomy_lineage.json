@@ -1,0 +1,2762 @@
+{
+  "_meta": {
+    "created_at": "2026-05-27T11:43:04.326209+00:00",
+    "schema": "orthogather.taxonomy.cache.v1",
+    "description": "Per-taxon_id NCBI lineages, fetched from UniProt REST. Each entry has fetched_at + source + source_release so the data backing a published tree can be audited."
+  },
+  "entries": {
+    "1003200": {
+      "scientific_name": "Achromobacter insuavis AXX-A",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 506,
+          "name": "Alcaligenaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 222,
+          "name": "Achromobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 1287735,
+          "name": "Achromobacter insuavis",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 1003200,
+          "name": "Achromobacter insuavis AXX-A",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:04.497103+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "72557": {
+      "scientific_name": "Achromobacter ruhlandii",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 506,
+          "name": "Alcaligenaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 222,
+          "name": "Achromobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 72557,
+          "name": "Achromobacter ruhlandii",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:04.659863+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "562971": {
+      "scientific_name": "Achromobacter xylosoxidans C54",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 506,
+          "name": "Alcaligenaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 222,
+          "name": "Achromobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 85698,
+          "name": "Alcaligenes xylosoxydans xylosoxydans",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 562971,
+          "name": "Achromobacter xylosoxidans C54",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:04.827450+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1116234": {
+      "scientific_name": "Acinetobacter baumannii AB5075",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2887326,
+          "name": "Moraxellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 468,
+          "name": "Moraxellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 469,
+          "name": "Acinetobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 909768,
+          "name": "Acinetobacter calcoaceticus/baumannii complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 470,
+          "name": "Acinetobacter baumannii",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 1116234,
+          "name": "Acinetobacter baumannii AB5075",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:04.980809+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "575584": {
+      "scientific_name": "Acinetobacter baumannii (strain ATCC 19606 / DSM 30007 / JCM 6841 / CCUG 19606 / CIP 70.34 / NBRC 109757 / NCIMB 12457 / NCTC 12156 / 81)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2887326,
+          "name": "Moraxellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 468,
+          "name": "Moraxellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 469,
+          "name": "Acinetobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 909768,
+          "name": "Acinetobacter calcoaceticus/baumannii complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 470,
+          "name": "Acinetobacter baumannii",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 575584,
+          "name": "Acinetobacter baumannii (strain ATCC 19606 / DSM 30007 / JCM 6841 / CCUG 19606 / CIP 70.34 / NBRC 109757 / NCIMB 12457 / NCTC 12156 / 81)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:05.138578+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "400667": {
+      "scientific_name": "Acinetobacter baumannii (strain ATCC 17978 / DSM 105126 / CIP 53.77 / LMG 1025 / NCDC KC755 / 5377)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2887326,
+          "name": "Moraxellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 468,
+          "name": "Moraxellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 469,
+          "name": "Acinetobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 909768,
+          "name": "Acinetobacter calcoaceticus/baumannii complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 470,
+          "name": "Acinetobacter baumannii",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 400667,
+          "name": "Acinetobacter baumannii (strain ATCC 17978 / DSM 105126 / CIP 53.77 / LMG 1025 / NCDC KC755 / 5377)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:05.652857+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "509173": {
+      "scientific_name": "Acinetobacter baumannii (strain AYE)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2887326,
+          "name": "Moraxellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 468,
+          "name": "Moraxellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 469,
+          "name": "Acinetobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 909768,
+          "name": "Acinetobacter calcoaceticus/baumannii complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 470,
+          "name": "Acinetobacter baumannii",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 509173,
+          "name": "Acinetobacter baumannii (strain AYE)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:05.837643+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "62977": {
+      "scientific_name": "Acinetobacter baylyi (strain ATCC 33305 / BD413 / ADP1)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2887326,
+          "name": "Moraxellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 468,
+          "name": "Moraxellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 469,
+          "name": "Acinetobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 202950,
+          "name": "Acinetobacter baylyi",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 62977,
+          "name": "Acinetobacter baylyi (strain ATCC 33305 / BD413 / ADP1)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:06.004683+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "981331": {
+      "scientific_name": "Acinetobacter calcoaceticus DSM 30006 = CIP 81.8",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2887326,
+          "name": "Moraxellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 468,
+          "name": "Moraxellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 469,
+          "name": "Acinetobacter",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 909768,
+          "name": "Acinetobacter calcoaceticus/baumannii complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 471,
+          "name": "Acinetobacter calcoaceticus",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 981331,
+          "name": "Acinetobacter calcoaceticus DSM 30006 = CIP 81.8",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:06.158311+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "216591": {
+      "scientific_name": "Burkholderia cenocepacia (strain ATCC BAA-245 / DSM 16553 / LMG 16656 / NCTC 13227 / J2315 / CF5610)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 87882,
+          "name": "Burkholderia cepacia complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 95486,
+          "name": "Burkholderia cenocepacia",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 216591,
+          "name": "Burkholderia cenocepacia (strain ATCC BAA-245 / DSM 16553 / LMG 16656 / NCTC 13227 / J2315 / CF5610)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:06.554432+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "152500": {
+      "scientific_name": "Burkholderia dolosa",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 87882,
+          "name": "Burkholderia cepacia complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 152500,
+          "name": "Burkholderia dolosa",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:06.706746+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "999541": {
+      "scientific_name": "Burkholderia gladioli (strain BSR3)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 28095,
+          "name": "Burkholderia gladioli",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 999541,
+          "name": "Burkholderia gladioli (strain BSR3)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:06.862392+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "395019": {
+      "scientific_name": "Burkholderia multivorans (strain ATCC 17616 / 249)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 87882,
+          "name": "Burkholderia cepacia complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 87883,
+          "name": "Burkholderia multivorans",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 395019,
+          "name": "Burkholderia multivorans (strain ATCC 17616 / 249)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:07.020797+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "272560": {
+      "scientific_name": "Burkholderia pseudomallei (strain K96243)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 111527,
+          "name": "pseudomallei group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 28450,
+          "name": "Burkholderia pseudomallei",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 272560,
+          "name": "Burkholderia pseudomallei (strain K96243)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:07.567290+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "95485": {
+      "scientific_name": "Burkholderia stabilis",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 87882,
+          "name": "Burkholderia cepacia complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 95485,
+          "name": "Burkholderia stabilis",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:07.725066+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "271848": {
+      "scientific_name": "Burkholderia thailandensis (strain ATCC 700388 / DSM 13276 / CCUG 48851 / CIP 106301 / E264)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 111527,
+          "name": "pseudomallei group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 57975,
+          "name": "Burkholderia thailandensis",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 271848,
+          "name": "Burkholderia thailandensis (strain ATCC 700388 / DSM 13276 / CCUG 48851 / CIP 106301 / E264)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:07.885479+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "269482": {
+      "scientific_name": "Burkholderia vietnamiensis (strain G4 / LMG 22486)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 32008,
+          "name": "Burkholderia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 87882,
+          "name": "Burkholderia cepacia complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 60552,
+          "name": "Burkholderia vietnamiensis",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 269482,
+          "name": "Burkholderia vietnamiensis (strain G4 / LMG 22486)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:08.064663+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "253": {
+      "scientific_name": "Chryseobacterium indologenes",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1783270,
+          "name": "FCB group",
+          "rank": "clade"
+        },
+        {
+          "taxon_id": 68336,
+          "name": "Bacteroidota/Chlorobiota group",
+          "rank": "clade"
+        },
+        {
+          "taxon_id": 976,
+          "name": "Bacteroidota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 117743,
+          "name": "Flavobacteriia",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 200644,
+          "name": "Flavobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 2762318,
+          "name": "Weeksellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 2782232,
+          "name": "Chryseobacterium group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 59732,
+          "name": "Chryseobacterium",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 253,
+          "name": "Chryseobacterium indologenes",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:08.569107+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "195930": {
+      "scientific_name": "Cupriavidus respiraculi",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 106589,
+          "name": "Cupriavidus",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 195930,
+          "name": "Cupriavidus respiraculi",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:08.777749+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "83333": {
+      "scientific_name": "Escherichia coli (strain K12)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 91347,
+          "name": "Enterobacterales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 543,
+          "name": "Enterobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 561,
+          "name": "Escherichia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 562,
+          "name": "Escherichia coli",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 83333,
+          "name": "Escherichia coli (strain K12)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:08.934972+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "83334": {
+      "scientific_name": "Escherichia coli O157:H7",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 91347,
+          "name": "Enterobacterales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 543,
+          "name": "Enterobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 561,
+          "name": "Escherichia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 562,
+          "name": "Escherichia coli",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 83334,
+          "name": "Escherichia coli O157:H7",
+          "rank": "no rank"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:09.089678+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "333849": {
+      "scientific_name": "Enterococcus faecium (strain ATCC BAA-472 / TX0016 / DO)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1239,
+          "name": "Bacillota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 91061,
+          "name": "Bacilli",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 186826,
+          "name": "Lactobacillales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 81852,
+          "name": "Enterococcaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1350,
+          "name": "Enterococcus",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 1352,
+          "name": "Enterococcus faecium",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 333849,
+          "name": "Enterococcus faecium (strain ATCC BAA-472 / TX0016 / DO)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:09.678368+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "71421": {
+      "scientific_name": "Haemophilus influenzae (strain ATCC 51907 / DSM 11121 / KW20 / Rd)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 135625,
+          "name": "Pasteurellales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 712,
+          "name": "Pasteurellaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 724,
+          "name": "Haemophilus",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 727,
+          "name": "Haemophilus influenzae",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 71421,
+          "name": "Haemophilus influenzae (strain ATCC 51907 / DSM 11121 / KW20 / Rd)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:09.828797+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "171674": {
+      "scientific_name": "Inquilinus limosus",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28211,
+          "name": "Alphaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 204441,
+          "name": "Rhodospirillales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 41295,
+          "name": "Rhodospirillaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 171673,
+          "name": "Inquilinus",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 171674,
+          "name": "Inquilinus limosus",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:09.982980+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "255431": {
+      "scientific_name": "Klebsiella oxytoca phage phiKO2",
+      "lineage": [
+        {
+          "taxon_id": 10239,
+          "name": "Viruses",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2731341,
+          "name": "Duplodnaviria",
+          "rank": "realm"
+        },
+        {
+          "taxon_id": 2731360,
+          "name": "Heunggongvirae",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 2731618,
+          "name": "Uroviricota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 2731619,
+          "name": "Caudoviricetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 2788787,
+          "name": "unclassified Caudoviricetes",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 255431,
+          "name": "Klebsiella oxytoca phage phiKO2",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:10.133402+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1125630": {
+      "scientific_name": "Klebsiella pneumoniae subsp. pneumoniae (strain HS11286)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 91347,
+          "name": "Enterobacterales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 543,
+          "name": "Enterobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 2890311,
+          "name": "Klebsiella/Raoultella group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 570,
+          "name": "Klebsiella",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 3390273,
+          "name": "Klebsiella pneumoniae complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 573,
+          "name": "Klebsiella pneumoniae",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 72407,
+          "name": "Klebsiella pneumoniae subsp. pneumoniae",
+          "rank": "subspecies"
+        },
+        {
+          "taxon_id": 1125630,
+          "name": "Klebsiella pneumoniae subsp. pneumoniae (strain HS11286)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:10.704583+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "487521": {
+      "scientific_name": "Mycobacterium intracellulare (strain ATCC 13950 / DSM 43223 / JCM 6384 / NCTC 13025 / 3600)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1763,
+          "name": "Mycobacterium",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 120793,
+          "name": "Mycobacterium avium complex (MAC)",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 1767,
+          "name": "Mycobacterium intracellulare",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 487521,
+          "name": "Mycobacterium intracellulare (strain ATCC 13950 / DSM 43223 / JCM 6384 / NCTC 13025 / 3600)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:10.870126+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "439334": {
+      "scientific_name": "Mycobacterium avium subsp. hominissuis",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1763,
+          "name": "Mycobacterium",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 120793,
+          "name": "Mycobacterium avium complex (MAC)",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 1764,
+          "name": "Mycobacterium avium",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 439334,
+          "name": "Mycobacterium avium subsp. hominissuis",
+          "rank": "subspecies"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:11.055245+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "246196": {
+      "scientific_name": "Mycolicibacterium smegmatis (strain ATCC 700084 / mc(2)155)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1866885,
+          "name": "Mycolicibacterium",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 1772,
+          "name": "Mycolicibacterium smegmatis",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 246196,
+          "name": "Mycolicibacterium smegmatis (strain ATCC 700084 / mc(2)155)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:11.239046+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "83332": {
+      "scientific_name": "Mycobacterium tuberculosis (strain ATCC 25618 / H37Rv)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1763,
+          "name": "Mycobacterium",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 77643,
+          "name": "Mycobacterium tuberculosis complex",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 1773,
+          "name": "Mycobacterium tuberculosis",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 83332,
+          "name": "Mycobacterium tuberculosis (strain ATCC 25618 / H37Rv)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:11.566512+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "561007": {
+      "scientific_name": "Mycobacteroides abscessus (strain ATCC 19977 / DSM 44196 / CCUG 20993 / CIP 104536 / JCM 13569 / NCTC 13031 / TMC 1543 / L948)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 670516,
+          "name": "Mycobacteroides",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 36809,
+          "name": "Mycobacteroides abscessus",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 561007,
+          "name": "Mycobacteroides abscessus (strain ATCC 19977 / DSM 44196 / CCUG 20993 / CIP 104536 / JCM 13569 / NCTC 13031 / TMC 1543 / L948)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:11.795866+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1306401": {
+      "scientific_name": "Mycobacteroides abscessus subsp. bolletii CRM-0020",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 670516,
+          "name": "Mycobacteroides",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 36809,
+          "name": "Mycobacteroides abscessus",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 319705,
+          "name": "Mycobacteroides abscessus subsp. bolletii",
+          "rank": "subspecies"
+        },
+        {
+          "taxon_id": 1306401,
+          "name": "Mycobacteroides abscessus subsp. bolletii CRM-0020",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:11.997779+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1962118": {
+      "scientific_name": "Mycobacteroides abscessus subsp. massiliense",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 670516,
+          "name": "Mycobacteroides",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 36809,
+          "name": "Mycobacteroides abscessus",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 1962118,
+          "name": "Mycobacteroides abscessus subsp. massiliense",
+          "rank": "subspecies"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:12.166485+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1460372": {
+      "scientific_name": "Mycobacteroides chelonae CCUG 47445",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 670516,
+          "name": "Mycobacteroides",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 1774,
+          "name": "Mycobacteroides chelonae",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 1460372,
+          "name": "Mycobacteroides chelonae CCUG 47445",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:12.656729+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "247156": {
+      "scientific_name": "Nocardia farcinica (strain IFM 10152)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 85025,
+          "name": "Nocardiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1817,
+          "name": "Nocardia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 37329,
+          "name": "Nocardia farcinica",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 247156,
+          "name": "Nocardia farcinica (strain IFM 10152)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:12.877720+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "93222": {
+      "scientific_name": "Pandoraea sputorum",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 93217,
+          "name": "Pandoraea",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 93222,
+          "name": "Pandoraea sputorum",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:13.066717+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "208964": {
+      "scientific_name": "Pseudomonas aeruginosa (strain ATCC 15692 / DSM 22644 / CIP 104116 / JCM 14847 / LMG 12228 / 1C / PRS 101 / PAO1)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 72274,
+          "name": "Pseudomonadales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 135621,
+          "name": "Pseudomonadaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 286,
+          "name": "Pseudomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 136841,
+          "name": "Pseudomonas aeruginosa group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 287,
+          "name": "Pseudomonas aeruginosa",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 208964,
+          "name": "Pseudomonas aeruginosa (strain ATCC 15692 / DSM 22644 / CIP 104116 / JCM 14847 / LMG 12228 / 1C / PRS 101 / PAO1)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:13.227782+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "557722": {
+      "scientific_name": "Pseudomonas aeruginosa (strain LESB58)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 72274,
+          "name": "Pseudomonadales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 135621,
+          "name": "Pseudomonadaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 286,
+          "name": "Pseudomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 136841,
+          "name": "Pseudomonas aeruginosa group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 287,
+          "name": "Pseudomonas aeruginosa",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 557722,
+          "name": "Pseudomonas aeruginosa (strain LESB58)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:13.812653+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1081927": {
+      "scientific_name": "Pseudomonas aeruginosa (strain ATCC 29260 / BCRC 12902 / CIP 102967 / NCIMB 11965 / PA103)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 72274,
+          "name": "Pseudomonadales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 135621,
+          "name": "Pseudomonadaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 286,
+          "name": "Pseudomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 136841,
+          "name": "Pseudomonas aeruginosa group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 287,
+          "name": "Pseudomonas aeruginosa",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 1081927,
+          "name": "Pseudomonas aeruginosa (strain ATCC 29260 / BCRC 12902 / CIP 102967 / NCIMB 11965 / PA103)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:13.991343+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "208963": {
+      "scientific_name": "Pseudomonas aeruginosa (strain UCBPP-PA14)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 72274,
+          "name": "Pseudomonadales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 135621,
+          "name": "Pseudomonadaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 286,
+          "name": "Pseudomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 136841,
+          "name": "Pseudomonas aeruginosa group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 287,
+          "name": "Pseudomonas aeruginosa",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 208963,
+          "name": "Pseudomonas aeruginosa (strain UCBPP-PA14)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:14.147502+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "1009714": {
+      "scientific_name": "Pseudomonas aeruginosa (strain PAK)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 72274,
+          "name": "Pseudomonadales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 135621,
+          "name": "Pseudomonadaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 286,
+          "name": "Pseudomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 136841,
+          "name": "Pseudomonas aeruginosa group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 287,
+          "name": "Pseudomonas aeruginosa",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 1009714,
+          "name": "Pseudomonas aeruginosa (strain PAK)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:14.310296+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "160488": {
+      "scientific_name": "Pseudomonas putida (strain ATCC 47054 / DSM 6125 / CFBP 8728 / NCIMB 11950 / KT2440)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 72274,
+          "name": "Pseudomonadales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 135621,
+          "name": "Pseudomonadaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 286,
+          "name": "Pseudomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 136845,
+          "name": "Pseudomonas putida group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 303,
+          "name": "Pseudomonas putida",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 160488,
+          "name": "Pseudomonas putida (strain ATCC 47054 / DSM 6125 / CFBP 8728 / NCIMB 11950 / KT2440)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:14.657224+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "105219": {
+      "scientific_name": "Ralstonia mannitolilytica",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28216,
+          "name": "Betaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 80840,
+          "name": "Burkholderiales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 119060,
+          "name": "Burkholderiaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 48736,
+          "name": "Ralstonia",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 105219,
+          "name": "Ralstonia mannitolilytica",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:14.826498+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "93061": {
+      "scientific_name": "Staphylococcus aureus (strain NCTC 8325 / PS 47)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1239,
+          "name": "Bacillota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 91061,
+          "name": "Bacilli",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 1385,
+          "name": "Bacillales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 90964,
+          "name": "Staphylococcaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1279,
+          "name": "Staphylococcus",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 1280,
+          "name": "Staphylococcus aureus",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 93061,
+          "name": "Staphylococcus aureus (strain NCTC 8325 / PS 47)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:14.990428+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "522373": {
+      "scientific_name": "Stenotrophomonas maltophilia (strain K279a)",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 135614,
+          "name": "Lysobacterales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 32033,
+          "name": "Lysobacteraceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 40323,
+          "name": "Stenotrophomonas",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 995085,
+          "name": "Stenotrophomonas maltophilia group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 40324,
+          "name": "Stenotrophomonas maltophilia",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 522373,
+          "name": "Stenotrophomonas maltophilia (strain K279a)",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:15.145303+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    },
+    "696762": {
+      "scientific_name": "Planktotalea frisia",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 28211,
+          "name": "Alphaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 204455,
+          "name": "Rhodobacterales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 31989,
+          "name": "Paracoccaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 1195766,
+          "name": "Planktotalea",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 696762,
+          "name": "Planktotalea frisia",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-05-27T11:43:15.600308+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_01"
+    }
+  }
+}

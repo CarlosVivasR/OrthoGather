@@ -1,804 +1,1874 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrthoGather - Results</title>
-    <link rel="icon" href="static/images/1-a668dcaa1.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-    <script src="{{ url_for('static', filename='ui.js') }}" defer></script>
-    <style>
-        :root{
-        --font-sans: "Helvetica Neue", Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
-        }
-        html, body, button, input, select, textarea {
-        font-family: var(--font-sans);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        header {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        gap: 24px;
-        padding: 16px 32px;
-        background-color: #003366;
-        color: #fff;
-        }
-        header .logo { justify-self: start; }
-        header .logo img { height: 120px; width: auto; object-fit: contain; display: block; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Results: OrthoGather</title>
 
-        header .title {
-        justify-self: center;
-        text-align: center;
-        font-weight: 400;
-        letter-spacing: 0.2px;
-        font-size: clamp(36px, 6vw, 72px);
-        margin: 0;
-        }
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
 
-        header .info {
-        justify-self: end;
-        text-align: right;
-        line-height: 1.25;
-        font-size: 14px;
-        color: inherit;
-        max-width: 36ch;
-        }
-        header .info p { margin: 2px 0; }
-        header .info a { color: inherit; text-decoration: none; }
-        header .info a:hover, header .info a:focus { color: #ffd700; text-decoration: underline; }
-        header .info a.email-link { overflow-wrap: anywhere; }
-        header .info .muted { opacity: 0.85; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
 
-        .titulo-principal{
-        font-family: var(--font-sans) !important;
-        font-weight: 400;
-        font-size: clamp(24px, 2.8vw, 36px); 
-        line-height: 1.15;
-        letter-spacing: 0.2px;
-        text-align: center;
-        margin: 12px 0 18px;
-        color: #003366;
-        }
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-        .subtitulo {
-            font-size: 17px;
-            line-height: 1.6;
-            text-align: justify;
-            color: #333;
-            background-color: #f2f6fa;
-            padding: 18px 22px;
-            border-left: 6px solid #003366;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-        html, body {
-            height: 100%;
-            font-family: 'Raleway', sans-serif;
-            background-color: #fffcfc;
-            display: flex;
-            flex-direction: column;
-        }
-        .loading-spinner {
-            display: none; 
-            text-align: center;
-            margin-top: 20px;
-        }
-        main {
-            flex: 1;
-            padding: clamp(24px, 6vw, 48px);
-            max-width: 1200px;
-            margin: auto;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            position: relative;
-        }
-        .contact-info a {
-            color: #003366;
-            text-decoration: none;
-        }
-        .contact-info a:hover {
-            text-decoration: underline;
-        }
-        h2 {
-            color: #003366;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        h3 {
-            margin-top: 30px;
-        }
-        .scroll-container {
-            overflow-x: auto;
-            white-space: nowrap;
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-        img {
-            max-width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #003366;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 20px 0;
-        }
-        button:hover {
-            background-color: #002244;
-        }
-        .boton-centrado {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .separador {
-            margin: 40px 0;
-            border: none;
-            height: 2px;
-            background-color: #ccc;
-        }
-        footer {
-            background-color: #003366;
-            color: white;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        footer .social-icons a {
-            color: white;
-            margin-left: 15px;
-            font-size: 20px;
-            text-decoration: none;
-        }
-        footer .social-icons a:hover {
-            color: #ffd700;
-        }
-        .boton-reanalisis {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: rgb(208, 208, 65);
-            color: black;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            z-index: 10;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-        .boton-reanalisis-sticky {
-            position: sticky;
-            bottom: 20px;
-            right: 20px;
-            background-color: yellow;
-            color: black;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            margin-left: auto;
-            z-index: 10;
-        }
-        .especies-imagen-container {
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            gap: 30px;
-            margin-top: 30px;
-        }
-        .especies-column {
-            width: 100%;
-            max-width: 800px;
-        }
-        .checkbox-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            column-gap: 100px;  
-            row-gap: 9px;     
-            margin-top: 10px;
-        }
-        .imagen-column {
-            flex: 1;
-            min-width: 280px;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .imagen-column img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-errors.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/results.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-taxonomy-tree.css') }}" />
 
-        @media (max-height: 700px) {
-            .boton-reanalisis {
-                bottom: 80px;
-            }
-        }
-        .hover-box {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .hover-box .strain-tooltip {
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0s linear 0.2s, opacity 0.2s linear;
-            background-color: #f9f9f9;
-            color: #333;
-            text-align: left;
-            padding: 6px 10px;
-            border-radius: 6px;
-            position: absolute;
-            z-index: 10;
-            top: 100%;
-            left: 0;
-            white-space: normal;
-            min-width: 280px;
-            font-size: 13px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .hover-box:hover .strain-tooltip {
-            visibility: visible;
-            opacity: 1;
-            transition-delay: 0s;
-        }
-    </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
+
+  <script src="{{ url_for('static', filename='js/og-base.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-taxonomy-tree.js') }}" defer></script>
+  <!-- D3 v7 for the taxonomic-tree modal (Point 11) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" defer></script>
+  <!-- Plotly.js (MIT): for interactive Figures 1, 2 & 3 -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <!-- UpSetJS (MPL-2.0): interactive UpSet plots for Figures 3 & 4.
+       Self-hosted on purpose: matches the local-first ethos and removes a
+       network dependency. Original: @upsetjs/bundle@1.11.0/dist/upsetjs.umd.production.min.js -->
+  <script src="{{ url_for('static', filename='vendor/upsetjs.umd.production.min.js') }}" defer></script>
 </head>
 <body>
-    <header>
-        <div class="logo">
-          <img src="static/images/1-a668dcaa1.ico" alt="Tool Logo" />
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="results-main">
+
+    <section class="results-intro">
+      <nav class="breadcrumb results-breadcrumb" aria-label="Breadcrumb">
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <a href="/1-seleccion_especies">New Analysis</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>Protein Analysis</span>
+      </nav>
+      <h1 class="sr-only">Protein Analysis results — {{ (species|length - 1) }} species</h1>
+      <span class="eyebrow"><i class="fa-solid fa-circle-check"></i> Analysis complete</span>
+    </section>
+
+    <!-- ─── Taxonomic context (collapsed by default) ─── -->
+    <details class="tax-collapse" id="taxCollapse">
+      <summary class="tax-collapse-summary">
+        <i class="fa-solid fa-sitemap tax-collapse-icon" aria-hidden="true"></i>
+        <span class="tax-collapse-label">Taxonomic tree</span>
+        <span class="tax-collapse-sub">NCBI classification of the species in this analysis · not a sequence-based phylogeny</span>
+        <i class="fa-solid fa-chevron-down tax-collapse-chev" aria-hidden="true"></i>
+      </summary>
+      <section class="tax-section" aria-label="Taxonomic context">
+        <button id="taxGenerateBtn" type="button" class="tax-generate-btn">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+          <span id="taxGenerateBtnLabel">Loading tree…</span>
+        </button>
+        <div id="taxTree" class="tax-tree" hidden>
+          <button id="taxExpandBtn" type="button" class="tax-expand-btn"
+                  aria-label="Open taxonomic tree full-screen" title="Open full-screen">
+            <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+          </button>
+          <div id="taxTreeSvg" class="tax-tree-inner"></div>
         </div>
-        <div class="title">OrthoGather</div>
-        <div class="info">
-          <p>
-            <a href="https://www.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-              University College Dublin
-            </a>
-          </p>
-          <p>
-            <a href="https://www.ucd.ie/conway/" target="_blank" rel="noopener" class="info-link">
-              UCD Conway Institute
-            </a>
-          </p>
-          <p>
-            <a href="https://cancerdata.ucd.ie/" target="_blank" rel="noopener" class="info-link">
-              UCD Cancer Data Lab
-            </a>
-          </p>
-          <p>
-            <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener" class="info-link">
-              https://doi.org/10.64898/2026.01.30.702851
-            </a>
-          </p>
+        <div id="taxActions" class="tax-actions" hidden>
+          <span class="tax-hint">Drag to pan · scroll to zoom</span>
+          <button type="button" id="taxResetViewBtn">Reset view</button>
+          <button type="button" id="taxDownloadNewickBtn">Download .nwk</button>
         </div>
-      </header>      
-    <main>  
-        <div class="container">
-            <div class="titulo-principal">COMPLETE ANALYSIS</div>
+        <button type="button" class="tax-collapse-close" id="taxCollapseCloseBtn">
+          <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+          Hide taxonomic tree
+        </button>
+      </section>
+    </details>
 
-            <div class="subtitulo">
-                Below are two graphs that represent the analysis of the {{ (species|length - 1) }} species present in the ZIP file you uploaded. 
-                <br> 
-                The first graph (Figure 1) shows the distribution of proteins by orthogroup, while the second graph (Figure 2) 
-                illustrates the number of species sharing orthogroups.
-            </div>
-            <div id="status-message" style="display: none;"></div>
+    <!-- View switcher: same data, two perspectives -->
+    <nav class="view-tabs" aria-label="Analysis view">
+      <a class="view-tab is-active" href="#" aria-current="page">
+        <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
+        <span class="view-tab-body">
+          <span class="view-tab-label">Protein Analysis</span>
+          <span class="view-tab-sub">UpSet plots, intersections, Excel exports</span>
+        </span>
+      </a>
+      <a class="view-tab" href="{{ url_for('resultado_goa') }}">
+        <i class="fa-solid fa-dna" aria-hidden="true"></i>
+        <span class="view-tab-body">
+          <span class="view-tab-label">Gene Ontology</span>
+          <span class="view-tab-sub">Functional enrichment with GOATOOLS</span>
+        </span>
+        <i class="fa-solid fa-arrow-right view-tab-arrow" aria-hidden="true"></i>
+      </a>
+    </nav>
 
-            <div class="row" style="display: flex; justify-content: space-around;">
-                <div class="column figura">
-                    {% if plot_url_1 %}
-                        <h3>Figure 1</h3>
-                        <img src="{{ url_for('static', filename='plots/' + plot_url_1) }}" alt="Figure 1">
-                        <a href="{{ url_for('download_image', filename=plot_url_1) }}">Download Figure 1</a>
-                    {% endif %}
-                </div>
-                <div class="column figura">
-                    {% if plot_url_2 %}
-                        <h3>Figure 2</h3>
-                        <img src="{{ url_for('static', filename='plots/' + plot_url_2) }}" alt="Figure 2">
-                        <a href="{{ url_for('download_image', filename=plot_url_2) }}">Download Figure 2</a>
-                    {% endif %}
-                </div>
-            </div>
+    <div id="status-message" style="display: none;" role="status" aria-live="polite"></div>
 
-            <div class="boton-centrado">
-                <button class="boton-especial btn btn-primary" id="boton-analisis">Species Analysis</button>
-            </div>
-
-            <div class="especies-imagen-container" id="especies-seleccionadas" style="display: none;">
-                <div class="especies-column">
-                <h2 style="text-align: center;">Select the species you want to analyze</h2>
-            
-                <form id="form-seleccion-especies" method="POST" data-url="/cargar_carpeta">
-                    <div class="checkbox-list">
-                    {% for specie in species %}
-                        {% if specie != 'Total' %}
-                        {% set base_name = specie.split('(')[0].strip() %}
-                        {% set strain = '(' + specie.split('(')[1] if '(' in specie else '' %}
-                        <label class="hover-box">
-                            <input type="checkbox" name="especies" value="{{ specie }}">
-                            {{ base_name }}
-                            {% if strain %}
-                            <span class="strain-tooltip">{{ strain }}</span>
-                            {% endif %}
-                        </label>
-                        {% endif %}
-                    {% endfor %}
-                    </div>
-            
-                    <input type="hidden" name="ruta_carpeta" value="{{ ruta_carpeta }}">
-            
-                    <button type="submit" id="btn-generate-figures" class="btn btn-primary">Generate Figures</button>
-                </form>
-                </div>
-            </div>
-
-            <div id="loading-spinner" class="loading-spinner">
-                <div class="spinner"></div>
-                <p>Generating figures, please wait...</p>
-            </div>
-
-            <hr class="separador">
-
-            <div id="go-figure-container" style="display: none; text-align: center; margin-top: 20px;">
-                <h3>Figure 9 - Gene Ontology Enrichment Analysis</h3>
-                <p style="font-size: smaller; color: gray;">* This figure displays the enriched GO terms in Biological Process, Cellular Component, and Molecular Function categories.</p>
-                <img src="" alt="Figure 9" id="go-figure-9" style="max-width: 80%; height: auto;">
-                <a href="#" id="go-figure-download-link-9" style="display: none;">Download Figure 9</a>
-                <a href="#" id="go-excel-download-link-9" style="display: none;">Download GO Enrichment Excel</a>
-            </div>
-
-            <div id="figure-parameters-container" style="display: none; text-align: center; margin-top: 20px;">
-                <h4>Adjust Parameters for Re-Generating Figure 9</h4>
-                <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                    <div>
-                        <label for="depth-input">Depth:</label><br>
-                        <input type="number" id="depth-input" min="1" value="2" style="width: 80px;">
-                    </div>
-                    <div>
-                        <label for="pvalue-input">P-value:</label><br>
-                        <input type="number" id="pvalue-input" step="0.01" min="0" max="1" value="0.05" style="width: 80px;">
-                    </div>
-                    <div>
-                        <label for="terms-input">Number of Terms:</label><br>
-                        <input type="number" id="terms-input" min="1" placeholder="All" style="width: 80px;">
-                    </div>
-                </div>
-                <button id="regenerate-figure-btn" class="boton-generar btn btn-secondary">Re-Generate Figure 9</button>
-            </div>
-
-            <div id="go-excel-container" style="display: none; text-align: center; margin-top: 10px;">
-                <a id="go-excel-download-link" href="#" style="display: none;">Download GO Enrichment Excel</a>
-            </div>
-
-
-            <hr id="linea-separativa-1" class="separador" style="display: none; border: none; height: 4px; background-color: #000000; margin: 20px 0;">
-            <hr id="linea-separativa-2" class="separador" style="display: none; border: none; height: 4px; background-color: #000000; margin: 20px 0;">
-            
-
-            <div id="figuras-adicionales">
-                <div class="figura" id="figura3">
-                    {% if plot_url_3 %}
-                        <h3>Figure 3</h3>
-                        <img src="{{ url_for('static', filename='plots/' + plot_url_3) }}" alt="Figure 3" style="width: 100%; height: auto;">
-                        <a href="{{ url_for('download_image', filename=plot_url_3) }}">Download Figure 3</a>
-                    {% endif %}
-                </div>
-                <div class="figura-scrollable" id="figura4">
-                    {% if plot_url_4 %}
-                        <h3>Figure 4</h3>
-                        <div class="scroll-container">
-                            <img src="{{ url_for('static', filename='plots/' + plot_url_4) }}" alt="Figure 4">
-                        </div>
-                        <a href="{{ url_for('download_image', filename=plot_url_4) }}">Download Figure 4</a>
-                    {% endif %}
-                </div>
-                <div class="figura-scrollable" id="figura5">
-                    {% if plot_url_5 %}
-                        <h3>Figure 5</h3>
-                        <div class="scroll-container">
-                            <img src="{{ url_for('static', filename='plots/' + plot_url_5) }}" alt="Figure 5">
-                        </div>
-                        <a href="{{ url_for('download_image', filename=plot_url_5) }}">Download Figure 5</a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div style="text-align: right;">
-            <a href="{{ url_for('cargar_carpeta') }}" class="boton-reanalisis-sticky">Re-analysis</a>
+    <div class="figures-grid">
+      {% if plot_url_1 %}
+      <section class="figure-card">
+        <div class="figure-card-head">
+          <div class="figure-card-head-text">
+            <h3>Figure 1: Protein distribution per orthogroup</h3>
+            <p class="figure-card-sub">How many orthogroups contain N proteins. Default view shows 1–20; zoom to explore the long tail.</p>
           </div>
-          
-    </main>
-
-    <footer>
-        <div>
-          &copy; 2025 OrthoGather. All rights reserved.
         </div>
-        <div class="social-icons">
-          <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
-          <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">FAQ</a>
-          <a href="mailto:carlos.vivasrodriguez@ucdconnect.ie" class="info-link email-link">Contact</a>
+        <div class="figure-stats-row">
+          <div class="figure-stats" id="fig1-stats" hidden></div>
+          <div class="figure-card-head-controls">
+            <div class="figure-card-actions" data-fig="1" data-kind="data">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-table"></i> Data
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="xlsx">Excel (.xlsx)</a></li>
+                <li role="menuitem"><a href="#" data-format="csv">CSV (.csv)</a></li>
+                <li role="menuitem"><a href="#" data-format="tsv">TSV (.tsv)</a></li>
+                <li role="menuitem"><a href="#" data-format="json">JSON (.json)</a></li>
+              </ul>
+            </div>
+            <div class="figure-card-actions" data-fig="1" data-kind="image">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-image"></i> Image
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="png">PNG (2× scale, presentations)</a></li>
+                <li role="menuitem"><a href="#" data-format="svg">SVG (vector, papers / Inkscape)</a></li>
+              </ul>
+            </div>
+            <button type="button" class="figure-expand-btn" aria-label="Open Figure 1 full-screen" onclick="openFigureLightbox('fig1')">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </button>
+          </div>
         </div>
-      </footer>
-    
-    
+        <div class="figure-help-chip">
+          <i class="fa-solid fa-circle-info"></i>
+          <span><strong>Drag</strong> to zoom, <strong>hover</strong> for details, <kbd>double-click</kbd> to reset, click <i class="fa-solid fa-up-right-and-down-left-from-center"></i> for full-screen.</span>
+        </div>
+        <div id="fig1" class="plot-host"></div>
+      </section>
+      {% endif %}
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#boton-analisis').on('click', function() {
-                $('#especies-seleccionadas').slideDown();
-                $('#boton-generar-figuras').slideDown();
-            });
+      {% if plot_url_2 %}
+      <section class="figure-card">
+        <div class="figure-card-head">
+          <div class="figure-card-head-text">
+            <h3>Figure 2: Orthogroup sharing across species</h3>
+            <p class="figure-card-sub">How many orthogroups are present in N species. Light blue = species-specific, dark navy = core.</p>
+          </div>
+        </div>
+        <div class="figure-stats-row">
+          <div class="figure-stats" id="fig2-stats" hidden></div>
+          <div class="figure-card-head-controls">
+            <div class="figure-card-actions" data-fig="2" data-kind="data">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-table"></i> Data
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="xlsx">Excel (.xlsx)</a></li>
+                <li role="menuitem"><a href="#" data-format="csv">CSV (.csv)</a></li>
+                <li role="menuitem"><a href="#" data-format="tsv">TSV (.tsv)</a></li>
+                <li role="menuitem"><a href="#" data-format="json">JSON (.json)</a></li>
+              </ul>
+            </div>
+            <div class="figure-card-actions" data-fig="2" data-kind="image">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-image"></i> Image
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="png">PNG (2× scale, presentations)</a></li>
+                <li role="menuitem"><a href="#" data-format="svg">SVG (vector, papers / Inkscape)</a></li>
+              </ul>
+            </div>
+            <button type="button" class="figure-expand-btn" aria-label="Open Figure 2 full-screen" onclick="openFigureLightbox('fig2')">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </button>
+          </div>
+        </div>
+        <div class="figure-help-chip">
+          <i class="fa-solid fa-circle-info"></i>
+          <span><strong>Drag</strong> to zoom, <strong>hover</strong> for details, <kbd>double-click</kbd> to reset, click <i class="fa-solid fa-up-right-and-down-left-from-center"></i> for full-screen.</span>
+        </div>
+        <div id="fig2" class="plot-host"></div>
+      </section>
+      {% endif %}
+    </div>
 
-            $('#form-seleccion-especies').on('submit', function(event) {
-            event.preventDefault();
+    <!-- Plotly data + lightbox -->
+    <script id="fig1-data" type="application/json">{{ plot_url_1 | tojson if plot_url_1 else 'null' }}</script>
+    <script id="fig2-data" type="application/json">{{ plot_url_2 | tojson if plot_url_2 else 'null' }}</script>
 
-            const seleccionadas = $('input[name="especies"]:checked').length;
-            if (seleccionadas < 2) {
-                showStatus("status-message", "error", "Please select at least two strains before generating the figures.");
-                return;
-            }
+    <div class="figure-modal" id="figure-modal" role="dialog" aria-modal="true" aria-labelledby="figure-modal-title" hidden>
+      <div class="figure-modal-inner">
+        <div class="figure-modal-head">
+          <div>
+            <h3 id="figure-modal-title">Figure</h3>
+            <div class="sub" id="figure-modal-sub"></div>
+          </div>
+          <button type="button" class="figure-modal-close" aria-label="Close" onclick="closeFigureLightbox()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="figure-modal-body">
+          <div id="figure-modal-plot" class="figure-modal-plot"></div>
+        </div>
+      </div>
+    </div>
 
-            const $form = $(this);
-            const formData = $form.serialize();
+    {# ── Compare specific species: inline-expanded card (Streamlit/Seqera pattern, L9) ── #}
+    <section class="upset-section" aria-labelledby="upset-heading">
+      <header class="upset-section-head">
+        <h2 id="upset-heading">Compare specific species</h2>
+        <p class="section-helper">
+          Generate interactive UpSet plots for any 2 or more species to see their
+          orthogroup intersections and shared proteins.
+        </p>
+      </header>
 
-            const url = $form.data('url') || '/cargar_carpeta';
+      <div class="upset-picker" data-species='{{ species | tojson }}'>
+        <div class="upset-picker-toolbar">
+          <div class="upset-picker-search-wrap">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <label for="upset-picker-search" class="sr-only">Filter species</label>
+            <input type="search" id="upset-picker-search" placeholder="Filter species…" autocomplete="off" />
+          </div>
+          <div class="upset-picker-meta">
+            <span class="upset-selected-count"><strong id="upset-selected-n">0</strong> selected</span>
+            <button type="button" class="btn btn-ghost btn-sm" id="upset-clear-btn">Clear</button>
+          </div>
+        </div>
+        <div class="upset-picker-chips" id="upset-picker-chips" role="list"></div>
+      </div>
 
-            $('#loading-spinner').show();
-            $('#btn-generate-figures').prop('disabled', true);
+      <div class="upset-actions">
+        <button type="button" class="btn btn-primary btn-lg" id="upset-generate-btn" disabled>
+          <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+          Generate UpSet figures
+        </button>
+        <span class="upset-actions-hint" id="upset-actions-hint">Pick at least 2 species to continue</span>
+      </div>
 
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: formData,
-                success: function(response) {
-                $('#figuras-adicionales').html(response);
-                },
-                error: function(xhr) {
-                const msg = xhr && xhr.responseText ? xhr.responseText : 'Error generating figures.';
-                showStatus("status-message", "error", msg);
-                },
-                complete: function() {
-                $('#loading-spinner').hide();
-                $('#btn-generate-figures').prop('disabled', false);
-                }
-            });
-            });
+      <div class="upset-progress" id="upset-progress" hidden role="status" aria-live="polite">
+        <span class="spinner-inline" aria-hidden="true"></span>
+        <span>Computing intersections…</span>
+      </div>
 
-            function triggerGeneOntologyImage() {
-                document.getElementById('loading-spinner-go').style.display = 'block';
+      <div class="upset-error" id="upset-error" hidden role="alert"></div>
+    </section>
 
-                fetch('/generate_go_image', {  
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('loading-spinner-go').style.display = 'none';
+    {# ── UpSet figures (rendered client-side after /upset_data) ─────────── #}
+    <div id="upset-figures" class="upset-figures" hidden>
+      <article class="figure-card upset-figure-card" id="upset-card-3">
+        <div class="figure-card-head">
+          <div class="figure-card-head-text">
+            <h3>Figure 3: UpSet of shared orthogroups</h3>
+            <p class="figure-card-sub">Each bar is a unique combination of species. Hover or click bars for details.</p>
+          </div>
+          <div class="figure-card-head-controls">
+            <div class="figure-help-wrap" data-figkind="orthogroups">
+              <button type="button" class="figure-help-btn" aria-label="What does the highlight mean?">?</button>
+              <div class="figure-help-popover" hidden>
+                <h4>How the highlight works</h4>
+                <p>Hover a <strong>species row</strong> to see which combinations contain it. Bars that include the species are painted amber; the rest stay black.</p>
+                <p>In this figure each bar counts <strong>orthogroups</strong>. Every orthogroup in a combination belongs to <em>all</em> the species in that combination by definition, so the highlight is binary: <code>100 %</code> when the combination contains the hovered species, <code>0 %</code> otherwise.</p>
+                <p>Hovering a <strong>bar</strong> highlights the matrix dots of the species that compose it.</p>
+              </div>
+            </div>
+            <div class="figure-card-actions" data-fig="3" data-kind="data">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-table"></i> Data
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="xlsx">Excel (.xlsx)</a></li>
+                <li role="menuitem"><a href="#" data-format="csv">CSV (.csv)</a></li>
+                <li role="menuitem"><a href="#" data-format="tsv">TSV (.tsv)</a></li>
+                <li role="menuitem"><a href="#" data-format="json">JSON (.json)</a></li>
+              </ul>
+            </div>
+            <div class="figure-card-actions" data-fig="3" data-kind="image">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-image"></i> Image
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="png">PNG (2× scale, presentations)</a></li>
+                <li role="menuitem"><a href="#" data-format="svg">SVG (vector, papers / Inkscape)</a></li>
+              </ul>
+            </div>
+            <button type="button" class="figure-expand-btn" aria-label="Open Figure 3 full-screen"
+                    onclick="window.openUpsetLightbox && window.openUpsetLightbox('fig3')">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </button>
+          </div>
+        </div>
+        <div id="upset-fig3" class="upset-host"></div>
+      </article>
 
-                    const goFigure = document.querySelector('img[alt="Figure 8"]');
-                    if (goFigure && data.image_file_path) {  
-                        goFigure.src = `/static/plots/${data.image_file_path}`;
-                        goFigure.parentElement.style.display = 'block';
+      <article class="figure-card upset-figure-card" id="upset-card-4">
+        <div class="figure-card-head">
+          <div class="figure-card-head-text">
+            <h3>Figure 4: UpSet of shared proteins</h3>
+            <p class="figure-card-sub">Same intersections as Figure 3 but weighted by total proteins, not orthogroup count.</p>
+          </div>
+          <div class="figure-card-head-controls">
+            <div class="figure-help-wrap" data-figkind="proteins">
+              <button type="button" class="figure-help-btn" aria-label="What does the highlight mean?">?</button>
+              <div class="figure-help-popover" hidden>
+                <h4>How the highlight works</h4>
+                <p>Hover a <strong>species row</strong> to see how many proteins each combination borrows from it. The amber portion of each bar is proportional to that species' protein contribution to the intersection.</p>
+                <p>If the combination contains 3 species, each contributes some proteins to the shared orthogroups; the highlight shows the <em>actual</em> share of the hovered species (not a flat 1/3).</p>
+                <p>Bars whose combination does not include the hovered species stay black (no amber).</p>
+              </div>
+            </div>
+            <div class="figure-card-actions" data-fig="4" data-kind="data">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-table"></i> Data
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="xlsx">Excel (.xlsx)</a></li>
+                <li role="menuitem"><a href="#" data-format="csv">CSV (.csv)</a></li>
+                <li role="menuitem"><a href="#" data-format="tsv">TSV (.tsv)</a></li>
+                <li role="menuitem"><a href="#" data-format="json">JSON (.json)</a></li>
+              </ul>
+            </div>
+            <div class="figure-card-actions" data-fig="4" data-kind="image">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-image"></i> Image
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="png">PNG (2× scale, presentations)</a></li>
+                <li role="menuitem"><a href="#" data-format="svg">SVG (vector, papers / Inkscape)</a></li>
+              </ul>
+            </div>
+            <button type="button" class="figure-expand-btn" aria-label="Open Figure 4 full-screen"
+                    onclick="window.openUpsetLightbox && window.openUpsetLightbox('fig4')">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </button>
+          </div>
+        </div>
+        <div id="upset-fig4" class="upset-host"></div>
+      </article>
+    </div>
 
-                        const generateExcelButton = document.getElementById('go-excel-section');
-                        if (generateExcelButton) {
-                            generateExcelButton.style.display = 'block';
-                        }
+    {# ── UniProt-ID filter section: hidden until Figs 3+4 have been
+         generated. Lives between the unfiltered figures and the filtered
+         figures so it reads top-to-bottom: see the whole comparison →
+         narrow it down by protein IDs → see the filtered comparison. #}
+    <section class="upset-filter-section" id="upset-filter-section" hidden aria-labelledby="upset-filter-heading">
+      <header class="upset-section-head">
+        <h2 id="upset-filter-heading">
+          <i class="fa-solid fa-filter" aria-hidden="true"></i>
+          Filter by UniProt IDs
+        </h2>
+        <p class="section-helper">
+          Restrict Figures 5 &amp; 6 to orthogroups that contain one or more of the
+          UniProt IDs you paste below. Useful when you already have a candidate
+          protein list (from a paper, an Excel column, a previous analysis).
+        </p>
+      </header>
+      <div class="upset-filter-body">
+        <label for="upset-filter-ids" class="sr-only">UniProt IDs to filter by</label>
+        <textarea id="upset-filter-ids" rows="5"
+                  placeholder="Paste one or more UniProt IDs, separated by spaces, commas, or new lines.&#10;Example:&#10;F7STY6 F7SU20&#10;P0CW31, Q9Y2I7&#10;A0A0B7HXH8"></textarea>
+        <div class="upset-filter-row">
+          <span class="upset-filter-count" id="upset-filter-count">0 IDs detected</span>
+          <button type="button" class="btn btn-secondary btn-sm" id="upset-filter-clear">Clear</button>
+          <button type="button" class="btn btn-primary btn-sm" id="upset-filter-run" disabled>
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            Generate filtered figures (5 &amp; 6)
+          </button>
+        </div>
+      </div>
+      <div class="upset-filter-result" id="upset-filter-result" hidden role="status" aria-live="polite"></div>
+    </section>
 
-                        const geneOntologyInfo = document.getElementById('gene-ontology-info');
-                        if (geneOntologyInfo) {
-                            geneOntologyInfo.style.display = 'block';
-                        }
+    {# ── Filtered UpSet figures (rendered after /upset_data_filtered) ──── #}
+    <div id="upset-figures-filtered" class="upset-figures" hidden>
+      <article class="figure-card upset-figure-card" id="upset-card-5">
+        <div class="figure-card-head">
+          <div class="figure-card-head-text">
+            <h3>Figure 5: Filtered UpSet of shared orthogroups</h3>
+            <p class="figure-card-sub">Same as Figure 3 but restricted to orthogroups that contain at least one of your UniProt IDs.</p>
+          </div>
+          <div class="figure-card-head-controls">
+            <div class="figure-help-wrap" data-figkind="orthogroups">
+              <button type="button" class="figure-help-btn" aria-label="What does the highlight mean?">?</button>
+              <div class="figure-help-popover" hidden>
+                <h4>How the highlight works</h4>
+                <p>Same logic as Figure 3, but only over orthogroups containing one of your UniProt IDs. Hover a species row to see which intersections of those filtered orthogroups it belongs to.</p>
+              </div>
+            </div>
+            <div class="figure-card-actions" data-fig="5" data-kind="data">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-table"></i> Data
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="xlsx">Excel (.xlsx)</a></li>
+                <li role="menuitem"><a href="#" data-format="csv">CSV (.csv)</a></li>
+                <li role="menuitem"><a href="#" data-format="tsv">TSV (.tsv)</a></li>
+                <li role="menuitem"><a href="#" data-format="json">JSON (.json)</a></li>
+              </ul>
+            </div>
+            <div class="figure-card-actions" data-fig="5" data-kind="image">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-image"></i> Image
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="png">PNG (2× scale, presentations)</a></li>
+                <li role="menuitem"><a href="#" data-format="svg">SVG (vector, papers / Inkscape)</a></li>
+              </ul>
+            </div>
+            <button type="button" class="figure-expand-btn" aria-label="Open Figure 5 full-screen"
+                    onclick="window.openUpsetLightbox && window.openUpsetLightbox('fig5')">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </button>
+          </div>
+        </div>
+        <div id="upset-fig5" class="upset-host"></div>
+      </article>
 
-                        $('#foreground-analysis-section').show();
-                        document.getElementById('linea-separativa-1').style.display = 'block';
-                        document.getElementById('linea-separativa-2').style.display = 'block';
-                    } else {
-                        console.error("Figure 8 element not found or missing image path in response.");
-                    }
-                })
-                .catch(error => {
-                    console.error('Error generating Gene Ontology Image:', error);
-                    document.getElementById('loading-spinner-go').style.display = 'none';
-                    showStatus("status-message", "error", "An error occurred during Gene Ontology Analysis.");
-                });
-            }
-  
-            function triggerGeneOntologyExcelGeneration() {
-                document.getElementById('loading-spinner-go-excel').style.display = 'block';
+      <article class="figure-card upset-figure-card" id="upset-card-6">
+        <div class="figure-card-head">
+          <div class="figure-card-head-text">
+            <h3>Figure 6: Filtered UpSet of shared proteins</h3>
+            <p class="figure-card-sub">Same intersections as Figure 5 but weighted by total proteins.</p>
+          </div>
+          <div class="figure-card-head-controls">
+            <div class="figure-help-wrap" data-figkind="proteins">
+              <button type="button" class="figure-help-btn" aria-label="What does the highlight mean?">?</button>
+              <div class="figure-help-popover" hidden>
+                <h4>How the highlight works</h4>
+                <p>Same logic as Figure 4 but only over the filtered orthogroups. Hover a species row to see how many proteins it contributes to each intersection (amber portion is proportional to that species' share).</p>
+              </div>
+            </div>
+            <div class="figure-card-actions" data-fig="6" data-kind="data">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-table"></i> Data
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="xlsx">Excel (.xlsx)</a></li>
+                <li role="menuitem"><a href="#" data-format="csv">CSV (.csv)</a></li>
+                <li role="menuitem"><a href="#" data-format="tsv">TSV (.tsv)</a></li>
+                <li role="menuitem"><a href="#" data-format="json">JSON (.json)</a></li>
+              </ul>
+            </div>
+            <div class="figure-card-actions" data-fig="6" data-kind="image">
+              <button type="button" class="download-btn" aria-haspopup="true" aria-expanded="false">
+                <i class="fa-solid fa-image"></i> Image
+              </button>
+              <ul class="download-menu" role="menu" hidden>
+                <li role="menuitem"><a href="#" data-format="png">PNG (2× scale, presentations)</a></li>
+                <li role="menuitem"><a href="#" data-format="svg">SVG (vector, papers / Inkscape)</a></li>
+              </ul>
+            </div>
+            <button type="button" class="figure-expand-btn" aria-label="Open Figure 6 full-screen"
+                    onclick="window.openUpsetLightbox && window.openUpsetLightbox('fig6')">
+              <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+            </button>
+          </div>
+        </div>
+        <div id="upset-fig6" class="upset-host"></div>
+      </article>
+    </div>
 
-                fetch('/generate_go_excel', {  
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.blob();
-                })
-                .then(blob => {
-                    document.getElementById('loading-spinner-go-excel').style.display = 'none';
+    {% include '_provenance.html' %}
 
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'Gene_Ontology_Analysis.xlsx';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
+  </main>
 
-                    const downloadLink = document.getElementById('download-go-link');
-                    if (downloadLink) {
-                        downloadLink.href = url;
-                        downloadLink.style.display = 'block';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error generating Gene Ontology Excel:', error);
-                    document.getElementById('loading-spinner-go-excel').style.display = 'none';
-                    showStatus("status-message", "error", "An error occurred during Gene Ontology Excel Generation.");
-                });
-            }
+  <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+    <div class="spinner" aria-hidden="true"></div>
+  </div>
 
-            $('#analyze-foreground-btn').on('click', function() {
-                console.log("Starting foreground analysis...");
-                const uniprotIDs = $('#uniprot-input').val().trim().split(/\s+/);
-                const useOrthogroups = $('#use-orthogroups').is(':checked');
+  </div><!-- /.app-shell -->
 
-                if (!uniprotIDs || uniprotIDs.length === 0 || uniprotIDs[0] === "") {
-                    showStatus("status-message", "error", "Please enter at least one UniProt ID.");
-                    console.warn("No UniProt IDs provided.");
-                    return;
-                }
+  {# jQuery removed: Compare species section is now vanilla JS. #}
 
-                console.log("Sending foreground analysis request with UniProt IDs:", uniprotIDs);
-                $('#loading-spinner-foreground').show();
+  <!-- ════════════════════════════════════════════════════════════════
+       Compare specific species: chips picker + UpSetJS + Plotly
+       Replaces the legacy slide-down + matplotlib PNG flow.
+       ════════════════════════════════════════════════════════════════ -->
+  <script>
+  // Inject the number of species in the analysis so downloadFigureImage()
+  // can embed it in PNG/SVG filenames (e.g. "..._47species_2026-05-26.png").
+  // `species` is Jinja-passed by the /cargar_carpeta route; the -1 trims
+  // the trailing "Total" header in gene_count_df.columns.
+  window.SPECIES_COUNT = {{ (species|length - 1) | tojson }};
+  </script>
 
-                $.ajax({
-                    type: 'POST',
-                    url: '/foreground_analysis',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        uniprot_ids: uniprotIDs,
-                        use_orthogroups: useOrthogroups
-                    }),
-                    success: function(response) {
-                        $('#loading-spinner-foreground').hide();
-                        console.log('Foreground analysis response:', response);
-                        window.foregroundUniProtIDs = response.foreground_proteins || [];
+  <script>
+  (function () {
+    'use strict';
 
-                        $('#background-analysis-section').show();
-                        $('#use-orthogroups-bg-section').show(); 
-                        $('#background-save-button-section').show(); 
-                    },
-                    error: function(xhr, status, error) {
-                        $('#loading-spinner-foreground').hide();
-                        console.error('Error during foreground analysis:', error);
-                        showStatus("status-message", "error", "An error occurred during the foreground analysis.");
-                    }
-                });
-            });
-   
-            $('input[name="background"]').on('change', function() {
-                $('input[name="background"]').not(this).prop('checked', false);
-            
-                if ($(this).val() === '4') {
-                    $('#custom-uniprot-section-bg').show();
-                } else {
-                    $('#custom-uniprot-section-bg').hide();
-                }
-            });
-    
-            $('#analyze-background-btn').on('click', function() {
-                    console.log("Starting background analysis...");
-                    const selectedBackground = $('input[name="background"]:checked').val();
-                    const useOrthogroups = $('#use-orthogroups-bg').is(':checked');
-                    const customUniProtIDs = $('#custom-uniprot-input-bg').val().trim().split(/\s+/);
+    const pickerRoot = document.querySelector('.upset-picker');
+    if (!pickerRoot) return;
 
-                    if (!selectedBackground) {
-                        showStatus("status-message", "error", "Please select a background option.");
-                        console.warn("No background option selected.");
-                        return;
-                    }
+    const SPECIES = (function () {
+      try {
+        const raw = JSON.parse(pickerRoot.getAttribute('data-species') || '[]');
+        return raw.filter(function (s) { return s && s !== 'Total'; });
+      } catch (_) { return []; }
+    })();
 
-                    console.log("Sending background analysis request with selection:", selectedBackground);
-                    $('#loading-spinner-background').show();
+    const chipsHost     = document.getElementById('upset-picker-chips');
+    const searchInput   = document.getElementById('upset-picker-search');
+    const clearBtn      = document.getElementById('upset-clear-btn');
+    const countEl       = document.getElementById('upset-selected-n');
+    const generateBtn   = document.getElementById('upset-generate-btn');
+    const actionsHint   = document.getElementById('upset-actions-hint');
+    const progressEl    = document.getElementById('upset-progress');
+    const errorEl       = document.getElementById('upset-error');
+    const figuresHost   = document.getElementById('upset-figures');
 
-                    $.ajax({
-                        type: 'POST',
-                        url: '/background_analysis',
-                        contentType: 'application/json',
-                        data: JSON.stringify({
-                            background_choice: selectedBackground,
-                            use_orthogroups: useOrthogroups,
-                            custom_uniprot_ids: selectedBackground === '4' ? customUniProtIDs : []
-                        }),
-                        success: function(response) {
-                            $('#loading-spinner-background').hide();
-                            console.log('Background analysis response:', response);
-                            window.backgroundIDs = response.background_ids || [];
-                            $('#go-figure-section').show();
-                        },
-                        error: function(xhr, status, error) {
-                            $('#loading-spinner-background').hide();
-                            console.error('Error during background analysis:', error);
-                            showStatus("status-message", "error", "An error occurred during the background analysis.");
-                        }
-                    });
-                });
+    const selected = new Set();
 
-            $('#generate-go-figures-btn').on('click', function() {
-                console.log("Initiating Gene Ontology Analysis...");
+    function renderChips(filter) {
+      const needle = (filter || '').toLowerCase().trim();
+      chipsHost.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      SPECIES.forEach(function (sp) {
+        if (needle && sp.toLowerCase().indexOf(needle) === -1) return;
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'upset-chip';
+        chip.setAttribute('role', 'listitem');
+        chip.setAttribute('aria-pressed', selected.has(sp) ? 'true' : 'false');
+        if (selected.has(sp)) chip.classList.add('is-selected');
+        chip.dataset.species = sp;
+        chip.innerHTML = '<span class="upset-chip-dot" aria-hidden="true"></span>' +
+                         '<span class="upset-chip-label">' + escapeHtml(sp.replace(/_/g, ' ')) + '</span>';
+        chip.addEventListener('click', function () { toggleSpecies(sp, chip); });
+        frag.appendChild(chip);
+      });
+      chipsHost.appendChild(frag);
+    }
 
-                $('#loading-spinner-go-figure').show();
+    function toggleSpecies(sp, chipEl) {
+      if (selected.has(sp)) { selected.delete(sp); }
+      else                  { selected.add(sp); }
+      if (chipEl) {
+        chipEl.classList.toggle('is-selected', selected.has(sp));
+        chipEl.setAttribute('aria-pressed', selected.has(sp) ? 'true' : 'false');
+      }
+      refreshActionState();
+    }
 
-                const uniprotIDs = window.foregroundUniProtIDs || [];
-                const backgroundIDs = window.backgroundIDs || [];
+    function refreshActionState() {
+      const n = selected.size;
+      countEl.textContent = String(n);
+      generateBtn.disabled = n < 2;
+      actionsHint.textContent =
+        n === 0 ? 'Pick at least 2 species to continue' :
+        n === 1 ? 'Pick at least 1 more species' :
+                  `Ready · ${n} species selected`;
+      // Keep the filter button's gating in sync with species changes.
+      if (typeof refreshFilterCount === 'function') refreshFilterCount();
+    }
 
-                if (uniprotIDs.length === 0 || backgroundIDs.length === 0) {
-                    showStatus("status-message", "error", "Foreground or Background IDs are missing.");
-                    console.warn("Missing UniProt or Background IDs.");
-                    $('#loading-spinner-go-figure').hide(); 
-                    return;
-                }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
 
-                console.log("Sending Gene Ontology analysis and figure generation request with UniProt IDs:", uniprotIDs, "and Background IDs:", backgroundIDs);
+    // Remember the most recent /upset_data and /upset_data_filtered responses
+    // so the lightbox can re-render at larger size without another network round-trip.
+    // Keys: fig3, fig4 (always-on), fig5, fig6 (UniProt-filtered).
+    let lastUpsetPayload = {};
 
-                $.ajax({
-                    type: 'POST',
-                    url: '/gene_ontology_analysis', 
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        uniprot_ids: uniprotIDs,
-                        background_ids: backgroundIDs
-                    }),
-                    success: function(response) {
-                        console.log("Gene Ontology Analysis and Figure generation response received:", response);
-                        $('#loading-spinner-go-figure').hide(); 
+    /* ── Generate figures ──────────────────────────────────────────────── */
+    async function generate() {
+      if (selected.size < 2) return;
+      errorEl.hidden = true;
+      progressEl.hidden = false;
+      generateBtn.disabled = true;
 
-                        if (response.image_file_path) {
-                            const goFigure9 = document.getElementById('go-figure-9');
-                            if (goFigure9) {
-                                goFigure9.src = `/static/plots/${response.image_file_path}`;
-                                goFigure9.parentElement.style.display = 'block';
-
-                                const downloadLink9 = document.getElementById('go-figure-download-link-9');
-                                if (downloadLink9) {
-                                    downloadLink9.href = `/static/plots/${response.image_file_path}`;
-                                    downloadLink9.style.display = 'block';
-                                }
-
-                                showFigure9Controls();
-                            } else {
-                                console.error("Figure 9 element not found.");
-                            }
-
-                            if (response.excel_file_path) {
-                                const excelDownloadLink9 = document.getElementById('go-excel-download-link-9');
-                                if (excelDownloadLink9) {
-                                    excelDownloadLink9.href = `/${response.excel_file_path}`;
-                                    excelDownloadLink9.style.display = 'block';
-                                }
-                            } else {
-                                console.error("No Excel file path returned in response.");
-                                showStatus("status-message", "error", "An error occurred: No Excel file generated.");
-                            }
-                        } else {
-                            console.error("No image file path returned in response.");
-                            showStatus("status-message", "error", "An error occurred: No new figure generated.");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        $('#loading-spinner-go-figure').hide(); 
-                        console.error('Error during Gene Ontology Analysis and Figure generation:', error);
-                        showStatus("status-message", "error", "An error occurred during the Gene Ontology Analysis and Figure generation.");
-                    }
-                });
-            });
-
-            function showFigure9Controls() {
-                document.getElementById('figure-parameters-container').style.display = 'block';
-            }
-
-            document.getElementById('regenerate-figure-btn').addEventListener('click', function() {
-                const minDepth = parseInt(document.getElementById('depth-input').value) || 2;
-                const pValue = parseFloat(document.getElementById('pvalue-input').value) || 0.05;
-                const maxTerms = parseInt(document.getElementById('terms-input').value) || null;
-
-                console.log("Re-Generating Figure 9 with parameters:", { minDepth, pValue, maxTerms });
-
-                $('#loading-spinner-go-figure').show();
-
-                fetch('/gene_ontology_analysis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        uniprot_ids: window.foregroundUniProtIDs || [],
-                        background_ids: window.backgroundIDs || [],
-                        min_depth: minDepth,
-                        p_value: pValue,
-                        max_terms: maxTerms
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    $('#loading-spinner-go-figure').hide();
-                    if (data.image_file_path) {
-                        const goFigure9 = document.getElementById('go-figure-9');
-                        goFigure9.src = `/static/plots/${data.image_file_path}?t=${new Date().getTime()}`; 
-                        goFigure9.parentElement.style.display = 'block';
-
-                        const downloadLink9 = document.getElementById('go-figure-download-link-9');
-                        downloadLink9.href = `/static/plots/${data.image_file_path}`;
-                        downloadLink9.style.display = 'block';
-
-                        const excelDownloadLink9 = document.getElementById('go-excel-download-link-9');
-                        if (data.excel_file_path) {
-                            excelDownloadLink9.href = `/${data.excel_file_path}`;
-                            excelDownloadLink9.style.display = 'block';
-                        }
-                    } else {
-                        showStatus("status-message", "error", "An error occurred: No new figure generated.");
-                    }
-                })
-                .catch(error => {
-                    $('#loading-spinner-go-figure').hide();
-                    console.error("Error re-generating Figure 9:", error);
-                    showStatus("status-message", "error", "An error occurred while re-generating the figure.");
-                });
-            });
- 
-            window.triggerGeneOntologyImage = triggerGeneOntologyImage;
-            window.triggerGeneOntologyExcelGeneration = triggerGeneOntologyExcelGeneration;
-
-            window.addEventListener('scroll', function() {
-                    const boton = document.querySelector('.boton-reanalisis');
-                    const footer = document.querySelector('footer');
-
-                    if (!boton || !footer) return;
-
-                    const footerTop = footer.getBoundingClientRect().top;
-                    const windowHeight = window.innerHeight;
-
-                    if (footerTop < windowHeight) {
-                    boton.style.position = 'absolute';
-                    boton.style.bottom = `${windowHeight - footerTop}px`;
-                    } else {
-                    boton.style.position = 'fixed';
-                    boton.style.bottom = '20px';
-                    }
-                });
+      try {
+        const res = await fetch('/upset_data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ species: Array.from(selected) }),
         });
-    </script>
-    
+        const payload = await res.json();
+        if (!res.ok || !payload.ok) {
+          throw new Error(payload.error || 'Request failed');
+        }
+        lastUpsetPayload.fig3 = payload.fig3;
+        lastUpsetPayload.fig4 = payload.fig4;
+        figuresHost.hidden = false;
+        renderUpset('upset-fig3', payload.fig3);
+        renderUpset('upset-fig4', payload.fig4);
+        // Now that Figs 3+4 exist, reveal the UniProt filter section so the
+        // user can drill down. Hidden by default to avoid presenting an
+        // option that depends on data the user hasn't computed yet.
+        const filterSection = document.getElementById('upset-filter-section');
+        if (filterSection) filterSection.hidden = false;
+        // Smooth-scroll to figures so the user sees the new content.
+        figuresHost.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorEl.hidden = false;
+        errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' +
+                            escapeHtml(err.message || 'Could not generate figures.');
+      } finally {
+        progressEl.hidden = true;
+        generateBtn.disabled = selected.size < 2;
+      }
+    }
 
-    
+    /* ── Figures 3 & 4: UpSetJS bundle ─────────────────────────────────── */
+    // opts.height (px) overrides the default 460 — used by the lightbox.
+    // opts.barPx (px) overrides BAR_PX — also for the lightbox (chunkier bars).
+    function renderUpset(hostId, figData, opts) {
+      const host = document.getElementById(hostId);
+      if (!host || !figData) return;
+      opts = opts || {};
+      // Wait until the UpSetJS bundle is on the page.
+      function tryRender(attempt) {
+        const U = window.UpSetJS || window.UpSetJSBundle;
+        if (!U) {
+          // Local file should load in ms — only retry briefly. If still missing
+          // after 3 s, the script tag itself is the problem (404, blocked by SW…).
+          if (attempt < 30) return setTimeout(function () { tryRender(attempt + 1); }, 100);
+          host.innerHTML = '<p class="upset-host-error">UpSetJS bundle did not load. ' +
+                           'Check the browser console for a 404 on /static/vendor/upsetjs.umd.production.min.js.</p>';
+          console.error('[OrthoGather] UpSetJS global is missing — bundle did not execute.');
+          return;
+        }
+
+        // ── Build proper UpSetJS data structures ──
+        // - sets[i].elems  = orthogroup IDs belonging to species i
+        // - comb.sets      = Set of REFERENCES to those set objects (same identity
+        //                    as in the top-level array — UpSetJS matches by ===).
+        // - comb.elems     = orthogroup IDs belonging to this exact intersection.
+        const sets = figData.sets.map(function (s) {
+          return {
+            type: 'set',
+            name: s.name.replace(/_/g, ' '),
+            cardinality: s.cardinality,
+            elems: Array.isArray(s.elems) ? s.elems : [],
+          };
+        });
+
+        const setByName = {};
+        sets.forEach(function (s) { setByName[s.name] = s; });
+
+        const combinations = figData.combinations.map(function (c) {
+          const refs = c.sets
+            .map(function (n) { return setByName[n.replace(/_/g, ' ')]; })
+            .filter(Boolean);
+          // Re-key species_proteins to use the SAME normalised names we use
+          // in `sets` (underscores → spaces) so lookups by speciesName match.
+          let speciesProteins = null;
+          if (c.species_proteins) {
+            speciesProteins = {};
+            Object.keys(c.species_proteins).forEach(function (k) {
+              speciesProteins[k.replace(/_/g, ' ')] = c.species_proteins[k];
+            });
+          }
+          return {
+            type: 'intersection',
+            name: c.name.replace(/_/g, ' '),
+            cardinality: c.cardinality,
+            sets: new Set(refs),
+            degree: refs.length,
+            elems: Array.isArray(c.elems) ? c.elems : [],
+            species_proteins: speciesProteins,
+          };
+        });
+
+        // ── Fixed-width SVG + horizontal scroll pattern ──
+        // The card has a fixed visible width (defined by .upset-host). The SVG
+        // inside grows with the number of combinations using a constant bar
+        // width — so few combos give a small SVG, many combos overflow and the
+        // host scrolls horizontally. We never stretch bars to fill the host:
+        // bar width stays consistent across figures and analyses.
+        //
+        // Sizing tuned to match (and improve on) the matplotlib version we
+        // had before: figsize=(12, min(9, 3.5 + n*0.25)) at 80–100 dpi
+        // ≈ 960–1200 × 360–900 px. We start from a generous default so the
+        // figure is readable inline without needing the lightbox.
+        //
+        // Adaptive bar width: when there are very few combinations (2–3
+        // species → 3–7 combos) we widen each bar so the chart doesn't look
+        // like a row of toothpicks. Past ~10 combos the default keeps reads
+        // dense without overflowing the host.
+        const nCombos = combinations.length;
+        const defaultBarPx = nCombos <= 6 ? 72 : (nCombos <= 12 ? 56 : 48);
+        const BAR_PX      = opts.barPx || defaultBarPx;
+        const longestLabel = Math.max.apply(
+          null, sets.map(function (s) { return s.name.length; })
+        );
+        // Char width scales mildly with the bar size — labels read better in
+        // the lightbox where bars are chunkier.
+        const charPx      = BAR_PX >= 60 ? 10 : 9;
+        const labelPx     = Math.max(180, longestLabel * charPx + 32);
+        const barsPx      = Math.max(420, combinations.length * BAR_PX);
+        const setSizesPx  = BAR_PX >= 60 ? 260 : 200;
+        const totalWidth  = setSizesPx + labelPx + barsPx;            // no Math.max(host.clientWidth) — let the SVG keep its natural width
+        const r1 = setSizesPx / totalWidth;
+        const r2 = labelPx    / totalWidth;
+        const r3 = 1 - r1 - r2;
+
+        // Bigger fonts than UpSetJS defaults (~10-12 px). Matches what the
+        // matplotlib version used to render at 80 dpi.
+        const isLarge = (opts.height || 0) >= 700;
+        const fontSizes = {
+          setLabel:    isLarge ? '17px' : '15px',
+          axisTick:    isLarge ? '14px' : '13px',
+          chartLabel:  isLarge ? '16px' : '14px',
+          barLabel:    isLarge ? '14px' : '13px',
+          legend:      isLarge ? '14px' : '13px',
+          title:       isLarge ? '20px' : '18px',
+        };
+
+        // Manual hover highlighting. UpSetJS's built-in selection logic was
+        // unreliable with our data shape (the same fraction would paint on
+        // every bar). We sidestep it: render the chart statically and add
+        // amber overlay rects ourselves on mouseover.
+        //
+        //   Figure 3 (orthogroups): every bar containing the hovered species
+        //     gets a full-height amber overlay (100 %). A row of matrix dots
+        //     for that species also lights up.
+        //   Figure 4 (proteins):    each bar gets a partial amber overlay
+        //     proportional to the protein contribution of the hovered species
+        //     (species_proteins[hovered] / cardinality).
+        //
+        // We treat the chart as "protein-flavoured" when sets[0].cardinality
+        // is not the same as sets_og_ids[0].length (i.e. when cardinality
+        // means proteins, not orthogroups).
+        function handleHover() { /* needed so UpSetJS wraps rows in interactive groups */ }
+        const isProteinView =
+          figData.combinations.length > 0 &&
+          figData.combinations[0].species_proteins != null;
+
+        // Tag every interactive group so we can find it again later.
+        // Set rows are matched BY NAME (text label content) → species index in
+        // our `sets`. Combo cols are tagged by x-sort order (matches the order
+        // we passed `combinations`). Additionally we tag each matrix dot
+        // inside every combo column with the species idx of its row, matched
+        // by cy ≈ row Y.
+        function tagInteractiveGroups() {
+          const svgEl = host.querySelector('svg');
+          if (!svgEl) return;
+          const groups = svgEl.querySelectorAll('g[class*="interactive-upset"]');
+          const setRows = [];
+          const comboCols = [];
+          groups.forEach(function (g) {
+            const t = g.getAttribute('transform') || '';
+            const my = /translate\(0,\s*([-\d.]+)\)/.exec(t);
+            const mx = /translate\(([-\d.]+),\s*0\)/.exec(t);
+            if (my) setRows.push({ y: parseFloat(my[1]), g });
+            else if (mx && parseFloat(mx[1]) !== 0) comboCols.push({ x: parseFloat(mx[1]), g });
+          });
+          // Match each set row to its species by reading the text label.
+          setRows.forEach(function (r) {
+            const labels = Array.from(r.g.querySelectorAll('text'))
+              .map(function (t) { return (t.textContent || '').trim(); });
+            const idx = sets.findIndex(function (s) {
+              return labels.indexOf(s.name) !== -1;
+            });
+            if (idx >= 0) r.g.setAttribute('data-og-set-idx', String(idx));
+          });
+          // Set rows sorted by Y ascending = visual top-to-bottom order.
+          // Each matrix dot column is also painted top-to-bottom, but in a
+          // different SVG Y range (the matrix area sits below the label area).
+          // We pair them BY VISUAL POSITION: i-th set row from the top
+          // corresponds to the i-th dot from the top within every combo col.
+          const setRowsByPosition = setRows.slice().sort(function (a,b) { return a.y - b.y; });
+          const visualIdxToSetIdx = setRowsByPosition.map(function (r) {
+            return parseInt(r.g.getAttribute('data-og-set-idx') || '-1', 10);
+          });
+          // Combo cols: x-sort matches the order we passed `combinations` in.
+          comboCols.sort(function (a,b) { return a.x - b.x; });
+          comboCols.forEach(function (c, i) {
+            if (combinations[i]) c.g.setAttribute('data-og-combo-idx', String(i));
+            // Tag every dot in this column with the set idx of its visual row.
+            const dots = Array.from(c.g.querySelectorAll('circle'))
+              .sort(function (a,b) {
+                return parseFloat(a.getAttribute('cy') || 0) -
+                       parseFloat(b.getAttribute('cy') || 0);
+              });
+            dots.forEach(function (dot, posIdx) {
+              const setIdx = visualIdxToSetIdx[posIdx];
+              if (setIdx >= 0) dot.setAttribute('data-og-set-idx', String(setIdx));
+            });
+          });
+          return { setRows, comboCols };
+        }
+
+        // ── Shared floating tooltip for combo-bar hover ──────────────────
+        // Created once, reused across all chart hosts. Shows the
+        // intersection name, total, and a per-species protein breakdown for
+        // Figure 4 (the orthogroup view just lists member species).
+        function getTooltipEl() {
+          let t = document.getElementById('og-upset-tooltip');
+          if (!t) {
+            t = document.createElement('div');
+            t.id = 'og-upset-tooltip';
+            t.hidden = true;
+            document.body.appendChild(t);
+          }
+          return t;
+        }
+        function tooltipUnit(n) {
+          const base = isProteinView ? 'protein' : 'orthogroup';
+          return n === 1 ? base : base + 's';
+        }
+        function showTooltipForCombo(combo, evt) {
+          const t = getTooltipEl();
+          const memberSets = Array.from(combo.sets);
+          let html = '<h5>' + escapeHtml(combo.name) + '</h5>' +
+                     '<p class="upset-tooltip-total">' +
+                       Number(combo.cardinality).toLocaleString() + ' ' + tooltipUnit(combo.cardinality) +
+                     '</p>';
+          html += '<ul>';
+          if (isProteinView && combo.species_proteins) {
+            // Sort by contribution descending — biggest first
+            const rows = memberSets.map(function (s) {
+              return { name: s.name, n: combo.species_proteins[s.name] || 0 };
+            }).sort(function (a, b) { return b.n - a.n; });
+            rows.forEach(function (r) {
+              const pct = combo.cardinality > 0
+                ? Math.round((r.n / combo.cardinality) * 100) : 0;
+              html += '<li>' +
+                '<span class="sp-name">' + escapeHtml(r.name) + '</span>' +
+                '<span class="sp-count">' + Number(r.n).toLocaleString() +
+                  '<span class="sp-pct">(' + pct + '%)</span></span>' +
+              '</li>';
+            });
+          } else {
+            // Orthogroup view: each member contributes the full cardinality
+            // (every OG belongs to all member species), so just list names.
+            memberSets.forEach(function (s) {
+              html += '<li><span class="sp-name">' + escapeHtml(s.name) + '</span></li>';
+            });
+          }
+          html += '</ul>';
+          t.innerHTML = html;
+          t.hidden = false;
+          positionTooltip(evt);
+        }
+        function positionTooltip(evt) {
+          const t = getTooltipEl();
+          if (t.hidden) return;
+          const pad = 14;
+          const rect = t.getBoundingClientRect();
+          // Default: anchor the tooltip ABOVE the cursor and slightly to the
+          // right, so it doesn't block the data the user is pointing at.
+          let x = evt.clientX + pad;
+          let y = evt.clientY - rect.height - pad;
+          // Flip horizontally if it would overflow the right edge.
+          if (x + rect.width > window.innerWidth) x = evt.clientX - rect.width - pad;
+          // Flip below the cursor only when there's not enough room above.
+          if (y < 0) y = evt.clientY + pad;
+          // Final safety clamps so it never escapes the viewport.
+          if (x < 0) x = pad;
+          if (y + rect.height > window.innerHeight) y = window.innerHeight - rect.height - pad;
+          t.style.left = x + 'px';
+          t.style.top  = y + 'px';
+        }
+        function hideTooltip() {
+          const t = document.getElementById('og-upset-tooltip');
+          if (t) t.hidden = true;
+        }
+
+        let layoutInfo = null;
+        function clearHighlight() {
+          const svgEl = host.querySelector('svg');
+          if (!svgEl) return;
+          svgEl.querySelectorAll('.og-highlight-overlay').forEach(function (el) { el.remove(); });
+          svgEl.querySelectorAll('.og-dot-highlighted').forEach(function (el) {
+            el.classList.remove('og-dot-highlighted');
+          });
+        }
+
+        function highlightForSpecies(speciesIdx) {
+          clearHighlight();
+          const svgEl = host.querySelector('svg');
+          if (!svgEl || speciesIdx == null) return;
+          const speciesName = sets[speciesIdx].name;
+
+          // 0) Paint a full overlay on the hovered species' OWN set-size bar
+          //    (the horizontal bar on the left showing total cardinality).
+          const rowG = svgEl.querySelector('g[data-og-set-idx="' + speciesIdx + '"]');
+          if (rowG) {
+            const setBar = rowG.querySelector('rect[class*="fillPrimary"]');
+            if (setBar) {
+              const sH = parseFloat(setBar.getAttribute('height') || 0);
+              const sW = parseFloat(setBar.getAttribute('width')  || 0);
+              const sY = parseFloat(setBar.getAttribute('y')      || 0);
+              const sX = parseFloat(setBar.getAttribute('x')      || 0);
+              if (sH > 0 && sW > 0) {
+                const overlay = svgEl.ownerDocument.createElementNS(
+                  'http://www.w3.org/2000/svg', 'rect');
+                overlay.setAttribute('class', 'og-highlight-overlay');
+                overlay.setAttribute('x', String(sX));
+                overlay.setAttribute('y', String(sY));
+                overlay.setAttribute('width',  String(sW));
+                overlay.setAttribute('height', String(sH));
+                overlay.setAttribute('fill', '#fbbf24');
+                overlay.setAttribute('pointer-events', 'none');
+                setBar.parentNode.appendChild(overlay);
+              }
+            }
+          }
+
+          // 1) Paint overlays on every combination bar containing this species.
+          combinations.forEach(function (combo, comboIdx) {
+            if (!combo.sets.has(sets[speciesIdx])) return;
+            const colG = svgEl.querySelector(
+              'g[data-og-combo-idx="' + comboIdx + '"]');
+            if (!colG) return;
+            const primary = colG.querySelector('rect[class*="fillPrimary"]');
+            if (!primary) return;
+            const pH = parseFloat(primary.getAttribute('height') || 0);
+            const pW = parseFloat(primary.getAttribute('width')  || 0);
+            const pY = parseFloat(primary.getAttribute('y')      || 0);
+            const pX = parseFloat(primary.getAttribute('x')      || 0);
+            if (pH <= 0 || pW <= 0) return;
+            // Fraction: Figure 3 always 1.0, Figure 4 proportional to proteins.
+            let frac = 1.0;
+            if (isProteinView && combo.species_proteins && combo.cardinality > 0) {
+              const sp = combo.species_proteins[speciesName] || 0;
+              frac = Math.max(0, Math.min(1, sp / combo.cardinality));
+            }
+            const overlayH = pH * frac;
+            const overlay = svgEl.ownerDocument.createElementNS(
+              'http://www.w3.org/2000/svg', 'rect');
+            overlay.setAttribute('class', 'og-highlight-overlay');
+            overlay.setAttribute('x', String(pX));
+            overlay.setAttribute('y', String(pY + (pH - overlayH))); // anchor at bottom
+            overlay.setAttribute('width',  String(pW));
+            overlay.setAttribute('height', String(overlayH));
+            overlay.setAttribute('fill',   '#fbbf24');
+            overlay.setAttribute('pointer-events', 'none');
+            primary.parentNode.appendChild(overlay);
+          });
+          // 2) Highlight matrix dots in the hovered species' row.
+          // We tagged each dot with data-og-set-idx during tagInteractiveGroups,
+          // so a single querySelectorAll grabs every member dot of this row
+          // (member dots have fillPrimary class; notMember dots have
+          // fillNotMember — we skip the latter so the gray dots stay gray).
+          svgEl.querySelectorAll(
+            'circle[data-og-set-idx="' + speciesIdx + '"]'
+          ).forEach(function (c) {
+            const cls = c.getAttribute('class') || '';
+            if (cls.indexOf('fillNotMember') !== -1) return;
+            c.classList.add('og-dot-highlighted');
+          });
+        }
+
+        function highlightForCombo(comboIdx) {
+          clearHighlight();
+          const combo = combinations[comboIdx];
+          if (!combo) return;
+          const svgEl = host.querySelector('svg');
+          if (!svgEl) return;
+          const colG = svgEl.querySelector(
+            'g[data-og-combo-idx="' + comboIdx + '"]');
+          if (!colG) return;
+          const primary = colG.querySelector('rect[class*="fillPrimary"]');
+          if (!primary) return;
+          // Full overlay on the hovered bar
+          const pH = parseFloat(primary.getAttribute('height') || 0);
+          const pW = parseFloat(primary.getAttribute('width')  || 0);
+          const pY = parseFloat(primary.getAttribute('y')      || 0);
+          const pX = parseFloat(primary.getAttribute('x')      || 0);
+          if (pH > 0 && pW > 0) {
+            const overlay = svgEl.ownerDocument.createElementNS(
+              'http://www.w3.org/2000/svg', 'rect');
+            overlay.setAttribute('class', 'og-highlight-overlay');
+            overlay.setAttribute('x', String(pX));
+            overlay.setAttribute('y', String(pY));
+            overlay.setAttribute('width',  String(pW));
+            overlay.setAttribute('height', String(pH));
+            overlay.setAttribute('fill', '#fbbf24');
+            overlay.setAttribute('pointer-events', 'none');
+            primary.parentNode.appendChild(overlay);
+          }
+          // Highlight all matrix dots of the species in this combo.
+          colG.querySelectorAll('circle[data-og-set-idx]').forEach(function (c) {
+            const idx = parseInt(c.getAttribute('data-og-set-idx'), 10);
+            if (!combo.sets.has(sets[idx])) return;
+            const cls = c.getAttribute('class') || '';
+            if (cls.indexOf('fillNotMember') !== -1) return;
+            c.classList.add('og-dot-highlighted');
+          });
+        }
+
+        // Delegated listener on the host. Survives across the (rare) full
+        // re-renders triggered by the lightbox, since the lightbox draws into
+        // a different host element.
+        host.addEventListener('mouseover', function (e) {
+          let el = e.target;
+          while (el && el !== host) {
+            if (el.getAttribute && el.getAttribute('data-og-set-idx')) {
+              highlightForSpecies(parseInt(el.getAttribute('data-og-set-idx'), 10));
+              hideTooltip();
+              return;
+            }
+            if (el.getAttribute && el.getAttribute('data-og-combo-idx')) {
+              const idx = parseInt(el.getAttribute('data-og-combo-idx'), 10);
+              highlightForCombo(idx);
+              const combo = combinations[idx];
+              if (combo) showTooltipForCombo(combo, e);
+              return;
+            }
+            el = el.parentNode;
+          }
+        });
+        // Reposition the tooltip while the cursor moves inside a combo bar
+        host.addEventListener('mousemove', function (e) {
+          const t = document.getElementById('og-upset-tooltip');
+          if (t && !t.hidden) positionTooltip(e);
+        });
+        host.addEventListener('mouseleave', function () {
+          clearHighlight();
+          hideTooltip();
+        });
+
+        const props = {
+          sets: sets,
+          combinations: combinations,
+          width: totalWidth,
+          // Adaptive inline height: scale with combo count so a 3-combo chart
+          // doesn't stretch every bar to 540 px tall (looked grotesque with
+          // 2–3 species). Floor 280 keeps the matrix readable, cap 600 keeps
+          // the inline footprint compact — the lightbox overrides with the
+          // viewport-derived height for full-screen reading.
+          //   2 species (3 combos):  300 px
+          //   3 species (7 combos):  420 px
+          //   5 species (31 combos): capped at 600 px
+          height: opts.height || Math.min(600, Math.max(280, 220 + nCombos * 28)),
+          fontSizes: fontSizes,
+          onHover: handleHover,
+          selection: null,
+          // [set-size bars · set-name column · combination bars]
+          widthRatios: [r1, r2, r3],
+          // ── Colour palette — manual hover handles the amber overlay ──
+          // We disable UpSetJS's internal selection rendering (hasSelection*)
+          // because we paint our own overlays. Everything UpSetJS draws stays
+          // black + grey; our `<rect class="og-highlight-overlay">` adds the
+          // amber on hover.
+          color: '#0a0a0a',
+          selectionColor: '#fbbf24',                          // colour of the hovered bar's outline (UpSetJS draws a hint)
+          hasSelectionColor: '',                              // empty → no automatic slice
+          hasSelectionOpacity: -1,
+          hoverHintColor: 'rgba(251, 191, 36, 0.10)',
+          notMemberColor: '#d1d5db',
+          strokeColor: '#0a0a0a',
+          textColor: '#0a0a0a',
+          valueTextColor: '#0a0a0a',
+          fontFamily: 'Inter, system-ui, sans-serif',
+          theme: 'light',
+          exportButtons: false,
+        };
+        U.render(host, props);
+        // Once UpSetJS has painted, tag each interactive group with the
+        // index it corresponds to in our `sets` / `combinations` arrays.
+        // Our hover handlers then know what to highlight without having to
+        // walk transforms every time.
+        requestAnimationFrame(tagInteractiveGroups);
+      }
+      tryRender(0);
+    }
+
+    /* ── Per-figure download dropdowns ────────────────────────────────── */
+    // Handles BOTH the "Data" (xlsx/csv/tsv/json) and the "Image" (png/svg)
+    // dropdowns. The distinction is the `data-kind` attribute on the group.
+    function wireDownloads() {
+      document.querySelectorAll('.figure-card-actions').forEach(function (group) {
+        const btn  = group.querySelector('.download-btn');
+        const menu = group.querySelector('.download-menu');
+        const fig  = group.dataset.fig;
+        const kind = group.dataset.kind || 'data';
+        if (!btn || !menu || !fig) return;
+
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const open = !menu.hidden;
+          document.querySelectorAll('.download-menu').forEach(function (m) { m.hidden = true; });
+          document.querySelectorAll('.download-btn').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+          if (!open) { menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
+        });
+        menu.querySelectorAll('a[data-format]').forEach(function (a) {
+          a.addEventListener('click', function (e) {
+            e.preventDefault();
+            const fmt = a.dataset.format;
+            if (kind === 'image') {
+              downloadFigureImage(fig, fmt);
+            } else {
+              window.location.href = '/download_figure_data?fig=' + encodeURIComponent(fig) +
+                                     '&format=' + encodeURIComponent(fmt);
+            }
+            menu.hidden = true;
+            btn.setAttribute('aria-expanded', 'false');
+          });
+        });
+      });
+      document.addEventListener('click', function () {
+        document.querySelectorAll('.download-menu').forEach(function (m) { m.hidden = true; });
+        document.querySelectorAll('.download-btn').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.download-menu').forEach(function (m) { m.hidden = true; });
+        }
+      });
+    }
+
+    /* ── Image export: PNG/SVG dispatched by figure type ─────────────── */
+    const FIGURE_FILENAMES = {
+      '1': 'figure1-protein-distribution',
+      '2': 'figure2-orthogroup-sharing',
+      '3': 'figure3-upset-orthogroups',
+      '4': 'figure4-upset-proteins',
+    };
+
+    /* Mirrors orthogather.utils.filenames on the backend:
+       "orthogather_<artifact>_<ctx>_<YYYY-MM-DD>.<ext>" */
+    function descriptiveFilename(artifact, ext, contextParts) {
+      const today = new Date().toISOString().slice(0, 10);
+      const slug = (s) => String(s || "").replace(/[^A-Za-z0-9._-]+/g, "-")
+                                          .replace(/^[-_.]+|[-_.]+$/g, "");
+      const parts = ["orthogather", slug(artifact)];
+      (contextParts || []).forEach(p => {
+        const s = slug(p);
+        if (s) parts.push(s);
+      });
+      parts.push(today);
+      return parts.filter(Boolean).join("_") + (ext ? "." + slug(ext) : "");
+    }
+
+    /* Pull the species count from the active UpSet selection (for Figs 3/4)
+       or the global dataset species list (for Figs 1/2). */
+    function _figureSpeciesCount(fig) {
+      if (fig === '3' || fig === '4') {
+        // Use the chips that are currently pressed in the UpSet picker.
+        const picked = document.querySelectorAll('#upset-picker-chips [aria-pressed="true"]');
+        if (picked.length) return picked.length;
+      }
+      // Fall back to the global Orthogroups species count (window.SPECIES_COUNT
+      // is injected by the template; if missing, leave it out of the name).
+      return window.SPECIES_COUNT || null;
+    }
+
+    function downloadFigureImage(fig, fmt) {
+      const base = FIGURE_FILENAMES[fig] || ('figure-' + fig);
+      const nSpecies = _figureSpeciesCount(fig);
+      const ctx = nSpecies ? [`${nSpecies}species`] : [];
+      const descName = descriptiveFilename(base, '', ctx);  // no ext yet
+      // Plotly's `filename` option doesn't include the extension; UpSetJS adds
+      // it for us; our manual a.download path adds it via descriptiveFilename.
+
+      // Figures 1 & 2 are Plotly charts — use Plotly.downloadImage.
+      if (fig === '1' || fig === '2') {
+        if (typeof Plotly === 'undefined') {
+          console.error('[OrthoGather] Plotly not loaded — cannot export image.');
+          return;
+        }
+        const elemId = (fig === '1') ? 'fig1' : 'fig2';
+        Plotly.downloadImage(elemId, {
+          format: fmt,                         // 'png' or 'svg'
+          filename: descName,                  // Plotly appends ".<fmt>" itself
+          width:  1400,
+          height: 800,
+          scale:  (fmt === 'png') ? 2 : 1,     // 2× for crisp PNG; scale ignored for SVG
+        }).catch(function (err) {
+          console.error('[OrthoGather] Plotly downloadImage failed:', err);
+        });
+        return;
+      }
+      // Figures 3 & 4 are UpSetJS. For SVG we use UpSetJS.exportSVG (gives a
+      // clean serialised SVG). For PNG we skip UpSetJS's built-in rasteriser
+      // because it sizes the canvas off node.getBoundingClientRect() — which
+      // returns the *visible* size when the SVG sits inside a horizontally
+      // scrolling container. The PNG would come out truncated. We rasterise
+      // ourselves using the SVG's intrinsic width/height attributes.
+      if (fig === '3' || fig === '4') {
+        const U = window.UpSetJS;
+        const host = document.getElementById('upset-fig' + fig);
+        const svg  = host && host.querySelector('svg');
+        if (!svg) {
+          if (window.OG) OG.showError({
+            error_code: 'ERR_GENERATE_FIRST', severity: 'info', category: 'state',
+            message: 'Generate the UpSet figure first',
+            hint: 'Pick at least 2 species, click Generate, then try downloading.',
+          });
+          return;
+        }
+        if (fmt === 'svg') {
+          if (!U || typeof U.exportSVG !== 'function') {
+            if (window.OG) OG.showError({
+              error_code: 'ERR_UPSETJS_NOT_LOADED', severity: 'warning', category: 'external',
+              message: 'The UpSetJS bundle failed to load',
+              hint: 'Refresh the page. UpSetJS is served from /static/vendor/ — verify the file exists.',
+            });
+            return;
+          }
+          try { U.exportSVG(svg, { type: 'svg', title: descName }); }
+          catch (err) {
+            console.error('[OrthoGather] UpSetJS exportSVG failed:', err);
+            if (window.OG) OG.showError({
+              error_code: 'ERR_EXPORT_SVG_FAILED', severity: 'error', category: 'system',
+              message: 'Could not export the figure as SVG',
+              hint: 'Refresh the page and try again. If it persists, see the browser console.',
+            });
+          }
+          return;
+        }
+        // PNG path — custom rasteriser, scale=2 for crisp output.
+        rasterSvgToPng(svg, descName, 2)
+          .catch(function (err) {
+            console.error('[OrthoGather] PNG rasterisation failed:', err);
+            if (window.OG) OG.showError({
+              error_code: 'ERR_EXPORT_PNG_FAILED', severity: 'error', category: 'system',
+              message: 'Could not export the figure as PNG',
+              hint: 'Some browser extensions interfere with canvas. Try in a private window or use SVG instead.',
+            });
+          });
+        return;
+      }
+      console.warn('[OrthoGather] Unknown figure for image export:', fig);
+    }
+
+    /* ── Rasterise a full SVG to PNG using its intrinsic dimensions ──
+       Built because UpSetJS's PNG path uses getBoundingClientRect which can
+       under-report the size when the SVG sits inside an overflow:auto host
+       (the PNG comes out cropped). This reads the SVG's actual width/height
+       attributes — set explicitly by UpSetJS when we call render({width,height}). */
+    function rasterSvgToPng(svgNode, filename, scale) {
+      scale = scale || 2;
+      // Clone so we can normalise attributes without mutating the live chart.
+      const clone = svgNode.cloneNode(true);
+
+      // Inline the chart's stylesheet block: UpSetJS injects a <style id="upsetjs-...">
+      // in <head>; without it the cloned SVG renders without styles when drawn
+      // onto a canvas (because the canvas image isn't connected to the document).
+      const styleId = svgNode.getAttribute('id');
+      let chartStyles = '';
+      if (styleId) {
+        const idMatch = 'upsetjs-' + styleId;
+        // UpSetJS prefixes its style rules with the chart id; find that <style>.
+        document.querySelectorAll('style').forEach(function (s) {
+          if (s.id === idMatch || (s.textContent || '').indexOf('#' + styleId) !== -1) {
+            chartStyles += s.textContent + '\n';
+          }
+        });
+      }
+      if (chartStyles) {
+        const styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        styleEl.textContent = chartStyles;
+        clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      // Resolve intrinsic size. Prefer the SVG's own width/height attributes
+      // (which UpSetJS sets to absolute px values), then viewBox, then a fallback.
+      const wAttr = parseFloat(clone.getAttribute('width'));
+      const hAttr = parseFloat(clone.getAttribute('height'));
+      let viewBox = clone.getAttribute('viewBox') || '';
+      let w = wAttr, h = hAttr;
+      if ((!w || !h) && viewBox) {
+        const parts = viewBox.split(/[\s,]+/).map(Number);
+        if (parts.length === 4) { w = w || parts[2]; h = h || parts[3]; }
+      }
+      if (!w || !h) {
+        // Last resort — getBBox is the SVG-side equivalent of bounding rect
+        // but works on the full tree, not just the visible viewport.
+        try {
+          const bb = svgNode.getBBox();
+          w = w || bb.width; h = h || bb.height;
+        } catch (_) { /* getBBox can throw on detached nodes */ }
+      }
+      if (!w || !h) {
+        return Promise.reject(new Error('Could not determine SVG size.'));
+      }
+
+      // Make sure the serialised SVG carries the namespace + explicit size.
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+      clone.setAttribute('width',  String(w));
+      clone.setAttribute('height', String(h));
+
+      const svgXml = new XMLSerializer().serializeToString(clone);
+      const blob   = new Blob([svgXml], { type: 'image/svg+xml;charset=utf-8' });
+      const url    = URL.createObjectURL(blob);
+
+      // Cap the rasterised canvas to stay below browser limits (Chrome's
+      // single-side cap is 32 767 px; we leave a margin and use 30 000).
+      // If the requested width × scale exceeds it we scale the canvas DOWN
+      // so the output is still a single valid PNG instead of silently
+      // truncating. This matters for UpSet charts with many species —
+      // 16 species can already produce a 40 000+ px wide SVG.
+      const MAX_CANVAS_SIDE = 30000;
+      let effScale = scale;
+      const wantedW = w * effScale;
+      if (wantedW > MAX_CANVAS_SIDE) effScale = MAX_CANVAS_SIDE / w;
+
+      return new Promise(function (resolve, reject) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          canvas.width  = Math.ceil(w * effScale);
+          canvas.height = Math.ceil(h * effScale);
+          const ctx = canvas.getContext('2d');
+          // White background — without this, transparent areas come out black
+          // when some browsers paint PNG-without-alpha.
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(function (pngBlob) {
+            if (!pngBlob) { reject(new Error('canvas.toBlob returned null')); return; }
+            const dlUrl = URL.createObjectURL(pngBlob);
+            const a = document.createElement('a');
+            a.href = dlUrl;
+            a.download = (filename || 'figure') + '.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(dlUrl);
+            resolve();
+          }, 'image/png');
+        };
+        img.onerror = function () {
+          URL.revokeObjectURL(url);
+          reject(new Error('Image failed to load — likely a CORS or SVG parsing error.'));
+        };
+        img.src = url;
+      });
+    }
+
+    /* ── Lightbox: render an UpSet at near-fullscreen size ───────────── */
+    // Shares the #figure-modal element with the Plotly lightbox. UpSetJS
+    // renders into a plain div, so cleanup is innerHTML='' (the existing
+    // closeFigureLightbox also calls Plotly.purge — harmless on a non-Plotly
+    // node, fails silently).
+    window.openUpsetLightbox = function (figKey) {
+      const fig = lastUpsetPayload && lastUpsetPayload[figKey];
+      if (!fig) {
+        console.warn('[OrthoGather] No UpSet payload yet — generate the figures first.');
+        return;
+      }
+      const titles = {
+        fig3: { title: 'Figure 3 — UpSet of shared orthogroups',
+                sub: 'Drag the horizontal scrollbar if there are many combinations. Hover bars to highlight which species contribute.' },
+        fig4: { title: 'Figure 4 — UpSet of shared proteins',
+                sub: 'Same intersections as Figure 3 but weighted by total proteins.' },
+        fig5: { title: 'Figure 5 — Filtered UpSet of shared orthogroups',
+                sub: 'Restricted to orthogroups containing your UniProt IDs.' },
+        fig6: { title: 'Figure 6 — Filtered UpSet of shared proteins',
+                sub: 'Same filtered intersections as Figure 5 but weighted by total proteins.' },
+      };
+      const info = titles[figKey] || { title: 'UpSet plot', sub: '' };
+      const modal = document.getElementById('figure-modal');
+      const titleEl = document.getElementById('figure-modal-title');
+      const subEl   = document.getElementById('figure-modal-sub');
+      const plotEl  = document.getElementById('figure-modal-plot');
+      if (!modal || !plotEl) return;
+      titleEl.textContent = info.title;
+      subEl.textContent   = info.sub;
+      // Reset any previous Plotly contents — using innerHTML on the host
+      // works for both Plotly (it owns the inner svg) and UpSetJS.
+      plotEl.innerHTML = '';
+      modal.removeAttribute('hidden');
+      // Render once the modal is visible so clientHeight is non-zero.
+      requestAnimationFrame(function () {
+        // Modal-inner is min(1000px, 94vh) — body fills the rest after the
+        // ~80 px header + padding. Use the actual modal body height so we
+        // don't render a 600 px SVG into a 900 px container.
+        const bodyEl = document.querySelector('#figure-modal .figure-modal-body');
+        const bodyH  = (bodyEl && bodyEl.clientHeight) || Math.floor((window.innerHeight || 900) * 0.85);
+        const targetH = Math.max(720, bodyH - 16);
+        renderUpset('figure-modal-plot', fig, { height: targetH, barPx: 72 });
+      });
+    };
+
+    /* ── UniProt-ID filter: Figures 5 + 6 ─────────────────────────────── */
+    const filterTextarea  = document.getElementById('upset-filter-ids');
+    const filterCount     = document.getElementById('upset-filter-count');
+    const filterClearBtn  = document.getElementById('upset-filter-clear');
+    const filterRunBtn    = document.getElementById('upset-filter-run');
+    const filterResultEl  = document.getElementById('upset-filter-result');
+    const figuresFilteredHost = document.getElementById('upset-figures-filtered');
+
+    // Tokeniser: split on whitespace, commas, semicolons, pipes. Trim each.
+    function parseUniProtIds(raw) {
+      if (!raw) return [];
+      const seen = new Set();
+      const out  = [];
+      raw.split(/[\s,;|]+/).forEach(function (tok) {
+        const t = (tok || '').trim();
+        if (!t || seen.has(t)) return;
+        seen.add(t); out.push(t);
+      });
+      return out;
+    }
+
+    function refreshFilterCount() {
+      const ids = parseUniProtIds(filterTextarea.value);
+      const n   = ids.length;
+      filterCount.textContent = n + ' ID' + (n === 1 ? '' : 's') + ' detected';
+      // Enable the run button only when we have ≥2 species AND ≥1 ID.
+      filterRunBtn.disabled = (n < 1) || (selected.size < 2);
+    }
+
+    async function runFilteredGeneration() {
+      const ids = parseUniProtIds(filterTextarea.value);
+      if (ids.length < 1 || selected.size < 2) return;
+      filterResultEl.hidden = true;
+      errorEl.hidden = true;
+      progressEl.hidden = false;
+      filterRunBtn.disabled = true;
+
+      try {
+        const res = await fetch('/upset_data_filtered', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            species: Array.from(selected),
+            uniprot_ids: ids,
+          }),
+        });
+        const payload = await res.json();
+        if (!payload.ok) {
+          // Special-case: zero matches still returns 200 with a clear message
+          // and ids_not_found populated.
+          throw new Error(payload.error || 'Filter request failed');
+        }
+        lastUpsetPayload.fig5 = payload.fig5;
+        lastUpsetPayload.fig6 = payload.fig6;
+        figuresFilteredHost.hidden = false;
+        renderUpset('upset-fig5', payload.fig5);
+        renderUpset('upset-fig6', payload.fig6);
+
+        // Build the result banner: N of M found, list not-found (truncated).
+        const nFound    = (payload.ids_found || []).length;
+        const nSearched = payload.n_ids_searched || ids.length;
+        const notFound  = payload.ids_not_found || [];
+        let html = '<i class="fa-solid fa-circle-check"></i> ' +
+                   '<strong>' + nFound + ' of ' + nSearched + '</strong> UniProt IDs found · ' +
+                   '<strong>' + (payload.n_orthogroups || 0) + '</strong> orthogroups in the filtered figures';
+        if (notFound.length) {
+          const preview = notFound.slice(0, 12).join(', ');
+          const more    = notFound.length > 12 ? ' …and ' + (notFound.length - 12) + ' more' : '';
+          html += '<div class="upset-not-found">Not present in this analysis: ' +
+                  '<code>' + escapeHtml(preview) + '</code>' + more +
+                  ' <button type="button" class="upset-copy-missing" data-ids="' +
+                  escapeHtml(notFound.join(' ')) + '">Copy missing IDs</button></div>';
+        }
+        filterResultEl.className = 'upset-filter-result is-' + (notFound.length ? 'partial' : 'success');
+        filterResultEl.innerHTML = html;
+        filterResultEl.hidden = false;
+        // Scroll to the newly added figures so the user sees them.
+        figuresFilteredHost.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        errorEl.hidden = false;
+        errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' +
+                            escapeHtml(err.message || 'Could not generate filtered figures.');
+      } finally {
+        progressEl.hidden = true;
+        refreshFilterCount();
+      }
+    }
+
+    // Copy-to-clipboard for missing IDs (delegated, the button is inside an
+    // innerHTML-rendered banner so we can't bind directly at render time).
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.upset-copy-missing');
+      if (!btn) return;
+      const ids = btn.dataset.ids || '';
+      if (!ids) return;
+      navigator.clipboard && navigator.clipboard.writeText(ids).then(function () {
+        btn.textContent = 'Copied ✓';
+        setTimeout(function () { btn.textContent = 'Copy missing IDs'; }, 1800);
+      });
+    });
+
+    /* ── Wire-up ───────────────────────────────────────────────────────── */
+    renderChips('');
+    searchInput.addEventListener('input', function () { renderChips(searchInput.value); });
+    clearBtn.addEventListener('click', function () {
+      selected.clear();
+      renderChips(searchInput.value);
+      refreshActionState();
+    });
+    generateBtn.addEventListener('click', generate);
+
+    // Filter wiring
+    if (filterTextarea) {
+      filterTextarea.addEventListener('input', refreshFilterCount);
+      filterClearBtn.addEventListener('click', function () {
+        filterTextarea.value = '';
+        refreshFilterCount();
+      });
+      filterRunBtn.addEventListener('click', runFilteredGeneration);
+      refreshFilterCount();
+    }
+
+    wireDownloads();
+    refreshActionState();
+
+    /* ── Help "?" popover toggles ───────────────────────────────────── */
+    // Delegated click — works for the figs that get rendered later as well.
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.figure-help-btn');
+      const popovers = document.querySelectorAll('.figure-help-popover');
+      if (btn) {
+        e.stopPropagation();
+        const wrap = btn.closest('.figure-help-wrap');
+        const pop = wrap && wrap.querySelector('.figure-help-popover');
+        const opening = pop && pop.hidden;
+        popovers.forEach(function (p) { p.hidden = true; });
+        if (opening) pop.hidden = false;
+        return;
+      }
+      // Click outside → close all popovers
+      if (!e.target.closest('.figure-help-popover')) {
+        popovers.forEach(function (p) { p.hidden = true; });
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.figure-help-popover').forEach(function (p) { p.hidden = true; });
+      }
+    });
+  })();
+  </script>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       Plotly Figures 1 & 2: interactive bar charts
+       Data comes from /cargar_carpeta via the plot_url_1 / plot_url_2 dicts
+       ════════════════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    'use strict';
+    if (typeof Plotly === 'undefined') return;
+
+    // Parse the embedded data
+    function readData(id) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      try {
+        const v = JSON.parse(el.textContent);
+        return (v && typeof v === 'object' && 'xs' in v) ? v : null;
+      } catch (_e) { return null; }
+    }
+    const fig1Data = readData('fig1-data');
+    const fig2Data = readData('fig2-data');
+
+    // Render compact "value · label" pairs into a figure-stats chip in the
+    // card head. Each item: { value: '4,218', label: 'orthogroups' }.
+    function renderFigureStats(targetId, items) {
+      const host = document.getElementById(targetId);
+      if (!host || !items || !items.length) return;
+      host.hidden = false;
+      host.innerHTML = items.map(function (it) {
+        return '<span class="figure-stat">' +
+                 '<span class="figure-stat-num">' + it.value + '</span>' +
+                 '<span class="figure-stat-label">' + it.label + '</span>' +
+               '</span>';
+      }).join('<span class="figure-stat-sep" aria-hidden="true">·</span>');
+    }
+
+    /* ── Figure 1: Protein distribution per orthogroup ──
+       Performance-tuned for datasets with hundreds of distinct protein counts:
+       no per-bar border, closest-hover (cheaper), zero transition. */
+    function renderFig1(targetId) {
+      if (!fig1Data) return false;
+      const max_x = Math.max.apply(null, fig1Data.xs);
+      const trace = {
+        type: 'bar',
+        x: fig1Data.xs,
+        y: fig1Data.ys,
+        marker: { color: '#f59e0b' },                          // ← no marker.line — biggest perf win on many bars
+        hovertemplate: '<b>%{x} proteins</b> per orthogroup<br>%{y:,} orthogroups<extra></extra>',
+        hoverlabel: { bgcolor: '#0a1a2f', font: { color: '#ffffff' } },
+      };
+      const max_y = Math.max.apply(null, fig1Data.ys);
+      const layout = {
+        margin: { t: 16, r: 30, l: 70, b: 60 },
+        xaxis: {
+          title: { text: 'Number of proteins in the orthogroup', font: { size: 13 } },
+          range: [0.4, Math.min(20.6, max_x + 0.6)],
+          minallowed: 0.4,                                     // ← no se puede arrastrar antes de 1
+          maxallowed: max_x + 0.6,                             // ← no se puede arrastrar más allá del max real
+          dtick: 1,
+          tickfont: { size: 11 },
+          gridcolor: '#f1f5f9',
+          fixedrange: false,
+        },
+        yaxis: {
+          title: { text: 'Number of orthogroups', font: { size: 13 } },
+          tickformat: ',d',
+          gridcolor: '#f1f5f9',
+          tickfont: { size: 11 },
+          fixedrange: false,
+          minallowed: 0,                                       // ← no se puede bajar de 0
+          maxallowed: max_y * 1.1,                             // ← un poco de cabecera por encima del max
+        },
+        bargap: 0.15,
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: '#ffffff',
+        font: { family: 'Inter, system-ui, sans-serif', color: '#1f2937' },
+        showlegend: false,
+        dragmode: 'zoom',
+        hovermode: 'closest',                                  // ← cheaper than 'x' for many bars
+        hoverdistance: 20,
+        transition: { duration: 0 },                           // ← no easing on zoom-in/out (snap)
+      };
+      // Stats moved out of the Plotly annotation (was unreadable: 11 px grey
+      // text crammed at y=1.02) into a real HTML chip in the figure-card head.
+      renderFigureStats('fig1-stats', [
+        { value: fig1Data.total.toLocaleString(), label: 'orthogroups' },
+        { value: max_x.toLocaleString(),          label: 'max proteins' },
+      ]);
+      const config = {
+        responsive: true, displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+        toImageButtonOptions: { format: 'png', filename: 'figure_1_protein_distribution', scale: 2 },
+        scrollZoom: false,                                     // ← disables zoom-by-wheel-scroll (smoother on touch/trackpad)
+        plotGlPixelRatio: 1,
+      };
+      Plotly.newPlot(targetId, [trace], layout, config);
+      return true;
+    }
+
+    /* ── Figure 2: Orthogroup sharing across species ── */
+    function renderFig2(targetId) {
+      if (!fig2Data) return false;
+      const N = fig2Data.N;
+      const colors = fig2Data.xs.map(function (x) {
+        const t = N > 1 ? (x - 1) / (N - 1) : 0;
+        const r = Math.round(147 + (0 - 147) * t);
+        const g = Math.round(197 + (51 - 197) * t);
+        const b = Math.round(253 + (102 - 253) * t);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+      });
+      const pct = fig2Data.ys.map(function (v) {
+        return fig2Data.total > 0 ? (v / fig2Data.total * 100) : 0;
+      });
+      const trace = {
+        type: 'bar',
+        x: fig2Data.xs,
+        y: fig2Data.ys,
+        marker: { color: colors },                             // ← no per-bar border (faster)
+        customdata: pct,
+        hovertemplate:
+          'Present in <b>%{x} of ' + N + ' species</b><br>' +
+          '%{y:,} orthogroups (%{customdata:.1f}%)<extra></extra>',
+        hoverlabel: { bgcolor: '#0a1a2f', font: { color: '#ffffff' } },
+      };
+      const layout = {
+        margin: { t: 16, r: 30, l: 70, b: 60 },
+        xaxis: {
+          title: { text: 'Number of species sharing the orthogroup', font: { size: 13 } },
+          dtick: N > 20 ? Math.ceil(N / 20) : 1,
+          tickfont: { size: 10 },
+          gridcolor: '#f1f5f9',
+          range: [0.3, N + 0.7],
+          minallowed: 0.3,                                     // ← cap inferior
+          maxallowed: N + 0.7,                                 // ← cap superior = num especies
+        },
+        yaxis: {
+          title: { text: 'Number of orthogroups', font: { size: 13 } },
+          tickformat: ',d',
+          gridcolor: '#f1f5f9',
+          tickfont: { size: 11 },
+          minallowed: 0,
+          maxallowed: Math.max.apply(null, fig2Data.ys) * 1.1,
+        },
+        bargap: 0.20,
+        plot_bgcolor: '#ffffff',
+        paper_bgcolor: '#ffffff',
+        font: { family: 'Inter, system-ui, sans-serif', color: '#1f2937' },
+        showlegend: false,
+        dragmode: 'zoom',
+        hovermode: 'closest',
+        hoverdistance: 20,
+        transition: { duration: 0 },
+        annotations: [
+          // Totals moved out to an HTML chip in the figure-card head
+          // (see renderFigureStats below). The two arrows below stay because
+          // they point at specific data points — they belong on the canvas.
+          {
+            x: 1, y: fig2Data.ys[0], xref: 'x', yref: 'y',
+            text: 'species-specific', showarrow: true, arrowhead: 0, ax: 30, ay: -30,
+            font: { size: 10, color: '#1d4ed8' }, arrowcolor: '#cbd5e1', arrowwidth: 1
+          },
+          {
+            x: N, y: fig2Data.ys[N - 1], xref: 'x', yref: 'y',
+            text: 'core (shared by all)', showarrow: true, arrowhead: 0, ax: -50, ay: -30,
+            font: { size: 10, color: '#003366' }, arrowcolor: '#cbd5e1', arrowwidth: 1
+          }
+        ]
+      };
+      renderFigureStats('fig2-stats', [
+        { value: fig2Data.total.toLocaleString(), label: 'orthogroups' },
+        { value: String(N),                        label: 'species' },
+      ]);
+      const config = {
+        responsive: true, displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+        toImageButtonOptions: { format: 'png', filename: 'figure_2_orthogroup_sharing', scale: 2 }
+      };
+      Plotly.newPlot(targetId, [trace], layout, config);
+      return true;
+    }
+
+    /* ── Lightbox: open figure full-screen ── */
+    const modalInfo = {
+      fig1: { title: 'Figure 1 — Protein distribution per orthogroup',
+              sub: 'Drag to zoom · hover for details · double-click to reset',
+              render: renderFig1 },
+      fig2: { title: 'Figure 2 — Orthogroup sharing across species',
+              sub: 'Color gradient: species-specific (light) → core (dark navy)',
+              render: renderFig2 }
+    };
+
+    window.openFigureLightbox = function (id) {
+      const info = modalInfo[id];
+      if (!info) return;
+      document.getElementById('figure-modal-title').textContent = info.title;
+      document.getElementById('figure-modal-sub').textContent = info.sub;
+      const modal = document.getElementById('figure-modal');
+      modal.removeAttribute('hidden');
+      requestAnimationFrame(function () { info.render('figure-modal-plot'); });
+    };
+    window.closeFigureLightbox = function () {
+      const modal = document.getElementById('figure-modal');
+      modal.setAttribute('hidden', '');
+      // The modal-plot host may have been used by Plotly (Figs 1–2) or by
+      // UpSetJS (Figs 3–4). Plotly.purge cleans its internals; innerHTML=''
+      // removes any UpSetJS SVG. Both are safe to call.
+      try { Plotly.purge('figure-modal-plot'); } catch (_) {}
+      const plotEl = document.getElementById('figure-modal-plot');
+      if (plotEl) plotEl.innerHTML = '';
+    };
+
+    // Click backdrop to close
+    document.getElementById('figure-modal').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) window.closeFigureLightbox();
+    });
+    // Esc to close
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !document.getElementById('figure-modal').hasAttribute('hidden')) {
+        window.closeFigureLightbox();
+      }
+    });
+
+    // Inline render
+    renderFig1('fig1');
+    renderFig2('fig2');
+  })();
+  </script>
+
+  <!-- ── Point 11 (v3): Auto-generate taxonomic tree on page load ───────
+       Tree appears immediately when the user lands on the Protein Analysis
+       page, using the species from the active session. The button stays
+       wired as a manual refresh in case the user wants to re-fetch. -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("taxGenerateBtn");
+    if (!btn) return;
+    const label = document.getElementById("taxGenerateBtnLabel");
+    const treeEl = document.getElementById("taxTree");
+    const actions = document.getElementById("taxActions");
+
+    async function runFetchAndRender() {
+      if (!(window.OGTaxonomyTree && window.d3)) return;
+      btn.disabled = true;
+      const svgHost = document.getElementById("taxTreeSvg");
+      if (treeEl) treeEl.hidden = false;
+      if (svgHost) svgHost.innerHTML = `<div class="tax-tree-loading">Fetching lineages…</div>`;
+      try {
+        const s = await fetch("/api/session_species_taxids").then(r => r.json());
+        const sp = (s.species || []).filter(x => x.taxon_id && /^\d+$/.test(x.taxon_id));
+        if (sp.length < 2) {
+          if (svgHost) svgHost.innerHTML = `<div class="tax-tree-empty">Need ≥ 2 species with valid taxon IDs.</div>`;
+          if (label) label.textContent = "Not enough species";
+          return;
+        }
+        const resp = await OGTaxonomyTree.fetchTree(sp);
+        if (!resp || !resp.success || !resp.tree) {
+          if (svgHost) svgHost.innerHTML = `<div class="tax-tree-empty">${(resp && resp.message) || "Tree unavailable"}</div>`;
+          return;
+        }
+        if (svgHost) svgHost.innerHTML = "";
+        OGTaxonomyTree.render({ containerId: "taxTreeSvg", treeData: resp.tree });
+        if (actions) actions.hidden = false;
+        // Wire Expand button → lightbox
+        const ex = document.getElementById("taxExpandBtn");
+        if (ex) {
+          const fresh = ex.cloneNode(true);
+          ex.parentNode.replaceChild(fresh, ex);
+          fresh.addEventListener("click", () => OGTaxonomyTree.openLightbox(resp.tree, { title: `Taxonomic tree — ${sp.length} species` }));
+        }
+        const dl = document.getElementById("taxDownloadNewickBtn");
+        if (dl) {
+          const fresh = dl.cloneNode(true);
+          dl.parentNode.replaceChild(fresh, dl);
+          fresh.addEventListener("click", () => OGTaxonomyTree.downloadNewick(resp.newick, sp.length));
+        }
+        const rv = document.getElementById("taxResetViewBtn");
+        if (rv) {
+          const fresh = rv.cloneNode(true);
+          rv.parentNode.replaceChild(fresh, rv);
+          fresh.addEventListener("click", () => {
+            const tEl = document.getElementById("taxTreeSvg");
+            if (tEl && typeof tEl.__resetZoom === "function") tEl.__resetZoom();
+          });
+        }
+        if (label) label.textContent = `Refresh tree (${sp.length} species)`;
+      } catch (e) {
+        console.error(e);
+        if (svgHost) svgHost.innerHTML = `<div class="tax-tree-empty">Network error.</div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Manual refresh button always works.
+    btn.addEventListener("click", runFetchAndRender);
+
+    // Lazy-fire: only fetch + render the first time the user opens the
+    // collapse. Avoids spending a round-trip + d3 layout for users who never
+    // open the tree, and stops a large dendrogram from dominating the page.
+    const collapse = document.getElementById("taxCollapse");
+    if (collapse) {
+      let fired = false;
+      collapse.addEventListener("toggle", () => {
+        if (collapse.open && !fired) {
+          fired = true;
+          runFetchAndRender();
+        }
+      });
+    }
+
+    // "Hide taxonomic tree" button at the bottom of the open tree. We read
+    // the summary's absolute Y BEFORE collapsing — once the tree collapses
+    // the page shortens, the browser auto-clamps scrollY to the new bottom,
+    // and a deferred scrollIntoView ends up cancelled. Capture-then-scroll
+    // sidesteps that race.
+    const closeBtn = document.getElementById("taxCollapseCloseBtn");
+    if (closeBtn && collapse) {
+      closeBtn.addEventListener("click", () => {
+        const sum = collapse.querySelector(".tax-collapse-summary");
+        const targetY = sum
+          ? window.scrollY + sum.getBoundingClientRect().top - 16
+          : 0;
+        collapse.open = false;
+        // requestAnimationFrame waits for the layout to settle (the page is
+        // now shorter), then scroll smoothly to the saved target position.
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
+        });
+      });
+    }
+  });
+  </script>
+
 </body>
 </html>

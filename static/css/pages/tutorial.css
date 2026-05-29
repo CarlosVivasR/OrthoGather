@@ -1,0 +1,272 @@
+/* ============================================================================
+   OrthoGather — Tutorial page (tutorial.html)
+   ============================================================================ */
+
+.tutorial-main {
+  flex: 1;
+  padding: var(--space-10) 0 var(--space-12);
+}
+
+/* Hero */
+.tutorial-hero {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+}
+.tutorial-hero .breadcrumb {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+.tutorial-hero .breadcrumb a { color: var(--color-text-secondary); }
+.tutorial-hero .breadcrumb a:hover { color: var(--color-primary); }
+.tutorial-hero h1 {
+  font-size: var(--text-display);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-3);
+}
+.tutorial-hero .lead {
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 760px;
+}
+.tutorial-hero .lead a {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.tutorial-hero .lead a:hover { text-decoration: underline; }
+
+/* Layout: TOC + content */
+.tutorial-layout {
+  max-width: var(--width-content);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-8);
+}
+@media (max-width: 900px) {
+  .tutorial-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sticky TOC */
+.tutorial-toc {
+  position: sticky;
+  top: 90px;
+  align-self: start;
+  font-size: var(--text-body-sm);
+}
+.tutorial-toc .toc-title {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+.tutorial-toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.tutorial-toc li a {
+  color: var(--color-text-secondary);
+  border-left: 2px solid transparent;
+  padding: 4px 12px;
+  display: block;
+  line-height: 1.4;
+}
+.tutorial-toc li a:hover {
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+}
+
+/* Content sections */
+.tutorial-content {
+  min-width: 0; /* prevent overflow */
+}
+.tutorial-section {
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.tutorial-section:last-child { border-bottom: none; }
+.tutorial-section h2 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-4);
+  scroll-margin-top: 80px;
+}
+.tutorial-section h3 {
+  font-size: var(--text-h3);
+  margin: var(--space-5) 0 var(--space-2);
+}
+.tutorial-section h4 {
+  font-size: var(--text-body);
+  font-weight: 600;
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--color-text);
+}
+.tutorial-section p,
+.tutorial-section li {
+  color: var(--color-text);
+  font-size: var(--text-body);
+  line-height: 1.65;
+}
+.tutorial-section ul {
+  padding-left: var(--space-5);
+  margin: var(--space-2) 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tutorial-section code {
+  background: var(--color-surface-alt);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  border: 1px solid var(--color-border);
+}
+.tutorial-section pre {
+  background: var(--color-surface-dark, #1f2937);
+  color: var(--color-text-inverse, #fff);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+  line-height: 1.55;
+}
+.tutorial-section pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+.tutorial-section a {
+  color: var(--color-primary);
+}
+.tutorial-section a:hover { text-decoration: underline; }
+
+/* Three-card layout for quick-start paths */
+.tutorial-paths {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
+}
+.tutorial-path {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+.tutorial-path h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-body);
+  color: var(--color-primary);
+}
+.tutorial-path p {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Callout box */
+.tutorial-callout {
+  display: flex;
+  gap: var(--space-3);
+  background: var(--color-warning-bg, #fff7ed);
+  border-left: 4px solid var(--color-warning, #ea580c);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-4) 0;
+}
+.tutorial-callout i {
+  color: var(--color-warning, #ea580c);
+  font-size: 18px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.tutorial-callout strong { color: var(--color-text); }
+
+/* Inline note paragraph for terminology/clarifications inside a section */
+.tutorial-note {
+  background: var(--color-surface-alt);
+  border-left: 3px solid var(--color-text-muted);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-3) 0 var(--space-4);
+  line-height: 1.55;
+}
+.tutorial-note strong { color: var(--color-text); }
+
+/* ============================================================================
+   Tutorial figure blocks (screenshots embedded under each section heading)
+   ============================================================================ */
+.tutorial-figure {
+  margin: var(--space-5) 0;
+  text-align: center;
+}
+.tutorial-figure img {
+  width: 100%;
+  max-width: 760px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
+  display: block;
+  margin: 0 auto;
+  background: var(--color-surface);
+}
+.tutorial-figure figcaption {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+
+/* FAQ details */
+.tutorial-faq {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.tutorial-faq summary {
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text);
+  list-style: none;
+  padding: 4px 0;
+}
+.tutorial-faq summary::-webkit-details-marker { display: none; }
+.tutorial-faq summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform var(--duration-fast) var(--easing-standard);
+  color: var(--color-text-muted);
+}
+.tutorial-faq[open] summary::before { transform: rotate(90deg); }
+.tutorial-faq p {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-2) 0 var(--space-1);
+  line-height: 1.6;
+}

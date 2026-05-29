@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History: OrthoGather</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/og-errors.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/history.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
+</head>
+<body>
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="history-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="history-flash-stack">
+          {% for category, msg in messages %}
+            <div class="history-flash is-{{ category or 'info' }}" role="alert">
+              <i class="fa-solid fa-{{ 'circle-exclamation' if category == 'error' else 'circle-info' }}"></i>
+              <span>{{ msg }}</span>
+              <button type="button" class="history-flash-dismiss" aria-label="Dismiss"
+                      onclick="this.parentElement.remove()">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="history-intro">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+        <i class="fa-solid fa-chevron-right"></i>
+        <span>History</span>
+      </nav>
+      <h1>Past analyses</h1>
+      {% if runs %}
+        <p class="lead">{{ runs|length }} run{{ '' if runs|length == 1 else 's' }} saved. Click <strong>Open</strong> to reload one and continue with Protein Analysis or Gene Ontology.</p>
+      {% endif %}
+      {% if runs and runs|length >= 2 %}
+        <div class="history-toolbar">
+          <button type="button" class="btn btn-secondary btn-sm" id="compare-toggle">
+            <i class="fa-solid fa-code-compare"></i> Compare two runs
+          </button>
+          <div class="compare-mode-status" hidden>
+            <i class="fa-solid fa-code-compare" aria-hidden="true"></i>
+            <span>Pick 2 runs · <strong id="compare-selected-count">0</strong>/2 selected</span>
+            <span class="compare-divider" aria-hidden="true"></span>
+            <button type="button" class="btn btn-primary btn-sm" id="compare-go" disabled>
+              <i class="fa-solid fa-arrow-right"></i> Compare
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" id="compare-cancel">Cancel</button>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+
+    {% if runs %}
+    <ul class="history-list">
+      {% for r in runs %}
+        {% set s = r.summary or {} %}
+        {% set issues = r.issues or [] %}
+        <li class="history-item" data-run-id="{{ r.id }}">
+          <header class="history-item-head">
+            <div class="history-item-title">
+              <h2 class="run-name">{{ r.name or (s.species | length | string ~ ' species') }}</h2>
+              <span class="run-date"><i class="fa-regular fa-clock"></i> {{ r.created_at[:10] }} · {{ r.created_at[11:16] }} UTC</span>
+            </div>
+            <div class="history-item-actions">
+              <a class="btn btn-primary btn-sm" href="{{ url_for('history_load', run_id=r.id) }}">
+                <i class="fa-solid fa-folder-open"></i> Open
+              </a>
+              <div class="history-kebab-wrap">
+                <button type="button" class="kebab-btn history-kebab" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+                <div class="history-menu" role="menu" hidden>
+                  {% if r.species_ids %}
+                  <a class="history-menu-item" href="{{ url_for('history_reproduce', run_id=r.id) }}"
+                     title="Pre-fill the species picker with the same proteomes">
+                    <i class="fa-solid fa-rotate-right"></i> Reproduce
+                  </a>
+                  {% endif %}
+                  <button type="button" class="history-menu-item" data-action="cite">
+                    <i class="fa-solid fa-quote-right"></i> Cite
+                  </button>
+                  <button type="button" class="history-menu-item" data-action="rename">
+                    <i class="fa-solid fa-pen"></i> Rename
+                  </button>
+                  <button type="button" class="history-menu-item is-danger" data-action="delete">
+                    <i class="fa-solid fa-trash"></i> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div class="history-item-stats">
+            <span class="hi-stat"><strong>{{ '{:,}'.format(s.total_orthogroups or 0) }}</strong> orthogroups</span>
+            <span class="hi-stat"><strong>{{ s.mean_pct_in_og if s.mean_pct_in_og is not none else '' }}%</strong> mean in OG</span>
+            <span class="hi-stat"><strong>{{ '{:,}'.format(s.single_copy_orthogroups or 0) }}</strong> single-copy</span>
+            <span class="hi-stat hi-stat-mute"><i class="fa-solid fa-stopwatch"></i> {{ (r.duration_s / 60) | round(1) }} min</span>
+          </div>
+
+          <div class="history-item-species">
+            {% for sp in s.species %}
+              <span class="species-chip">
+                <span class="chip-dot"></span>
+                <span class="chip-name">{{ sp.name | replace('_', ' ') }}</span>
+              </span>
+            {% endfor %}
+          </div>
+
+          {% if issues %}
+            <p class="history-item-issues">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              {{ issues|length }} technical issue{{ '' if issues|length == 1 else 's' }} flagged
+            </p>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="history-empty">
+      <i class="fa-regular fa-folder-open"></i>
+      <h2>No past analyses yet</h2>
+      <p>When you run OrthoFinder, the results are saved here so you can come back later and continue with the analysis.</p>
+      <a class="btn btn-primary btn-lg" href="/1-seleccion_especies"><i class="fa-solid fa-microscope"></i> Start your first analysis</a>
+    </div>
+    {% endif %}
+  </main>
+
+  </div><!-- /.app-shell -->
+
+  <script src="{{ url_for('static', filename='js/og-base.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/og-errors.js') }}" defer></script>
+  <script>
+    /* History page — wire kebab menu (rename / delete) */
+    (function () {
+      'use strict';
+
+      function closeAllMenus() {
+        document.querySelectorAll('.history-menu').forEach(m => { m.hidden = true; });
+        document.querySelectorAll('.history-kebab').forEach(b => b.setAttribute('aria-expanded', 'false'));
+      }
+
+      function showStatusInline(item, kind, text) {
+        let bar = item.querySelector('.history-item-status');
+        if (!bar) {
+          bar = document.createElement('div');
+          bar.className = 'history-item-status';
+          item.appendChild(bar);
+        }
+        bar.className = 'history-item-status is-' + kind;
+        bar.innerHTML = `<i class="fa-solid ${kind === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> ${text}`;
+        if (kind === 'success') setTimeout(() => bar.remove(), 2500);
+      }
+
+      function startRename(item) {
+        const nameEl = item.querySelector('.run-name');
+        const current = nameEl.textContent.trim();
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'run-name-edit';
+        input.value = current;
+        input.maxLength = 100;
+        input.setAttribute('aria-label', 'Rename analysis');
+
+        // Replace h2 with input
+        nameEl.style.display = 'none';
+        nameEl.parentNode.insertBefore(input, nameEl.nextSibling);
+        input.focus();
+        input.select();
+
+        const commit = async (save) => {
+          const newName = input.value.trim();
+          input.remove();
+          nameEl.style.display = '';
+
+          if (!save || newName === current || newName === '') {
+            return;
+          }
+
+          const runId = item.dataset.runId;
+          try {
+            const res = await fetch(`/history/${runId}/rename`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: newName })
+            });
+            if (!res.ok) throw new Error('Rename failed');
+            nameEl.textContent = newName;
+            showStatusInline(item, 'success', 'Renamed');
+          } catch (e) {
+            showStatusInline(item, 'error', 'Could not rename. Please try again.');
+          }
+        };
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); commit(true); }
+          if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+        });
+        input.addEventListener('blur', () => commit(true));
+      }
+
+      async function showCitation(item) {
+        const runId = item.dataset.runId;
+        let preview = '';
+        try {
+          const res = await fetch(`/history/${runId}/cite.bib`);
+          if (!res.ok) throw new Error('cite fetch failed');
+          preview = await res.text();
+        } catch (e) {
+          showStatusInline(item, 'error', 'Could not load citation. Please try again.');
+          return;
+        }
+        const modal = document.createElement('div');
+        modal.className = 'cite-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-label', 'Citation for this analysis');
+        modal.innerHTML = `
+          <div class="cite-modal-backdrop"></div>
+          <div class="cite-modal-card">
+            <header class="cite-modal-head">
+              <h2><i class="fa-solid fa-quote-right"></i> Cite this analysis</h2>
+              <button type="button" class="cite-modal-close" aria-label="Close">&times;</button>
+            </header>
+            <p class="cite-modal-hint">
+              Copy this BibTeX or download .bib / .ris for Zotero, Mendeley, EndNote.
+              Includes OrthoFinder and UniProt references so reviewers can verify the pipeline.
+            </p>
+            <pre class="cite-preview"></pre>
+            <div class="cite-modal-actions">
+              <button type="button" class="btn btn-secondary btn-sm" data-cite="copy">
+                <i class="fa-solid fa-copy"></i> Copy BibTeX
+              </button>
+              <a class="btn btn-secondary btn-sm" href="/history/${runId}/cite.bib" download>
+                <i class="fa-solid fa-download"></i> Download .bib
+              </a>
+              <a class="btn btn-secondary btn-sm" href="/history/${runId}/cite.ris" download>
+                <i class="fa-solid fa-download"></i> Download .ris
+              </a>
+            </div>
+          </div>
+        `;
+        modal.querySelector('.cite-preview').textContent = preview;
+        document.body.appendChild(modal);
+        const close = () => modal.remove();
+        modal.querySelector('.cite-modal-backdrop').addEventListener('click', close);
+        modal.querySelector('.cite-modal-close').addEventListener('click', close);
+        modal.querySelector('[data-cite="copy"]').addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(preview);
+            showStatusInline(item, 'success', 'Citation copied to clipboard.');
+            close();
+          } catch (e) {
+            showStatusInline(item, 'error', 'Clipboard not available. Use Download instead.');
+          }
+        });
+        document.addEventListener('keydown', function onEsc(e) {
+          if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); }
+        });
+      }
+
+      async function confirmDelete(item) {
+        const name = item.querySelector('.run-name').textContent.trim();
+        if (!window.confirm(`Delete this analysis?\n\n"${name}"\n\nThis cannot be undone. The results and stats will be removed from disk.`)) {
+          return;
+        }
+        const runId = item.dataset.runId;
+        try {
+          const res = await fetch(`/history/${runId}/delete`, { method: 'POST' });
+          if (!res.ok) throw new Error('Delete failed');
+          // Fade out + remove
+          item.style.transition = 'opacity .25s ease, transform .25s ease';
+          item.style.opacity = '0';
+          item.style.transform = 'translateX(-10px)';
+          setTimeout(() => {
+            item.remove();
+            const remaining = document.querySelectorAll('.history-item').length;
+            const intro = document.querySelector('.history-intro .lead');
+            if (intro) intro.firstChild.textContent = `${remaining} run${remaining === 1 ? '' : 's'} saved. `;
+            if (remaining === 0) location.reload();   // show empty state
+          }, 250);
+        } catch (e) {
+          showStatusInline(item, 'error', 'Could not delete. Please try again.');
+        }
+      }
+
+      // Wire each kebab on the page
+      document.querySelectorAll('.history-kebab').forEach((btn) => {
+        const wrap = btn.closest('.history-kebab-wrap');
+        const menu = wrap.querySelector('.history-menu');
+        const item = btn.closest('.history-item');
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const wasOpen = !menu.hidden;
+          closeAllMenus();
+          if (!wasOpen) {
+            menu.hidden = false;
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        menu.querySelectorAll('[data-action]').forEach((mb) => {
+          mb.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeAllMenus();
+            const action = mb.dataset.action;
+            if (action === 'rename') startRename(item);
+            else if (action === 'delete') confirmDelete(item);
+            else if (action === 'cite') showCitation(item);
+          });
+        });
+      });
+
+      // Close on outside click or Escape
+      document.addEventListener('click', closeAllMenus);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllMenus(); });
+
+      /* ── Compare mode (Innovation #2) ───────────────────────────────── */
+      const compareToggle = document.getElementById('compare-toggle');
+      const compareStatus = document.querySelector('.compare-mode-status');
+      const compareCount  = document.getElementById('compare-selected-count');
+      const compareGoBtn  = document.getElementById('compare-go');
+      const compareCancel = document.getElementById('compare-cancel');
+      let compareMode = false;
+      const compareSelected = new Set();
+
+      function refreshCompareUI() {
+        compareCount.textContent = String(compareSelected.size);
+        compareGoBtn.disabled = compareSelected.size !== 2;
+        document.querySelectorAll('.history-item').forEach((item) => {
+          item.classList.toggle('compare-mode', compareMode);
+          item.classList.toggle('is-compare-selected', compareSelected.has(item.dataset.runId));
+        });
+      }
+
+      function enterCompareMode() {
+        compareMode = true;
+        compareSelected.clear();
+        compareToggle.hidden = true;
+        compareStatus.hidden = false;
+        refreshCompareUI();
+      }
+      function exitCompareMode() {
+        compareMode = false;
+        compareSelected.clear();
+        compareToggle.hidden = false;
+        compareStatus.hidden = true;
+        refreshCompareUI();
+      }
+
+      if (compareToggle) compareToggle.addEventListener('click', enterCompareMode);
+      if (compareCancel) compareCancel.addEventListener('click', exitCompareMode);
+      if (compareGoBtn) compareGoBtn.addEventListener('click', () => {
+        if (compareSelected.size !== 2) return;
+        const [a, b] = Array.from(compareSelected);
+        window.location.href = `/compare?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+      });
+
+      document.querySelectorAll('.history-item').forEach((item) => {
+        item.addEventListener('click', (e) => {
+          if (!compareMode) return;
+          // Don't toggle when clicking inside the actions block
+          if (e.target.closest('.history-item-actions')) return;
+          e.preventDefault();
+          const id = item.dataset.runId;
+          if (compareSelected.has(id)) {
+            compareSelected.delete(id);
+          } else if (compareSelected.size < 2) {
+            compareSelected.add(id);
+          }
+          refreshCompareUI();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

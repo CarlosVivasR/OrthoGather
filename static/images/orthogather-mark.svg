@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 110" role="img" aria-label="OrthoGather mark">
+  <!-- Connecting lines between the balls -->
+  <line x1="32" y1="50" x2="64" y2="20" stroke="#3b78b9" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="50" x2="22" y2="86" stroke="#3b78b9" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="50" x2="60" y2="86" stroke="#3b78b9" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Pink ball (bottom left) -->
+  <circle cx="22" cy="86" r="11" fill="#fbd9d3" stroke="#f0a0a0" stroke-width="2.4"/>
+
+  <!-- Yellow ball (bottom right) -->
+  <circle cx="60" cy="86" r="11" fill="#fce58a" stroke="#d8a82a" stroke-width="2.4"/>
+
+  <!-- Green ball (top right) -->
+  <circle cx="64" cy="20" r="11" fill="#5fa84f" stroke="#3d7a30" stroke-width="2.4"/>
+
+  <!-- Blue ball (centre, largest) -->
+  <circle cx="32" cy="50" r="17" fill="#7cb8ee" stroke="#2c6ea8" stroke-width="2.8"/>
+</svg>

@@ -1,0 +1,910 @@
+/* ============================================================================
+   OrthoGather — Home page (bento-style entry hub)
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   Hero — two-column layout with scientific visual
+   ---------------------------------------------------------------------------- */
+
+.home-hero {
+  position: relative;
+  padding: clamp(var(--space-10), 8vw, var(--space-16)) 0 var(--space-12);
+  overflow: hidden;
+}
+
+.home-hero-inner {
+  max-width: var(--width-content);
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+  display: grid;
+  /* Balance the columns so "Compare proteomes." stays on one line while the
+     system-overview visual gets a bit more room. */
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 36px;
+  align-items: center;
+}
+
+@media (max-width: 880px) {
+  .home-hero-inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .home-hero-visual { order: -1; }
+}
+
+.home-hero-text { max-width: 720px; }
+
+.home-hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  margin-bottom: var(--space-5);
+  box-shadow: var(--shadow-xs);
+}
+
+.home-hero .eyebrow .pulse-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background-color: var(--color-success);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+  animation: og-pulse 2s var(--easing-standard) infinite;
+}
+
+@keyframes og-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18); }
+  50%      { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+.home-hero h1 {
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.home-hero .tagline {
+  margin-top: var(--space-4);
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.home-hero .hero-ctas {
+  margin-top: var(--space-6);
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.home-hero .powered-by {
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.home-hero .powered-by .label {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.home-hero .powered-by .deps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.home-hero .powered-by .dep {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.home-hero .powered-by .dep i {
+  color: var(--color-primary);
+  font-size: 12px;
+}
+
+/* --- Visual side --- */
+.home-hero-visual {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.05;
+  max-width: 540px;
+  margin-inline: auto;
+}
+
+.home-hero-visual .visual-frame {
+  position: absolute;
+  inset: 0;
+  /* Right-align the system-overview panel in its column. */
+  max-width: 560px;
+  margin-left: auto;
+  border-radius: var(--radius-2xl);
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-alt) 100%);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.home-hero-visual .visual-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(50% 60% at 18% 15%, rgba(0, 51, 102, 0.08) 0%, transparent 70%),
+    radial-gradient(50% 60% at 85% 85%, rgba(7, 89, 133, 0.10) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.home-hero-visual .visual-frame .browser-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-hero-visual .visual-frame .browser-bar .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--color-border-strong);
+}
+
+.home-hero-visual .visual-frame .browser-bar .dot.red    { background: #f87171; }
+.home-hero-visual .visual-frame .browser-bar .dot.amber  { background: #fbbf24; }
+.home-hero-visual .visual-frame .browser-bar .dot.green  { background: #4ade80; }
+
+.home-hero-visual .visual-frame .browser-bar .url {
+  margin-left: 8px;
+  padding: 3px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.home-hero-visual .visual-canvas {
+  position: absolute;
+  inset: 42px 0 0;
+  padding: var(--space-5);
+}
+
+.home-hero-visual svg.upset-illu,
+.home-hero-visual img.system-overview-illu {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+/* ----------------------------------------------------------------------------
+   Bento grid of entry cards
+   ---------------------------------------------------------------------------- */
+
+/* Section eyebrow above the bento — "─── PICK YOUR STARTING POINT ───" */
+.bento-section-eyebrow {
+  max-width: var(--width-content);
+  margin: calc(var(--space-4) * -1) auto var(--space-4);  /* tucked up + tighter below */
+  padding: 0 var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #334155;                                            /* slate-700 — darker than muted */
+}
+.bento-section-eyebrow::before,
+.bento-section-eyebrow::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.home-bento {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: var(--space-5);
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-12);
+  padding: 0 var(--space-6);
+}
+
+.home-bento .bento-card {
+  grid-column: span 1;
+  grid-row: span 1;
+  min-height: 0;
+}
+
+/* New Analysis — full width on top */
+.home-bento .bento-card.is-feature {
+  grid-column: 1 / span 2;
+  grid-row: 1;
+}
+
+/* Preselected and External Upload side by side below */
+.home-bento .bento-card.is-side-top    { grid-column: 1; grid-row: 2; }
+.home-bento .bento-card.is-side-bottom { grid-column: 2; grid-row: 2; }
+
+@media (max-width: 720px) {
+  .home-bento {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .home-bento .bento-card.is-feature,
+  .home-bento .bento-card.is-side-top,
+  .home-bento .bento-card.is-side-bottom {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* --- New Analysis (featured, full width) — split into 2 inner columns --- */
+.home-bento .bento-card.is-feature {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+  padding-bottom: 30px;            /* breathing room below the "You get" tags */
+}
+
+/* Body sits in the right column; visual + outputs sit in the left column */
+.home-bento .bento-card.is-feature .bento-visual {
+  grid-column: 1;
+  grid-row: 1;
+  margin-bottom: 0;
+  height: 180px;             /* taller so the bigger pipeline boxes have room */
+  align-self: end;           /* push it toward the bottom of the row → visually mid-card */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+}
+
+.home-bento .bento-card.is-feature .bento-body {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.home-bento .bento-card.is-feature .bento-outputs {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: var(--space-2);
+  border-top: none;          /* remove the dashed separator */
+  padding-top: 0;
+  text-align: center;
+}
+
+.home-bento .bento-card.is-feature .bento-outputs-tags {
+  justify-content: center;
+}
+
+/* The floating arrow sits over the whole featured card */
+.home-bento .bento-card.is-feature .bento-arrow {
+  grid-column: 1 / -1;
+}
+
+/* Stack inner content vertically on narrow screens */
+@media (max-width: 720px) {
+  .home-bento .bento-card.is-feature {
+    grid-template-columns: 1fr;
+  }
+  .home-bento .bento-card.is-feature .bento-visual,
+  .home-bento .bento-card.is-feature .bento-body,
+  .home-bento .bento-card.is-feature .bento-outputs {
+    grid-column: 1;
+  }
+}
+
+/* --- Preselected & External Upload — side layout (SVG left, text right) --- */
+.bento-card.has-side-layout {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  gap: var(--space-5);
+}
+
+.bento-card.has-side-layout .bento-head {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--space-5);
+  align-items: center;
+}
+
+.bento-card.has-side-layout .bento-visual {
+  margin: 0;
+  height: 160px;
+  width: 160px;
+  padding: var(--space-2);
+  flex-shrink: 0;
+}
+
+.bento-card.has-side-layout .bento-illustration {
+  max-width: 90%;
+  max-height: 90%;
+}
+
+.bento-card.has-side-layout .bento-body {
+  margin: 0;
+}
+/* Make the eyebrow pill shrink to its content (otherwise it stretches to the
+   full bento-body width and wraps the "X of 3 · ..." text to multiple lines
+   on narrow viewports, looking like a tall awkward block). */
+.bento-card.has-side-layout .bento-eyebrow {
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+/* Choice block */
+.bento-choice {
+  border-top: 1px dashed var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.bento-choice-label {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bento-choice-label::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background-color: var(--color-text-muted);
+}
+
+/* Horizontal action row — overrides .bento-actions default flex-column */
+.bento-card .bento-actions.bento-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.bento-card .bento-actions.bento-actions-row .subaction-card {
+  width: auto;
+}
+
+/* Stack on narrow screens — when home-bento is still 2 columns but cards are
+   narrow (~340px), the side-layout head can't fit visual + body in a row
+   (body ends up at ~130px and the eyebrow text wraps to multiple lines).
+   Stack the head vertically: visual on top, full-width body below. */
+@media (max-width: 960px) {
+  .bento-card.has-side-layout .bento-head {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .bento-card.has-side-layout .bento-visual {
+    width: 140px;
+    height: 140px;
+    margin-inline: auto;
+  }
+  /* Eyebrow back to inline-flex centered in the row */
+  .bento-card.has-side-layout .bento-eyebrow {
+    align-self: center;
+  }
+  /* Stack subaction-cards (Protein / GO) vertically — keeps the long labels readable */
+  .bento-card .bento-actions.bento-actions-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Bento card base — clean white, scientific-tool aesthetic (Latch-like) */
+.bento-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border: 1px solid rgba(15, 23, 42, 0.16);   /* darker, more defined edge */
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  width: 100%;
+  min-height: 220px;
+  /* Light shadow: ambient close + soft mid-drop, paired with the darker border */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 6px 14px rgba(15, 23, 42, 0.08);
+  transition: transform var(--duration) var(--easing-standard),
+              box-shadow var(--duration) var(--easing-standard),
+              border-color var(--duration) var(--easing-standard);
+}
+
+/* Thin coloured stripe across the top of every card */
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--color-primary);
+  z-index: 1;
+}
+
+.bento-card.theme-primary::before { background: linear-gradient(90deg, #003366, #1a4d80); }
+.bento-card.theme-teal::before    { background: linear-gradient(90deg, #0c4a6e, #0ea5e9); }
+.bento-card.theme-warm::before    { background: linear-gradient(90deg, #475569, #ca8a04); }
+
+/* Featured card: white background, taller stripe, denser content */
+.bento-card.is-feature {
+  padding: var(--space-7);
+  color: var(--color-text);
+}
+
+.bento-card.is-feature::before {
+  height: 4px;
+  background: linear-gradient(90deg, #003366 0%, #1a4d80 50%, #0ea5e9 100%);
+}
+
+.bento-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.bento-card.is-feature:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.bento-card:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus), var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+/* Decorative top section of the card (simplified, scientific-tool look) */
+.bento-card .bento-visual {
+  position: relative;
+  margin: 0 0 var(--space-5);
+  height: 110px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bento-card.is-feature .bento-visual {
+  margin: 0 0 var(--space-5);
+  height: 140px;
+  background: linear-gradient(135deg, #f7f8fa 0%, #e6ecf2 100%);
+  border-color: var(--color-border);
+}
+
+.bento-card.theme-teal .bento-visual {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-color: #bae6fd;
+}
+
+.bento-card.theme-warm .bento-visual {
+  background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%);
+  border-color: #fde68a;
+}
+
+.bento-card .bento-visual svg.pattern {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.32;
+}
+
+.bento-card.is-feature .bento-visual svg.pattern { display: none; }
+
+.bento-card .bento-icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: 26px;
+  box-shadow: var(--shadow-xs);
+  border: 1px solid var(--color-border);
+  transition: transform var(--duration) var(--easing-emphasis);
+}
+
+/* New SVG illustrations inside bento visual area */
+.bento-card .bento-illustration {
+  width: auto;
+  max-width: 78%;
+  max-height: 78%;
+  height: auto;
+  color: var(--color-primary);
+  transition: transform var(--duration) var(--easing-emphasis);
+}
+
+.bento-card.theme-teal  .bento-illustration { color: #0369a1; }
+.bento-card.theme-warm  .bento-illustration { color: #b45309; }
+.bento-card.theme-primary .bento-illustration { color: var(--color-primary); }
+
+.bento-card:hover .bento-illustration {
+  transform: translateY(-2px) scale(1.03);
+}
+
+.bento-card.is-feature .bento-icon {
+  width: 72px; height: 72px; font-size: 30px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bento-card.theme-teal .bento-icon { color: #0369a1; }
+.bento-card.theme-warm .bento-icon { color: #b45309; }
+
+.bento-card:hover .bento-icon {
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* Card body */
+.bento-card .bento-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.bento-card .bento-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+
+.bento-card.is-feature .bento-eyebrow {
+  color: var(--color-primary);
+  background-color: var(--color-primary-soft);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  align-self: flex-start;
+  margin-top: var(--space-3);
+}
+
+.bento-card .bento-title {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.bento-card.is-feature .bento-title {
+  font-size: clamp(26px, 3vw, 32px);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.bento-card .bento-desc {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.bento-card.is-feature .bento-desc {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+}
+
+.bento-card .bento-actions {
+  margin-top: auto;
+  padding-top: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.bento-card .bento-arrow {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.95);
+  color: var(--color-primary);
+  font-size: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-fast) var(--easing-standard),
+              background-color var(--duration-fast) var(--easing-standard);
+}
+
+.bento-card.is-feature .bento-arrow {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bento-card:hover .bento-arrow {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  transform: translate(2px, -2px);
+  border-color: transparent;
+}
+
+/* Feature highlights list inside the featured card */
+.bento-card .bento-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.bento-card.is-feature .bento-highlights li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+}
+
+.bento-card.is-feature .bento-highlights i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-success-bg);
+  color: #065f46;
+  font-size: 10px;
+}
+
+/* Numbered step badge for the New Analysis bullets — matches the SVG colors */
+.bento-card.is-feature .bento-highlights .bento-step {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 11px;
+  color: #ffffff;
+  background-color: #1e40af;
+  margin-top: 1px;
+}
+.bento-card.is-feature .bento-highlights li:nth-child(2) .bento-step { background-color: #0c9488; }
+.bento-card.is-feature .bento-highlights li:nth-child(3) .bento-step { background-color: #b45309; }
+
+/* Workflow illustration inside featured card visual */
+.bento-card .workflow-illu {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+/* "You get" section in featured card */
+.bento-card .bento-outputs {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--color-border);
+}
+
+.bento-card .bento-outputs-label {
+  display: block;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.bento-card .bento-outputs-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.bento-card .bento-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+}
+
+.bento-card .bento-tag i {
+  color: var(--color-primary);
+  font-size: 11px;
+}
+
+/* ----------------------------------------------------------------------------
+   Quick links row below the bento
+   ---------------------------------------------------------------------------- */
+
+.home-quick-links {
+  max-width: var(--width-narrow);
+  margin: 0 auto var(--space-12);
+  padding: 0 var(--space-6);
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.home-quick-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              color var(--duration-fast) var(--easing-standard),
+              transform var(--duration-fast) var(--easing-standard);
+}
+
+.home-quick-links a:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.home-quick-links a i { color: var(--color-text-secondary); }
+.home-quick-links a:hover i { color: var(--color-primary); }
+
+#status-message {
+  max-width: var(--width-narrow);
+  margin: var(--space-6) auto 0;
+  padding-inline: var(--space-6);
+}
+
+/* ----------------------------------------------------------------------------
+   P14 — Home aesthetic refresh applied to the real template (2026-05-27).
+   - Headline switches from "OrthoGather" wordmark to a verb-pair:
+     "Compare proteomes. Test enrichment." in Fraunces serif (more editorial).
+   - Subtagline becomes italic + secondary color (literally a subtitle).
+   - The "Built on" deps badges row is replaced with a 2-cell stats strip
+     showing real catalogue sizes (UniProt + GO).
+   - Hero top-padding is collapsed so the visual content sits right under
+     the header bar instead of floating in white space.
+   ---------------------------------------------------------------------------- */
+
+.home-hero {
+  padding-top: var(--space-4) !important;
+  padding-bottom: var(--space-4) !important;   /* was --space-12 — tightens the gap above the bento */
+}
+/* Eyebrow "Pick your starting point" sits closer to the hero now */
+.bento-section-eyebrow { margin-top: 0 !important; margin-bottom: var(--space-3) !important; }
+
+.home-hero .home-headline {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  /* Scales with the viewport: small on laptops, larger on wide monitors.
+     The hero text column doesn't grow as fast as the viewport (the 248px sidebar
+     is fixed), so a plain vw overshoots and wraps on ~1100px screens — the
+     calc() slope is tuned to keep "Compare proteomes." on one line throughout. */
+  font-size: clamp(28px, calc(2.7vw + 2px), 54px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-3);
+  color: var(--color-text);
+  /* Two full-size lines: "Compare proteomes." / "Test enrichment.",
+     verb roman + noun italic on the SAME line. */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.home-headline .headline-line { display: block; }
+.home-headline .headline-noun {
+  font-weight: 600;
+}
+.home-headline .headline-noun.accent { color: var(--color-primary); }
+
+.tagline.tagline-italic {
+  font-style: italic;
+  color: var(--color-text-secondary, #4b5563);
+  max-width: 540px;
+}
+
+.home-stats {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+  max-width: 560px;
+}
+@media (max-width: 480px) {
+  .home-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.home-stat { display: flex; flex-direction: column; gap: 2px; }
+.home-stat-num {
+  font-size: clamp(20px, 1.8vw, 24px);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.home-stat-label {
+  font-size: 11px;
+  color: var(--color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}

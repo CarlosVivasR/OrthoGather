@@ -1,0 +1,298 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 440"
+     font-family="Inter, system-ui, -apple-system, sans-serif">
+
+  <!-- ============================================================
+       SECTION 1 — DATA INPUT
+       y range: 6 — 100
+       ============================================================ -->
+  <text x="270" y="18" text-anchor="middle"
+        font-size="10" font-weight="800" letter-spacing="0.1em" fill="#6b7280">
+    DATA INPUT
+  </text>
+
+  <!-- Three input boxes, each 150 wide x 72 tall, centred along the x-axis -->
+  <!-- Positions: 20, 195, 370 — equal 25 px gaps -->
+
+  <!-- A · External Upload (amber, matches our home theme-warm) -->
+  <g transform="translate(20, 30)">
+    <rect x="0" y="0" width="150" height="72" rx="10" fill="#fef3c7" stroke="#78350f" stroke-width="1.6"/>
+    <!-- icon: small ZIP file -->
+    <g transform="translate(12, 14)">
+      <rect x="0"  y="0" width="22" height="28" rx="2"   fill="#fef3c7" stroke="#78350f" stroke-width="1.4"/>
+      <path d="M16 0 L16 6 L22 6"                          fill="none"   stroke="#78350f" stroke-width="1.4"/>
+      <rect x="5"  y="6"  width="6" height="3" rx="0.6" fill="#92400e"/>
+      <rect x="11" y="10" width="6" height="3" rx="0.6" fill="#92400e"/>
+      <rect x="5"  y="14" width="6" height="3" rx="0.6" fill="#92400e"/>
+      <rect x="11" y="18" width="6" height="3" rx="0.6" fill="#92400e"/>
+    </g>
+    <!-- text -->
+    <text x="44" y="28" font-size="11" font-weight="700" fill="#78350f">External</text>
+    <text x="44" y="42" font-size="11" font-weight="700" fill="#78350f">Upload</text>
+    <text x="44" y="58" font-size="8"  fill="#92400e">Upload OrthoFinder ZIP</text>
+  </g>
+
+  <!-- B · New Analysis (navy primary, matches home theme-primary) -->
+  <g transform="translate(195, 30)">
+    <rect x="0" y="0" width="150" height="72" rx="10" fill="#e6ecf2" stroke="#1e40af" stroke-width="1.6"/>
+    <!-- icon: magnifier -->
+    <g transform="translate(15, 18)">
+      <circle cx="11" cy="11" r="9"  fill="#ffffff" stroke="#1e40af" stroke-width="1.8"/>
+      <line   x1="17.5" y1="17.5" x2="24" y2="24" stroke="#1e40af" stroke-width="2.4" stroke-linecap="round"/>
+      <!-- tiny bars inside lens -->
+      <rect x="6"  y="10" width="2" height="6" fill="#1e40af"/>
+      <rect x="9"  y="8"  width="2" height="8" fill="#1e40af" opacity="0.8"/>
+      <rect x="12" y="6"  width="2" height="10" fill="#1e40af" opacity="0.6"/>
+      <rect x="15" y="9"  width="2" height="7" fill="#1e40af" opacity="0.45"/>
+    </g>
+    <text x="55" y="28" font-size="11" font-weight="700" fill="#1e40af">New</text>
+    <text x="55" y="42" font-size="11" font-weight="700" fill="#1e40af">Analysis</text>
+    <text x="55" y="58" font-size="8"  fill="#1e40af">Pick + Run OrthoFinder</text>
+  </g>
+
+  <!-- C · Preselected Dataset (teal, matches home theme-teal) -->
+  <g transform="translate(370, 30)">
+    <rect x="0" y="0" width="150" height="72" rx="10" fill="#cffafe" stroke="#0369a1" stroke-width="1.6"/>
+    <!-- icon: tiny tree -->
+    <g transform="translate(14, 14)" stroke="#0369a1" stroke-width="1.4" stroke-linecap="round" fill="none">
+      <path d="M2 22 L8 22 L8 8 L8 36 L14 8 L14 2 L24 2 M14 8 L14 14 L24 14 M14 8 L24 8 M8 36 L14 36 L14 30 L24 30 M14 36 L14 42 L24 42"/>
+    </g>
+    <g transform="translate(14, 14)" fill="#0369a1">
+      <circle cx="26" cy="2" r="2"/>
+      <circle cx="26" cy="8" r="2"/>
+      <circle cx="26" cy="14" r="2"/>
+      <circle cx="26" cy="30" r="2"/>
+      <circle cx="26" cy="36" r="2"/>
+      <circle cx="26" cy="42" r="2"/>
+    </g>
+    <text x="62" y="28" font-size="11" font-weight="700" fill="#0369a1">Preselected</text>
+    <text x="62" y="42" font-size="11" font-weight="700" fill="#0369a1">Dataset</text>
+    <text x="62" y="58" font-size="8"  fill="#0369a1">47 species ready to go</text>
+  </g>
+
+  <!-- ============================================================
+       SECTION 2 — CONVERGENCE ARROWS (3 inputs -> Orthogroups)
+       y range: 106 — 152
+       ============================================================ -->
+  <path d="M95 105 Q 95 130 270 152"  stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arr-gray)"/>
+  <path d="M270 105 L 270 152"        stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arr-gray)"/>
+  <path d="M445 105 Q 445 130 270 152" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arr-gray)"/>
+
+  <!-- ============================================================
+       SECTION 3 — ORTHOGROUPS FOLDER (central pivot)
+       y range: 160 — 210
+       ============================================================ -->
+  <g transform="translate(170, 160)">
+    <rect x="0" y="0" width="200" height="50" rx="10" fill="#1f2937"/>
+    <text x="100" y="22" text-anchor="middle"
+          font-size="12" font-weight="800" letter-spacing="0.08em" fill="#ffffff">
+      ORTHOGROUPS FOLDER
+    </text>
+    <text x="100" y="40" text-anchor="middle"
+          font-size="9" fill="#9ca3af"
+          font-family="JetBrains Mono, ui-monospace, monospace">
+      Orthogroups.tsv · GeneCount.tsv
+    </text>
+  </g>
+
+  <!-- ============================================================
+       SECTION 4 — BIFURCATION (Orthogroups -> 2 modules)
+       y range: 215 — 250
+       ============================================================ -->
+  <path d="M225 210 Q 200 230 145 250" stroke="#be123c" stroke-width="2.2" fill="none" marker-end="url(#arr-red)"/>
+  <path d="M315 210 Q 340 230 395 250" stroke="#a16207" stroke-width="2.2" fill="none" marker-end="url(#arr-amber)"/>
+
+  <!-- ============================================================
+       SECTION 5 — MODULES (2 cards side-by-side)
+       y range: 255 — 410
+       ============================================================ -->
+
+  <!-- LEFT MODULE — Comparative Orthogroups -->
+  <g transform="translate(20, 255)">
+    <rect x="0" y="0" width="245" height="170" rx="10" fill="#fee2e2" stroke="#be123c" stroke-width="1.5"/>
+    <text x="122" y="20" text-anchor="middle"
+          font-size="9.5" font-weight="800" letter-spacing="0.06em" fill="#9f1239">
+      COMPARATIVE ORTHOGROUPS
+    </text>
+
+    <!-- ─── Mini UpSet plot ─── -->
+    <!--
+      Layout (within this module's 245×170):
+        Left gutter (species labels): x 8 — 62
+        Plot area:                   x 70 — 230 (160 wide)
+        6 column centres at x = 84, 108, 132, 156, 180, 204 (24 px apart)
+        Bar width = 14, bar from col-7 to col+7
+
+        Bar plot area:    y 36 — 96  (60 tall, baseline at y=96)
+        Dot matrix rows:  y 110, 124, 138 (14 px gap)
+        Caption:          y 158
+    -->
+
+    <!-- Bars (heights scaled to fit, descending order) -->
+    <g>
+      <!-- bar 1 (largest): 60 tall, all 3 species -->
+      <rect x="77"  y="36" width="14" height="60" rx="1.5" fill="#1f2937"/>
+      <rect x="101" y="48" width="14" height="48" rx="1.5" fill="#1f2937" opacity="0.85"/>
+      <rect x="125" y="68" width="14" height="28" rx="1.5" fill="#1f2937" opacity="0.7"/>
+      <rect x="149" y="78" width="14" height="18" rx="1.5" fill="#475569"/>
+      <rect x="173" y="82" width="14" height="14" rx="1.5" fill="#475569" opacity="0.75"/>
+      <rect x="197" y="86" width="14" height="10" rx="1.5" fill="#94a3b8"/>
+    </g>
+
+    <!-- Numbers above each bar -->
+    <g text-anchor="middle" font-size="8" font-weight="700">
+      <text x="84"  y="32" fill="#1f2937">1848</text>
+      <text x="108" y="44" fill="#1f2937">874</text>
+      <text x="132" y="64" fill="#374151">145</text>
+      <text x="156" y="74" fill="#475569">82</text>
+      <text x="180" y="78" fill="#475569">68</text>
+      <text x="204" y="82" fill="#94a3b8">55</text>
+    </g>
+
+    <!-- Y-axis micro-label -->
+    <text x="70" y="100" text-anchor="end" font-size="6.5" fill="#9ca3af" font-style="italic">
+      Intersection size
+    </text>
+
+    <!-- Separator line between bars and dot matrix -->
+    <line x1="70" y1="103" x2="220" y2="103" stroke="#fca5a5" stroke-width="0.8"/>
+
+    <!-- Species labels (italic, left-aligned in gutter) -->
+    <g text-anchor="end" font-size="8" font-style="italic" fill="#374151">
+      <text x="64" y="113">S. enterica</text>
+      <text x="64" y="127">E. coli</text>
+      <text x="64" y="141">S. aureus</text>
+    </g>
+
+    <!-- Dot matrix (3 rows × 6 columns, aligned with bar centres) -->
+    <g>
+      <!-- Column 1 (84): all 3 species filled -->
+      <circle cx="84" cy="110" r="3.2" fill="#1f2937"/>
+      <circle cx="84" cy="124" r="3.2" fill="#1f2937"/>
+      <circle cx="84" cy="138" r="3.2" fill="#1f2937"/>
+      <line   x1="84" y1="110" x2="84" y2="138" stroke="#1f2937" stroke-width="2"/>
+
+      <!-- Column 2 (108): S. enterica + E. coli -->
+      <circle cx="108" cy="110" r="3.2" fill="#1f2937"/>
+      <circle cx="108" cy="124" r="3.2" fill="#1f2937"/>
+      <circle cx="108" cy="138" r="3.2" fill="#d1d5db"/>
+      <line   x1="108" y1="110" x2="108" y2="124" stroke="#1f2937" stroke-width="2"/>
+
+      <!-- Column 3 (132): E. coli + S. aureus -->
+      <circle cx="132" cy="110" r="3.2" fill="#d1d5db"/>
+      <circle cx="132" cy="124" r="3.2" fill="#374151"/>
+      <circle cx="132" cy="138" r="3.2" fill="#374151"/>
+      <line   x1="132" y1="124" x2="132" y2="138" stroke="#374151" stroke-width="2"/>
+
+      <!-- Column 4 (156): only S. enterica -->
+      <circle cx="156" cy="110" r="3.2" fill="#475569"/>
+      <circle cx="156" cy="124" r="3.2" fill="#d1d5db"/>
+      <circle cx="156" cy="138" r="3.2" fill="#d1d5db"/>
+
+      <!-- Column 5 (180): only E. coli -->
+      <circle cx="180" cy="110" r="3.2" fill="#d1d5db"/>
+      <circle cx="180" cy="124" r="3.2" fill="#475569"/>
+      <circle cx="180" cy="138" r="3.2" fill="#d1d5db"/>
+
+      <!-- Column 6 (204): only S. aureus -->
+      <circle cx="204" cy="110" r="3.2" fill="#d1d5db"/>
+      <circle cx="204" cy="124" r="3.2" fill="#d1d5db"/>
+      <circle cx="204" cy="138" r="3.2" fill="#94a3b8"/>
+    </g>
+
+    <!-- Caption -->
+    <text x="122" y="160" text-anchor="middle" font-size="8" fill="#9f1239" font-weight="600">
+      UpSet plot of shared orthogroups
+    </text>
+  </g>
+
+  <!-- RIGHT MODULE — GO Enrichment -->
+  <g transform="translate(275, 255)">
+    <rect x="0" y="0" width="245" height="170" rx="10" fill="#fef3c7" stroke="#a16207" stroke-width="1.5"/>
+    <text x="122" y="20" text-anchor="middle"
+          font-size="9.5" font-weight="800" letter-spacing="0.06em" fill="#854d0e">
+      GENE ONTOLOGY ENRICHMENT
+    </text>
+
+    <!--
+      Layout:
+        Categories stacked vertically with proper spacing.
+        Each category: a label on the left + 3 bars decreasing in length.
+
+        BP starts at y=34
+        CC starts at y=72
+        MF starts at y=110
+    -->
+
+    <!-- BP block -->
+    <g transform="translate(14, 34)">
+      <text x="0" y="11" font-size="9" font-weight="800" fill="#1d4ed8">BP</text>
+      <text x="0" y="22" font-size="6.5" fill="#1d4ed8" opacity="0.7">Biological Process</text>
+      <rect x="34" y="2"  width="92" height="4" rx="1" fill="#1d4ed8"/>
+      <rect x="34" y="9"  width="72" height="4" rx="1" fill="#1d4ed8" opacity="0.8"/>
+      <rect x="34" y="16" width="48" height="4" rx="1" fill="#1d4ed8" opacity="0.6"/>
+    </g>
+
+    <!-- CC block -->
+    <g transform="translate(14, 72)">
+      <text x="0" y="11" font-size="9" font-weight="800" fill="#15803d">CC</text>
+      <text x="0" y="22" font-size="6.5" fill="#15803d" opacity="0.7">Cellular Component</text>
+      <rect x="34" y="2"  width="80" height="4" rx="1" fill="#15803d"/>
+      <rect x="34" y="9"  width="62" height="4" rx="1" fill="#15803d" opacity="0.8"/>
+      <rect x="34" y="16" width="40" height="4" rx="1" fill="#15803d" opacity="0.6"/>
+    </g>
+
+    <!-- MF block -->
+    <g transform="translate(14, 110)">
+      <text x="0" y="11" font-size="9" font-weight="800" fill="#b91c1c">MF</text>
+      <text x="0" y="22" font-size="6.5" fill="#b91c1c" opacity="0.7">Molecular Function</text>
+      <rect x="34" y="2"  width="96" height="4" rx="1" fill="#b91c1c"/>
+      <rect x="34" y="9"  width="74" height="4" rx="1" fill="#b91c1c" opacity="0.8"/>
+      <rect x="34" y="16" width="50" height="4" rx="1" fill="#b91c1c" opacity="0.6"/>
+    </g>
+
+    <!-- X-axis -log10(FDR) -->
+    <line x1="48" y1="148" x2="160" y2="148" stroke="#a16207" stroke-width="0.8"/>
+    <text x="104" y="158" text-anchor="middle" font-size="7" fill="#854d0e" font-style="italic">
+      −log₁₀(FDR)
+    </text>
+
+    <!-- Mini GO hierarchy on the right side -->
+    <g transform="translate(175, 56)">
+      <g stroke="#0c9488" stroke-width="1.1" fill="none">
+        <line x1="24" y1="6"  x2="6"  y2="22"/>
+        <line x1="24" y1="6"  x2="24" y2="22"/>
+        <line x1="24" y1="6"  x2="42" y2="22"/>
+        <line x1="6"  y1="22" x2="2"  y2="40"/>
+        <line x1="6"  y1="22" x2="10" y2="40"/>
+        <line x1="24" y1="22" x2="20" y2="40"/>
+        <line x1="24" y1="22" x2="28" y2="40"/>
+        <line x1="42" y1="22" x2="38" y2="40"/>
+        <line x1="42" y1="22" x2="46" y2="40"/>
+      </g>
+      <circle cx="24" cy="6"  r="3.4" fill="#115e59"/>
+      <circle cx="6"  cy="22" r="2.8" fill="#0f766e"/>
+      <circle cx="24" cy="22" r="2.8" fill="#0f766e"/>
+      <circle cx="42" cy="22" r="2.8" fill="#0f766e"/>
+      <circle cx="2"  cy="40" r="2.2" fill="#14b8a6"/>
+      <circle cx="10" cy="40" r="2.2" fill="#14b8a6"/>
+      <circle cx="20" cy="40" r="2.2" fill="#14b8a6"/>
+      <circle cx="28" cy="40" r="2.2" fill="#14b8a6"/>
+      <circle cx="38" cy="40" r="2.2" fill="#14b8a6"/>
+      <circle cx="46" cy="40" r="2.2" fill="#14b8a6"/>
+      <text x="24" y="58" text-anchor="middle" font-size="7" fill="#115e59" font-weight="700">GO DAG</text>
+    </g>
+  </g>
+
+  <!-- Arrow definitions -->
+  <defs>
+    <marker id="arr-gray"  markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arr-red"   markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" fill="#be123c"/>
+    </marker>
+    <marker id="arr-amber" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0 0 L7 3.5 L0 7 z" fill="#a16207"/>
+    </marker>
+  </defs>
+</svg>

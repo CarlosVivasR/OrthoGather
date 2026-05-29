@@ -1,0 +1,64 @@
+{# Reproducibility / provenance strip. Shows which proteome catalogue snapshot
+   and GOA download produced this analysis, plus the OrthoGather version. Shared
+   by the results pages; rendered at the very bottom of the content. Data comes
+   from the build_provenance() context processor. #}
+{% set p = provenance() %}
+<section class="provenance" aria-label="Analysis provenance">
+  <h3 class="provenance-title">
+    <i class="fa-solid fa-fingerprint" aria-hidden="true"></i> Data provenance
+  </h3>
+  <p class="provenance-lead">
+    Record these versions to reproduce this analysis — the underlying databases
+    are updated over time.
+  </p>
+  <dl class="provenance-grid">
+    <div class="provenance-item">
+      <dt>Proteome data (UniProt)</dt>
+      <dd>
+        {% if p.proteome and p.proteome.release %}release
+          <strong>{{ p.proteome.release if p.proteome.release is string else p.proteome.release | join(', ') }}</strong>
+          {%- if p.proteome.release_date %} · {{ p.proteome.release_date if p.proteome.release_date is string else p.proteome.release_date | join(', ') }}{% endif %}
+        {%- else %}<span class="provenance-muted">externally supplied sequences</span>{% endif %}
+      </dd>
+    </div>
+    <div class="provenance-item">
+      <dt>GOA annotations (EBI)</dt>
+      <dd>
+        {% if p.goa %}
+          {%- if p.goa.data_generated %}generated <strong>{{ p.goa.data_generated if p.goa.data_generated is string else p.goa.data_generated | join(', ') }}</strong> · {% endif -%}
+          downloaded {{ p.goa.downloaded_at[:10] }} · {{ p.goa.n_files }} files
+        {%- else %}<span class="provenance-muted">not downloaded in this analysis</span>{% endif %}
+      </dd>
+    </div>
+    <div class="provenance-item">
+      <dt>Proteome catalogue</dt>
+      <dd>
+        version <strong>{{ p.catalogue.version or 'unknown' }}</strong>{% if p.catalogue.is_fallback %} (bundled){% endif %}
+        {%- if p.catalogue.downloaded_at %} · {{ p.catalogue.downloaded_at[:10] }}{% endif %}
+        {%- if p.catalogue.proteome_count %} · {{ '{:,}'.format(p.catalogue.proteome_count) }} proteomes{% endif %}
+      </dd>
+    </div>
+    <div class="provenance-item">
+      <dt>GO ontology</dt>
+      <dd>
+        {% if p.ontology and p.ontology.data_version %}{{ p.ontology.data_version }}
+        {%- else %}<span class="provenance-muted">unknown</span>{% endif %}
+      </dd>
+    </div>
+    <div class="provenance-item">
+      <dt>OrthoFinder</dt>
+      <dd>
+        {% if p.orthofinder_version %}v{{ p.orthofinder_version }}
+        {%- else %}<span class="provenance-muted">externally supplied orthogroups</span>{% endif %}
+      </dd>
+    </div>
+    <div class="provenance-item">
+      <dt>OrthoGather</dt>
+      <dd>v{{ p.orthogather_version }} · DOI <a href="https://doi.org/10.64898/2026.01.30.702851" target="_blank" rel="noopener">10.64898/2026.01.30.702851</a></dd>
+    </div>
+    <div class="provenance-item">
+      <dt>Viewed</dt>
+      <dd>{{ p.generated_at[:10] }}</dd>
+    </div>
+  </dl>
+</section>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ error_code|default("Error") }} · OrthoGather</title>
+
+  <link rel="icon" href="{{ url_for('static', filename='images/1-a668dcaa1.ico') }}" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}" />
+
+  <style>
+    .error-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-10) var(--space-6) var(--space-12);
+    }
+    .error-card {
+      max-width: 640px;
+      width: 100%;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-left: 4px solid var(--color-error, #c0392b);
+      border-radius: var(--radius-lg);
+      /* Generous padding so neither the icon nor the buttons feel cramped
+         against the card edges (vertical first, then horizontal). */
+      padding: var(--space-8) var(--space-9, 56px);
+      box-shadow: var(--shadow-sm);
+    }
+    /* Tighter padding on narrow viewports so the card still breathes. */
+    @media (max-width: 600px) {
+      .error-card {
+        padding: var(--space-6) var(--space-5);
+      }
+    }
+    .error-card.is-warning   { border-left-color: var(--color-warning, #ea580c); }
+    .error-card.is-not-found { border-left-color: var(--color-text-muted, #6b7280); }
+
+    .error-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--color-error-bg, #fee2e2);
+      color: var(--color-error, #c0392b);
+      font-size: 24px;
+      margin-bottom: var(--space-4);
+    }
+    .error-card.is-warning .error-icon {
+      background: var(--color-warning-bg, #fff7ed);
+      color: var(--color-warning, #ea580c);
+    }
+    .error-card.is-not-found .error-icon {
+      background: var(--color-surface-alt);
+      color: var(--color-text-muted);
+    }
+    .error-code {
+      font-family: var(--font-mono);
+      font-size: var(--text-caption);
+      letter-spacing: var(--tracking-wide);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-2);
+    }
+    .error-title {
+      font-size: var(--text-h2);
+      font-weight: 600;
+      color: var(--color-text);
+      margin: 0 0 var(--space-2);
+      letter-spacing: var(--tracking-tight);
+    }
+    .error-hint {
+      font-size: var(--text-body);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin: 0 0 var(--space-5);
+    }
+    .error-detail {
+      background: var(--color-surface-alt);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono);
+      font-size: var(--text-body-sm);
+      color: var(--color-text-secondary);
+      margin: 0 0 var(--space-5);
+      word-break: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .error-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Global navigation shell: dark sidebar + content. -->
+  <div class="app-shell">
+  {% include 'partials/_sidebar.html' %}
+
+  <main class="error-main">
+    <div class="error-card{% if severity == 'warning' %} is-warning{% endif %}{% if category == 'not-found' %} is-not-found{% endif %}">
+      <div class="error-icon" aria-hidden="true">
+        {% if category == 'not-found' %}
+          <i class="fa-solid fa-compass"></i>
+        {% elif severity == 'warning' %}
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        {% else %}
+          <i class="fa-solid fa-circle-exclamation"></i>
+        {% endif %}
+      </div>
+
+      <p class="error-code">{{ error_code|default("ERR_UNEXPECTED") }} · {{ category|default("system") }}</p>
+      <h1 class="error-title">{{ message }}</h1>
+      <p class="error-hint">{{ hint }}</p>
+
+      {% if detail %}
+        <pre class="error-detail">{{ detail }}</pre>
+      {% endif %}
+
+      <div class="error-actions">
+        <a href="/" class="btn btn-primary"><i class="fa-solid fa-house"></i> Back to home</a>
+        {% if category == 'not-found' %}
+          <a href="/history" class="btn btn-secondary"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+        {% endif %}
+        <a href="https://github.com/CarlosVivasR/OrthoGather/issues/new?title=%5B{{ error_code|default('ERR') }}%5D%20"
+           target="_blank" rel="noopener" class="btn btn-secondary">
+          <i class="fa-solid fa-bug"></i> Report this
+        </a>
+      </div>
+    </div>
+  </main>
+
+  </div><!-- /.app-shell -->
+</body>
+</html>

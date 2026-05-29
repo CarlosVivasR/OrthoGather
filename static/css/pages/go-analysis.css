@@ -1,0 +1,1173 @@
+/* ============================================================================
+   OrthoGather — Gene Ontology analysis page (resultado_goa.html)
+   ============================================================================ */
+
+.goa-main {
+  flex: 1;
+  padding: var(--space-10) 0 var(--space-12);
+}
+
+.goa-intro {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-6);
+}
+
+.goa-intro .breadcrumb {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.goa-intro .breadcrumb a { color: var(--color-text-secondary); }
+.goa-intro .breadcrumb a:hover { color: var(--color-primary); }
+.goa-intro .breadcrumb i { font-size: 10px; opacity: 0.5; }
+
+.goa-intro h1 {
+  font-size: var(--text-display);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+
+.goa-intro .lead {
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  max-width: 720px;
+}
+
+/* Stepper */
+.goa-stepper {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-6);
+  padding: 0 var(--space-6);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.goa-stepper .step {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 14px 6px 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.goa-stepper .step .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.goa-stepper .step.is-active {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.goa-stepper .step.is-active .num {
+  background: rgba(255,255,255,0.2);
+  color: var(--color-text-inverse);
+}
+
+.goa-stepper .step-divider {
+  color: var(--color-text-muted);
+  font-size: 10px;
+  align-self: center;
+}
+
+/* Card containers */
+.goa-card {
+  max-width: var(--width-content);
+  margin: 0 auto var(--space-5);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+}
+
+.goa-card h1 {
+  font-size: var(--text-h1);
+  margin-bottom: var(--space-1);
+}
+
+.goa-card h2 {
+  font-size: var(--text-h2);
+  margin-bottom: var(--space-3);
+}
+
+.goa-card h3 {
+  font-size: var(--text-h3);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.goa-card .section-helper {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  margin-bottom: var(--space-5);
+}
+
+/* Species match table */
+.table-container {
+  /* Cap the species-match table's height so a 47-species dataset doesn't
+     stretch the whole page. The user scrolls inside the box instead. */
+  max-height: 480px;
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+}
+
+/* Keep the column headers visible while the user scrolls through species. */
+.table-container #species-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  z-index: 1;
+  /* The original padding/border lives on the unscoped rule below — adding a
+     bottom box-shadow here gives the sticky header a subtle separator that
+     persists even when overlapping the first data row. */
+  box-shadow: inset 0 -1px 0 var(--color-border);
+}
+
+#species-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+}
+
+#species-table thead th {
+  text-align: left;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+#species-table tbody td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+#species-table tbody tr:last-child td { border-bottom: none; }
+#species-table tbody tr:hover { background-color: var(--color-surface-alt); }
+
+#species-table .col-species { width: 40%; }
+#species-table .col-match { width: 35%; }
+#species-table .col-goa { width: 10%; text-align: center; }
+#species-table .col-fix { width: 15%; }
+
+#species-table .ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+#species-table .fail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-error);
+  font-size: var(--text-body-sm);
+}
+
+#species-table .ok.icon, #species-table .fail.icon {
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: var(--radius-full);
+}
+
+#species-table .ok.icon { background: var(--color-success-bg); color: var(--color-success); }
+#species-table .fail.icon { background: var(--color-error-bg); color: var(--color-error); }
+
+.hover-box {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.hover-box .name-ellipsis {
+  display: inline-block;
+  max-width: 320px;
+  vertical-align: bottom;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hover-box .name-tooltip {
+  position: fixed;
+  background: var(--color-surface-dark);
+  color: var(--color-text-inverse);
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  z-index: 9999;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+  max-width: 480px;
+  white-space: normal;
+}
+
+.taxon-input {
+  width: 130px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  margin-right: 6px;
+}
+
+.fix-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--easing-standard);
+}
+
+.fix-btn:hover { background-color: var(--color-primary-soft); border-color: var(--color-primary); color: var(--color-primary); }
+
+/* Tooltip in table header */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: var(--color-surface-dark);
+  color: var(--color-text-inverse);
+  text-align: center;
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+  white-space: nowrap;
+  font-size: var(--text-body-sm);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
+/* Form-style inputs in GO sections */
+.goa-card textarea {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  resize: vertical;
+  min-height: 96px;
+  margin-bottom: var(--space-3);
+}
+
+.goa-card textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+.goa-card label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text);
+  margin-right: var(--space-4);
+  cursor: pointer;
+  user-select: none;
+}
+
+.goa-card label input[type="checkbox"] {
+  width: 16px; height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.goa-card .inline-msg {
+  font-size: var(--text-body-sm);
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.goa-card .inline-msg.is-success { color: var(--color-success); }
+.goa-card .inline-msg.is-error { color: var(--color-error); }
+
+/* Centered button row */
+.goa-card .boton-centrado {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin: var(--space-4) 0;
+}
+
+/* ============================================================================
+   Annotation distribution chart (Point 10) — Plotly 4-panel layout that
+   replaces the legacy matplotlib/seaborn PNG.
+   ============================================================================ */
+#go-distribution-container {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.go-dist-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-3);
+}
+.go-dist-stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.go-dist-stat-label {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+.go-dist-stat-value {
+  font-size: var(--text-h4, 1.1rem);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.go-dist-stat-sub {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.go-distribution-plot {
+  background: var(--color-surface);
+  /* Explicit height: Plotly runs with responsive:true, which sizes the chart
+     to its container — so the container must reserve the height itself. Without
+     it the div collapses to ~0 and the 340px chart overflows onto the footer.
+     Matches layout.height (340) in renderAnnotationDistribution. */
+  height: 340px;
+}
+
+/* GO sub-blocks */
+#background-block {
+  transition: opacity var(--duration) var(--easing-standard);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+#background-block.is-disabled { opacity: 0.5; pointer-events: none; }
+
+/* GO figure container */
+#go-figure-container {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+#go-figure-container img {
+  max-width: 90%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+#go-figure-container a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-3) var(--space-3) 0 0;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+}
+
+#go-figure-container a:hover { background-color: var(--color-primary-soft); border-color: var(--color-primary); }
+
+/* Figure parameters */
+#figure-parameters-container {
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+#figure-parameters-container input[type="number"] {
+  display: block;
+  margin: 6px auto 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: var(--text-body);
+  width: 100px;
+}
+
+#figure-parameters-container label {
+  display: inline-block;
+  margin-right: 0;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.hidden { display: none !important; }
+[hidden] { display: none !important; }
+
+/* Helper text under the page heading */
+.goa-intro .lead-aux {
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  margin-top: var(--space-2);
+}
+.goa-intro .lead-aux a { color: var(--color-primary); }
+.goa-intro .lead-aux a:hover { text-decoration: underline; }
+
+/* Centered action row (replaces legacy .boton-centrado) */
+.goa-action-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin: var(--space-4) 0;
+}
+
+.section-divider {
+  margin: var(--space-8) 0;
+  border: none;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Inline option labels (checkboxes inline with input) */
+.goa-inline-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+/* ============================================================================
+   Phase E — Explainer cards above foreground / background
+   ============================================================================ */
+.goa-explainer {
+  background: var(--color-primary-soft, #eef4ff);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  margin: var(--space-5) 0 var(--space-3);
+}
+.goa-explainer-title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.goa-explainer p {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2);
+  line-height: 1.55;
+}
+.goa-explainer p:last-child { margin-bottom: 0; }
+.goa-explainer code {
+  background: var(--color-surface);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  border: 1px solid var(--color-border);
+}
+.goa-explainer-tip {
+  font-size: var(--text-body-sm);
+  color: var(--color-text);
+}
+
+/* ============================================================================
+   Phase D — Analysis settings card
+   ============================================================================ */
+.goa-settings {
+  margin: var(--space-6) 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-alt);
+}
+.goa-settings > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: var(--radius-lg);
+}
+.goa-settings > summary::-webkit-details-marker { display: none; }
+.goa-settings-title {
+  font-size: var(--text-h3);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+}
+.goa-settings-sub {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.goa-settings[open] > summary { border-bottom: 1px solid var(--color-border); }
+
+.goa-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+.goa-setting {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--color-surface);
+  position: relative;
+}
+.goa-setting legend {
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  padding: 0 var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.goa-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+.goa-radio input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--color-primary);
+}
+.goa-radio strong { color: var(--color-text); }
+
+/* Help "?" button + popover (reused from Protein Analysis) */
+.figure-help-btn {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-left: 4px;
+}
+.figure-help-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.figure-help-popover {
+  position: absolute;
+  top: calc(100% - 6px);
+  right: var(--space-4);
+  z-index: 50;
+  max-width: 320px;
+  background: var(--color-surface-dark, #1f2937);
+  color: var(--color-text-inverse, #fff);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  box-shadow: var(--shadow-lg);
+}
+.figure-help-popover em { font-style: italic; }
+.figure-help-popover strong { color: var(--color-text-inverse, #fff); }
+
+/* ============================================================================
+   Phase C — Interactive results: Plotly chart + sortable table
+   ============================================================================ */
+#go-results-container {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-lg);
+}
+
+/* Annotation-coverage banner */
+.go-coverage-banner {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin: 0 0 var(--space-4);
+}
+.go-coverage-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+.go-coverage-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+}
+.go-coverage-label {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+.go-coverage-value {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+.go-coverage-unit {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.go-coverage-note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.go-plot-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.go-plot-tabs {
+  display: inline-flex;
+  gap: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+}
+.go-ns-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+.go-ns-btn:hover { background: var(--color-surface-alt); color: var(--color-text); }
+.go-ns-btn.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+}
+.go-plot-actions {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.go-plot {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  min-height: 360px;
+}
+
+/* Toolbar above the table */
+.go-table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin: var(--space-4) 0 var(--space-3);
+}
+.go-table-toolbar input[type="search"] {
+  flex: 1 1 220px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  background: var(--color-surface);
+}
+.go-table-toolbar input[type="search"]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+.go-chip-filters {
+  display: inline-flex;
+  gap: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+}
+.go-chip {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.go-chip.is-active {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: 600;
+}
+.go-range-label {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.go-range-label input[type="number"] {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+}
+.go-table-export {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+/* Table */
+.go-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+#go-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-body-sm);
+}
+#go-table thead th {
+  text-align: left;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+#go-table thead th[data-sort]::after {
+  content: "";
+  margin-left: 6px;
+  opacity: 0.4;
+}
+#go-table thead th.is-sort-asc::after  { content: "▲"; opacity: 0.9; }
+#go-table thead th.is-sort-desc::after { content: "▼"; opacity: 0.9; }
+#go-table tbody td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+#go-table tbody tr:last-child td { border-bottom: none; }
+#go-table tbody tr:hover { background: var(--color-surface-alt); }
+#go-table td.num, #go-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+#go-table a { color: var(--color-primary); }
+#go-table a:hover { text-decoration: underline; }
+
+.go-table-empty {
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-sm);
+  margin: 0;
+}
+
+/* Namespace pill */
+.go-ns-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--ns-color, #888);
+}
+
+/* Evidence chips inside table */
+.go-ev-cell {
+  max-width: 320px;
+}
+.go-ev-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  margin: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-text);
+}
+.go-ev-chip > span {
+  font-weight: 700;
+}
+
+/* Tier coloring. Mirrors backend EVIDENCE_PRESETS:
+   experimental  = green   (strongest)
+   curated       = blue    (PAINT IBA, author statement, curator)
+   computational = gray    (IEA, ISS, sequence similarity) */
+.go-ev-chip.is-experimental {
+  background: #e6f7ec;
+  border-color: #34a853;
+  color: #16653a;
+}
+.go-ev-chip.is-experimental > span { color: #0f5132; }
+
+.go-ev-chip.is-curated {
+  background: #e7f1ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+.go-ev-chip.is-curated > span { color: #1e3a8a; }
+
+.go-ev-chip.is-computational {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #4b5563;
+}
+.go-ev-chip.is-computational > span { color: #374151; }
+
+.go-no-ev { color: var(--color-text-muted); font-style: italic; }
+
+/* Evidence-tier legend sits between the chart and the table */
+.go-ev-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.go-ev-legend-label {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Chart "Top N" selector + truncation note */
+.go-plot-limit-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin-right: var(--space-2);
+}
+.go-plot-limit-label select {
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+.go-plot-truncation {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Re-run bar — sits right under the Plotly chart, so the user can tune the
+   thresholds without scrolling to the bottom of the page. */
+.goa-rerun-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-end;
+  justify-content: space-between;
+  margin: var(--space-4) 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.goa-rerun-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+.goa-rerun-bar .goa-param {
+  position: relative;
+}
+.goa-rerun-bar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+.goa-rerun-bar input[type="number"] {
+  display: block;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: var(--text-body-sm);
+  width: 96px;
+}
+.goa-rerun-bar .figure-help-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  transform: none;
+  right: auto;
+  margin-top: 6px;
+  max-width: 280px;
+  z-index: 60;
+  text-align: left;
+}
+.goa-rerun-bar #regenerate-figure-btn {
+  white-space: nowrap;
+}
+
+/* "Showing X of Y" counter line between toolbar and table */
+.go-table-meta {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-2);
+  padding: 0 4px;
+}
+.go-table-counter { font-variant-numeric: tabular-nums; }
+
+/* Page-size select inside the toolbar */
+.go-table-toolbar select {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+/* Column-header tooltip hint */
+.go-th-hint {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  margin-left: 3px;
+  vertical-align: 1px;
+}
+#go-table thead th:hover .go-th-hint { opacity: 1; color: var(--color-primary); }
+
+/* The fix input replaces .taxon-input */
+.fix-input {
+  width: 200px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  margin-right: 6px;
+}
+
+#status-message {
+  margin-top: var(--space-4);
+}
+
+/* Collapsed annotation-distribution chart (summary cards stay above, always
+   visible; the heavier histogram is one click away). */
+.go-dist-collapse {
+  margin-top: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.go-dist-collapse-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  font-size: var(--text-body-sm);
+  color: var(--color-text);
+}
+.go-dist-collapse-summary::-webkit-details-marker { display: none; }
+.go-dist-collapse-summary > .fa-chart-column { color: var(--color-primary); }
+.go-dist-collapse-label { flex: 1; }
+.go-dist-collapse-chev {
+  color: var(--color-text-muted, #94a3b8);
+  transition: transform var(--duration-fast, .15s) var(--easing-standard, ease);
+}
+.go-dist-collapse[open] .go-dist-collapse-chev { transform: rotate(180deg); }
+.go-dist-collapse > p { padding: var(--space-3) var(--space-4) 0; margin: 0; }
+.go-dist-collapse > #go-distribution-plot { padding: 0 var(--space-4); margin-bottom: var(--space-4); }
+
+/* Post-download notice: which species had no GOA file / failed on the network */
+.goa-download-notice {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.goa-download-notice[hidden] { display: none; }
+.goa-notice-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-text-muted, #94a3b8);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-alt, #f8fafc);
+}
+.goa-notice-block--warn { border-left-color: var(--color-warning, #d97706); }
+.goa-notice-head {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: var(--text-body-sm);
+}
+.goa-notice-head i { margin-right: 6px; color: var(--color-text-muted, #94a3b8); }
+.goa-notice-block--warn .goa-notice-head i { color: var(--color-warning, #d97706); }
+.goa-notice-list {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+.goa-notice-hint {
+  color: var(--color-text-muted, #94a3b8);
+  font-size: var(--text-caption, 12px);
+}
+
+/* Live GOA download progress: spinner + label + "k / total species" counter */
+.goa-download-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-surface-alt, #f8fafc);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+.goa-download-progress[hidden] { display: none; }
+.goa-download-progress-text {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.goa-download-progress-count {
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+#loading-spinner-analysis {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+#loading-spinner-analysis:not(.hidden) { display: flex; }
+
+#loading-spinner-analysis .spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: og-spin 0.9s linear infinite;
+}

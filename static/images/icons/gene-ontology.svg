@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 70" role="img" aria-label="Gene Ontology hierarchy with Biological Process, Cellular Component, and Molecular Function">
+  <!-- Branch lines (drawn first so nodes sit on top) -->
+  <g stroke="#115e59" stroke-width="1.9" fill="none" stroke-linecap="round">
+    <path d="M32 10 L14 26"/>
+    <path d="M32 10 L32 26"/>
+    <path d="M32 10 L50 26"/>
+    <path d="M14 26 L8 42"/>
+    <path d="M14 26 L20 42"/>
+    <path d="M32 26 L26 42"/>
+    <path d="M32 26 L38 42"/>
+    <path d="M50 26 L44 42"/>
+    <path d="M50 26 L56 42"/>
+  </g>
+
+  <!-- Root node -->
+  <circle cx="32" cy="10" r="4.8" fill="#115e59"/>
+
+  <!-- Mid level (BP / CC / MF) -->
+  <g fill="#0f766e">
+    <circle cx="14" cy="26" r="3.8"/>
+    <circle cx="32" cy="26" r="3.8"/>
+    <circle cx="50" cy="26" r="3.8"/>
+  </g>
+
+  <!-- Leaves -->
+  <g fill="#14b8a6">
+    <circle cx="8"  cy="42" r="2.8"/>
+    <circle cx="20" cy="42" r="2.8"/>
+    <circle cx="26" cy="42" r="2.8"/>
+    <circle cx="38" cy="42" r="2.8"/>
+    <circle cx="44" cy="42" r="2.8"/>
+    <circle cx="56" cy="42" r="2.8"/>
+  </g>
+
+  <!-- Big readable labels — fill: dark teal, font-weight: 800 for high legibility -->
+  <g font-family="Inter, system-ui, -apple-system, sans-serif"
+     font-size="9" font-weight="800"
+     fill="#115e59" text-anchor="middle">
+    <text x="14" y="60">BP</text>
+    <text x="32" y="60">CC</text>
+    <text x="50" y="60">MF</text>
+  </g>
+</svg>
