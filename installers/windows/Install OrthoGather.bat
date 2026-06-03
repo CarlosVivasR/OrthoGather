@@ -23,7 +23,7 @@ if %errorlevel% NEQ 0 (
   exit /b
 )
 
-set "OGZIP=https://github.com/CarlosVivasR/OrthoGather/archive/refs/heads/refactor/post-review.zip"
+set "OGZIP=https://github.com/CarlosVivasR/OrthoGather/archive/refs/heads/main.zip"
 
 echo ============================================================
 echo    OrthoGather installer for Windows

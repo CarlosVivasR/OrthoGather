@@ -14,7 +14,7 @@ set -euo pipefail
 
 # ---- Configuration ---------------------------------------------------------
 REPO="CarlosVivasR/OrthoGather"
-BRANCH="refactor/post-review"          # switch to a release tag when one exists
+BRANCH="main"          # switch to a release tag when one exists
 ENV_NAME="${ORTHOGATHER_ENV:-orthogather}"            # override for testing
 APP_DIR="${ORTHOGATHER_DIR:-$HOME/Applications/OrthoGather}"  # override for testing
 ZIP_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.zip"

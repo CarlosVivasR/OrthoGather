@@ -32,7 +32,7 @@ user never touches a terminal.
 ## Configuration
 
 Both scripts download the app from a GitHub URL set at the top of each file
-(`BRANCH` / `OGZIP`). Currently they point at `refactor/post-review`. **When you
+(`BRANCH` / `OGZIP`). Currently they point at `main`. **When you
 merge to `main` or cut a versioned app release, update that ref** so installers
 pull the right code.
 

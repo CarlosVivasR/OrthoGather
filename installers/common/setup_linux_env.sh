@@ -11,7 +11,7 @@
 set -euo pipefail
 
 REPO="CarlosVivasR/OrthoGather"
-BRANCH="refactor/post-review"
+BRANCH="main"
 ENV_NAME="orthogather"
 APP_DIR="$HOME/OrthoGather"
 ZIP_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.zip"
