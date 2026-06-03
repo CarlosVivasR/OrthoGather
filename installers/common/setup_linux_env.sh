@@ -104,16 +104,30 @@ rm -rf /tmp/orthogather.zip /tmp/og_extract
 ok "App at $APP_DIR"
 
 # ---- 4. Environment --------------------------------------------------------
-say "⚙️  Building the environment (Python 3.11 + OrthoFinder 2.5.5)…"
+say ""
+say "============================================================"
+say "⚙️   Building the environment (Python 3.11 + OrthoFinder + tools)"
+say "============================================================"
+say "   ⬇️  This downloads ~1–2 GB and takes about 5–15 minutes."
+say "   ⏳  It will sit silently at \"Solving environment…\" for a while —"
+say "       that is NORMAL, it is NOT frozen. Please leave this window open."
+say "============================================================"
+say ""
+# Heartbeat: print a line periodically so the long, quiet phase clearly looks alive.
+( while sleep 45; do printf "   ⏳ still installing, please wait… (%s)\n" "$(date +%H:%M:%S)"; done ) &
+HEARTBEAT=$!
+trap 'kill "$HEARTBEAT" 2>/dev/null' EXIT
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
   retry 3 "Environment setup" -- conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune \
-    || die "The environment didn't finish building after several tries — re-run the installer to resume."
+    || { kill "$HEARTBEAT" 2>/dev/null; die "The environment didn't finish building after several tries — re-run the installer to resume."; }
 else
   # -n overrides the name in environment.yml. An interrupted create leaves a partial
   # env that a re-run finishes via the update path above — so re-running always heals.
   retry 3 "Environment setup" -- conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" \
-    || die "The environment didn't finish building after several tries — re-run the installer to resume."
+    || { kill "$HEARTBEAT" 2>/dev/null; die "The environment didn't finish building after several tries — re-run the installer to resume."; }
 fi
+kill "$HEARTBEAT" 2>/dev/null || true; trap - EXIT
+ok "Environment built."
 conda activate "$ENV_NAME"
 orthofinder -h >/dev/null 2>&1 && ok "OrthoFinder detected." || warn "OrthoFinder check failed."
 

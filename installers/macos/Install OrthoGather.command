@@ -118,19 +118,31 @@ rm -rf "$tmp_zip" "$tmp_dir"
 ok "App installed at $APP_DIR"
 
 # ---- 4. Create / update the conda environment ------------------------------
-say "⚙️  Setting up the environment (Python 3.11 + OrthoFinder 2.5.5 + deps)."
-say "${DIM}    First time takes a few minutes — it downloads scientific packages.${RST}"
+say ""
+say "============================================================"
+say "⚙️   Setting up the environment (Python 3.11 + OrthoFinder + tools)"
+say "============================================================"
+say "   ⬇️  This downloads ~1–2 GB and takes about 5–15 minutes."
+say "   ⏳  It will sit silently at \"Solving environment…\" for a while —"
+say "       that's NORMAL, it is NOT frozen. Please leave this window open."
+say "============================================================"
+echo
+# Heartbeat so the long, quiet phase clearly looks alive.
+( while sleep 45; do printf "   ⏳ still installing, please wait… (%s)\n" "$(date +%H:%M:%S)"; done ) &
+HEARTBEAT=$!
+trap 'kill "$HEARTBEAT" 2>/dev/null' EXIT
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
   # Env exists (maybe half-built from an interrupted run) → finish/repair it.
   retry 3 "Environment setup" -- conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune \
-    || die "The environment didn't finish building after several tries (usually a network drop). Just run this installer again — it resumes from here."
+    || { kill "$HEARTBEAT" 2>/dev/null; die "The environment didn't finish building after several tries (usually a network drop). Just run this installer again — it resumes from here."; }
 else
   # -n overrides the name baked into environment.yml so $ENV_NAME is authoritative.
   # If creation is interrupted, a re-run finds the partial env and finishes it via
   # the update path above — so the install always heals by re-running.
   retry 3 "Environment setup" -- conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" \
-    || die "The environment didn't finish building after several tries (usually a network drop). Just run this installer again — it picks up where it left off."
+    || { kill "$HEARTBEAT" 2>/dev/null; die "The environment didn't finish building after several tries (usually a network drop). Just run this installer again — it picks up where it left off."; }
 fi
+kill "$HEARTBEAT" 2>/dev/null || true; trap - EXIT
 ok "Environment '$ENV_NAME' ready."
 
 # ---- 5. Launcher: a real OrthoGather.app with the logo ---------------------
