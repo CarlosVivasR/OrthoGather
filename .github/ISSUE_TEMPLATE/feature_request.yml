@@ -1,0 +1,20 @@
+name: 💡 Feature request
+description: Suggest an idea or improvement for OrthoGather.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like OrthoGather to do?
+      placeholder: It would help if I could…
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this useful?
+      description: What analysis or workflow would it unlock?
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything you do today to work around it?
