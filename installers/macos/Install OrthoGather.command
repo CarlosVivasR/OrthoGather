@@ -30,6 +30,24 @@ warn() { printf "%s\n" "${YLW}⚠️  $*${RST}"; }
 die()  { printf "%s\n" "${RED}❌ $*${RST}"; echo; read -r -p "Press Return to close..." _; exit 1; }
 ask()  { local r; read -r -p "${BOLD}$1 [Y/n] ${RST}" r; [[ -z "$r" || "$r" =~ ^[Yy] ]]; }
 
+# ---- Self-healing helpers --------------------------------------------------
+# Downloads retry automatically on the usual cause of failure: a network blip.
+dl()    { curl -fL --progress-bar --retry 6 --retry-delay 4 --retry-connrefused -o "$2" "$1"; }
+# Retry any step a few times with backoff before giving up — so transient
+# failures (dropped connection mid-install) heal themselves with no user action.
+retry() {  # retry <max> <label> -- <command...>
+  local max="$1" label="$2"; shift 2; [ "${1:-}" = "--" ] && shift
+  local n=1
+  while true; do
+    if "$@"; then return 0; fi
+    if [ "$n" -ge "$max" ]; then return 1; fi
+    warn "$label didn't finish (try $n/$max) — retrying in $((n*5)) s…"
+    sleep $((n*5)); n=$((n+1))
+  done
+}
+# Give conda extra network retries too.
+export CONDA_REMOTE_MAX_RETRIES=8 CONDA_REMOTE_BACKOFF_FACTOR=2
+
 clear 2>/dev/null || true
 say "============================================================"
 say "   🧬  OrthoGather installer for macOS"
@@ -61,7 +79,8 @@ else
   if ask "Install Miniforge now? (free, ~400 MB, goes in your home folder)"; then
     say "⬇️  Downloading Miniforge…"
     tmp_mf="$(mktemp -t miniforge).sh"
-    curl -fL --progress-bar -o "$tmp_mf" "$MINIFORGE_BASE/$MF" || die "Download failed. Check your internet connection."
+    retry 5 "Miniforge download" -- dl "$MINIFORGE_BASE/$MF" "$tmp_mf" \
+      || die "Couldn't download Miniforge after several tries. Check your internet, then just run this installer again — it will pick up where it left off."
     say "⚙️  Installing Miniforge to \$HOME/miniforge3 …"
     bash "$tmp_mf" -b -p "$HOME/miniforge3" || die "Miniforge installation failed."
     rm -f "$tmp_mf"
@@ -81,8 +100,9 @@ say "⬇️  Downloading OrthoGather…"
 mkdir -p "$HOME/Applications"
 tmp_zip="$(mktemp -t orthogather).zip"
 tmp_dir="$(mktemp -d -t orthogather)"
-curl -fL --progress-bar -o "$tmp_zip" "$ZIP_URL" || die "Could not download OrthoGather from GitHub."
-unzip -q "$tmp_zip" -d "$tmp_dir" || die "Could not unpack the download."
+retry 5 "OrthoGather download" -- dl "$ZIP_URL" "$tmp_zip" \
+  || die "Couldn't download OrthoGather after several tries. Check your internet, then just run this installer again — it resumes automatically."
+unzip -q "$tmp_zip" -d "$tmp_dir" || die "Could not unpack the download — re-run the installer to try again."
 src_dir="$(find "$tmp_dir" -maxdepth 1 -type d -name 'OrthoGather-*' | head -1)"
 [ -d "$src_dir" ] || die "Unexpected download layout."
 
@@ -101,10 +121,15 @@ ok "App installed at $APP_DIR"
 say "⚙️  Setting up the environment (Python 3.11 + OrthoFinder 2.5.5 + deps)."
 say "${DIM}    First time takes a few minutes — it downloads scientific packages.${RST}"
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
-  conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune || die "Environment update failed."
+  # Env exists (maybe half-built from an interrupted run) → finish/repair it.
+  retry 3 "Environment setup" -- conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune \
+    || die "The environment didn't finish building after several tries (usually a network drop). Just run this installer again — it resumes from here."
 else
   # -n overrides the name baked into environment.yml so $ENV_NAME is authoritative.
-  conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" || die "Environment creation failed."
+  # If creation is interrupted, a re-run finds the partial env and finishes it via
+  # the update path above — so the install always heals by re-running.
+  retry 3 "Environment setup" -- conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" \
+    || die "The environment didn't finish building after several tries (usually a network drop). Just run this installer again — it picks up where it left off."
 fi
 ok "Environment '$ENV_NAME' ready."
 

@@ -22,6 +22,21 @@ ok()   { printf "\033[32m✅ %s\033[0m\n" "$*"; }
 warn() { printf "\033[33m⚠️  %s\033[0m\n" "$*"; }
 die()  { printf "\033[31m❌ %s\033[0m\n" "$*"; exit 1; }
 
+# Self-healing: downloads + steps retry automatically so a network blip during
+# install heals itself with no user action; a re-run resumes where it left off.
+dl()    { curl -fL --progress-bar --retry 6 --retry-delay 4 --retry-connrefused -o "$2" "$1"; }
+retry() {  # retry <max> <label> -- <command...>
+  local max="$1" label="$2"; shift 2; [ "${1:-}" = "--" ] && shift
+  local n=1
+  while true; do
+    if "$@"; then return 0; fi
+    if [ "$n" -ge "$max" ]; then return 1; fi
+    warn "$label didn't finish (try $n/$max) — retrying in $((n*5)) s…"
+    sleep $((n*5)); n=$((n+1))
+  done
+}
+export CONDA_REMOTE_MAX_RETRIES=8 CONDA_REMOTE_BACKOFF_FACTOR=2
+
 say "============================================================"
 say "   🧬  OrthoGather — Linux/WSL setup"
 say "============================================================"
@@ -44,7 +59,8 @@ else
   ARCH="$(uname -m)"   # x86_64 or aarch64 (ARM Windows)
   MF="Miniforge3-Linux-${ARCH}.sh"
   say "⬇️  Installing Miniforge ($MF)…"
-  curl -fL --progress-bar -o /tmp/miniforge.sh "$MINIFORGE_BASE/$MF" || die "Miniforge download failed."
+  retry 5 "Miniforge download" -- dl "$MINIFORGE_BASE/$MF" /tmp/miniforge.sh \
+    || die "Miniforge download failed after several tries — re-run the installer to resume."
   bash /tmp/miniforge.sh -b -p "$HOME/miniforge3" || die "Miniforge install failed."
   rm -f /tmp/miniforge.sh
   CONDA_BASE="$HOME/miniforge3"
@@ -62,7 +78,8 @@ if [ -n "${OG_SRC:-}" ] && [ -d "$OG_SRC" ]; then
   src_dir="$OG_SRC"
 else
   say "⬇️  Downloading OrthoGather…"
-  curl -fL --progress-bar -o /tmp/orthogather.zip "$ZIP_URL" || die "Could not download OrthoGather."
+  retry 5 "OrthoGather download" -- dl "$ZIP_URL" /tmp/orthogather.zip \
+    || die "Could not download OrthoGather after several tries — re-run the installer to resume."
   rm -rf /tmp/og_extract && mkdir -p /tmp/og_extract
   unzip -q /tmp/orthogather.zip -d /tmp/og_extract || die "Could not unpack the download."
   src_dir="$(find /tmp/og_extract -maxdepth 1 -type d -name 'OrthoGather-*' | head -1)"
@@ -80,10 +97,13 @@ ok "App at $APP_DIR"
 # ---- 4. Environment --------------------------------------------------------
 say "⚙️  Building the environment (Python 3.11 + OrthoFinder 2.5.5)…"
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
-  conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune || die "Env update failed."
+  retry 3 "Environment setup" -- conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune \
+    || die "The environment didn't finish building after several tries — re-run the installer to resume."
 else
-  # -n overrides the name baked into environment.yml so $ENV_NAME is authoritative.
-  conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" || die "Env creation failed."
+  # -n overrides the name in environment.yml. An interrupted create leaves a partial
+  # env that a re-run finishes via the update path above — so re-running always heals.
+  retry 3 "Environment setup" -- conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" \
+    || die "The environment didn't finish building after several tries — re-run the installer to resume."
 fi
 conda activate "$ENV_NAME"
 orthofinder -h >/dev/null 2>&1 && ok "OrthoFinder detected." || warn "OrthoFinder check failed."
