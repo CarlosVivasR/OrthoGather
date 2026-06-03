@@ -43,6 +43,20 @@ This section will be updated with the bioRxiv preprint and the final journal ref
 ---
 ## 🔽 Download and Installation
 
+### ⚡ Easiest: one-click installer (no terminal)
+
+For non-technical users — download the installer for your computer, double-click,
+and it sets up **everything** (package manager, the app, Python 3.11, OrthoFinder)
+and adds an **OrthoGather** launcher to your Desktop:
+
+- **macOS** (Apple Silicon & Intel): `Install OrthoGather.command`
+- **Windows 10/11**: `Install OrthoGather.bat` (enables WSL automatically — OrthoFinder
+  has no native Windows build; needs admin + one restart, then continues by itself)
+
+Get them from the [Releases page](https://github.com/CarlosVivasR/OrthoGather/releases).
+See [`installers/`](installers/) for details. The manual conda route below still works
+for advanced users.
+
 ### Prerequisites
 
 Before installing **OrthoGather**, please ensure that you have:
