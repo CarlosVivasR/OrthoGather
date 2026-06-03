@@ -9,9 +9,6 @@ dependencies:
   - flask-session
   - pandas
   - numpy
-  - matplotlib
-  - seaborn
-  - upsetplot
   - goatools
   - requests
   - openpyxl
