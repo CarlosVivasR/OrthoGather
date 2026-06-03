@@ -5,6 +5,9 @@
 
 set -e
 
+# This script lives in installers/; work from the repo root (where environment.yml is).
+cd "$(cd "$(dirname "$0")/.." && pwd)"
+
 echo "🚀 Starting OrthoGather installation for macOS..."
 sleep 1
 

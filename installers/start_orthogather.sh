@@ -17,7 +17,8 @@ while [ -h "$SRC" ]; do
   LINK="$(readlink "$SRC")"
   [[ $LINK != /* ]] && SRC="$DIR/$LINK" || SRC="$LINK"
 done
-APP_DIR="$( cd -P "$( dirname "$SRC" )" >/dev/null 2>&1 && pwd )"
+# This launcher lives in installers/; the app (app.py) is one level up at the repo root.
+APP_DIR="$( cd -P "$( dirname "$SRC" )/.." >/dev/null 2>&1 && pwd )"
 cd "$APP_DIR"
 
 # --- Load conda in this shell ---

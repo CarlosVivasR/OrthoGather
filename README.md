@@ -113,13 +113,13 @@ That's it. Every time you want to use OrthoGather, just `conda activate orthogat
 If you prefer a guided installer that also checks prerequisites, run the script for your platform:
 
 ```bash
-./install_orthogather_mac.sh   # macOS (Apple Silicon or Intel)
-./install_orthogather_wsl.sh   # Linux / WSL
+./installers/install_orthogather_mac.sh   # macOS (Apple Silicon or Intel)
+./installers/install_orthogather_wsl.sh   # Linux / WSL
 ```
 
 Both scripts create the same `orthogather` environment from `environment.yml` and verify that OrthoFinder is detected.
 
-⚠️ **Prerequisite:** Conda or Micromamba must already be installed (e.g. via [Miniforge](https://github.com/conda-forge/miniforge)). For a step-by-step walkthrough and troubleshooting, see [installation_guide.pdf](Installation_guide.pdf).
+⚠️ **Prerequisite:** Conda or Micromamba must already be installed (e.g. via [Miniforge](https://github.com/conda-forge/miniforge)). For a step-by-step walkthrough and troubleshooting, see [installation_guide.pdf](docs/Installation_guide.pdf).
 
 ---
 
