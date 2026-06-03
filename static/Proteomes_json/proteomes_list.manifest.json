@@ -1,9 +1,10 @@
 {
   "version": "2026-06-03",
-  "release_tag": null,
-  "downloaded_at": "2026-06-03T13:49:05.715029+00:00",
+  "release_tag": "catalogue-2026-06-03",
+  "downloaded_at": "2026-06-03T14:19:15Z",
   "refreshed_at": "2026-06-03T13:49:05.715029+00:00",
   "source": "UniProt proteomes (REST) + EBI GOA proteomes",
+  "source_url": "https://github.com/CarlosVivasR/OrthoGather/releases/download/catalogue-2026-06-03/proteomes_list.json.gz",
   "uniprot_release": "2026_01",
   "uniprot_release_date": "28-January-2026",
   "proteome_tiers": [
