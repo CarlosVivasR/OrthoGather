@@ -1,10 +1,18 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18510911.svg)](https://doi.org/10.5281/zenodo.18510911)
-
 # 🧬 OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18510911.svg)](https://doi.org/10.5281/zenodo.18510911)
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![OrthoFinder](https://img.shields.io/badge/OrthoFinder-2.5.5-2c6ea8)
+![Platforms](https://img.shields.io/badge/macOS%20·%20Windows%20·%20Linux-supported-555)
+![License](https://img.shields.io/badge/License-GPLv3-blue)
 
 **OrthoGather** — compare proteomes with **OrthoFinder** and discover function with **GOATOOLS** — all in a local web application.  
 Download **UniProt** proteomes, run **OrthoFinder**, perform **Gene Ontology enrichment**, and export publication-ready figures and tables.  
 *Requires Python 3.11 and OrthoFinder 2.5.5 (runs natively on Apple Silicon, Intel macOS, Linux, and WSL — no Rosetta needed).*
+
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="OrthoGather — local, open, reproducible" width="820">
+</p>
 
 ---
 
@@ -19,6 +27,11 @@ It enables users to:
 - Generate **publication-ready figures** and **Excel tables** for downstream analysis.
 
 All analyses run **locally**, favouring **privacy**, **reproducibility**, and **rapid iteration**, and are particularly useful when working with **poorly annotated or non-model organisms**.
+
+<p align="center">
+  <img src="docs/screenshots/species-selection.png" alt="Pick species from the UniProt catalogue with live search" width="820">
+  <br><sub>Pick species from the <b>1,013,422-proteome</b> UniProt catalogue with live search, then run OrthoFinder locally.</sub>
+</p>
 
 ---
 
