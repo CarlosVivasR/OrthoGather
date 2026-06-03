@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="OrthoGather">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e7eef7"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1024" height="1024" rx="200" fill="url(#bg)"/>
+  <!-- OrthoGather molecular mark (from static/images/orthogather-mark.svg), centred -->
+  <g transform="translate(221,192) scale(5.82)">
+    <line x1="32" y1="50" x2="64" y2="20" stroke="#3b78b9" stroke-width="3" stroke-linecap="round"/>
+    <line x1="32" y1="50" x2="22" y2="86" stroke="#3b78b9" stroke-width="3" stroke-linecap="round"/>
+    <line x1="32" y1="50" x2="60" y2="86" stroke="#3b78b9" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="22" cy="86" r="11" fill="#fbd9d3" stroke="#f0a0a0" stroke-width="2.4"/>
+    <circle cx="60" cy="86" r="11" fill="#fce58a" stroke="#d8a82a" stroke-width="2.4"/>
+    <circle cx="64" cy="20" r="11" fill="#5fa84f" stroke="#3d7a30" stroke-width="2.4"/>
+    <circle cx="32" cy="50" r="17" fill="#7cb8ee" stroke="#2c6ea8" stroke-width="2.8"/>
+  </g>
+</svg>

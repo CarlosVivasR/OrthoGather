@@ -103,25 +103,49 @@ say "${DIM}    First time takes a few minutes — it downloads scientific packag
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
   conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune || die "Environment update failed."
 else
-  conda env create -f "$APP_DIR/environment.yml" || die "Environment creation failed."
+  # -n overrides the name baked into environment.yml so $ENV_NAME is authoritative.
+  conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" || die "Environment creation failed."
 fi
 ok "Environment '$ENV_NAME' ready."
 
-# ---- 5. Desktop launcher ---------------------------------------------------
-LAUNCHER="$HOME/Desktop/OrthoGather.command"
-cat > "$LAUNCHER" <<LAUNCH
+# ---- 5. Launcher: a real OrthoGather.app with the logo ---------------------
+# A proper .app bundle → shows the OrthoGather icon in Finder/Launchpad/Dock,
+# double-click like any app, no Terminal window. The executable just activates
+# the env and runs the server (which opens the browser).
+build_app_bundle() {
+  local dest="$1"
+  rm -rf "$dest"
+  mkdir -p "$dest/Contents/MacOS" "$dest/Contents/Resources"
+  cp "$APP_DIR/installers/assets/OrthoGather.icns" "$dest/Contents/Resources/OrthoGather.icns" 2>/dev/null || true
+  cat > "$dest/Contents/Info.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0"><dict>
+  <key>CFBundleName</key><string>OrthoGather</string>
+  <key>CFBundleDisplayName</key><string>OrthoGather</string>
+  <key>CFBundleIdentifier</key><string>org.ucd.orthogather</string>
+  <key>CFBundleVersion</key><string>1.0</string>
+  <key>CFBundleShortVersionString</key><string>1.0</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleExecutable</key><string>OrthoGather</string>
+  <key>CFBundleIconFile</key><string>OrthoGather</string>
+  <key>LSMinimumSystemVersion</key><string>10.13</string>
+  <key>NSHighResolutionCapable</key><true/>
+</dict></plist>
+PLIST
+  cat > "$dest/Contents/MacOS/OrthoGather" <<LAUNCH
 #!/bin/bash
-# OrthoGather launcher — double-click to start the app.
-set -euo pipefail
+# OrthoGather — double-click to start. Opens your browser automatically.
 source "$CONDA_BASE/etc/profile.d/conda.sh"
 conda activate "$ENV_NAME"
 cd "$APP_DIR"
-echo "Starting OrthoGather… your browser will open automatically."
-python app.py
+exec python app.py
 LAUNCH
-chmod +x "$LAUNCHER"
-cp -f "$LAUNCHER" "$APP_DIR/OrthoGather.command" 2>/dev/null || true
-ok "Launcher placed on your Desktop: OrthoGather.command"
+  chmod +x "$dest/Contents/MacOS/OrthoGather"
+  touch "$dest"   # nudge Finder to pick up the icon
+}
+build_app_bundle "$HOME/Desktop/OrthoGather.app"
+mkdir -p "$HOME/Applications" && build_app_bundle "$HOME/Applications/OrthoGather.app"
+ok "Launcher created: OrthoGather.app (Desktop + Applications) with the OrthoGather logo"
 
 # ---- 6. Verify + offer to launch ------------------------------------------
 conda activate "$ENV_NAME"
@@ -131,9 +155,9 @@ echo
 say "============================================================"
 ok  "OrthoGather is installed!"
 say "============================================================"
-echo "From now on, just double-click ${BOLD}OrthoGather.command${RST} on your Desktop."
+echo "From now on, just double-click ${BOLD}OrthoGather${RST} on your Desktop (the app with the OrthoGather logo)."
 echo
 if ask "Launch OrthoGather now?"; then
-  cd "$APP_DIR"; exec python app.py
+  open "$HOME/Desktop/OrthoGather.app" 2>/dev/null || { cd "$APP_DIR"; exec python app.py; }
 fi
 read -r -p "Done. Press Return to close..." _

@@ -12,9 +12,10 @@ user never touches a terminal.
 
 | Path | Platform | What it is |
 |------|----------|------------|
-| `macos/Install OrthoGather.command` | macOS (Apple Silicon + Intel) | Double-click. Installs Miniforge (if missing), the app, the conda env + OrthoFinder, and a Desktop launcher. |
-| `windows/Install OrthoGather.bat` | Windows 10 2004+ / 11 | Double-click. Self-elevates, installs WSL + Ubuntu (one restart), then sets up everything inside Linux + a Desktop launcher. |
+| `macos/Install OrthoGather.command` | macOS (Apple Silicon + Intel) | Double-click. Installs Miniforge (if missing), the app, the conda env + OrthoFinder, and a branded **`OrthoGather.app`** (logo icon, no Terminal window) on the Desktop + in Applications. |
+| `windows/Install OrthoGather.bat` | Windows 10 2004+ / 11 | Double-click. Self-elevates, installs WSL + Ubuntu (one restart), sets up everything inside Linux, and creates a **Desktop shortcut with the OrthoGather logo**. |
 | `common/setup_linux_env.sh` | Linux / inside WSL | The Linux-side setup (Miniforge + env + app). Reused by the Windows installer; also works on a plain Linux box. |
+| `assets/` | — | App icon (`OrthoGather.icns` for macOS, `OrthoGather.ico` for Windows) built from `OrthoGather-icon.svg` via `build_icons.sh`. |
 | `packaging/build_macos_pkg.sh` | macOS | **Phase B** scaffold — wrap the `.command` into a signed `.pkg` (needs an Apple Developer ID). |
 | `packaging/orthogather.iss` | Windows | **Phase B** scaffold — wrap the `.bat` into a signed `OrthoGather-Setup.exe` via Inno Setup (needs a code-signing cert). |
 

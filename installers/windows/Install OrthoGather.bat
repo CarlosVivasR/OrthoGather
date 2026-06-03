@@ -74,17 +74,34 @@ if %errorlevel% NEQ 0 (
   exit /b 1
 )
 
-REM ---- Create the Desktop launcher -----------------------------------------
-REM Starts the app inside WSL on a fixed port, then opens the Windows browser.
-set "LAUNCHER=%USERPROFILE%\Desktop\OrthoGather.bat"
-> "%LAUNCHER%" echo @echo off
->> "%LAUNCHER%" echo title OrthoGather
->> "%LAUNCHER%" echo echo Starting OrthoGather... a browser tab opens in a few seconds.
->> "%LAUNCHER%" echo start "" /b wsl -u root -- bash -lc "ORTHOGATHER_PORT=5000 ORTHOGATHER_NO_BROWSER=1 ~/OrthoGather/run_orthogather.sh"
->> "%LAUNCHER%" echo timeout /t 12 /nobreak ^>nul
->> "%LAUNCHER%" echo start "" http://localhost:5000
->> "%LAUNCHER%" echo echo OrthoGather is running. Close this window to stop it.
->> "%LAUNCHER%" echo pause ^>nul
+REM ---- Create the launcher + an icon'd Desktop shortcut --------------------
+REM Put the runner .bat and the logo .ico in a per-user app folder, then make a
+REM Desktop shortcut (.lnk) that points to it and shows the OrthoGather logo.
+set "OGHOME=%LOCALAPPDATA%\OrthoGather"
+if not exist "%OGHOME%" mkdir "%OGHOME%"
+
+REM Copy the logo from inside WSL to Windows (best-effort; falls back to no icon).
+set "OGICON=%OGHOME%\OrthoGather.ico"
+copy /Y "\\wsl.localhost\Ubuntu\root\OrthoGather\installers\assets\OrthoGather.ico" "%OGICON%" >nul 2>&1
+if not exist "%OGICON%" copy /Y "\\wsl$\Ubuntu\root\OrthoGather\installers\assets\OrthoGather.ico" "%OGICON%" >nul 2>&1
+
+REM The actual runner: starts the app in WSL on a fixed port, opens the browser.
+set "RUNNER=%OGHOME%\OrthoGather-run.bat"
+> "%RUNNER%" echo @echo off
+>> "%RUNNER%" echo title OrthoGather
+>> "%RUNNER%" echo echo Starting OrthoGather... a browser tab opens in a few seconds.
+>> "%RUNNER%" echo start "" /b wsl -u root -- bash -lc "ORTHOGATHER_PORT=5000 ORTHOGATHER_NO_BROWSER=1 ~/OrthoGather/run_orthogather.sh"
+>> "%RUNNER%" echo timeout /t 12 /nobreak ^>nul
+>> "%RUNNER%" echo start "" http://localhost:5000
+>> "%RUNNER%" echo echo OrthoGather is running. Close this window to stop it.
+>> "%RUNNER%" echo pause ^>nul
+
+REM Desktop shortcut with the logo icon (falls back to default icon if .ico missing).
+powershell -NoProfile -Command ^
+  "$s=(New-Object -ComObject WScript.Shell).CreateShortcut([System.IO.Path]::Combine([Environment]::GetFolderPath('Desktop'),'OrthoGather.lnk'));" ^
+  "$s.TargetPath='%RUNNER%'; $s.WorkingDirectory='%OGHOME%';" ^
+  "if (Test-Path '%OGICON%') { $s.IconLocation='%OGICON%' };" ^
+  "$s.Description='Launch OrthoGather'; $s.Save()"
 
 REM Clean up the resume key if it was set.
 powershell -NoProfile -Command "Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce' -Name 'OrthoGatherSetup' -ErrorAction SilentlyContinue" >nul 2>&1
@@ -92,7 +109,7 @@ powershell -NoProfile -Command "Remove-ItemProperty -Path 'HKCU:\Software\Micros
 echo.
 echo ============================================================
 echo   OrthoGather installed!
-echo   Double-click "OrthoGather" on your Desktop to start it.
+echo   Double-click "OrthoGather" on your Desktop (with the logo) to start it.
 echo ============================================================
 echo.
 pause

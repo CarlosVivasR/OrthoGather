@@ -82,7 +82,8 @@ say "⚙️  Building the environment (Python 3.11 + OrthoFinder 2.5.5)…"
 if conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
   conda env update -n "$ENV_NAME" -f "$APP_DIR/environment.yml" --prune || die "Env update failed."
 else
-  conda env create -f "$APP_DIR/environment.yml" || die "Env creation failed."
+  # -n overrides the name baked into environment.yml so $ENV_NAME is authoritative.
+  conda env create -n "$ENV_NAME" -f "$APP_DIR/environment.yml" || die "Env creation failed."
 fi
 conda activate "$ENV_NAME"
 orthofinder -h >/dev/null 2>&1 && ok "OrthoFinder detected." || warn "OrthoFinder check failed."
