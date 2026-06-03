@@ -42,8 +42,17 @@ say "   🧬  OrthoGather — Linux/WSL setup"
 say "============================================================"
 
 # ---- 1. Base tools ---------------------------------------------------------
-command -v curl  >/dev/null 2>&1 || die "curl is required (sudo apt install -y curl)."
-command -v unzip >/dev/null 2>&1 || { warn "Installing unzip…"; sudo apt-get update -y && sudo apt-get install -y unzip || die "Could not install unzip."; }
+# Use sudo only when not already root (WSL runs this as root, where sudo may be absent).
+SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
+ensure_pkg() {  # ensure_pkg <command> <apt-package>
+  command -v "$1" >/dev/null 2>&1 && return 0
+  warn "Installing $2…"
+  $SUDO apt-get update -y >/dev/null 2>&1 || true
+  retry 3 "$2 install" -- $SUDO apt-get install -y "$2" || die "Could not install $2."
+}
+ensure_pkg curl curl
+ensure_pkg unzip unzip
+ensure_pkg rsync rsync
 
 # ---- 2. conda / Miniforge --------------------------------------------------
 find_conda() {

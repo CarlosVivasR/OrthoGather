@@ -66,7 +66,7 @@ echo (first run downloads Python, OrthoFinder and dependencies - a few minutes)
 echo.
 REM Run the Linux setup script as root (no extra prompts). It downloads the app,
 REM installs Miniforge + the conda env with OrthoFinder, and writes a launcher.
-wsl -u root -- bash -lc "apt-get update -y && apt-get install -y curl unzip rsync >/dev/null && curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused '%OGZIP%' -o /tmp/og.zip && rm -rf /tmp/og_src && mkdir -p /tmp/og_src && unzip -q /tmp/og.zip -d /tmp/og_src && SRC=$(find /tmp/og_src -maxdepth 1 -type d -name 'OrthoGather-*' | head -1) && OG_SRC=\"$SRC\" bash \"$SRC/installers/common/setup_linux_env.sh\""
+wsl -u root -- bash -lc "apt-get update -y && apt-get install -y curl && curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused 'https://raw.githubusercontent.com/CarlosVivasR/OrthoGather/main/installers/common/setup_linux_env.sh' -o /tmp/og_setup.sh && bash /tmp/og_setup.sh"
 if %errorlevel% NEQ 0 (
   echo.
   echo *** Setup failed inside WSL. See the messages above. ***
