@@ -349,7 +349,14 @@ def _handle_exception(e):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Feed the home-page "catalogue scope" stats from the live manifest so they
+    # never drift out of date (they used to be hardcoded and went stale).
+    m = _read_catalog_manifest() or {}
+    return render_template(
+        'index.html',
+        proteome_count=m.get('proteome_count') or 1013422,
+        goa_taxa_count=m.get('goa_taxa_count') or 28475,
+    )
 
 
 @app.route('/favicon.ico')
@@ -1626,6 +1633,12 @@ def catalog_update():
                 proteome_count = len(data)
                 if proteome_count == 0:
                     raise ValueError("Catalogue is empty")
+                # Distinct species with a GOA file — powers the home-page stat;
+                # compute here so the manifest stays complete after a live update.
+                goa_taxa_count = len({
+                    p.get("taxon_id") for p in data
+                    if p.get("file_url") not in ("NA", None, "")
+                })
             except Exception as e:
                 try: os.remove(tmp_path)
                 except OSError: pass
@@ -1649,6 +1662,7 @@ def catalog_update():
                 "source_url": asset_url,
                 "size_bytes": downloaded,
                 "proteome_count": proteome_count,
+                "goa_taxa_count": goa_taxa_count,
                 "is_fallback": False,
             }
             _write_catalog_manifest(new_manifest)

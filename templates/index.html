@@ -337,12 +337,12 @@
 
             <div class="home-stats" aria-label="Catalogue scope">
               <div class="home-stat">
-                <span class="home-stat-num">843,532</span>
+                <span class="home-stat-num">{{ "{:,}".format(proteome_count) }}</span>
                 <span class="home-stat-label">UniProt proteomes</span>
               </div>
               <div class="home-stat">
-                <span class="home-stat-num">44,296</span>
-                <span class="home-stat-label">Gene Ontology terms</span>
+                <span class="home-stat-num">{{ "{:,}".format(goa_taxa_count) }}</span>
+                <span class="home-stat-label">species with GO annotations</span>
               </div>
             </div>
           </div>
