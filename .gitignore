@@ -33,6 +33,9 @@ static/flask_sessions/*
 .orthogather_sessions/
 UpSetPlot_Data_v2.xlsx
 UpSetPlot_Filtrado.xlsx
+GO_Analysis_Evolution.pptx
+IMPROVEMENT_PLAN.md
+REWORK_PLAN.md
 
 # Editor / local tooling, caches and scratch (local-only, do not commit)
 .pytest_cache/
