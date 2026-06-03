@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How to install OrthoGather</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+  :root{
+    --navy:#003366; --navy-2:#0e1a2b; --accent:#7cb8ee;
+    --bg:#f6f8fb; --surface:#ffffff; --border:#e5e7eb;
+    --text:#111827; --muted:#6b7280;
+    --ok:#16a34a; --ok-bg:#ecfdf5; --ok-bd:#a7f3d0;
+    --warn:#b45309; --warn-bg:#fffbeb; --warn-bd:#fde68a;
+    --info:#1d4ed8; --info-bg:#eff6ff; --info-bd:#bfdbfe;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+
+  header.hero{background:linear-gradient(160deg,#04284f 0%,var(--navy-2) 100%);color:#fff;padding:48px 0 40px;text-align:center}
+  .mark{width:74px;height:74px;margin:0 auto 16px;display:block}
+  .hero h1{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:clamp(26px,4vw,38px);margin:0 0 8px}
+  .hero p{color:#cdd6e3;max-width:520px;margin:0 auto;font-size:15px}
+
+  main{padding:34px 0 60px}
+
+  /* OS picker */
+  .os-tabs{display:flex;gap:10px;margin:0 0 22px}
+  .os-tab{flex:1;border:1.5px solid var(--border);background:var(--surface);border-radius:14px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);transition:.15s}
+  .os-tab i{font-size:22px}
+  .os-tab.active{border-color:var(--navy);color:var(--navy);box-shadow:0 0 0 3px rgba(0,51,102,.08)}
+  .os-pane{display:none}
+  .os-pane.active{display:block}
+
+  /* download button */
+  .dl{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin:0 0 24px}
+  .dl .file{flex:1;min-width:0}
+  .dl .file b{display:block;font-size:15px}
+  .dl .file span{font-size:13px;color:var(--muted)}
+  .dl a.btn{background:var(--navy);color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:11px 18px;border-radius:10px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+  .dl a.btn:hover{background:#04284f}
+
+  /* steps */
+  .step{display:flex;gap:16px;margin:0 0 18px}
+  .step-num{flex:0 0 38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;box-shadow:0 0 0 4px rgba(0,51,102,.10)}
+  .step-body{flex:1;min-width:0;padding-top:2px}
+  .step-body h3{margin:4px 0 6px;font-size:16.5px}
+  .step-body p{margin:0 0 6px;font-size:14.5px;color:#374151}
+  .kbd{font-weight:700;color:var(--navy)}
+
+  .callout{display:flex;gap:11px;border-radius:12px;padding:13px 15px;font-size:13.5px;margin:10px 0}
+  .callout i{margin-top:2px}
+  .c-info{background:var(--info-bg);border:1px solid var(--info-bd);color:#1e3a8a}
+  .c-info i{color:var(--info)}
+  .c-warn{background:var(--warn-bg);border:1px solid var(--warn-bd);color:#7c5310}
+  .c-warn i{color:var(--warn)}
+  .c-ok{background:var(--ok-bg);border:1px solid var(--ok-bd);color:#065f46}
+  .c-ok i{color:var(--ok)}
+
+  .section-title{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:36px 0 14px;display:flex;align-items:center;gap:12px}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--border)}
+
+  details{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 16px;margin:0 0 10px}
+  summary{cursor:pointer;font-weight:600;padding:13px 0;list-style:none;font-size:14.5px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"\f105";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--navy);margin-right:10px;display:inline-block;transition:transform .15s}
+  details[open] summary::before{transform:rotate(90deg)}
+  details .det{padding:0 0 14px;font-size:13.5px;color:#374151}
+
+  footer{border-top:1px solid var(--border);padding:24px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <svg class="mark" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg" aria-label="OrthoGather">
+      <line x1="32" y1="50" x2="64" y2="20" stroke="#7cb8ee" stroke-width="3" stroke-linecap="round"/>
+      <line x1="32" y1="50" x2="22" y2="86" stroke="#7cb8ee" stroke-width="3" stroke-linecap="round"/>
+      <line x1="32" y1="50" x2="60" y2="86" stroke="#7cb8ee" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="22" cy="86" r="11" fill="#fbd9d3" stroke="#f0a0a0" stroke-width="2.4"/>
+      <circle cx="60" cy="86" r="11" fill="#fce58a" stroke="#d8a82a" stroke-width="2.4"/>
+      <circle cx="64" cy="20" r="11" fill="#5fa84f" stroke="#3d7a30" stroke-width="2.4"/>
+      <circle cx="32" cy="50" r="17" fill="#7cb8ee" stroke="#2c6ea8" stroke-width="2.8"/>
+    </svg>
+    <h1>How to install OrthoGather</h1>
+    <p>No commands, no setup knowledge needed. Download one file, double-click, and you're done. Pick your computer below.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="os-tabs">
+    <button class="os-tab active" data-os="mac"><i class="fa-brands fa-apple"></i> I have a Mac</button>
+    <button class="os-tab" data-os="win"><i class="fa-brands fa-windows"></i> I have Windows</button>
+  </div>
+
+  <!-- ============================ MAC ============================ -->
+  <div class="os-pane active" data-pane="mac">
+
+    <div class="dl">
+      <i class="fa-brands fa-apple" style="font-size:26px;color:var(--navy)"></i>
+      <div class="file"><b>Install OrthoGather.command</b><span>Works on all Macs (Apple Silicon &amp; Intel)</span></div>
+      <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Download the installer</h3>
+        <p>Click the <span class="kbd">Download</span> button above and save <b>Install OrthoGather.command</b> (it usually lands in your <b>Downloads</b> folder).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Open it (the first time, right-click → Open)</h3>
+        <p>Find the file, <span class="kbd">right-click</span> it (or Control-click) and choose <span class="kbd">Open</span>. A box says it's from an unidentified developer — click <span class="kbd">Open</span> again.</p>
+        <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div>This security step only happens the first time. It's normal for free tools that aren't from the App Store.</div></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Let it run</h3>
+        <p>A black <b>Terminal</b> window opens and shows progress. It installs everything it needs and downloads the scientific tools. <b>Leave it open</b> — the first time takes a few minutes.</p>
+        <div class="callout c-warn"><i class="fa-solid fa-clock"></i><div>The first install downloads ~1–2 GB. A progress bar that looks stuck is usually still working — give it time.</div></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>You're done 🎉</h3>
+        <p>When it finishes you'll have an <b>OrthoGather</b> app (with the logo) on your <b>Desktop</b> and in <b>Launchpad / Applications</b>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>To use it — now and every time after</h3>
+        <p>Just <span class="kbd">double-click OrthoGather</span> (the app with the logo). It opens automatically in your web browser. That's the whole app.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ WINDOWS ============================ -->
+  <div class="os-pane" data-pane="win">
+
+    <div class="dl">
+      <i class="fa-brands fa-windows" style="font-size:24px;color:var(--navy)"></i>
+      <div class="file"><b>Install OrthoGather.bat</b><span>Windows 10 (2020+) or Windows 11</span></div>
+      <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
+    </div>
+
+    <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>Why Windows is a little different:</b> the science engine (OrthoFinder) only runs on Linux, so the installer quietly sets up a small Linux inside Windows (called <b>WSL</b>). You don't have to do anything — it handles it, but it needs <b>one restart</b>.</div></div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Download the installer</h3>
+        <p>Click <span class="kbd">Download</span> above and save <b>Install OrthoGather.bat</b>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Run it</h3>
+        <p>Double-click the file. If a blue <b>"Windows protected your PC"</b> box appears, click <span class="kbd">More info</span> → <span class="kbd">Run anyway</span>. Then click <span class="kbd">Yes</span> on the permission prompt.</p>
+        <div class="callout c-info"><i class="fa-solid fa-shield-halved"></i><div>That warning is normal for free tools. The permission (admin) is needed to set up the Linux part.</div></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Restart when it asks</h3>
+        <p>It installs WSL and then says it needs a <b>restart</b>. Save your work and <span class="kbd">restart your PC</span>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>It continues by itself</h3>
+        <p>After the restart the installer <b>picks up automatically</b>. If a Linux (Ubuntu) window asks you to <b>create a username and password</b>, type a simple one and remember it. Then it downloads everything (a few minutes).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>You're done 🎉</h3>
+        <p>You'll get an <b>OrthoGather</b> shortcut (with the logo) on your <b>Desktop</b>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <h3>To use it — now and every time after</h3>
+        <p><span class="kbd">Double-click OrthoGather</span> on your Desktop. A small window opens and, a few seconds later, the app appears in your web browser.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMON: good to know -->
+  <div class="section-title">Good to know</div>
+  <div class="callout c-ok"><i class="fa-solid fa-circle-check"></i><div><b>You only install once.</b> After that, you just double-click the OrthoGather icon whenever you want to use it.</div></div>
+  <div class="callout c-info"><i class="fa-solid fa-window-maximize"></i><div><b>A little window stays open while you work.</b> That's the engine running. Keep it open while you use OrthoGather; close it to stop the app.</div></div>
+  <div class="callout c-info"><i class="fa-solid fa-rotate"></i><div><b>To update later</b>, just run the installer again — it refreshes your install and keeps your data.</div></div>
+
+  <!-- System requirements -->
+  <div class="section-title">What you need</div>
+  <div class="step">
+    <div class="step-num"><i class="fa-solid fa-hard-drive"></i></div>
+    <div class="step-body">
+      <h3>Free disk space</h3>
+      <p><b>~3 GB</b> on a Mac, <b>~5 GB</b> on Windows (Windows is bigger because it also sets up a small Linux). The first install downloads about 1–2 GB.</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num"><i class="fa-solid fa-memory"></i></div>
+    <div class="step-body">
+      <h3>Memory &amp; system</h3>
+      <p><b>8 GB RAM</b> is comfortable for typical analyses. <b>macOS</b> (Apple Silicon or Intel) or <b>Windows 10 (2020 or newer) / Windows 11</b>. An internet connection for the first install.</p>
+    </div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div class="section-title">If something looks off</div>
+
+  <details>
+    <summary>macOS won't let me open the file</summary>
+    <div class="det">Don't double-click — instead <b>right-click</b> (or Control-click) the file and choose <b>Open</b>, then <b>Open</b> again in the box. If you still can't, go to <b>System Settings → Privacy &amp; Security</b>, scroll down, and click <b>Open Anyway</b>.</div>
+  </details>
+  <details>
+    <summary>Windows shows "Windows protected your PC"</summary>
+    <div class="det">Click <b>More info</b>, then <b>Run anyway</b>. This appears because the installer isn't code-signed yet; it's safe to run.</div>
+  </details>
+  <details>
+    <summary>It seems frozen during the first install</summary>
+    <div class="det">The first install downloads large scientific packages. A progress bar that sits still for a minute or two is usually fine — please wait. Closing the window cancels it.</div>
+  </details>
+  <details>
+    <summary>The browser didn't open</summary>
+    <div class="det">Open your web browser yourself and go to <b>http://localhost:5000</b> (Windows) or the address shown in the window (Mac). Make sure the small OrthoGather window is still open.</div>
+  </details>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    OrthoGather · developed at UCD Conway Institute &amp; UCD Cancer Data Lab<br>
+    Need the manual / advanced (conda) install? See the project README on GitHub.
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.os-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.os-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const os=tab.dataset.os;
+      document.querySelectorAll('.os-pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===os));
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+</script>
+</body>
+</html>
