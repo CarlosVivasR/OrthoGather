@@ -53,7 +53,12 @@ from orthogather.config import (
 )
 from orthogather.utils.responses import respond, respond_error
 from orthogather.utils.parsing import normalize, parse_uniprot_block
-from orthogather.utils.network import find_free_port, open_browser
+from orthogather.utils.network import (
+    find_free_port,
+    open_browser,
+    is_port_in_use,
+    is_orthogather_running,
+)
 
 # ------------------------
 # App
@@ -3564,8 +3569,29 @@ if __name__ == "__main__":
     # Port: honour ORTHOGATHER_PORT if set (handy for tooling/deploys), else pick
     # a free one as before. ORTHOGATHER_NO_BROWSER=1 suppresses the auto-open tab.
     env_port = os.environ.get("ORTHOGATHER_PORT")
-    port = int(env_port) if env_port and env_port.isdigit() else find_free_port()
+    no_browser = os.environ.get("ORTHOGATHER_NO_BROWSER") == "1"
+    if env_port and env_port.isdigit():
+        port = int(env_port)
+        # The desktop launchers always use this fixed port. If it's already busy
+        # and it's our own app, OrthoGather is already running — so instead of
+        # crashing with "Address already in use" (what you'd get by double-clicking
+        # the launcher twice), just reopen the instance that's already there.
+        if is_port_in_use(port):
+            if is_orthogather_running(port):
+                logging.info(f"OrthoGather already running on port {port}; reusing it.")
+                print(
+                    "\n✅ OrthoGather is already running — opening it in your browser.\n"
+                    f"   (http://127.0.0.1:{port} — no need to start it twice.)\n"
+                )
+                if not no_browser:
+                    open_browser(port)
+                raise SystemExit(0)
+            # Port held by some other program → fall back to a free one so we still start.
+            logging.warning(f"Port {port} is in use by another app; picking a free port.")
+            port = find_free_port()
+    else:
+        port = find_free_port()
     logging.info(f"🚀 Starting Flask on port {port}")
-    if os.environ.get("ORTHOGATHER_NO_BROWSER") != "1":
+    if not no_browser:
         threading.Timer(1.25, open_browser, args=(port,)).start()
     app.run(debug=True, use_reloader=False, port=port)

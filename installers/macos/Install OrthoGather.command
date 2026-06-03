@@ -176,10 +176,12 @@ PLIST
   cat > "$dest/Contents/MacOS/OrthoGather" <<LAUNCH
 #!/bin/bash
 # OrthoGather — double-click to start. Opens your browser automatically.
+# Fixed port 5000 so double-clicking again just reopens the running app
+# (app.py detects it's already running) instead of starting a second copy.
 source "$CONDA_BASE/etc/profile.d/conda.sh"
 conda activate "$ENV_NAME"
 cd "$APP_DIR"
-exec python app.py
+exec env ORTHOGATHER_PORT=5000 python app.py
 LAUNCH
   chmod +x "$dest/Contents/MacOS/OrthoGather"
   touch "$dest"   # nudge Finder to pick up the icon
