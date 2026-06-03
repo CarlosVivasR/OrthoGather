@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Install OrthoGather</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+  :root{
+    --navy:#003366; --navy-2:#0e1a2b; --accent:#7cb8ee;
+    --bg:#f6f8fb; --surface:#ffffff; --border:#e5e7eb;
+    --text:#111827; --muted:#6b7280; --code-bg:#0e1a2b; --code-fg:#e6edf6;
+    --ok:#16a34a; --warn:#b45309; --warn-bg:#fffbeb; --warn-bd:#fde68a;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--navy)}
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px}
+
+  /* Hero */
+  header.hero{background:linear-gradient(160deg,#04284f 0%,var(--navy-2) 100%);color:#fff;padding:54px 0 46px;text-align:center}
+  .mark{width:54px;height:54px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(124,184,238,.14);border:1px solid rgba(124,184,238,.35);font-size:26px}
+  .hero h1{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:clamp(28px,4vw,40px);margin:0 0 8px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--accent)}
+  .hero p{color:#cdd6e3;max-width:560px;margin:0 auto;font-size:15px}
+  .badges{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .badge{font-size:12px;font-weight:600;color:#cdd6e3;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);padding:5px 11px;border-radius:999px}
+  .badge i{color:var(--accent);margin-right:6px}
+
+  /* Sections */
+  main{padding:40px 0 60px}
+  .section-title{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:38px 0 14px;display:flex;align-items:center;gap:12px}
+  .section-title::after{content:"";flex:1;height:1px;background:var(--border)}
+
+  /* Prereq cards */
+  .prereqs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:620px){.prereqs{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .card h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:9px}
+  .card h3 i{color:var(--navy);width:18px;text-align:center}
+  .card p{margin:0;font-size:13.5px;color:var(--muted)}
+  .card a{font-weight:600;text-decoration:none}
+  .card a:hover{text-decoration:underline}
+
+  /* Steps */
+  .step{display:flex;gap:16px;margin:0 0 14px}
+  .step-num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;box-shadow:0 0 0 4px rgba(0,51,102,.10)}
+  .step-body{flex:1;min-width:0}
+  .step-body h3{margin:4px 0 8px;font-size:17px}
+  .step-body p{margin:0 0 10px;font-size:14.5px;color:#374151}
+  .note{font-size:13px;color:var(--muted);margin:8px 0 0}
+  .note i{color:var(--accent)}
+
+  /* Code block + copy */
+  .code{position:relative;background:var(--code-bg);border-radius:10px;margin:0 0 4px;overflow:hidden}
+  .code pre{margin:0;padding:14px 50px 14px 16px;overflow-x:auto;color:var(--code-fg);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13.5px;line-height:1.7}
+  .code .cmt{color:#7e8aa0}
+  .copy{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#cdd6e3;border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:background .12s}
+  .copy:hover{background:rgba(124,184,238,.22);color:#fff}
+  .copy.done{background:rgba(22,163,74,.28);border-color:rgba(22,163,74,.5);color:#dcfce7}
+
+  /* OS tabs */
+  .tabs{display:flex;gap:6px;margin:0 0 10px}
+  .tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer}
+  .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .tabpane{display:none}
+  .tabpane.active{display:block}
+
+  /* Callouts */
+  .callout{display:flex;gap:11px;background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:13px 15px;font-size:13.5px;color:#7c5310;margin:6px 0}
+  .callout i{color:var(--warn);margin-top:2px}
+  .success{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+  .success i{color:var(--ok)}
+
+  /* Troubleshooting */
+  details{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 16px;margin:0 0 10px}
+  summary{cursor:pointer;font-weight:600;padding:13px 0;list-style:none;font-size:14.5px}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"\f105";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--navy);margin-right:10px;display:inline-block;transition:transform .15s}
+  details[open] summary::before{transform:rotate(90deg)}
+  details .det-body{padding:0 0 14px;font-size:13.5px;color:#374151}
+
+  footer{border-top:1px solid var(--border);padding:26px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+  footer a{font-weight:600;text-decoration:none;margin:0 8px}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="mark">🧬</div>
+    <h1>Install <span class="accent">OrthoGather</span></h1>
+    <p>A local platform for orthology-based proteome comparison and Gene Ontology enrichment. Three steps and you're running it on your own machine — no cloud, no command-line expertise required.</p>
+    <div class="badges">
+      <span class="badge"><i class="fa-brands fa-python"></i>Python 3.11</span>
+      <span class="badge"><i class="fa-solid fa-dna"></i>OrthoFinder 2.5.5</span>
+      <span class="badge"><i class="fa-solid fa-laptop"></i>macOS · Linux · WSL</span>
+      <span class="badge"><i class="fa-solid fa-bolt"></i>No Rosetta</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- PREREQS -->
+  <div class="section-title">Before you start</div>
+  <div class="prereqs">
+    <div class="card">
+      <h3><i class="fa-solid fa-box-open"></i> Conda or Micromamba</h3>
+      <p>The package manager that builds the environment. Don't have it? Install <a href="https://github.com/conda-forge/miniforge" target="_blank" rel="noopener">Miniforge</a> (free, lightweight).</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-code-branch"></i> Git</h3>
+      <p>To download the code. The proteome catalogue ships compressed inside the repo — <strong>no Git LFS needed</strong>, it unpacks itself on first launch.</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-terminal"></i> A terminal</h3>
+      <p>macOS Terminal, a Linux shell, or Windows + WSL. Everything below is copy-paste.</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-hard-drive"></i> ~2 GB free space</h3>
+      <p>For the environment, OrthoFinder and the bundled UniProt catalogue.</p>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="section-title">Install in 3 steps</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Download OrthoGather</h3>
+      <p>Clone the repository and move into the folder. A plain <code>git clone</code> is all you need — the proteome catalogue travels inside the repo, compressed.</p>
+      <div class="code"><button class="copy">Copy</button><pre>git clone https://github.com/CarlosVivasR/OrthoGather.git
+cd OrthoGather</pre></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Create the environment</h3>
+      <p>This one command installs Python 3.11, OrthoFinder 2.5.5 and every dependency, then activates it.</p>
+      <div class="tabs">
+        <button class="tab active" data-tab="conda">Conda</button>
+        <button class="tab" data-tab="mamba">Micromamba</button>
+      </div>
+      <div class="tabpane active" data-pane="conda">
+        <div class="code"><button class="copy">Copy</button><pre>conda env create -f environment.yml
+conda activate orthogather</pre></div>
+      </div>
+      <div class="tabpane" data-pane="mamba">
+        <div class="code"><button class="copy">Copy</button><pre>micromamba env create -f environment.yml
+micromamba activate orthogather</pre></div>
+      </div>
+      <p class="note"><i class="fa-solid fa-clock"></i> The first build takes a few minutes — it downloads OrthoFinder and the scientific packages.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Launch it</h3>
+      <p>Start the app — it picks a free port and <strong>opens your browser automatically</strong>.</p>
+      <div class="code"><button class="copy">Copy</button><pre>python app.py</pre></div>
+      <p class="note"><i class="fa-solid fa-box-open"></i> On the <strong>first</strong> launch the app unpacks the proteome catalogue (~250 MB) from its compressed copy — this happens once and takes a few seconds. It also checks GitHub for a newer catalogue and offers a one-click update if one exists.</p>
+      <div class="callout success"><i class="fa-solid fa-circle-check"></i><div>That's it — OrthoGather opens in your browser. From here pick <strong>New Analysis</strong>, the <strong>Preselected Dataset</strong>, or <strong>External Upload</strong>.</div></div>
+    </div>
+  </div>
+
+  <div class="callout"><i class="fa-solid fa-rotate-right"></i><div><strong>Every time after this</strong>, you only need two lines:
+    <div class="code" style="margin-top:8px"><button class="copy">Copy</button><pre>conda activate orthogather
+python app.py</pre></div>
+  </div></div>
+
+  <!-- GUIDED SCRIPTS -->
+  <div class="section-title">Prefer a guided installer?</div>
+  <p style="font-size:14.5px;color:#374151;margin-top:0">From inside the <code>OrthoGather</code> folder, run the script for your system. It checks prerequisites, builds the same <code>orthogather</code> environment and verifies OrthoFinder.</p>
+  <div class="tabs">
+    <button class="tab active" data-tab="mac">macOS</button>
+    <button class="tab" data-tab="wsl">Linux / WSL</button>
+  </div>
+  <div class="tabpane active" data-pane="mac">
+    <div class="code"><button class="copy">Copy</button><pre>./install_orthogather_mac.sh</pre></div>
+  </div>
+  <div class="tabpane" data-pane="wsl">
+    <div class="code"><button class="copy">Copy</button><pre>./install_orthogather_wsl.sh</pre></div>
+  </div>
+
+  <!-- OTHER OPTIONS -->
+  <div class="section-title">Other ways to install</div>
+  <div class="prereqs">
+    <div class="card">
+      <h3><i class="fa-brands fa-windows"></i> Windows</h3>
+      <p>OrthoFinder runs on Linux/macOS, so on Windows install <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL</a> first, then follow the Linux / WSL steps inside it.</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-cube"></i> pip (advanced)</h3>
+      <p>Already have Python 3.11? <code>pip install -r requirements.txt</code> covers the Python packages, but you must install <strong>OrthoFinder 2.5.5</strong> separately (it is not on PyPI) — conda/bioconda is the supported route.</p>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div class="section-title">Troubleshooting</div>
+
+  <details>
+    <summary><code>conda: command not found</code></summary>
+    <div class="det-body">Conda isn't installed (or your terminal hasn't loaded it). Install <a href="https://github.com/conda-forge/miniforge" target="_blank" rel="noopener">Miniforge</a>, then close and reopen your terminal and try again.</div>
+  </details>
+
+  <details>
+    <summary>Species list is empty / catalogue didn't load</summary>
+    <div class="det-body">The catalogue unpacks itself from the compressed copy on first launch, so this is rare. If it happens, delete the half-written raw file and restart — the app re-unpacks it from <code>proteomes_list.json.gz</code>:
+      <div class="code"><button class="copy">Copy</button><pre>rm -f static/Proteomes_json/proteomes_list.json
+python app.py</pre></div>
+      Still stuck? Open the catalogue menu on the species page and click <strong>Check for updates</strong> to download a fresh copy from GitHub.</div>
+  </details>
+
+  <details>
+    <summary>"OrthoFinder not detected"</summary>
+    <div class="det-body">Make sure the environment is active — your prompt should show <code>(orthogather)</code>. If not, run <code>conda activate orthogather</code> and launch again.</div>
+  </details>
+
+  <details>
+    <summary>OrthoFinder runs slowly or uses too much CPU</summary>
+    <div class="det-body">OrthoGather auto-detects your cores. To leave headroom for other work, set the thread counts before launching:
+      <div class="code"><button class="copy">Copy</button><pre>ORTHOGATHER_OF_THREADS=6 ORTHOGATHER_OF_ANALYSIS_THREADS=1 python app.py</pre></div>
+    </div>
+  </details>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Repository</a>·
+    <a href="https://github.com/CarlosVivasR/OrthoGather#readme" target="_blank" rel="noopener">Full README</a>·
+    <a href="https://doi.org/10.5281/zenodo.18510911" target="_blank" rel="noopener">DOI</a>
+    <p style="margin-top:12px">OrthoGather · developed at UCD Conway Institute &amp; UCD Cancer Data Lab · GPL-3.0</p>
+  </div>
+</footer>
+
+<script>
+  // Copy buttons
+  document.querySelectorAll('.copy').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const pre=btn.parentElement.querySelector('pre');
+      const text=pre.innerText;
+      navigator.clipboard.writeText(text).then(()=>{
+        const old=btn.textContent;btn.textContent='Copied!';btn.classList.add('done');
+        setTimeout(()=>{btn.textContent=old;btn.classList.remove('done');},1400);
+      });
+    });
+  });
+  // OS / tool tabs (scoped to the tab group's following panes)
+  document.querySelectorAll('.tabs').forEach(group=>{
+    const tabs=group.querySelectorAll('.tab');
+    // panes are the .tabpane siblings that follow this group until the next .tabs
+    let panes=[];let el=group.nextElementSibling;
+    while(el && !el.classList.contains('tabs') && !el.classList.contains('section-title')){
+      if(el.classList.contains('tabpane'))panes.push(el);
+      el=el.nextElementSibling;
+    }
+    tabs.forEach(tab=>{
+      tab.addEventListener('click',()=>{
+        tabs.forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        const key=tab.dataset.tab;
+        panes.forEach(p=>p.classList.toggle('active',p.dataset.pane===key));
+      });
+    });
+  });
+</script>
+</body>
+</html>

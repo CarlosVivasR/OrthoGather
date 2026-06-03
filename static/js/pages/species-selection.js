@@ -548,11 +548,40 @@
     };
   }
 
+  // Shared check routine. When `silent`, stay quiet unless a newer catalogue is
+  // found (used by the auto-check on load); otherwise surface every outcome
+  // (used by the manual "Check for updates" button).
+  function runUpdateCheck(silent) {
+    return fetch('/catalog/check_updates')
+      .then(r => r.json())
+      .then(res => {
+        if (!res.ok) {
+          if (!silent) showUpdateMessage('error', res.reason || 'Could not check for updates.');
+          return;
+        }
+        if (!res.update_available) {
+          if (!silent) showUpdateMessage('ok', res.reason || `You're on the latest available catalogue.`);
+          return;
+        }
+        // A newer catalogue exists → show the 1-click update card.
+        showUpdateAvailable(res.remote);
+      })
+      .catch(err => {
+        if (!silent) showUpdateMessage('error', 'Network error: ' + err.message);
+      });
+  }
+
   function wireCatalogueUpdates() {
-    // Load info on page load
+    // Load local info, then auto-detect a newer catalogue on page load
+    // (detect + 1-click). The check is silent on errors/rate-limits so a flaky
+    // network or GitHub throttle never nags the user — the manual button below
+    // still reports those outcomes explicitly.
     fetch('/catalog/info')
       .then(r => r.ok ? r.json() : null)
-      .then(info => { if (info) renderCatalogueMeta(info); })
+      .then(info => {
+        if (info) renderCatalogueMeta(info);
+        runUpdateCheck(true);
+      })
       .catch(() => {});
 
     const checkBtn = document.getElementById('catalogue-check-btn');
@@ -561,27 +590,10 @@
       checkBtn.disabled = true;
       checkBtn.classList.add('is-loading');
       showUpdateMessage('info', 'Checking GitHub for newer releases...');
-      fetch('/catalog/check_updates')
-        .then(r => r.json())
-        .then(res => {
-          if (!res.ok) {
-            showUpdateMessage('error', res.reason || 'Could not check for updates.');
-            return;
-          }
-          if (!res.update_available) {
-            const reason = res.reason || `You're on the latest available catalogue.`;
-            showUpdateMessage('ok', reason);
-            return;
-          }
-          showUpdateAvailable(res.remote);
-        })
-        .catch(err => {
-          showUpdateMessage('error', 'Network error: ' + err.message);
-        })
-        .finally(() => {
-          checkBtn.disabled = false;
-          checkBtn.classList.remove('is-loading');
-        });
+      runUpdateCheck(false).finally(() => {
+        checkBtn.disabled = false;
+        checkBtn.classList.remove('is-loading');
+      });
     });
   }
 
@@ -595,7 +607,7 @@
     // handler short-circuits while proteomeData is empty.
     if (state === 'loading') {
       input.placeholder = 'Loading proteome catalogue...';
-      hint.textContent = msg || 'Loading the catalogue (~166 MB). This can take 20-60 s the first time.';
+      hint.textContent = msg || 'Loading the catalogue (~250 MB). This can take 20-60 s the first time.';
       hint.className = 'label-helper is-loading';
     } else if (state === 'ready') {
       input.placeholder = 'e.g. Escherichia coli, Burkholderia, UP000000625...';
@@ -674,26 +686,35 @@
 
   function loadCatalogue() {
     setCatalogueLoading('loading');
-    // Use .json() directly — fastest path for 174 MB.
-    // If the file is a Git LFS pointer (rare misconfig), it's tiny and JSON.parse
-    // will throw a SyntaxError that we surface to the user.
-    fetch('/static/Proteomes_json/proteomes_list.json')
+    // Slim, gzipped projection: the server sends a compact array of
+    // [label, pid, isRef(0/1), taxon_id] tuples (~6 MB gzipped) instead of the
+    // full ~246 MB catalogue. Far faster transfer + parse, and ~3× less memory
+    // even at ~1 M proteomes. The browser transparently decompresses it.
+    fetch('/catalog/species_index')
       .then((res) => {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
-      .then((data) => {
-        proteomeData = data;
-        // Pre-compute lowercased labels + proteome IDs once at load time.
-        // Without this, every keystroke in the search box re-runs
-        // .toLowerCase() on ~843k strings → real perceptible lag while
-        // typing. With this, the search loop only compares pre-normalised
-        // fields (zero allocations per keystroke).
-        for (let i = 0; i < data.length; i++) {
-          const e = data[i];
-          e._lc_label = (e.label || '').toLowerCase();
-          e._lc_pid   = (e['Proteome Id'] || '').toLowerCase();
+      .then((rows) => {
+        // Rebuild the objects the rest of the page expects, and pre-compute the
+        // lowercased label + proteome ID in the SAME pass. Pre-normalising here
+        // means the search loop never calls .toLowerCase() per keystroke (which
+        // on ~1 M strings would be real, perceptible typing lag).
+        const data = new Array(rows.length);
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i];
+          const label = r[0] || '';
+          const pid = r[1] || '';
+          data[i] = {
+            label,
+            'Proteome Id': pid,
+            type: r[2] ? 'reference' : 'non-reference',
+            taxon_id: r[3] || '',
+            _lc_label: label.toLowerCase(),
+            _lc_pid: pid.toLowerCase(),
+          };
         }
+        proteomeData = data;
         setCatalogueLoading('ready');
         // After the catalogue is in memory, pre-fill chips if the user landed
         // here via /history/<id>/reproduce. The endpoint clears the session key
@@ -701,15 +722,18 @@
         applyPrefillFromHistory();
       })
       .catch((err) => {
-        const friendly = /unexpected token|JSON/i.test(err.message)
-          ? 'The catalogue file looks invalid (possibly a Git LFS pointer). Run "git lfs pull" and reload the page.'
-          : 'Error loading the proteome catalogue: ' + err.message;
+        const friendly = 'Error loading the proteome catalogue: ' + err.message +
+          '. Try reloading the page.';
         setCatalogueLoading('error', friendly);
         OG.showStatus('downloadStatus', 'error', friendly);
       });
   }
 
   /* ---- Search ---- */
+  // Remembers the last search term that matched nothing, so we can skip the
+  // full-catalogue scan while the user keeps typing past a dead end.
+  let _lastEmptyTerm = '';
+
   function runSearch(input, resultsDiv) {
     const searchTerm = input.value.toLowerCase().trim();
     resultsDiv.innerHTML = '';
@@ -719,18 +743,26 @@
 
     // Early-exit loop instead of .filter().slice(20): stop scanning as soon
     // as we have 20 matches. With "ec" as searchTerm this typically scans a
-    // few thousand entries instead of all 843k.
+    // few thousand entries instead of all ~1 M.
     const MAX_RESULTS = 20;
     const matches = [];
-    for (let i = 0; i < proteomeData.length; i++) {
-      const item = proteomeData[i];
-      // _lc_label / _lc_pid are precomputed at catalogue load — see
-      // loadCatalogue(). No per-keystroke allocations here.
-      if (item._lc_label.includes(searchTerm) || item._lc_pid.includes(searchTerm)) {
-        matches.push(item);
-        if (matches.length >= MAX_RESULTS) break;
+    // No-match memoization: if a shorter prefix already matched nothing, every
+    // longer extension of it also matches nothing — so skip the full ~1 M scan
+    // entirely. This is what keeps typing past a dead end from lagging.
+    const skipScan = _lastEmptyTerm && searchTerm.startsWith(_lastEmptyTerm);
+    if (!skipScan) {
+      for (let i = 0; i < proteomeData.length; i++) {
+        const item = proteomeData[i];
+        // _lc_label / _lc_pid are precomputed at catalogue load — see
+        // loadCatalogue(). No per-keystroke allocations here.
+        if (item._lc_label.includes(searchTerm) || item._lc_pid.includes(searchTerm)) {
+          matches.push(item);
+          if (matches.length >= MAX_RESULTS) break;
+        }
       }
     }
+    // Remember a dead-end term (and clear it the moment we get hits again).
+    _lastEmptyTerm = matches.length === 0 ? searchTerm : '';
 
     // ── Empty state: no matches found ──
     if (matches.length === 0) {

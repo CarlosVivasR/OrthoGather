@@ -1,1 +1,6 @@
-static/Proteomes_json/proteomes_list.json filter=lfs diff=lfs merge=lfs -text
+# The proteome catalogue is no longer tracked with Git LFS.
+# What ships in the repo is the compressed baseline
+# `static/Proteomes_json/proteomes_list.json.gz` (~13 MB, plain Git — well under
+# GitHub's 100 MB limit). The raw 166 MB `proteomes_list.json` is git-ignored and
+# decompressed from the .gz on first launch (see orthogather.core.catalogue
+# .ensure_catalogue_present). No `git lfs install` / `git lfs pull` needed.

@@ -828,6 +828,16 @@
 .provenance-item dd a { color: var(--color-primary); text-decoration: none; }
 .provenance-item dd a:hover { text-decoration: underline; }
 .provenance-muted { color: var(--color-text-muted, #94a3b8); font-style: italic; }
+.provenance-download {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-caption, 12px);
+  color: var(--color-text-muted, #94a3b8);
+}
+.provenance-download i { margin-right: 4px; }
+.provenance-download a { color: var(--color-primary); text-decoration: none; font-weight: 600; }
+.provenance-download a:hover { text-decoration: underline; }
 
 /* ----------------------------------------------------------------------------
    Global navigation shell — dark fixed sidebar + content column.

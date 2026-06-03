@@ -61,4 +61,9 @@
       <dd>{{ p.generated_at[:10] }}</dd>
     </div>
   </dl>
+  <p class="provenance-download">
+    <i class="fa-solid fa-download" aria-hidden="true"></i> Save this record:
+    <a href="{{ url_for('download_provenance', fmt='txt') }}">provenance.txt</a> ·
+    <a href="{{ url_for('download_provenance', fmt='json') }}">provenance.json</a>
+  </p>
 </section>

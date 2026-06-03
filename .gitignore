@@ -1,6 +1,16 @@
 __pycache__/
 *.pyc
 
+# Proteome catalogue: only the compressed baseline (.gz) is versioned; the raw
+# JSON is decompressed from it on first launch (no Git LFS). Ignore the derived
+# raw file and any in-flight temp files from seeding/updates.
+static/Proteomes_json/proteomes_list.json
+static/Proteomes_json/proteomes_list.json.tmp
+static/Proteomes_json/proteomes_list.json.seed.tmp
+static/Proteomes_json/proteomes_list.json.tmp.json
+static/Proteomes_json/proteomes_list.json.full.jsonl
+static/Proteomes_json/proteomes_list.json.full.cursor
+
 # runtime outputs
 Proteomas/*
 GOAfiles/*

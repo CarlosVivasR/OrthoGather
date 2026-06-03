@@ -47,12 +47,14 @@ This section will be updated with the bioRxiv preprint and the final journal ref
 
 Before installing **OrthoGather**, please ensure that you have:
 
-- **Git**, including **Git LFS**
-  ```bash
-  git lfs install
-  ```
+- **Git** (a plain clone is enough — **no Git LFS required**)
 - **Conda** or **Micromamba**
 - A Unix-based environment (macOS, Linux, or WSL)
+
+> The proteome catalogue ships compressed inside the repo
+> (`static/Proteomes_json/proteomes_list.json.gz`, ~19 MB) and is unpacked
+> automatically on the first launch. The app also checks GitHub for a newer
+> catalogue and offers a one-click update.
 
 ### Clone the repository
 

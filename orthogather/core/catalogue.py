@@ -16,8 +16,11 @@ so they're safe under Flask's multi-request model.
 """
 from __future__ import annotations
 
+import gzip
 import json
+import os
 import re
+import shutil
 from typing import List
 
 import pandas as pd
@@ -45,7 +48,7 @@ SPECIES_ALIAS_MAP = {
     "ggallus":          "Gallus gallus",
     "xlaevis":          "Xenopus laevis",
     "xtropicalis":      "Xenopus tropicalis",
-    "ppatens":          "Physcomitrella patens",
+    "ppatens":          "Physcomitrium patens",  # was Physcomitrella; UniProt renamed the genus
     "osativa":          "Oryza sativa",
     "zmays":            "Zea mays",
     "styphimurium":     "Salmonella typhimurium",
@@ -73,7 +76,7 @@ SPECIES_ALIAS_MAP = {
     "neurosporacrassa": "Neurospora crassa",
     "ncrassa":          "Neurospora crassa",
     "aniger":           "Aspergillus niger",
-    "anidulans":        "Aspergillus nidulans",
+    "anidulans":        "Emericella nidulans",  # UniProt names A. nidulans by its teleomorph
     "afumigatus":       "Aspergillus fumigatus",
     "calbicans":        "Candida albicans",
 }
@@ -141,6 +144,39 @@ def extract_species_names_from_tsv(path):
 _proteomes_cache = None
 
 
+def ensure_catalogue_present(json_path):
+    """Seed the raw catalogue JSON from the committed ``.gz`` baseline if absent.
+
+    The 166 MB ``proteomes_list.json`` is no longer stored in Git (no more LFS).
+    What ships in the repo is ``proteomes_list.json.gz`` (~13 MB); the raw JSON is
+    a derived, git-ignored artefact decompressed on first launch. This makes a
+    fresh clone self-contained and offline — no ``git lfs pull``, no network.
+
+    Idempotent and safe: if the raw JSON already exists (e.g. a newer catalogue
+    was downloaded from a GitHub release) it is left untouched — the ``.gz`` seed
+    never clobbers a fresher copy. Returns ``json_path`` for convenient chaining.
+    """
+    if os.path.exists(json_path):
+        return json_path
+    gz_path = json_path + ".gz"
+    if not os.path.exists(gz_path):
+        return json_path  # nothing to seed from; caller handles the missing file
+    tmp_path = json_path + ".seed.tmp"
+    try:
+        os.makedirs(os.path.dirname(json_path), exist_ok=True)
+        with gzip.open(gz_path, "rb") as src, open(tmp_path, "wb") as dst:
+            shutil.copyfileobj(src, dst, length=1024 * 1024)  # 1 MiB chunks
+        os.replace(tmp_path, json_path)  # atomic
+    except Exception:
+        if os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
+        raise
+    return json_path
+
+
 def load_proteomes(json_path):
     """Load and cache the UniProt proteome catalogue.
 
@@ -148,9 +184,14 @@ def load_proteomes(json_path):
     once at startup turns subsequent :func:`match_species` calls from O(N×M)
     string ops into O(N×M) plain comparisons (~50× faster). The catalogue
     is read-only after load, so the cache is safe under Flask's thread model.
+
+    Seeds the raw JSON from the ``.gz`` baseline first (see
+    :func:`ensure_catalogue_present`) so importing without going through
+    ``app.py``'s ``__main__`` (tests, helper scripts) still finds the file.
     """
     global _proteomes_cache
     if _proteomes_cache is None:
+        ensure_catalogue_present(json_path)
         with open(json_path, "r") as f:
             _proteomes_cache = json.load(f)
         # Pre-normalise every label once
@@ -160,6 +201,19 @@ def load_proteomes(json_path):
 
 
 _match_species_cache = {}
+
+
+def invalidate_caches():
+    """Drop the in-memory catalogue + match caches so the next
+    :func:`load_proteomes` rebuilds from the file on disk.
+
+    Call this after the catalogue file changes (e.g. a release update). Resetting
+    the importing module's own globals is NOT enough — the caches live here, so
+    invalidation must happen here too.
+    """
+    global _proteomes_cache, _match_species_cache
+    _proteomes_cache = None
+    _match_species_cache = {}
 
 
 def match_species(species_list, proteomes):

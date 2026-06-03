@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OrthoGather launcher (macOS/Linux) - requires conda env 'ortho37'
+# OrthoGather launcher (macOS/Linux) - requires conda env 'orthogather'
 # Does not create environments: if missing, shows error and exits.
 set -euo pipefail
 
@@ -32,14 +32,14 @@ else
   exit 1
 fi
 
-# --- Check that the 'ortho37' environment exists ---
-if ! conda info --envs | awk '{print $1}' | grep -qx "ortho37"; then
-  echo "[ERROR] The environment 'ortho37' is missing. Check the installation README." >&2
+# --- Check that the 'orthogather' environment exists ---
+if ! conda info --envs | awk '{print $1}' | grep -qx "orthogather"; then
+  echo "[ERROR] The environment 'orthogather' is missing. Check the installation README." >&2
   exit 1
 fi
 
 # --- Activate and launch ---
-conda activate ortho37
+conda activate orthogather
 echo "[INFO] Dir: $PWD"
 python app.py
 

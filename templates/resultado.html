@@ -209,11 +209,19 @@
             <h3 id="figure-modal-title">Figure</h3>
             <div class="sub" id="figure-modal-sub"></div>
           </div>
-          <button type="button" class="figure-modal-close" aria-label="Close" onclick="closeFigureLightbox()">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <div class="figure-modal-tools">
+            <div class="figure-modal-zoom" role="group" aria-label="Zoom">
+              <button type="button" class="zoom-btn" id="zoom-out" aria-label="Zoom out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+              <span class="zoom-level" id="zoom-level">100%</span>
+              <button type="button" class="zoom-btn" id="zoom-in" aria-label="Zoom in"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+              <button type="button" class="zoom-btn" id="zoom-reset" aria-label="Reset zoom"><i class="fa-solid fa-arrows-rotate"></i></button>
+            </div>
+            <button type="button" class="figure-modal-close" aria-label="Close" onclick="closeFigureLightbox()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
-        <div class="figure-modal-body">
+        <div class="figure-modal-body" id="figure-modal-body">
           <div id="figure-modal-plot" class="figure-modal-plot"></div>
         </div>
       </div>
@@ -1383,8 +1391,29 @@
         const bodyH  = (bodyEl && bodyEl.clientHeight) || Math.floor((window.innerHeight || 900) * 0.85);
         const targetH = Math.max(720, bodyH - 16);
         renderUpset('figure-modal-plot', fig, { height: targetH, barPx: 72 });
+        if (window.resetFigureZoom) window.resetFigureZoom();
       });
     };
+
+    /* ── Lightbox zoom (+ / − / reset) — applies to UpSet and Plotly figures ── */
+    (function () {
+      var zoom = 1, MIN = 0.4, MAX = 3, STEP = 0.25;
+      var label = document.getElementById('zoom-level');
+      function plotEl() { return document.getElementById('figure-modal-plot'); }
+      function apply() {
+        var el = plotEl();
+        if (el) { el.style.transformOrigin = 'top center'; el.style.transform = 'scale(' + zoom + ')'; }
+        if (label) label.textContent = Math.round(zoom * 100) + '%';
+      }
+      function setZoom(z) { zoom = Math.min(MAX, Math.max(MIN, Math.round(z * 100) / 100)); apply(); }
+      window.resetFigureZoom = function () { setZoom(1); };
+      var zi = document.getElementById('zoom-in');
+      var zo = document.getElementById('zoom-out');
+      var zr = document.getElementById('zoom-reset');
+      if (zi) zi.addEventListener('click', function () { setZoom(zoom + STEP); });
+      if (zo) zo.addEventListener('click', function () { setZoom(zoom - STEP); });
+      if (zr) zr.addEventListener('click', function () { setZoom(1); });
+    })();
 
     /* ── UniProt-ID filter: Figures 5 + 6 ─────────────────────────────── */
     const filterTextarea  = document.getElementById('upset-filter-ids');
@@ -1735,7 +1764,10 @@
       document.getElementById('figure-modal-sub').textContent = info.sub;
       const modal = document.getElementById('figure-modal');
       modal.removeAttribute('hidden');
-      requestAnimationFrame(function () { info.render('figure-modal-plot'); });
+      requestAnimationFrame(function () {
+        info.render('figure-modal-plot');
+        if (window.resetFigureZoom) window.resetFigureZoom();
+      });
     };
     window.closeFigureLightbox = function () {
       const modal = document.getElementById('figure-modal');

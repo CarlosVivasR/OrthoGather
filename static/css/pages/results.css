@@ -923,6 +923,29 @@ circle.og-dot-highlighted {
   color: var(--color-error);
   border-color: var(--color-error);
 }
+.figure-modal-tools {
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.figure-modal-zoom {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--color-surface-alt, #f7f8fa);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 3px;
+}
+.zoom-btn {
+  width: 30px; height: 30px;
+  border: none; background: transparent; cursor: pointer;
+  border-radius: var(--radius-sm, 6px);
+  color: var(--color-text-secondary);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.zoom-btn:hover { background: var(--color-primary-soft, #e8eef7); color: var(--color-primary); }
+.zoom-level {
+  min-width: 46px; text-align: center;
+  font-size: var(--text-body-sm); font-weight: 600;
+  color: var(--color-text-secondary); font-variant-numeric: tabular-nums;
+}
 .figure-modal-body {
   flex: 1;
   padding: var(--space-4) var(--space-6) var(--space-6);

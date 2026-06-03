@@ -1,0 +1,22 @@
+{
+  "version": "2026-06-03",
+  "release_tag": null,
+  "downloaded_at": "2026-06-03T13:49:05.715029+00:00",
+  "refreshed_at": "2026-06-03T13:49:05.715029+00:00",
+  "source": "UniProt proteomes (REST) + EBI GOA proteomes",
+  "uniprot_release": "2026_01",
+  "uniprot_release_date": "28-January-2026",
+  "proteome_tiers": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "goa_source_url": "https://ftp.ebi.ac.uk/pub/databases/GO/goa/proteomes/proteome2taxid",
+  "proteome_count": 1013422,
+  "reference_count": 34305,
+  "goa_resolved_count": 132935,
+  "goa_taxa_count": 28475,
+  "is_fallback": false,
+  "size_bytes": 259982841
+}

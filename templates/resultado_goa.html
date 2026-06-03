@@ -211,10 +211,16 @@
       <div id="goa-download-notice" class="goa-download-notice" hidden></div>
 
       <div class="goa-action-row">
-        <button id="download-goa-excel" class="btn btn-secondary" type="button" hidden
-                onclick="window.location.href='/download_go_excel'">
-          <i class="fa-solid fa-file-excel"></i> Download GOA Excel
-        </button>
+        <div id="goa-download-group" class="download-split" hidden>
+          <button id="download-goa-excel" class="btn btn-secondary" type="button"
+                  onclick="window.location.href='/download_go_excel'">
+            <i class="fa-solid fa-file-excel"></i> Download GOA tables
+          </button>
+          <span class="download-alt">as
+            <a href="/download_go_excel?fmt=csv">CSV</a> ·
+            <a href="/download_go_excel?fmt=tsv">TSV</a>
+          </span>
+        </div>
         <button id="toggle-go-analysis" class="btn btn-primary" type="button" hidden>
           <i class="fa-solid fa-microscope"></i> Continue to GO enrichment
         </button>
@@ -415,7 +421,8 @@
         <div id="go-results-container" hidden>
           <h3>Figure 9: Gene Ontology enrichment</h3>
           <p class="section-helper">
-            Bars show <strong>−log₁₀(FDR)</strong> for each enriched GO term, grouped by namespace.
+            Bars show <strong>−log₁₀(FDR)</strong> for each significant GO term, grouped by namespace.
+            Bars are direction-agnostic (magnitude only); <strong>depleted</strong> (purified) terms are drawn in a distinct warm colour — see the Direction column in the table.
             Hover for full names, p-values, and evidence breakdown. Use the table below to filter and export.
           </p>
 
@@ -474,6 +481,12 @@
               <a id="go-excel-download-link" class="btn btn-secondary btn-sm" href="#" hidden>
                 <i class="fa-solid fa-file-excel"></i> Excel
               </a>
+              <a id="go-csv-download-link" class="btn btn-secondary btn-sm" href="#" hidden>
+                <i class="fa-solid fa-file-csv"></i> CSV
+              </a>
+              <a id="go-tsv-download-link" class="btn btn-secondary btn-sm" href="#" hidden>
+                <i class="fa-solid fa-file-lines"></i> TSV
+              </a>
             </div>
           </div>
 
@@ -529,7 +542,7 @@
             </button>
           </div>
 
-          <h3>Enriched terms: interactive table</h3>
+          <h3>Enriched &amp; depleted terms: interactive table</h3>
           <div class="go-ev-legend" role="note">
             <span class="go-ev-legend-label">Evidence tier:</span>
             <span class="go-ev-chip is-experimental" title="Experimental evidence codes (EXP, IDA, IPI, IMP, IGI, IEP and high-throughput variants). Strongest support.">Experimental</span>
@@ -587,6 +600,10 @@
                   <th data-sort="namespace"
                       title="GO namespace: BP (Biological Process), CC (Cellular Component), or MF (Molecular Function).">
                     NS <span class="go-th-hint">(?)</span>
+                  </th>
+                  <th data-sort="direction"
+                      title="Direction of the two-sided test: 'enriched' = over-represented in your foreground vs the background; 'depleted' = under-represented (purified). Chart bars show magnitude only.">
+                    Dir <span class="go-th-hint">(?)</span>
                   </th>
                   <th data-sort="depth" class="num"
                       title="Depth of the term in the GO ontology graph. 0 = ontology root; 5+ = very specific terms.">
@@ -1039,6 +1056,8 @@
             renderAnnotationDistribution(data.distribution);
             if (distContainer) distContainer.hidden = false;
 
+            const dlGroup = document.getElementById("goa-download-group");
+            if (dlGroup) dlGroup.hidden = false;
             if (dlExcelBtn) dlExcelBtn.hidden = false;
             if (toggleGO) toggleGO.hidden = false;
 
@@ -1484,6 +1503,14 @@
         }).join("");
       }
 
+      function dirBadge(d) {
+        if (d === "enriched")
+          return '<span class="go-dir" style="color:#0b7261;font-weight:600" title="Over-represented vs background">▲ enriched</span>';
+        if (d === "depleted")
+          return '<span class="go-dir" style="color:#b4541f;font-weight:600" title="Under-represented (purified) vs background">▼ depleted</span>';
+        return '<span class="go-dir" style="color:#888">n/a</span>';
+      }
+
       function getPlotLimit() {
         const v = document.getElementById("go-plot-limit")?.value || "20";
         return v === "all" ? Infinity : parseInt(v, 10) || 20;
@@ -1518,12 +1545,15 @@
             name: `${NS_LABEL[ns]} (${subset.length}${isFinite(perNsLimit) && all.length > perNsLimit ? ` of ${all.length}` : ""})`,
             y: subset.map(r => r.name.length > 50 ? r.name.slice(0, 50) + "…" : r.name),
             x: subset.map(r => r.neg_log10_fdr),
-            marker: { color: NS_COLOR[ns] },
-            customdata: subset.map(r => [r.GO, r.namespace, r.depth, r.study_count, r.study_n, r.p_fdr_bh]),
+            // Depleted (purified) terms are drawn in a distinct warm colour so a
+            // tall bar is never silently read as "enriched".
+            marker: { color: subset.map(r => r.direction === "depleted" ? "#b4541f" : NS_COLOR[ns]) },
+            customdata: subset.map(r => [r.GO, r.namespace, r.depth, r.study_count, r.study_n, r.p_fdr_bh, r.direction || "n/a"]),
             hovertemplate:
               "<b>%{y}</b><br>" +
               "GO: %{customdata[0]}<br>" +
               "NS: %{customdata[1]}<br>" +
+              "Direction: %{customdata[6]}<br>" +
               "Depth: %{customdata[2]}<br>" +
               "Study: %{customdata[3]}/%{customdata[4]}<br>" +
               "FDR: %{customdata[5]:.2e}<br>" +
@@ -1635,6 +1665,7 @@
             <td><a href="https://amigo.geneontology.org/amigo/term/${r.GO}" target="_blank" rel="noopener">${r.GO}</a></td>
             <td>${r.name}</td>
             <td><span class="go-ns-pill" style="--ns-color:${NS_COLOR[r.namespace]}">${NS_LABEL[r.namespace]}</span></td>
+            <td>${dirBadge(r.direction)}</td>
             <td class="num">${r.depth}</td>
             <td class="num">${r.study_count}/${r.study_n}</td>
             <td class="num">${r.pop_count}/${r.pop_n}</td>
@@ -1706,7 +1737,7 @@
             mime = "application/json"; ext = "json";
           } else {
             const sep = fmt === "tsv" ? "\t" : ",";
-            const cols = ["GO", "name", "namespace", "depth", "study_count", "study_n", "pop_count", "pop_n", "p_fdr_bh", "neg_log10_fdr"];
+            const cols = ["GO", "name", "namespace", "direction", "depth", "study_count", "study_n", "pop_count", "pop_n", "p_fdr_bh", "neg_log10_fdr"];
             const esc = (v) => {
               const s = String(v ?? "");
               if (fmt === "csv" && /[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
@@ -1852,12 +1883,20 @@
               : `/${window.__goResults.excelUrl}`;
             excelLink.href = url;
             excelLink.hidden = false;
+            const sep = url.includes("?") ? "&" : "?";
+            const csvL = document.getElementById("go-csv-download-link");
+            const tsvL = document.getElementById("go-tsv-download-link");
+            if (csvL) { csvL.href = url + sep + "fmt=csv"; csvL.hidden = false; }
+            if (tsvL) { tsvL.href = url + sep + "fmt=tsv"; tsvL.hidden = false; }
           }
 
           renderPlot("all");
           renderTable();
           const notice = data.payload?.notice || data.notice;
-          if (notice) {
+          const warnings = data.payload?.warnings || data.warnings || [];
+          if (warnings.length) {
+            setStatus("⚠️ " + warnings.join("  •  "), "info");
+          } else if (notice) {
             setStatus(`ℹ️ ${notice}`, "info");
           } else {
             setStatus(`✅ GO Enrichment generated (${flat.length} terms).`, "ok");

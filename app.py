@@ -1,4 +1,6 @@
 import os
+import io
+import gzip
 import zipfile
 import shutil
 import re
@@ -166,6 +168,7 @@ def read_orthogroups_data(zip_path):
 from orthogather.core.catalogue import (
     SPECIES_ALIAS_MAP, expand_species_alias, split_species_name,
     extract_species_names_from_tsv, load_proteomes, match_species,
+    ensure_catalogue_present, invalidate_caches,
     _match_species_cache, _proteomes_cache,
 )
 
@@ -1306,6 +1309,79 @@ def _inject_sidebar_context():
     return {"history_count": count, "orthogather_version": ORTHOGATHER_VERSION}
 
 
+def build_provenance_text(prov=None) -> str:
+    """Render the provenance record as a human-readable plain-text block, ready
+    to paste into a paper's Methods section."""
+    p = prov or build_provenance()
+    cat = p.get("catalogue") or {}
+    g = p.get("goa") or {}
+    pr = p.get("proteome") or {}
+    onto = p.get("ontology") or {}
+    j = lambda v: ", ".join(v) if isinstance(v, list) else (v if v not in (None, "") else "—")
+    return "\n".join([
+        "OrthoGather — analysis provenance",
+        "=" * 42,
+        f"OrthoGather version  : {p.get('orthogather_version') or '—'}",
+        f"Generated at         : {p.get('generated_at') or '—'}",
+        f"Analysis mode        : {p.get('mode') or '—'}",
+        "",
+        "Proteome data (UniProt)",
+        f"  release            : {j(pr.get('release'))}",
+        f"  release date       : {j(pr.get('release_date'))}",
+        f"  source             : {pr.get('source') or '—'}",
+        "",
+        "OrthoFinder",
+        f"  version            : {p.get('orthofinder_version') or '— (externally supplied orthogroups)'}",
+        "",
+        "Gene Ontology ontology",
+        f"  release (OBO)      : {onto.get('data_version') or '—'}",
+        "",
+        "GOA annotations (EBI)",
+        f"  data generated     : {j(g.get('data_generated')) if g else '—'}",
+        f"  GO-version         : {j(g.get('go_version')) if g else '—'}",
+        f"  downloaded at      : {(g.get('downloaded_at') if g else None) or '—'}",
+        f"  files              : {(g.get('n_files') if g else None) if g else '—'}",
+        f"  source             : {(g.get('source') if g else None) or '—'}",
+        "",
+        "Proteome catalogue",
+        f"  version            : {cat.get('version') or '—'}",
+        f"  downloaded at      : {cat.get('downloaded_at') or '—'}",
+        f"  proteome count     : {cat.get('proteome_count') or '—'}",
+        "",
+        "Cite: https://doi.org/10.64898/2026.01.30.702851",
+        "",
+    ]) + "\n"
+
+
+@app.route("/download_provenance")
+def download_provenance():
+    """Download the reproducibility provenance (data versions) as a readable
+    .txt (default) or machine-readable .json."""
+    fmt = (request.args.get("fmt") or "txt").lower()
+    prov = build_provenance()
+    if fmt == "json":
+        data = json.dumps(prov, indent=2).encode("utf-8")
+        return send_file(io.BytesIO(data), mimetype="application/json",
+                         as_attachment=True, download_name="orthogather-provenance.json")
+    data = build_provenance_text(prov).encode("utf-8")
+    return send_file(io.BytesIO(data), mimetype="text/plain",
+                     as_attachment=True, download_name="orthogather-provenance.txt")
+
+
+def _xlsx_to_delimited_zip(xlsx_path: str, sep: str) -> io.BytesIO:
+    """Read every sheet of an .xlsx workbook and return an in-memory ZIP with
+    one delimited text file per sheet (``,`` → CSV, ``\\t`` → TSV)."""
+    ext = "csv" if sep == "," else "tsv"
+    sheets = pd.read_excel(xlsx_path, sheet_name=None)
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for name, df in sheets.items():
+            safe = re.sub(r"[^A-Za-z0-9._-]+", "_", str(name)).strip("_") or "sheet"
+            zf.writestr(f"{safe}.{ext}", df.to_csv(index=False, sep=sep))
+    buf.seek(0)
+    return buf
+
+
 @app.route("/catalog/info")
 def catalog_info():
     """Return the local catalogue manifest (synthesised from file mtime if absent)."""
@@ -1313,6 +1389,53 @@ def catalog_info():
     if manifest is None:
         return jsonify({"error": "No catalogue found locally"}), 404
     return jsonify(manifest)
+
+
+# Cache of the gzipped slim species index, keyed by catalogue file mtime so it
+# rebuilds automatically after an update. (mtime, gzipped_bytes).
+_species_index_cache = {"mtime": None, "gz": None}
+
+
+def _build_species_index_gz():
+    """Build (and cache) the gzipped slim species index, rebuilding only when the
+    catalogue file changed. Returns the gzipped bytes. Safe to call from a warm-up
+    thread at startup so the first page load doesn't pay the build cost."""
+    try:
+        mtime = os.path.getmtime(JSON_PATH)
+    except OSError:
+        mtime = None
+    if _species_index_cache["gz"] is None or _species_index_cache["mtime"] != mtime:
+        proteomes = load_proteomes(JSON_PATH)
+        slim = [
+            [p.get("label", ""), p.get("Proteome Id", ""),
+             1 if p.get("type") == "reference" else 0, p.get("taxon_id", "")]
+            for p in proteomes
+        ]
+        raw = json.dumps(slim, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        _species_index_cache["gz"] = gzip.compress(raw, compresslevel=6)
+        _species_index_cache["mtime"] = mtime
+    return _species_index_cache["gz"]
+
+
+@app.route("/catalog/species_index")
+def catalog_species_index():
+    """Serve a SLIM, gzip-compressed projection of the catalogue for the species
+    picker.
+
+    The picker only needs four fields per proteome — label, Proteome Id, whether
+    it's a reference proteome, and taxon id — but the full catalogue carries five
+    more (protein_count, the two version stamps, GOA url + size). Streaming the
+    whole 246 MB file to the browser is wasteful: it parses slowly (~2 s) and holds
+    ~1 M nine-field objects in memory. Here we emit a compact array of
+    ``[label, pid, is_reference(0/1), taxon_id]`` tuples, gzipped (~6 MB on the
+    wire). The browser fetch transparently decompresses it; the picker rebuilds its
+    objects from the tuples. Result: fast transfer + ~3× less parse/memory, even at
+    a million proteomes. Cached and keyed by the catalogue's mtime so it refreshes
+    after a catalogue update on its own."""
+    resp = Response(_build_species_index_gz(), mimetype="application/json")
+    resp.headers["Content-Encoding"] = "gzip"
+    resp.headers["Vary"] = "Accept-Encoding"
+    return resp
 
 
 @app.route("/catalog/check_updates")
@@ -1349,7 +1472,9 @@ def catalog_check_updates():
             continue
         for asset in rel.get("assets") or []:
             name = (asset.get("name") or "").lower()
-            if name.endswith(".json"):
+            # Catalogue assets are published gzip-compressed (.json.gz, ~20 MB vs
+            # 250 MB raw); accept the plain .json form too for backward compat.
+            if name.endswith(".json.gz") or name.endswith(".json"):
                 candidate = {
                     "release_name": rel.get("name") or rel.get("tag_name"),
                     "release_tag": rel.get("tag_name"),
@@ -1475,6 +1600,24 @@ def catalog_update():
 
             yield _sse({"phase": "validating"})
 
+            # Catalogue assets are published gzip-compressed (~13 MB vs 166 MB).
+            # Decompress in place before validating so the rest of the flow still
+            # sees a raw JSON file. Detection is by asset extension (query stripped).
+            if asset_url.split("?")[0].lower().endswith(".gz"):
+                gunzipped = tmp_path + ".json"
+                try:
+                    with gzip.open(tmp_path, "rb") as src, open(gunzipped, "wb") as dst:
+                        shutil.copyfileobj(src, dst, length=1024 * 1024)
+                    os.remove(tmp_path)
+                    tmp_path = gunzipped
+                except Exception as e:
+                    for p in (tmp_path, gunzipped):
+                        try: os.remove(p)
+                        except OSError: pass
+                    yield _sse({"phase": "error",
+                                "reason": f"Could not decompress the downloaded catalogue: {e}"})
+                    return
+
             try:
                 with open(tmp_path) as f:
                     data = json.load(f)
@@ -1511,10 +1654,10 @@ def catalog_update():
             _write_catalog_manifest(new_manifest)
 
             # Catalogue changed — invalidate the in-memory caches so the next
-            # request rebuilds them from the new file on disk.
-            global _proteomes_cache, _match_species_cache
-            _proteomes_cache = None
-            _match_species_cache = {}
+            # request rebuilds them from the new file on disk. The caches live in
+            # orthogather.core.catalogue, so this must reset them there (resetting
+            # app.py's imported references alone would be a no-op).
+            invalidate_caches()
 
             yield _sse({"phase": "done", "manifest": new_manifest})
         except Exception as e:
@@ -2478,9 +2621,15 @@ def download_go_excel():
     # tell several downloads apart on disk.
     from orthogather.utils.filenames import descriptive_filename
     species = session.get('species') or []
+    ctx = [f"{len(species)}species"] if species else []
+    fmt = (request.args.get("fmt") or "xlsx").lower()
+    if fmt in ("csv", "tsv"):
+        sep = "," if fmt == "csv" else "\t"
+        buf = _xlsx_to_delimited_zip(output_excel_path, sep)
+        dl_name = descriptive_filename("GOA-orthogroup-annotation", "zip", context=ctx + [fmt])
+        return send_file(buf, mimetype="application/zip", as_attachment=True, download_name=dl_name)
     dl_name = descriptive_filename(
-        "GOA-orthogroup-annotation", "xlsx",
-        context=[f"{len(species)}species"] if species else None,
+        "GOA-orthogroup-annotation", "xlsx", context=ctx or None,
     )
     return send_file(output_excel_path, as_attachment=True, download_name=dl_name)
 
@@ -2837,6 +2986,12 @@ def gene_ontology_analysis():
         counting_mode = str(data.get('counting_mode', 'per_protein')).lower().strip()
         if counting_mode not in ('per_protein', 'per_orthogroup'):
             counting_mode = 'per_protein'
+        # Remember what the user asked for: the per_orthogroup collapse below can
+        # fall back to per_protein, and that change must be reported, not silent.
+        counting_mode_requested = counting_mode
+        # User-facing, non-fatal warnings accumulated during the run (silent
+        # fallback, version drift, low power). Surfaced in the JSON response.
+        warnings = []
 
         logging.info("="*80)
         logging.info(f"[GO] ▶ Starting GO Analysis")
@@ -2989,10 +3144,17 @@ def gene_ontology_analysis():
                     logging.warning("[GO][WARN] per_orthogroup requested but no OG "
                                     "mapping available — falling back to per_protein.")
                     counting_mode = 'per_protein'
+                    warnings.append(
+                        "Requested per_orthogroup counting, but no orthogroup mapping "
+                        "was available — fell back to per_protein. Pseudoreplication "
+                        "was NOT corrected.")
             except Exception as e:
                 logging.warning(f"[GO][WARN] per_orthogroup collapse failed ({e}); "
                                 f"falling back to per_protein.")
                 counting_mode = 'per_protein'
+                warnings.append(
+                    f"per_orthogroup collapse failed ({e}) — fell back to per_protein. "
+                    f"Pseudoreplication was NOT corrected.")
 
         # -------------------------------
         # LOAD ONTOLOGY
@@ -3008,13 +3170,20 @@ def gene_ontology_analysis():
         # ENRICHMENT ANALYSIS
         # -------------------------------
         logging.info("[GO] Running GOEnrichmentStudy ...")
-        from goatools.goea.go_enrichment_ns import GOEnrichmentStudy  # ✅ correct for v1.4.12
+        # NOTE: this name re-exports the PLAIN GOEnrichmentStudy (NOT the
+        # per-namespace GOEnrichmentStudyNS). Benjamini-Hochberg FDR is therefore
+        # computed ONCE over BP+CC+MF pooled as a single family, before the
+        # namespace split and the depth/max_terms filters below. This is a valid
+        # single-experiment correction but is not per-aspect; q-values will not
+        # match tools that correct each namespace separately.
+        from goatools.goea.go_enrichment_ns import GOEnrichmentStudy
 
         try:
             goea = GOEnrichmentStudy(
                 list(bg_set),   # universe
                 assoc_bg,       # gene -> set(GO)
                 godag,
+                propagate_counts=True,  # explicit: annotations propagate up the GO DAG
                 methods=['fdr_bh'],
                 log=None
             )
@@ -3046,7 +3215,9 @@ def gene_ontology_analysis():
         # -------------------------------
         def top_by_ns(ns, N=None):
             arr = [r for r in sig if r.goterm.namespace == ns]
-            arr = sorted(arr, key=lambda x: (x.p_fdr_bh, x.p_uncorrected))
+            # GO id as final tie-breaker => deterministic ordering at the max_terms
+            # cutoff (terms with identical p-values no longer swap between runs).
+            arr = sorted(arr, key=lambda x: (x.p_fdr_bh, x.p_uncorrected, x.GO))
             return arr[:N] if (N and isinstance(N, int)) else arr
 
         bp_results = top_by_ns("biological_process", max_terms)
@@ -3054,6 +3225,13 @@ def gene_ontology_analysis():
         mf_results = top_by_ns("molecular_function", max_terms)
 
         logging.info(f"[GO] Split by namespace: BP={len(bp_results)}, CC={len(cc_results)}, MF={len(mf_results)}")
+
+        # Direction of each term from the two-sided Fisher test: 'e' = over-
+        # represented (enriched), 'p' = under-represented (depleted / purified).
+        # Surfaced explicitly so depleted terms are never mislabeled as enriched.
+        _DIRECTION = {"e": "enriched", "p": "depleted"}
+        def _direction(r):
+            return _DIRECTION.get(getattr(r, "enrichment", None), "n/a")
 
         # NOTE (2026-05-25): the matplotlib GridSpec block that generated
         # static/plots/go_analysis_figure.png was removed here. Phase C
@@ -3071,13 +3249,17 @@ def gene_ontology_analysis():
                     "GO": [r.GO for r in res],
                     "name": [r.name for r in res],
                     "NS": [r.goterm.namespace for r in res],
-                    "-log10(FDR)": [(-np.log10(r.p_fdr_bh)) for r in res],
+                    "Direction": [_direction(r) for r in res],
+                    "-log10(FDR)": [
+                        ((-float(np.log10(r.p_fdr_bh))) if (r.p_fdr_bh and r.p_fdr_bh > 0) else 0.0)
+                        for r in res
+                    ],
                     "study_count": [r.study_count for r in res],
                     "study_n": [r.study_n for r in res],
                     "pop_count": [r.pop_count for r in res],
                     "pop_n": [r.pop_n for r in res],
                 }) if res else pd.DataFrame(columns=[
-                    "GO","name","NS","-log10(FDR)","study_count","study_n","pop_count","pop_n"
+                    "GO","name","NS","Direction","-log10(FDR)","study_count","study_n","pop_count","pop_n"
                 ])
                 df.to_excel(xw, sheet_name=ns, index=False)
             # Provenance + run settings, so a downloaded report is reproducible.
@@ -3104,15 +3286,40 @@ def gene_ontology_analysis():
                 ("GOA source",                   g.get("source")),
                 ("GOA files used",               g.get("n_files")),
                 ("Evidence preset",              evidence_preset),
-                ("Counting mode",                counting_mode),
+                ("Counting mode requested",      counting_mode_requested),
+                ("Counting mode applied",        counting_mode),
+                ("FDR method",                   "Benjamini-Hochberg (fdr_bh)"),
+                ("FDR scope",                    "pooled across BP/CC/MF (single family); applied before depth & max_terms filters"),
+                ("Annotation propagation",       "enabled (propagate_counts=True)"),
                 ("FDR threshold",                p_value_threshold),
                 ("Min depth",                    min_depth),
                 ("Foreground units",             len(fg_in_bg)),
                 ("Background units",             len(bg_set)),
             ]
+            if counting_mode == 'per_orthogroup':
+                prov_rows.append((
+                    "Background universe note",
+                    "per_orthogroup: background = orthogroups in 'Groups of Interest' "
+                    "with an annotated member (not all GOA proteins)"))
             pd.DataFrame(prov_rows, columns=["key", "value"]).to_excel(
                 xw, sheet_name="Provenance", index=False)
         logging.info(f"[GO] 📑 Excel generated: {out_xlsx}")
+
+        # Version-drift guard: the OBO and the GOA files are downloaded
+        # independently. If the GOA references a GO release newer/older than the
+        # loaded OBO, a few terms silently drop from the testable universe.
+        try:
+            _obo_v = (onto or {}).get("data_version")
+            _goa_v = g.get("go_version")
+            if isinstance(_goa_v, list):
+                _goa_v = _goa_v[0] if _goa_v else None
+            if _obo_v and _goa_v and str(_obo_v) != str(_goa_v):
+                warnings.append(
+                    f"GO ontology version ({_obo_v}) differs from the GOA GO-version "
+                    f"({_goa_v}); a few annotations referencing terms outside the loaded "
+                    f"ontology may be dropped.")
+        except Exception:
+            pass
 
         # -------------------------------
         # PER-TERM EVIDENCE BREAKDOWN (for table chips in the UI)
@@ -3159,6 +3366,7 @@ def gene_ontology_analysis():
                     "pop_count": r.pop_count,
                     "pop_n": r.pop_n,
                     "enrichment": r.enrichment if hasattr(r, 'enrichment') else None,
+                    "direction": _direction(r),
                     "study_items": study_items,
                     "evidence_breakdown": evidence_breakdown_for_term(r.GO, study_items),
                 })
@@ -3183,6 +3391,10 @@ def gene_ontology_analysis():
         # power and returns nothing — which looks broken unless we explain it.
         total_sig = len(bp_results) + len(cc_results) + len(mf_results)
         foreground_units = len(fg_in_bg)
+        if foreground_units and foreground_units < 5:
+            warnings.append(
+                f"Only {foreground_units} foreground unit(s) entered the test — "
+                f"statistical power is very low; treat any result as exploratory.")
         notice = None
         if counting_mode == 'per_orthogroup' and total_sig == 0:
             notice = (
@@ -3208,10 +3420,12 @@ def gene_ontology_analysis():
                            "settings": session['go_settings'],
                            "counting": {
                                "mode": counting_mode,
+                               "mode_requested": counting_mode_requested,
                                "foreground_units": foreground_units,
                                "background_units": len(bg_set),
                            },
                            "notice": notice,
+                           "warnings": warnings,
                        })
 
     except Exception as e:
@@ -3237,6 +3451,12 @@ def download_go_enrichment_excel():
         context.append(f"fg{fg_size}")
     if evidence_preset:
         context.append(f"evidence-{evidence_preset}")
+    fmt = (request.args.get("fmt") or "xlsx").lower()
+    if fmt in ("csv", "tsv"):
+        sep = "," if fmt == "csv" else "\t"
+        buf = _xlsx_to_delimited_zip(excel_path, sep)
+        dl_name = descriptive_filename("GOenrichment-results", "zip", context=context + [fmt])
+        return send_file(buf, mimetype="application/zip", as_attachment=True, download_name=dl_name)
     dl_name = descriptive_filename(
         "GOenrichment-results", "xlsx", context=context,
     )
@@ -3310,7 +3530,28 @@ def generate_go_image():
 
 
 if __name__ == "__main__":
-    port = find_free_port()
+    # Seed the raw catalogue JSON from the committed .gz baseline if missing
+    # (fresh clone, no Git LFS). Decompresses once; no-op on subsequent runs.
+    try:
+        ensure_catalogue_present(JSON_PATH)
+    except Exception as e:
+        logging.warning(f"Could not seed catalogue from .gz baseline: {e}")
+
+    # Warm the slim species-index cache in the background so the first species-page
+    # load doesn't pay the one-time build (load catalogue + project + gzip ~ a few
+    # seconds). Daemon thread: never blocks startup or delays shutdown.
+    def _warm_species_index():
+        try:
+            _build_species_index_gz()
+            logging.info("Species index cache warmed.")
+        except Exception as e:
+            logging.warning(f"Could not warm species index: {e}")
+    threading.Thread(target=_warm_species_index, daemon=True).start()
+    # Port: honour ORTHOGATHER_PORT if set (handy for tooling/deploys), else pick
+    # a free one as before. ORTHOGATHER_NO_BROWSER=1 suppresses the auto-open tab.
+    env_port = os.environ.get("ORTHOGATHER_PORT")
+    port = int(env_port) if env_port and env_port.isdigit() else find_free_port()
     logging.info(f"🚀 Starting Flask on port {port}")
-    threading.Timer(1.25, open_browser, args=(port,)).start()
+    if os.environ.get("ORTHOGATHER_NO_BROWSER") != "1":
+        threading.Timer(1.25, open_browser, args=(port,)).start()
     app.run(debug=True, use_reloader=False, port=port)
