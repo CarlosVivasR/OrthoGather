@@ -82,7 +82,7 @@
 
           <figure class="tutorial-figure">
             <img src="{{ url_for('static', filename='images/tutorial/tut_00_home.png') }}"
-                 alt="OrthoGather home page showing the Preselected, Pick species and Upload entry-point cards"
+                 alt="OrthoGather home page showing the New Analysis, Preselected Dataset and External Upload entry-point cards"
                  loading="lazy" />
             <figcaption>Home page with the three entry points: New Analysis, Preselected Dataset, and External Upload.</figcaption>
           </figure>
@@ -181,9 +181,9 @@
             the GO literature, but in this app "size of an orthogroup" always means
             "number of proteins it contains".
           </p>
-          <p>Both are interactive Plotly charts. Hover for exact counts; use the camera icon
-            (top right of the chart) to export PNG/SVG. The "?" button on each figure shows a
-            popover with what the figure means and how it's computed.</p>
+          <p>Both are interactive Plotly charts. Hover for exact counts; use each figure's
+            <strong>Image</strong> menu (PNG at 2× scale, or SVG vector) to export, or the
+            <strong>Data</strong> menu to grab the underlying table as Excel/CSV/TSV/JSON.</p>
 
           <figure class="tutorial-figure">
             <img src="{{ url_for('static', filename='images/tutorial/tut_01_protein_figures.png') }}"
@@ -194,13 +194,17 @@
 
           <h3>Species picker &amp; action bar</h3>
           <p>
-            Below Figure 2 you'll find a chip-based species picker. Click a chip to include
-            a species in the comparison; click again to remove it. The chips are the same
-            ones that drive Figures 3, 4, 5 and 6.
+            Below Figure 2, the <strong>Compare specific species</strong> card holds a chip-based
+            species picker. Narrow the list with the <em>Filter species…</em> box, then click a
+            chip to include a species in the comparison; click again to remove it. A counter shows
+            how many are selected, and <strong>Clear</strong> resets the selection. These chips are
+            the same ones that drive Figures 3, 4, 5 and 6.
           </p>
-          <p>The action bar offers: <strong>Run UpSet</strong>, <strong>Download Excel</strong>,
-            <strong>Save view</strong>, and <strong>Copy link</strong> (so you can share the exact
-            selection with a colleague).</p>
+          <p>Once at least two species are selected, click <strong>Generate UpSet figures</strong>
+            to render Figures 3 and 4. There is no separate "save" or "share" button: each figure
+            instead carries its own <strong>Data</strong> menu (Excel, CSV, TSV, JSON), an
+            <strong>Image</strong> menu (PNG at 2× scale, or SVG vector) and a full-screen
+            button.</p>
 
           <figure class="tutorial-figure">
             <img src="{{ url_for('static', filename='images/tutorial/tut_02_protein_species_picker.png') }}"
@@ -214,10 +218,17 @@
             UpSet plots show set intersections without the visual chaos of large Venn diagrams.
             Each row at the bottom-left is a species; the matrix in the middle shows which
             combination ("which species share this set?"); the bar at the top is the count.
+            OrthoGather draws two complementary views:
           </p>
-          <p>Hover a bar to see the exact orthogroup count, click to drill into that intersection.
-            Use the camera icon to download the figure, or the data icon to grab the underlying
-            table as CSV/TSV/JSON/XLSX.</p>
+          <ul>
+            <li><strong>Figure 3 — UpSet of shared orthogroups</strong>: each bar counts the
+              <em>orthogroups</em> in that species combination.</li>
+            <li><strong>Figure 4 — UpSet of shared proteins</strong>: the same intersections, but
+              weighted by total <em>proteins</em> rather than orthogroup count.</li>
+          </ul>
+          <p>Hover a bar to see the exact count, click to drill into that intersection.
+            Use each figure's <strong>Image</strong> menu (PNG/SVG) to download the figure, or the
+            <strong>Data</strong> menu to grab the underlying table as Excel/CSV/TSV/JSON.</p>
 
           <figure class="tutorial-figure">
             <img src="{{ url_for('static', filename='images/tutorial/tut_03_protein_upset.png') }}"
@@ -296,9 +307,16 @@
           <h3>2. Download GOA</h3>
           <p>
             Clicking <strong>Download GOA files</strong> pulls the matched annotation files from
-            EBI and builds an Excel summary (<em>Gene_Ontology_Analysis.xlsx</em>) listing every
-            orthogroup, its members, and their annotation status. This Excel is the on-disk
-            record of which proteins carry GO terms.
+            EBI and builds a summary listing every orthogroup, its members, and their annotation
+            status. Export it from the <strong>Download GOA tables</strong> control as Excel
+            (<em>Gene_Ontology_Analysis.xlsx</em>), <strong>CSV</strong> or <strong>TSV</strong> —
+            the on-disk record of which proteins carry GO terms.
+          </p>
+          <p>
+            Once the download finishes, an <strong>Annotation overview</strong> panel appears: a
+            quick sanity check on how well-annotated your dataset is, with a distribution chart of
+            the share of proteins per orthogroup that carry GO terms. Use it to judge whether an
+            enrichment will have enough signal <em>before</em> you run it.
           </p>
           <h4>GOA, GAF, UniProt: who provides what?</h4>
           <ul>
@@ -411,6 +429,14 @@
             <strong>Plotly bar chart</strong>, the <strong>re-run bar</strong>, and the
             <strong>interactive table</strong>.
           </p>
+          <p class="tutorial-note">
+            <strong>Enriched vs depleted:</strong> the test is two-sided, so a term can be
+            <em>enriched</em> (▲ over-represented in your foreground) or <em>depleted</em>
+            (▼ purified, under-represented). The chart bars show magnitude only, so depleted
+            terms are drawn in a distinct warm colour and flagged in the <strong>Direction</strong>
+            column of the table — a tall bar is never silently read as "enriched". The results
+            table is headed <em>"Enriched &amp; depleted terms"</em> for this reason.
+          </p>
 
           <h4>Coverage banner</h4>
           <p>
@@ -464,6 +490,8 @@
               see what the column means (e.g. <em>"study_count / study_n: how many of your
               foreground proteins are annotated with this term, out of how many were tested"</em>).</li>
             <li><strong>Sort</strong>: click any column header to sort ascending / descending.</li>
+            <li><strong>Direction column</strong>: each row is tagged ▲ <em>enriched</em> or
+              ▼ <em>depleted</em>, matching the warm-coloured bars in the chart above.</li>
             <li><strong>Filter</strong>: search box (free text on GO ID + name), namespace
               chips (All / BP / CC / MF), FDR and Depth numeric inputs all update the
               table live.</li>
