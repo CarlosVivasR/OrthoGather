@@ -3,9 +3,34 @@ Tiny network/UI helpers used by app.py at startup time only.
 """
 from __future__ import annotations
 
+import os
 import socket
 import urllib.request
 import webbrowser
+from pathlib import Path
+
+# Where the running app advertises the TCP port it actually bound to.
+# The Windows launcher reads this (via \\wsl.localhost\Ubuntu\root\.orthogather\port.txt)
+# so it opens the *real* port even when app.py had to fall back off 5000.
+# ~/.orthogather/ is the app's existing per-user state dir (see orthogather/config.py).
+PORT_FILE = Path.home() / ".orthogather" / "port.txt"
+
+
+def write_port_file(port: int, path: Path = PORT_FILE) -> None:
+    """Atomically record the port the app is about to serve on.
+
+    Must be called BEFORE ``app.run()`` (which blocks forever) so the launcher
+    can discover the port. Written atomically (tmp + os.replace) so a poller on
+    the Windows side never reads a half-written file. Best-effort: a failure
+    here must never stop the app from starting.
+    """
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".txt.tmp")
+        tmp.write_text(str(port), encoding="utf-8")
+        os.replace(tmp, path)
+    except Exception:
+        pass
 
 
 def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:

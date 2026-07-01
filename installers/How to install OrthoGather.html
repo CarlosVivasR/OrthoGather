@@ -105,24 +105,26 @@
 
     <div class="dl">
       <i class="fa-brands fa-apple" style="font-size:26px;color:var(--navy)"></i>
-      <div class="file"><b>Install OrthoGather.command</b><span>Works on all Macs (Apple Silicon &amp; Intel)</span></div>
-      <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
+      <div class="file"><b>Install OrthoGather (Mac).zip</b><span>Works on all Macs (Apple Silicon &amp; Intel)</span></div>
+      <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases/latest/download/Install-OrthoGather-Mac.zip" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
     </div>
 
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <h3>Download the installer</h3>
-        <p>Click the <span class="kbd">Download</span> button above and save <b>Install OrthoGather.command</b> (it usually lands in your <b>Downloads</b> folder).</p>
+        <h3>Download &amp; unzip</h3>
+        <p>Click the <span class="kbd">Download</span> button above to save <b>Install OrthoGather (Mac).zip</b> (it usually lands in your <b>Downloads</b> folder). Then <b>double-click the .zip</b> to unzip it — you'll get a file called <b>Install OrthoGather.command</b>.</p>
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <h3>Open it (the first time, right-click → Open)</h3>
-        <p>Find the file, <span class="kbd">right-click</span> it (or Control-click) and choose <span class="kbd">Open</span>. A box says it's from an unidentified developer — click <span class="kbd">Open</span> again.</p>
-        <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div>This security step only happens the first time. It's normal for free tools that aren't from the App Store.</div></div>
+        <h3>Open it — get past the security warning</h3>
+        <p>Double-click <b>Install OrthoGather.command</b>. macOS shows a warning that it <b>“could not verify it is free of malware”</b>. That's only because the app isn't from the App Store — it's not a real problem. Get past it like this:</p>
+        <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>The reliable way (works on every Mac):</b> click whatever button closes the warning (it may say <span class="kbd">Done</span>, <span class="kbd">OK</span> or <span class="kbd">Cancel</span> — none of them block the app), then open <span class="kbd">System Settings → Privacy &amp; Security</span>, scroll down to the line mentioning <b>Install OrthoGather.command</b>, and click <span class="kbd">Open Anyway</span> (confirm once more if asked).</div></div>
+        <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>On older Macs</b> you can instead <span class="kbd">right-click</span> (or Control-click) the file → <span class="kbd">Open</span> → <span class="kbd">Open</span>. Newer macOS versions may not offer this, so use the method above if you don't see it.</div></div>
+        <div class="callout c-ok"><i class="fa-solid fa-circle-check"></i><div>This security step only happens <b>once</b>. It's normal for free tools that aren't from the App Store.</div></div>
       </div>
     </div>
 
@@ -157,17 +159,18 @@
 
     <div class="dl">
       <i class="fa-brands fa-windows" style="font-size:24px;color:var(--navy)"></i>
-      <div class="file"><b>Install OrthoGather.bat</b><span>Windows 10 (2020+) or Windows 11</span></div>
-      <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases" target="_blank" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
+      <div class="file"><b>Install OrthoGather (Windows).zip</b><span>Windows 10 (2020+) or Windows 11</span></div>
+      <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases/latest/download/Install-OrthoGather-Windows.zip" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
     </div>
 
-    <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>Why Windows is a little different:</b> the science engine (OrthoFinder) only runs on Linux, so the installer quietly sets up a small Linux inside Windows (called <b>WSL</b>). You don't have to do anything — it handles it, but it needs <b>one restart</b>.</div></div>
+    <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>Why Windows is a little different:</b> the science engine (OrthoFinder) only runs on Linux, so the installer quietly sets up a small Linux inside Windows (called <b>WSL</b>). It handles almost everything for you — it just needs <b>one restart</b> and (the first time) a quick one-time Linux username setup.</div></div>
 
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <h3>Download the installer</h3>
-        <p>Click <span class="kbd">Download</span> above and save <b>Install OrthoGather.bat</b>.</p>
+        <h3>Download &amp; unzip</h3>
+        <p>Click <span class="kbd">Download</span> above to save <b>Install OrthoGather (Windows).zip</b>. Then <b>right-click the .zip → Extract All</b> to unzip it into a real folder, open that folder, and you'll find <b>Install OrthoGather.bat</b>.</p>
+        <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>Do extract it first</b> — don't run the installer straight from inside the zip preview window, or it can fail. Use <b>Extract All</b>, then open the extracted folder.</div></div>
       </div>
     </div>
 
@@ -191,9 +194,11 @@
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <h3>It continues by itself</h3>
-        <p>After the restart the installer <b>picks up automatically</b>. If a Linux (Ubuntu) window asks you to <b>create a username and password</b>, type a simple one and remember it. Then it downloads everything (<b>~1–2 GB, about 5–15 minutes</b>).</p>
-        <div class="callout c-warn"><i class="fa-solid fa-triangle-exclamation"></i><div><b>The window will look frozen at times — that's completely normal, it is NOT stuck.</b> Do not close it or touch anything until you see <b>one of two things</b>: an <b>error message</b>, or the words <b>“OrthoGather installed!”</b>. Then you're done.</div></div>
+        <h3>It continues by itself — Ubuntu may ask for a username</h3>
+        <p>After the restart the installer <b>picks up automatically</b>. A black <b>Ubuntu</b> window may appear asking you to <b>create a username and password</b> — this is a normal, one-time Linux step.</p>
+        <div class="callout c-warn"><i class="fa-solid fa-triangle-exclamation"></i><div><b>When it asks for the password, you won't see anything as you type</b> — no dots, no stars. That's normal on Linux, the keyboard <i>is</i> working. Type a simple password, press <span class="kbd">Enter</span>, then type it again to confirm. <b>Remember this username and password</b> — you may need it again later. If it says the passwords don't match, don't worry — it just asks you to type them again.</div></div>
+        <div class="callout c-ok"><i class="fa-solid fa-circle-check"></i><div><b>If you accidentally close the Ubuntu window</b>, don't worry — just run the installer again and it resumes where it left off.</div></div>
+        <p>Then it downloads everything (<b>~1–2 GB, about 5–15 minutes</b>). <b>It will look frozen at times — that's completely normal, it is NOT stuck.</b> Don't close it until you see an <b>error message</b> or the words <b>“OrthoGather installed!”</b>.</p>
       </div>
     </div>
 
@@ -242,11 +247,15 @@
 
   <details>
     <summary>macOS won't let me open the file</summary>
-    <div class="det">Don't double-click — instead <b>right-click</b> (or Control-click) the file and choose <b>Open</b>, then <b>Open</b> again in the box. If you still can't, go to <b>System Settings → Privacy &amp; Security</b>, scroll down, and click <b>Open Anyway</b>.</div>
+    <div class="det"><b>Way 1 (easiest):</b> go to <b>System Settings → Privacy &amp; Security</b>, scroll down to the line about the file, and click <b>Open Anyway</b>.<br><br><b>Way 2 (older Macs):</b> right-click (or Control-click) the file → <b>Open</b> → <b>Open</b> again.<br><br><b>Way 3 (last resort, Terminal):</b> if both are blocked, open <b>Terminal</b>, paste the line below and press Return (adjust the path if the file isn't in Downloads):<br><code>xattr -dr com.apple.quarantine ~/Downloads/"Install OrthoGather.command" &amp;&amp; chmod +x ~/Downloads/"Install OrthoGather.command"</code></div>
   </details>
   <details>
     <summary>Windows shows "Windows protected your PC"</summary>
     <div class="det">Click <b>More info</b>, then <b>Run anyway</b>. This appears because the installer isn't code-signed yet; it's safe to run.</div>
+  </details>
+  <details>
+    <summary>My antivirus blocked or deleted the download</summary>
+    <div class="det">Some managed or work computers (for example with <b>Sophos</b>) block downloading program files. That's why OrthoGather is given to you as a <b>.zip</b>, which is normally allowed. If the download is still blocked, or the file disappears after downloading, it's your organisation's security policy stopping it — ask your IT support to allow it, or contact Carlos for another way to get the file.</div>
   </details>
   <details>
     <summary>It seems frozen during the first install</summary>
@@ -254,7 +263,7 @@
   </details>
   <details>
     <summary>The browser didn't open</summary>
-    <div class="det">Open your web browser yourself and go to <b>http://localhost:5000</b> (Windows) or the address shown in the window (Mac). Make sure the small OrthoGather window is still open.</div>
+    <div class="det">Look at the small OrthoGather window — it prints the exact address to open (for example <b>http://localhost:5000</b>; it may be a different number if 5000 was busy). Type that address into your web browser. Make sure that window stays open.</div>
   </details>
 
 </main>
@@ -276,6 +285,21 @@
       window.scrollTo({top:0,behavior:'smooth'});
     });
   });
+
+  // Pre-select the tab matching the visitor's operating system (they can still
+  // switch manually). Falls back to leaving the default (Mac) selected.
+  (function(){
+    const ua=(navigator.userAgent||'').toLowerCase();
+    // Exclude touch devices from the Mac match: iPadOS spoofs "Macintosh" in
+    // its UA but can't run a desktop installer, so don't auto-route it to Mac.
+    const os=/windows/.test(ua)?'win':((/mac/.test(ua)&&!('ontouchend' in document))?'mac':null);
+    if(!os) return;
+    const tab=document.querySelector('.os-tab[data-os="'+os+'"]');
+    if(!tab) return;
+    document.querySelectorAll('.os-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.os-pane').forEach(p=>p.classList.toggle('active',p.dataset.pane===os));
+  })();
 </script>
 </body>
 </html>

@@ -43,3 +43,7 @@ tasks/
 static/mockups/
 templates/*.bak
 *.bak
+
+# Build output from installers/packaging/build_installer_zips.sh (regenerate
+# locally / in CI; only the unzipped sources under installers/ are versioned)
+installers/packaging/dist/

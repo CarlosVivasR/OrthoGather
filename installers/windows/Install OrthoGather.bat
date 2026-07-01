@@ -33,14 +33,18 @@ echo OrthoFinder only runs on Linux, so OrthoGather runs inside WSL
 echo (a small Linux that Windows provides). Setting that up for you.
 echo.
 
-REM ---- Is WSL present with a distro? ----------------------------------------
+REM ---- Is WSL present, and is UBUNTU specifically installed? -----------------
+REM We must check for Ubuntu itself, NOT just "any distro": a user may already
+REM have WSL configured with a different distro (Debian, Fedora...). Since we run
+REM apt-get and target -d Ubuntu, we need Ubuntu present - otherwise we'd charge
+REM into phase 2 and fail with "no distribution named Ubuntu". (Tester feedback.)
 set "HASWSL="
 wsl --status >nul 2>&1 && set "HASWSL=1"
-set "HASDISTRO="
-for /f "usebackq delims=" %%d in (`wsl -l -q 2^>nul`) do if not "%%d"=="" set "HASDISTRO=1"
+set "HASUBUNTU="
+wsl -d Ubuntu -u root -- true >nul 2>&1 && set "HASUBUNTU=1"
 
 if not defined HASWSL    goto install_wsl
-if not defined HASDISTRO goto install_wsl
+if not defined HASUBUNTU goto install_wsl
 goto phase2
 
 :install_wsl
@@ -53,8 +57,18 @@ echo.
 echo ============================================================
 echo   WSL installed.  Please RESTART your computer now.
 echo   After the restart this installer continues automatically.
-echo   (Ubuntu may ask you to pick a username + password the first
-echo    time it opens - choose a simple one and remember it.)
+echo ============================================================
+echo.
+echo   IMPORTANT - the first time Ubuntu opens, a black window will
+echo   ask you to CREATE A USERNAME AND PASSWORD. This is a normal,
+echo   one-time step. Don't panic and don't close it.
+echo     - Type a short username (for example: ortho) and press Enter.
+echo     - Type a password. You will NOT see anything as you type
+echo       (no dots, no stars) - that is normal on Linux. Press Enter,
+echo       then type the same password again to confirm.
+echo   Remember this username and password - you may need it again later.
+echo   If you accidentally CLOSE the Ubuntu window, just run this
+echo   installer again - it picks up where it left off.
 echo ============================================================
 echo.
 pause
@@ -66,7 +80,7 @@ echo (first run downloads Python, OrthoFinder and dependencies - a few minutes)
 echo.
 REM Run the Linux setup script as root (no extra prompts). It downloads the app,
 REM installs Miniforge + the conda env with OrthoFinder, and writes a launcher.
-wsl -u root -- bash -lc "apt-get update -y && apt-get install -y curl && curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused 'https://raw.githubusercontent.com/CarlosVivasR/OrthoGather/main/installers/common/setup_linux_env.sh' -o /tmp/og_setup.sh && bash /tmp/og_setup.sh"
+wsl -d Ubuntu -u root -- bash -lc "apt-get update -y && apt-get install -y curl && curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused 'https://raw.githubusercontent.com/CarlosVivasR/OrthoGather/main/installers/common/setup_linux_env.sh' -o /tmp/og_setup.sh && bash /tmp/og_setup.sh"
 if %errorlevel% NEQ 0 (
   echo.
   echo *** Setup failed inside WSL. See the messages above. ***
@@ -85,16 +99,24 @@ set "OGICON=%OGHOME%\OrthoGather.ico"
 copy /Y "\\wsl.localhost\Ubuntu\root\OrthoGather\installers\assets\OrthoGather.ico" "%OGICON%" >nul 2>&1
 if not exist "%OGICON%" copy /Y "\\wsl$\Ubuntu\root\OrthoGather\installers\assets\OrthoGather.ico" "%OGICON%" >nul 2>&1
 
-REM The actual runner: starts the app in WSL on a fixed port, opens the browser.
+REM ---- Install the launcher (static, version-controlled runner) -------------
+REM The runner waits for the app's REAL port (written to ~/.orthogather/port.txt
+REM inside Ubuntu) and opens the browser there - so it works even if port 5000
+REM was busy. Copy it from the WSL checkout; modern path first, legacy fallback.
 set "RUNNER=%OGHOME%\OrthoGather-run.bat"
-> "%RUNNER%" echo @echo off
->> "%RUNNER%" echo title OrthoGather
->> "%RUNNER%" echo echo Starting OrthoGather... a browser tab opens in a few seconds.
->> "%RUNNER%" echo start "" /b wsl -u root -- bash -lc "ORTHOGATHER_PORT=5000 ORTHOGATHER_NO_BROWSER=1 ~/OrthoGather/run_orthogather.sh"
->> "%RUNNER%" echo timeout /t 12 /nobreak ^>nul
->> "%RUNNER%" echo start "" http://localhost:5000
->> "%RUNNER%" echo echo OrthoGather is running. Close this window to stop it.
->> "%RUNNER%" echo pause ^>nul
+copy /Y "\\wsl.localhost\Ubuntu\root\OrthoGather\installers\windows\OrthoGather-run.bat" "%RUNNER%" >nul 2>&1
+if not exist "%RUNNER%" copy /Y "\\wsl$\Ubuntu\root\OrthoGather\installers\windows\OrthoGather-run.bat" "%RUNNER%" >nul 2>&1
+REM Fallback: if the copy failed, write a minimal runner so the shortcut still works.
+if not exist "%RUNNER%" (
+  > "%RUNNER%" echo @echo off
+  >> "%RUNNER%" echo title OrthoGather
+  >> "%RUNNER%" echo echo Starting OrthoGather... a browser tab opens in a few seconds.
+  >> "%RUNNER%" echo start "" /b wsl -d Ubuntu -u root -- bash -lc "ORTHOGATHER_PORT=5000 ORTHOGATHER_NO_BROWSER=1 ~/OrthoGather/run_orthogather.sh"
+  >> "%RUNNER%" echo timeout /t 12 /nobreak ^>nul
+  >> "%RUNNER%" echo start "" "http://localhost:5000"
+  >> "%RUNNER%" echo echo OrthoGather is running. Close this window to stop it.
+  >> "%RUNNER%" echo pause ^>nul
+)
 
 REM Desktop shortcut with the logo icon (falls back to default icon if .ico missing).
 powershell -NoProfile -Command ^

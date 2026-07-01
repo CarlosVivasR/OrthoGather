@@ -58,6 +58,7 @@ from orthogather.utils.network import (
     open_browser,
     is_port_in_use,
     is_orthogather_running,
+    write_port_file,
 )
 
 # ------------------------
@@ -3579,6 +3580,9 @@ if __name__ == "__main__":
         if is_port_in_use(port):
             if is_orthogather_running(port):
                 logging.info(f"OrthoGather already running on port {port}; reusing it.")
+                # Refresh the advertised port so this launcher's poller still
+                # finds the already-running instance (same port) and opens it.
+                write_port_file(port)
                 print(
                     "\n✅ OrthoGather is already running — opening it in your browser.\n"
                     f"   (http://127.0.0.1:{port} — no need to start it twice.)\n"
@@ -3591,6 +3595,10 @@ if __name__ == "__main__":
             port = find_free_port()
     else:
         port = find_free_port()
+    # Advertise the port we actually bound to BEFORE app.run() (which blocks
+    # forever) so the Windows launcher opens the real URL even when we fell back
+    # off 5000. On macOS the launcher ignores this and app.py opens the browser.
+    write_port_file(port)
     logging.info(f"🚀 Starting Flask on port {port}")
     if not no_browser:
         threading.Timer(1.25, open_browser, args=(port,)).start()
