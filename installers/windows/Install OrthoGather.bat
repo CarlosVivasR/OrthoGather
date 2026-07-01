@@ -239,8 +239,11 @@ echo   - that's normal. Please leave this window open.
 echo.
 call :log "Running Linux setup script."
 wsl -d Ubuntu -u root -- bash -c "apt-get update -y && apt-get install -y curl && curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused '%SETUP_URL%' -o /tmp/og_setup.sh && bash /tmp/og_setup.sh"
-if errorlevel 1 (
-  call :fail "The Linux setup step didn't finish." "This is usually a dropped internet connection. Just run this installer again - it resumes from here. If it keeps failing, send Carlos the log: %LOG%"
+REM Check for EXACTLY 0: wsl returns negative codes that 'if errorlevel 1' misses.
+set "SETUP_RC=!errorlevel!"
+call :log "phase2 setup rc=!SETUP_RC!"
+if not "!SETUP_RC!"=="0" (
+  call :fail "The Linux setup step didn't finish (code !SETUP_RC!)." "Usually a dropped internet connection, or Ubuntu wasn't ready. Just run this installer again - it resumes from here. If it keeps failing, send Carlos the log: %LOG%"
   goto :eof
 )
 call :ok "OrthoGather installed inside Linux."
@@ -378,10 +381,12 @@ call :fail "Couldn't turn on the Windows feature '%FEAT%'." "Please open 'Turn W
 exit /b 1
 
 :ubuntu_healthy
-REM Sets UBUNTU_OK=1 if Ubuntu is installed and can actually run a command.
+REM Sets UBUNTU_OK=1 only if Ubuntu is installed AND can actually run a command.
+REM wsl.exe returns a NEGATIVE exit code when the distro is missing, and cmd's
+REM 'if errorlevel 1' does NOT catch negatives - so require the code to be EXACTLY 0.
 set "UBUNTU_OK="
 wsl -d Ubuntu -u root -- true >nul 2>&1
-if not errorlevel 1 set "UBUNTU_OK=1"
+if "!errorlevel!"=="0" set "UBUNTU_OK=1"
 exit /b 0
 
 :diagnose_wsl

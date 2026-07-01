@@ -158,6 +158,27 @@ call :feat_decision "Disabled" "87"
 call :check "dism rc other means fail" "!OUTCOME!" "fail"
 
 echo.
+echo -- Group 9: exact-zero error check (WSL returns negative codes) --
+REM WSL exits with a NEGATIVE code when the distro is missing; 'if errorlevel 1'
+REM misses that. Verify the exact-zero check catches negative AND positive fails.
+cmd /c exit -1
+set "RC=!errorlevel!"
+echo   simulated wsl-missing exit code: "!RC!"
+set "CAUGHT=no"
+if not "!RC!"=="0" set "CAUGHT=yes"
+call :check "exact-zero check catches negative code" "!CAUGHT!" "yes"
+cmd /c exit 5
+set "RC=!errorlevel!"
+set "CAUGHT=no"
+if not "!RC!"=="0" set "CAUGHT=yes"
+call :check "exact-zero check catches positive code" "!CAUGHT!" "yes"
+cmd /c exit 0
+set "RC=!errorlevel!"
+set "OKZERO=no"
+if "!RC!"=="0" set "OKZERO=yes"
+call :check "exact-zero check passes on success" "!OKZERO!" "yes"
+
+echo.
 echo ============================================================
 echo  RESULT: !TESTS! tests, !FAILS! failures
 echo ============================================================
