@@ -1,0 +1,19 @@
+name: test-windows-installer
+
+# Validates the Windows installer/launcher cmd.exe logic on REAL Windows.
+# Runs on changes to the Windows installer, and on demand.
+on:
+  push:
+    paths:
+      - 'installers/windows/**'
+      - '.github/workflows/test-windows-installer.yml'
+  workflow_dispatch:
+
+jobs:
+  installer-logic:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer logic tests (cmd.exe)
+        shell: cmd
+        run: installers\windows\tests\test_installer_logic.bat

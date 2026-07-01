@@ -163,7 +163,7 @@
       <a class="btn" href="https://github.com/CarlosVivasR/OrthoGather/releases/latest/download/Install-OrthoGather-Windows.zip" rel="noopener"><i class="fa-solid fa-download"></i> Download</a>
     </div>
 
-    <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>Why Windows is a little different:</b> the science engine (OrthoFinder) only runs on Linux, so the installer quietly sets up a small Linux inside Windows (called <b>WSL</b>). It handles almost everything for you — it just needs <b>one restart</b> and (the first time) a quick one-time Linux username setup.</div></div>
+    <div class="callout c-info"><i class="fa-solid fa-circle-info"></i><div><b>Why Windows is a little different:</b> the science engine (OrthoFinder) only runs on Linux, so the installer quietly sets up a small Linux inside Windows (called <b>WSL</b>). It handles almost everything for you — it just needs <b>one restart</b> partway through, then reopens and continues on its own. No commands, no Linux username to create.</div></div>
 
     <div class="step">
       <div class="step-num">1</div>
@@ -186,19 +186,18 @@
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <h3>Restart when it asks</h3>
-        <p>It installs WSL and then says it needs a <b>restart</b>. Save your work and <span class="kbd">restart your PC</span>.</p>
+        <h3>Restart if it asks</h3>
+        <p>If the Linux components need turning on, the installer asks to <b>restart</b> — press <span class="kbd">Y</span> and it restarts for you (save your work first). After the restart it <b>reopens and continues by itself</b>. You don't have to do anything.</p>
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <h3>It continues by itself — Ubuntu may ask for a username</h3>
-        <p>After the restart the installer <b>picks up automatically</b>. A black <b>Ubuntu</b> window may appear asking you to <b>create a username and password</b> — this is a normal, one-time Linux step.</p>
-        <div class="callout c-warn"><i class="fa-solid fa-triangle-exclamation"></i><div><b>When it asks for the password, you won't see anything as you type</b> — no dots, no stars. That's normal on Linux, the keyboard <i>is</i> working. Type a simple password, press <span class="kbd">Enter</span>, then type it again to confirm. <b>Remember this username and password</b> — you may need it again later. If it says the passwords don't match, don't worry — it just asks you to type them again.</div></div>
-        <div class="callout c-ok"><i class="fa-solid fa-circle-check"></i><div><b>If you accidentally close the Ubuntu window</b>, don't worry — just run the installer again and it resumes where it left off.</div></div>
-        <p>Then it downloads everything (<b>~1–2 GB, about 5–15 minutes</b>). <b>It will look frozen at times — that's completely normal, it is NOT stuck.</b> Don't close it until you see an <b>error message</b> or the words <b>“OrthoGather installed!”</b>.</p>
+        <h3>It sets up Linux by itself</h3>
+        <p>The installer turns on the Windows Linux components, installs Ubuntu, and downloads everything it needs — <b>all automatically</b>. There's <b>no username or password to create</b>, and it shows you what it's doing at each step.</p>
+        <div class="callout c-warn"><i class="fa-solid fa-triangle-exclamation"></i><div>The download is <b>~1–2 GB and takes about 5–15 minutes</b>. <b>It will look frozen at times — that's completely normal, it is NOT stuck.</b> Leave the window open until you see an <b>error message</b> or the words <b>“OrthoGather is installed!”</b>.</div></div>
+        <div class="callout c-ok"><i class="fa-solid fa-circle-check"></i><div><b>If a window ever closes unexpectedly</b>, don't worry — just run the installer again. It saves its progress and resumes where it left off.</div></div>
       </div>
     </div>
 
@@ -256,6 +255,10 @@
   <details>
     <summary>My antivirus blocked or deleted the download</summary>
     <div class="det">Some managed or work computers (for example with <b>Sophos</b>) block downloading program files. That's why OrthoGather is given to you as a <b>.zip</b>, which is normally allowed. If the download is still blocked, or the file disappears after downloading, it's your organisation's security policy stopping it — ask your IT support to allow it, or contact Carlos for another way to get the file.</div>
+  </details>
+  <details>
+    <summary>Windows: it says it can't start Linux / virtualization is off</summary>
+    <div class="det">The installer checks this for you and tells you if it's the problem. Linux inside Windows needs <b>“virtualization”</b> switched on in your computer's <b>BIOS/UEFI</b> — this is the one thing an installer can't turn on for you. Restart the PC, open the BIOS (usually by tapping <b>F2</b>, <b>F10</b>, <b>DEL</b> or <b>ESC</b> as it powers on), find a setting named <b>Virtualization Technology</b>, <b>Intel VT-x</b>, <b>AMD-V</b> or <b>SVM</b>, set it to <b>Enabled</b>, save and exit, then run the installer again. If you get stuck, send Carlos the log file the installer saves at <b>%LOCALAPPDATA%\OrthoGather\install-log.txt</b>.</div>
   </details>
   <details>
     <summary>It seems frozen during the first install</summary>
