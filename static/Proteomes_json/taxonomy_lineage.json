@@ -2757,6 +2757,127 @@
       "fetched_at": "2026-05-27T11:43:15.600308+00:00",
       "source": "UniProt REST taxonomy",
       "source_release": "2026_01"
+    },
+    "571": {
+      "scientific_name": "Klebsiella oxytoca",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 3379134,
+          "name": "Pseudomonadati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 1224,
+          "name": "Pseudomonadota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1236,
+          "name": "Gammaproteobacteria",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 91347,
+          "name": "Enterobacterales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 543,
+          "name": "Enterobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 2890311,
+          "name": "Klebsiella/Raoultella group",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 570,
+          "name": "Klebsiella",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 571,
+          "name": "Klebsiella oxytoca",
+          "rank": "species"
+        }
+      ],
+      "fetched_at": "2026-08-04T10:56:30.856638+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_02"
+    },
+    "1303024": {
+      "scientific_name": "Mycobacteroides abscessus subsp. bolletii 50594",
+      "lineage": [
+        {
+          "taxon_id": 131567,
+          "name": "cellular organisms",
+          "rank": "no rank"
+        },
+        {
+          "taxon_id": 2,
+          "name": "Bacteria",
+          "rank": "domain"
+        },
+        {
+          "taxon_id": 1783272,
+          "name": "Bacillati",
+          "rank": "kingdom"
+        },
+        {
+          "taxon_id": 201174,
+          "name": "Actinomycetota",
+          "rank": "phylum"
+        },
+        {
+          "taxon_id": 1760,
+          "name": "Actinomycetes",
+          "rank": "class"
+        },
+        {
+          "taxon_id": 85007,
+          "name": "Mycobacteriales",
+          "rank": "order"
+        },
+        {
+          "taxon_id": 1762,
+          "name": "Mycobacteriaceae",
+          "rank": "family"
+        },
+        {
+          "taxon_id": 670516,
+          "name": "Mycobacteroides",
+          "rank": "genus"
+        },
+        {
+          "taxon_id": 36809,
+          "name": "Mycobacteroides abscessus",
+          "rank": "species"
+        },
+        {
+          "taxon_id": 319705,
+          "name": "Mycobacteroides abscessus subsp. bolletii",
+          "rank": "subspecies"
+        },
+        {
+          "taxon_id": 1303024,
+          "name": "Mycobacteroides abscessus subsp. bolletii 50594",
+          "rank": "strain"
+        }
+      ],
+      "fetched_at": "2026-08-04T10:56:31.055929+00:00",
+      "source": "UniProt REST taxonomy",
+      "source_release": "2026_02"
     }
   }
 }

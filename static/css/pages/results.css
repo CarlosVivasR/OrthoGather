@@ -427,6 +427,13 @@
   cursor: pointer;
 }
 .upset-copy-missing:hover { background: rgba(0,0,0,0.05); }
+.upset-not-found-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+.upset-not-found + .upset-not-found { margin-top: 6px; }
 
 /* IMPORTANT: use :not([hidden]) so the [hidden] attribute on the HTML element
    actually wins over our display rule. Plain `.upset-progress { display: ... }`

@@ -601,7 +601,12 @@
         });
         const payload = await res.json();
         if (!res.ok || !payload.ok) {
-          throw new Error(payload.error || 'Request failed');
+          // Surface the backend's real message/hint (respond_error JSON) —
+          // `payload.error` never existed, so this used to hide every reason.
+          throw new Error(
+            (payload.message || 'Request failed') +
+            (payload.hint ? ' ' + payload.hint : '')
+          );
         }
         lastUpsetPayload.fig3 = payload.fig3;
         lastUpsetPayload.fig4 = payload.fig4;
@@ -1133,6 +1138,8 @@
       '2': 'figure2-orthogroup-sharing',
       '3': 'figure3-upset-orthogroups',
       '4': 'figure4-upset-proteins',
+      '5': 'figure5-upset-orthogroups-filtered',
+      '6': 'figure6-upset-proteins-filtered',
     };
 
     /* Mirrors orthogather.utils.filenames on the backend:
@@ -1150,11 +1157,12 @@
       return parts.filter(Boolean).join("_") + (ext ? "." + slug(ext) : "");
     }
 
-    /* Pull the species count from the active UpSet selection (for Figs 3/4)
+    /* Pull the species count from the active UpSet selection (for Figs 3–6)
        or the global dataset species list (for Figs 1/2). */
     function _figureSpeciesCount(fig) {
-      if (fig === '3' || fig === '4') {
+      if (fig === '3' || fig === '4' || fig === '5' || fig === '6') {
         // Use the chips that are currently pressed in the UpSet picker.
+        // Figs 5/6 are filtered over the same species selection as 3/4.
         const picked = document.querySelectorAll('#upset-picker-chips [aria-pressed="true"]');
         if (picked.length) return picked.length;
       }
@@ -1189,13 +1197,14 @@
         });
         return;
       }
-      // Figures 3 & 4 are UpSetJS. For SVG we use UpSetJS.exportSVG (gives a
+      // Figures 3–6 are UpSetJS (3/4 always-on, 5/6 UniProt-filtered). For SVG
+      // we use UpSetJS.exportSVG (gives a
       // clean serialised SVG). For PNG we skip UpSetJS's built-in rasteriser
       // because it sizes the canvas off node.getBoundingClientRect() — which
       // returns the *visible* size when the SVG sits inside a horizontally
       // scrolling container. The PNG would come out truncated. We rasterise
       // ourselves using the SVG's intrinsic width/height attributes.
-      if (fig === '3' || fig === '4') {
+      if (fig === '3' || fig === '4' || fig === '5' || fig === '6') {
         const U = window.UpSetJS;
         const host = document.getElementById('upset-fig' + fig);
         const svg  = host && host.querySelector('svg');
@@ -1453,19 +1462,55 @@
       filterRunBtn.disabled = true;
 
       try {
+        const reqBody = {
+          species: Array.from(selected),
+          uniprot_ids: ids,
+        };
         const res = await fetch('/upset_data_filtered', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            species: Array.from(selected),
-            uniprot_ids: ids,
-          }),
+          body: JSON.stringify(reqBody),
         });
         const payload = await res.json();
         if (!payload.ok) {
-          // Special-case: zero matches still returns 200 with a clear message
-          // and ids_not_found populated.
-          throw new Error(payload.error || 'Filter request failed');
+          // The backend ships structured JSON (respond_error): the real reason
+          // lives in `message`/`hint`/`error_code`, never in `error`. The old
+          // `payload.error` read was ALWAYS undefined, so every backend reason
+          // — wrong IDs, wrong species, zero matches — collapsed into the
+          // meaningless "Filter request failed". Surface the real thing.
+
+          // "No orthogroups matched" is not a failure: it means none of the
+          // pasted IDs occur in the SELECTED species. Show it inline (amber)
+          // with the not-found list so the user can fix their input.
+          if (payload.error_code === 'ERR_NO_MATCHING_ORTHOGROUPS' ||
+              payload.severity === 'warning') {
+            const notFound   = payload.ids_not_found || [];
+            const unassigned = payload.ids_unassigned || [];
+            const allMissing = unassigned.concat(notFound);
+            const fallback   = allMissing.length ? allMissing : ids;
+            const msg = payload.message ||
+                        'None of those UniProt IDs were found in the selected species.';
+            let banner = '<i class="fa-solid fa-circle-exclamation"></i> ' + escapeHtml(msg);
+            if (payload.hint) banner += ' ' + escapeHtml(payload.hint);
+            if (fallback.length) {
+              const preview = fallback.slice(0, 12).join(', ');
+              const more    = fallback.length > 12 ? ' …and ' + (fallback.length - 12) + ' more' : '';
+              banner += '<div class="upset-not-found">Not present in this analysis: ' +
+                        '<code>' + escapeHtml(preview) + '</code>' + more +
+                        ' <button type="button" class="upset-copy-missing" data-ids="' +
+                        escapeHtml(fallback.join(' ')) + '">Copy missing IDs</button></div>';
+            }
+            filterResultEl.className = 'upset-filter-result is-partial';
+            filterResultEl.innerHTML = banner;
+            filterResultEl.hidden = false;
+            return;
+          }
+
+          // Any other backend error: show its real catalogue message + hint.
+          throw new Error(
+            (payload.message || 'Could not generate filtered figures.') +
+            (payload.hint ? ' ' + payload.hint : '')
+          );
         }
         lastUpsetPayload.fig5 = payload.fig5;
         lastUpsetPayload.fig6 = payload.fig6;
@@ -1474,21 +1519,43 @@
         renderUpset('upset-fig6', payload.fig6);
 
         // Build the result banner: N of M found, list not-found (truncated).
-        const nFound    = (payload.ids_found || []).length;
-        const nSearched = payload.n_ids_searched || ids.length;
-        const notFound  = payload.ids_not_found || [];
+        const nFound      = (payload.ids_found || []).length;
+        const nSearched   = payload.n_ids_searched || ids.length;
+        const notFound    = payload.ids_not_found || [];
+        const unassigned  = payload.ids_unassigned || [];
+        const allMissing  = unassigned.concat(notFound);
         let html = '<i class="fa-solid fa-circle-check"></i> ' +
                    '<strong>' + nFound + ' of ' + nSearched + '</strong> UniProt IDs found · ' +
                    '<strong>' + (payload.n_orthogroups || 0) + '</strong> orthogroups in the filtered figures';
+        if (unassigned.length) {
+          const uPreview = unassigned.slice(0, 8).join(', ');
+          const uMore    = unassigned.length > 8 ? ' …and ' + (unassigned.length - 8) + ' more' : '';
+          html += '<div class="upset-not-found upset-unassigned">' +
+                  '<strong>Unassigned genes (' + unassigned.length + '):</strong> ' +
+                  '<code>' + escapeHtml(uPreview) + '</code>' + uMore +
+                  ' <button type="button" class="upset-copy-missing" data-ids="' +
+                  escapeHtml(unassigned.join(' ')) + '">Copy</button>' +
+                  '<p class="upset-not-found-hint">These proteins are present in the input proteome and were processed ' +
+                  'by OrthoFinder, but no homologs were detected in any of the other selected species ' +
+                  '(listed in <em>Orthogroups_UnassignedGenes.tsv</em>). Because they do not belong to any ' +
+                  'orthogroup, they cannot appear in the UpSet plots, which visualise orthogroup sharing ' +
+                  'across species. This is biologically expected for lineage-specific proteins or sequences ' +
+                  'that have diverged beyond the detection threshold of the sequence similarity search.</p></div>';
+        }
         if (notFound.length) {
-          const preview = notFound.slice(0, 12).join(', ');
-          const more    = notFound.length > 12 ? ' …and ' + (notFound.length - 12) + ' more' : '';
-          html += '<div class="upset-not-found">Not present in this analysis: ' +
+          const preview = notFound.slice(0, 8).join(', ');
+          const more    = notFound.length > 8 ? ' …and ' + (notFound.length - 8) + ' more' : '';
+          html += '<div class="upset-not-found">' +
+                  '<strong>Not found (' + notFound.length + '):</strong> ' +
                   '<code>' + escapeHtml(preview) + '</code>' + more +
                   ' <button type="button" class="upset-copy-missing" data-ids="' +
-                  escapeHtml(notFound.join(' ')) + '">Copy missing IDs</button></div>';
+                  escapeHtml(notFound.join(' ')) + '">Copy</button>' +
+                  '<p class="upset-not-found-hint">These protein accessions were not found in the OrthoFinder output ' +
+                  '(neither in <em>Orthogroups.tsv</em> nor in <em>Orthogroups_UnassignedGenes.tsv</em>). ' +
+                  'This typically means the accession is not present in the reference proteome used for the ' +
+                  'analysis, e.g. due to a different proteome version or a retired/merged UniProt accession.</p></div>';
         }
-        filterResultEl.className = 'upset-filter-result is-' + (notFound.length ? 'partial' : 'success');
+        filterResultEl.className = 'upset-filter-result is-' + (allMissing.length ? 'partial' : 'success');
         filterResultEl.innerHTML = html;
         filterResultEl.hidden = false;
         // Scroll to the newly added figures so the user sees them.

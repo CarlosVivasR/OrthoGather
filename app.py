@@ -769,25 +769,30 @@ def _build_upset_payload(gene_count_df, species_selected, orthogroup_subset=None
 # various formats (sp|P12345|... , tr|Q9XX12|... , bare P12345, etc.).
 # Substring match on the raw cell is robust to all of them and ~100× faster
 # than per-protein parsing (Series.str.contains is C-vectorised).
-def _find_orthogroups_with_ids(orthogroups_df, species_selected, uniprot_ids):
-    """Return (matched_orthogroups, ids_found, ids_not_found).
+def _find_orthogroups_with_ids(orthogroups_df, species_selected, uniprot_ids,
+                               unassigned_df=None):
+    """Return (matched_orthogroups, ids_found, ids_not_found, ids_unassigned).
 
     matched_orthogroups: list of Orthogroup IDs that contain ANY of the queried
                         UniProt IDs in their selected-species columns.
     ids_found:          subset of `uniprot_ids` that appeared at least once.
-    ids_not_found:      subset of `uniprot_ids` that did NOT appear anywhere.
+    ids_not_found:      subset of `uniprot_ids` that did NOT appear anywhere
+                        (neither in orthogroups nor in unassigned genes).
+    ids_unassigned:     subset of `uniprot_ids` that appear in
+                        Orthogroups_UnassignedGenes.tsv — proteins detected by
+                        OrthoFinder but not assigned to any orthogroup.
     """
     # Concatenate the selected species columns into one big haystack per row.
     cols = [c for c in species_selected if c in orthogroups_df.columns]
     if not cols:
-        return [], [], list(uniprot_ids)
+        return [], [], list(uniprot_ids), []
     # NaN safety: missing cells become empty strings.
     joined = orthogroups_df[cols].fillna("").astype(str).agg("|".join, axis=1)
 
     # Compile a single regex with word-boundary-ish guard so 'P123' doesn't
     # match 'P12345'. UniProt IDs are alphanumeric — surround by non-alnum.
     if not uniprot_ids:
-        return [], [], []
+        return [], [], [], []
     # Sort by length descending so longer IDs are tried first when overlapping.
     ids_sorted = sorted({str(i).strip() for i in uniprot_ids if str(i).strip()},
                         key=len, reverse=True)
@@ -803,8 +808,26 @@ def _find_orthogroups_with_ids(orthogroups_df, species_selected, uniprot_ids):
             matched_ogs.append(idx)
             found.update(hits)
 
-    not_found = [i for i in ids_sorted if i not in found]
-    return matched_ogs, sorted(found), not_found
+    not_found_set = {i for i in ids_sorted if i not in found}
+
+    # Classify not-found IDs: unassigned genes vs truly absent.
+    # Search ALL species columns in UnassignedGenes (not just selected) so
+    # we catch proteins regardless of which species subset was chosen.
+    ids_unassigned = []
+    if not_found_set and unassigned_df is not None:
+        ua_all_cols = [c for c in unassigned_df.columns if c != "Orthogroup"]
+        if ua_all_cols:
+            ua_hay = unassigned_df[ua_all_cols].fillna("").astype(str).agg(
+                "|".join, axis=1).str.cat(sep=" ")
+            ids_unassigned = sorted(
+                i for i in not_found_set
+                if re.search(r"(?<![A-Za-z0-9])" + re.escape(i) +
+                             r"(?![A-Za-z0-9])", ua_hay)
+            )
+    unassigned_set = set(ids_unassigned)
+    ids_not_found = sorted(i for i in not_found_set if i not in unassigned_set)
+
+    return matched_ogs, sorted(found), ids_not_found, ids_unassigned
 
 
 @app.route('/upset_data', methods=['POST'])
@@ -855,6 +878,7 @@ def upset_data_filtered():
     data = request.get_json(silent=True) or {}
     species_selected = data.get("species", [])
     raw_ids = data.get("uniprot_ids", [])
+    logging.info(f"[/upset_data_filtered] species_selected={species_selected}, n_ids={len(raw_ids)}")
 
     if not isinstance(species_selected, list) or len(species_selected) < 2:
         return respond_error("ERR_TOO_FEW_SPECIES_FILTERED", where="upset_data_filtered")
@@ -871,7 +895,7 @@ def upset_data_filtered():
         return respond_error("ERR_NO_ACTIVE_ANALYSIS", where="upset_data_filtered")
 
     try:
-        gene_count_df_, orthogroups_df_, _, _ = load_folder_data(folder_path)
+        gene_count_df_, orthogroups_df_, _, unassigned_df_ = load_folder_data(folder_path)
     except Exception as e:
         logging.error(f"[/upset_data_filtered] Could not load data: {e}")
         return respond_error("ERR_LOAD_ANALYSIS_FAILED",
@@ -885,27 +909,34 @@ def upset_data_filtered():
 
     # Run the UniProt → orthogroup matcher.
     try:
-        matched_ogs, ids_found, ids_not_found = _find_orthogroups_with_ids(
-            orthogroups_df_, species_selected, uniprot_ids
-        )
+        matched_ogs, ids_found, ids_not_found, ids_unassigned = \
+            _find_orthogroups_with_ids(
+                orthogroups_df_, species_selected, uniprot_ids,
+                unassigned_df=unassigned_df_,
+            )
     except Exception as e:
         logging.error(f"[/upset_data_filtered] Matcher failed: {e}")
         return respond_error("ERR_FILTERED_UPSET_FAILED",
                               where="upset_data_filtered", detail=str(e))
 
+    logging.info(f"[/upset_data_filtered] found={len(ids_found)}, "
+                 f"not_found={len(ids_not_found)}, unassigned={len(ids_unassigned)}, "
+                 f"ogs={len(matched_ogs)}")
+    if ids_not_found:
+        logging.info(f"[/upset_data_filtered] ids_not_found={ids_not_found[:20]}")
+
     if not matched_ogs:
-        # Special case: not an error, just no hits. Return a warning-level JSON
-        # so the frontend can surface a clear "no matches" notice with the IDs.
         return jsonify({
             "ok": False,
-            "success": False,                # so OG.fetchJSON catches it
+            "success": False,
             "error_code": "ERR_NO_MATCHING_ORTHOGROUPS",
             "severity": "warning",
             "category": "input",
             "message": f"None of the {len(uniprot_ids)} UniProt IDs were found in the selected species' orthogroups",
             "hint":    "Double-check the IDs (case-sensitive) or pick a broader species selection.",
             "ids_found": [],
-            "ids_not_found": uniprot_ids,
+            "ids_not_found": ids_not_found,
+            "ids_unassigned": ids_unassigned,
         }), 200
 
     # Build Figures 5 + 6 from the filtered subset.
@@ -926,8 +957,9 @@ def upset_data_filtered():
 
     return jsonify({
         "ok": True,
-        "ids_found":     ids_found,
-        "ids_not_found": ids_not_found,
+        "ids_found":      ids_found,
+        "ids_not_found":  ids_not_found,
+        "ids_unassigned": ids_unassigned,
         "n_ids_searched": len(uniprot_ids),
         **payload,
     })
@@ -1021,6 +1053,102 @@ def _build_figure_dataframe(fig, folder_path, species_selected, filtered_ogs=Non
     raise ValueError(f"Unknown figure '{fig}'. Valid values: 1, 2, 3, 4, 5, 6.")
 
 
+def _safe_sheet_label(label):
+    return re.sub(r"[:\\/?*\[\]]", "_", label)
+
+
+def _build_detailed_upset_excel(buf, fig, folder_path, species_selected,
+                                filtered_ogs=None):
+    """Write a multi-sheet Excel to *buf* for UpSet figures (3–6).
+
+    Sheet layout:
+      1. "Figure N"  — summary table (current format + "detail_sheet" column)
+      2. "README"    — generation metadata
+      3+. "01-Label" — one sheet per intersection with Orthogroup ID +
+                       UniProt protein IDs per species
+    """
+    gene_count_df_, orthogroups_df_, _, _ = load_folder_data(folder_path)
+    orthogroups_df_.set_index("Orthogroup", inplace=True)
+
+    is_filtered = fig in ('5', '6')
+    is_protein_view = fig in ('4', '6')
+
+    if is_filtered:
+        payload = _build_upset_payload(
+            gene_count_df_, species_selected,
+            orthogroup_subset=filtered_ogs,
+            fig_keys=("fig5", "fig6"),
+        )
+        fig_key = "fig6" if is_protein_view else "fig5"
+    else:
+        payload = _build_upset_payload(gene_count_df_, species_selected)
+        fig_key = "fig4" if is_protein_view else "fig3"
+
+    combinations = payload[fig_key]["combinations"]
+
+    with pd.ExcelWriter(buf, engine='openpyxl') as writer:
+        # ── Detail sheets (numbered 01-, 02-, …) ────────────────────────
+        sheet_names_map = {}
+        for i, combo in enumerate(combinations, start=1):
+            og_ids = combo["elems"]
+            if not og_ids:
+                continue
+
+            rows = []
+            for og_id in og_ids:
+                row = {"Orthogroup ID": og_id}
+                if og_id in orthogroups_df_.index:
+                    for sp in species_selected:
+                        if sp in orthogroups_df_.columns:
+                            val = orthogroups_df_.at[og_id, sp]
+                            row[sp] = val if pd.notna(val) else ""
+                        else:
+                            row[sp] = ""
+                rows.append(row)
+
+            df_detail = pd.DataFrame(rows)
+            label = " + ".join(combo["sets"])
+            prefix = f"{i:02d}-"
+            sheet_name = (prefix + _safe_sheet_label(label))[:31]
+            sheet_names_map[combo["name"]] = sheet_name
+            df_detail.to_excel(writer, sheet_name=sheet_name, index=False)
+
+        # ── Summary sheet (Figure N) ────────────────────────────────────
+        count_key = "n_proteins" if is_protein_view else "n_orthogroups"
+        summary_rows = []
+        for combo in combinations:
+            row = {
+                "combination":   combo["name"],
+                "n_species":     len(combo["sets"]),
+                "species":       " + ".join(combo["sets"]),
+                count_key:       combo["cardinality"],
+                "detail_sheet":  sheet_names_map.get(combo["name"], ""),
+            }
+            summary_rows.append(row)
+        df_summary = pd.DataFrame(summary_rows)
+        df_summary.to_excel(writer, sheet_name=f"Figure {fig}", index=False)
+
+        # ── README sheet ────────────────────────────────────────────────
+        meta_rows = [
+            {"key": "Generated",       "value": datetime.datetime.utcnow().isoformat() + "Z"},
+            {"key": "Source",           "value": "OrthoGather figure data export"},
+            {"key": "Figure",           "value": f"Figure {fig}"},
+            {"key": "Total combinations", "value": len(combinations)},
+            {"key": "Species selected", "value": ", ".join(species_selected)},
+        ]
+        if is_filtered and filtered_ogs:
+            meta_rows.append({"key": "Filtered orthogroups", "value": len(filtered_ogs)})
+        pd.DataFrame(meta_rows).to_excel(writer, sheet_name="README", index=False)
+
+        # Move Figure + README to the front
+        wb = writer.book
+        fig_sheet_name = f"Figure {fig}"
+        desired_order = [fig_sheet_name, "README"] + [
+            s for s in wb.sheetnames if s not in (fig_sheet_name, "README")
+        ]
+        wb._sheets = [wb[s] for s in desired_order]
+
+
 @app.route('/download_figure_data')
 def download_figure_data():
     """Download Figure 1/2/3/4 underlying data in xlsx / csv / tsv / json.
@@ -1083,17 +1211,21 @@ def download_figure_data():
     # xlsx
     import io
     buf = io.BytesIO()
-    with pd.ExcelWriter(buf, engine='openpyxl') as writer:
-        df_out.to_excel(writer, sheet_name=f"Figure {fig}", index=False)
-        meta_rows = [
-            {"key": "Generated",   "value": datetime.datetime.utcnow().isoformat() + "Z"},
-            {"key": "Source",      "value": "OrthoGather figure data export"},
-            {"key": "Figure",      "value": f"Figure {fig}"},
-            {"key": "Total rows",  "value": len(df_out)},
-        ]
-        if fig in ('3', '4'):
-            meta_rows.append({"key": "Species selected", "value": ", ".join(species_selected)})
-        pd.DataFrame(meta_rows).to_excel(writer, sheet_name="README", index=False)
+    if fig in ('3', '4', '5', '6'):
+        _build_detailed_upset_excel(
+            buf, fig, folder_path, species_selected,
+            filtered_ogs=filtered_ogs,
+        )
+    else:
+        with pd.ExcelWriter(buf, engine='openpyxl') as writer:
+            df_out.to_excel(writer, sheet_name=f"Figure {fig}", index=False)
+            meta_rows = [
+                {"key": "Generated",   "value": datetime.datetime.utcnow().isoformat() + "Z"},
+                {"key": "Source",      "value": "OrthoGather figure data export"},
+                {"key": "Figure",      "value": f"Figure {fig}"},
+                {"key": "Total rows",  "value": len(df_out)},
+            ]
+            pd.DataFrame(meta_rows).to_excel(writer, sheet_name="README", index=False)
     buf.seek(0)
     return send_file(
         buf,

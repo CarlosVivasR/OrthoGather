@@ -503,6 +503,29 @@ def ris_for_run(ctx: dict) -> str:
         f"{ctx['n_orthogroups']} orthogroups. Pipeline: OrthoFinder + UniProt proteomes.\n"
         "PB  - OrthoGather (local)\n"
         "ER  - \n"
+        # Record 3: OrthoFinder.
+        "TY  - JOUR\n"
+        "TI  - OrthoFinder: phylogenetic orthology inference for comparative genomics\n"
+        "AU  - Emms, David M\n"
+        "AU  - Kelly, Steven\n"
+        "PY  - 2019\n"
+        "JO  - Genome Biology\n"
+        "VL  - 20\n"
+        "SP  - 238\n"
+        "DO  - 10.1186/s13059-019-1832-y\n"
+        "ER  - \n"
+        # Record 4: UniProt.
+        "TY  - JOUR\n"
+        "TI  - UniProt: the Universal Protein Knowledgebase in 2023\n"
+        "AU  - The UniProt Consortium\n"
+        "PY  - 2023\n"
+        "JO  - Nucleic Acids Research\n"
+        "VL  - 51\n"
+        "IS  - D1\n"
+        "SP  - D523\n"
+        "EP  - D531\n"
+        "DO  - 10.1093/nar/gkac1052\n"
+        "ER  - \n"
     )
 
 
