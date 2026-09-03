@@ -26,16 +26,26 @@ from typing import Dict, List, Optional
 #
 # - 'all'          : accept every annotation (default; closest to legacy
 #                    behaviour, includes IEA which is ~95% of any GOA file).
-# - 'curated'      : human-curated annotations: experimental + author-statement
-#                    + PAINT-derived IBA + high-throughput. Excludes IEA.
+# - 'curated'      : human-curated annotations: experimental + traceable author
+#                    statement (TAS) + curator statement (IC) + PAINT-derived
+#                    IBA + high-throughput. Excludes IEA, the computational-
+#                    analysis codes (ISS/ISO/ISA/ISM/IGC/RCA) and NAS: a
+#                    non-traceable author statement cannot be traced back to a
+#                    source, so it is deliberately not treated as curated here.
 # - 'experimental' : strictest, experimental + high-throughput experimental only.
+#
+# The full high-throughput family is HTP, HEP, HDA, HMP and HGI — all five are
+# included wherever "high-throughput" is claimed above.
+#
+# templates/resultado_goa.html shows these lists to the user code-by-code in the
+# "Evidence quality" popover. Keep the two in sync when editing either.
 # ---------------------------------------------------------------------------
 EVIDENCE_PRESETS = {
     "all":          None,  # no filter
     "curated":      {"EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "TAS", "IC",
-                     "IBA", "HEP", "HDA", "HMP", "HGI"},
+                     "IBA", "HTP", "HEP", "HDA", "HMP", "HGI"},
     "experimental": {"EXP", "IDA", "IPI", "IMP", "IGI", "IEP",
-                     "HEP", "HDA", "HMP", "HGI"},
+                     "HTP", "HEP", "HDA", "HMP", "HGI"},
 }
 
 

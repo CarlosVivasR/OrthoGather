@@ -274,7 +274,7 @@
         <div class="figure-card-head">
           <div class="figure-card-head-text">
             <h3>Figure 3: UpSet of shared orthogroups</h3>
-            <p class="figure-card-sub">Each bar is a unique combination of species. Hover or click bars for details.</p>
+            <p class="figure-card-sub">Each bar is one <em>exclusive</em> combination of species: every orthogroup is counted in exactly one bar. Hover or click bars for details.</p>
           </div>
           <div class="figure-card-head-controls">
             <div class="figure-help-wrap" data-figkind="orthogroups">
@@ -283,6 +283,8 @@
                 <h4>How the highlight works</h4>
                 <p>Hover a <strong>species row</strong> to see which combinations contain it. Bars that include the species are painted amber; the rest stay black.</p>
                 <p>In this figure each bar counts <strong>orthogroups</strong>. Every orthogroup in a combination belongs to <em>all</em> the species in that combination by definition, so the highlight is binary: <code>100 %</code> when the combination contains the hovered species, <code>0 %</code> otherwise.</p>
+                <p><strong>Intersections are exclusive.</strong> Each orthogroup is counted in exactly one bar — the one matching the <em>exact</em> set of species it is present in. The bar for A&nbsp;∩&nbsp;B therefore holds orthogroups present in A and B <em>and in no other selected species</em>; it does not include the ones that are also in C. Bars never double-count, so they sum to the total number of orthogroups.</p>
+                <p>Combinations are computed over the <strong>species you selected</strong> only. If you select 3 of 10 species, an orthogroup present in all 10 lands in the 3-species bar, because the other 7 are not part of this comparison.</p>
                 <p>Hovering a <strong>bar</strong> highlights the matrix dots of the species that compose it.</p>
               </div>
             </div>
@@ -319,7 +321,7 @@
         <div class="figure-card-head">
           <div class="figure-card-head-text">
             <h3>Figure 4: UpSet of shared proteins</h3>
-            <p class="figure-card-sub">Same intersections as Figure 3 but weighted by total proteins, not orthogroup count.</p>
+            <p class="figure-card-sub">Same exclusive intersections as Figure 3, but weighted by total proteins rather than orthogroup count.</p>
           </div>
           <div class="figure-card-head-controls">
             <div class="figure-help-wrap" data-figkind="proteins">
@@ -329,6 +331,7 @@
                 <p>Hover a <strong>species row</strong> to see how many proteins each combination borrows from it. The amber portion of each bar is proportional to that species' protein contribution to the intersection.</p>
                 <p>If the combination contains 3 species, each contributes some proteins to the shared orthogroups; the highlight shows the <em>actual</em> share of the hovered species (not a flat 1/3).</p>
                 <p>Bars whose combination does not include the hovered species stay black (no amber).</p>
+                <p>The intersections are the same exclusive ones as Figure 3 — each orthogroup contributes its proteins to a single bar — so the bars sum to the total number of proteins in the selected species.</p>
               </div>
             </div>
             <div class="figure-card-actions" data-fig="4" data-kind="data">
@@ -1536,11 +1539,16 @@
                   ' <button type="button" class="upset-copy-missing" data-ids="' +
                   escapeHtml(unassigned.join(' ')) + '">Copy</button>' +
                   '<p class="upset-not-found-hint">These proteins are present in the input proteome and were processed ' +
-                  'by OrthoFinder, but no homologs were detected in any of the other selected species ' +
-                  '(listed in <em>Orthogroups_UnassignedGenes.tsv</em>). Because they do not belong to any ' +
+                  'by OrthoFinder, but no homolog was detected for them anywhere in the analysed dataset — ' +
+                  'neither in the other species of the run nor within their own proteome. OrthoFinder only ' +
+                  'creates an orthogroup when at least two sequences cluster together, so a protein left on ' +
+                  'its own does not form a single-gene orthogroup: it is reported in ' +
+                  '<em>Orthogroups_UnassignedGenes.tsv</em> instead. Because they do not belong to any ' +
                   'orthogroup, they cannot appear in the UpSet plots, which visualise orthogroup sharing ' +
-                  'across species. This is biologically expected for lineage-specific proteins or sequences ' +
-                  'that have diverged beyond the detection threshold of the sequence similarity search.</p></div>';
+                  'across species. Note that species-specific orthogroups (two or more homologous proteins ' +
+                  'from a single species) are a different case and do appear in the plots. Unassigned genes ' +
+                  'are biologically expected for lineage-specific single-copy proteins or sequences that ' +
+                  'have diverged beyond the detection threshold of the sequence similarity search.</p></div>';
         }
         if (notFound.length) {
           const preview = notFound.slice(0, 8).join(', ');

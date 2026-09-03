@@ -229,8 +229,13 @@
       <div id="go-distribution-container" hidden>
         <h3>Annotation overview</h3>
         <p class="section-helper">
-          A quick check on how well-annotated the dataset you just downloaded is —
-          whether a GO enrichment will have enough signal to be meaningful.
+          A quick check on how much of your dataset is <em>reachable</em> by GO annotation —
+          whether an enrichment will have enough signal to be meaningful.
+          <strong>What is measured:</strong> for each orthogroup, the share of its proteins that come
+          from a species with a GOA annotation file. It is a ceiling, not the real annotation rate:
+          a species can have a GOA file and still leave many of its proteins without a single GO
+          term. The exact per-protein figure is reported later, in the coverage banner of the
+          enrichment run ("With GO annotations").
         </p>
         <div id="go-distribution-summary" class="go-dist-summary"></div>
 
@@ -241,10 +246,11 @@
             <i class="fa-solid fa-chevron-down go-dist-collapse-chev" aria-hidden="true"></i>
           </summary>
           <p class="section-helper">
-            Distribution of per-orthogroup annotation percentage among orthogroups that
-            received any annotation, with each bar coloured by how many of your annotated
-            species contributed proteins — a "breadth of evidence" axis. Hover for exact
-            values; use the camera icon to export PNG/SVG.
+            Distribution of per-orthogroup GOA coverage — the share of each orthogroup's proteins
+            that belong to a species with a GOA file — across the orthogroups with non-zero
+            coverage. Each bar is coloured by how many GOA-covered species contributed proteins,
+            a "breadth of evidence" axis. Hover for exact values; use the camera icon to export
+            PNG/SVG.
           </p>
           <div id="go-distribution-plot" class="go-distribution-plot"></div>
         </details>
@@ -255,7 +261,7 @@
         <h2>Gene Ontology enrichment</h2>
         <p class="section-helper">
           Define your <strong>foreground</strong> (proteins of interest) and a <strong>background</strong>
-          (reference set). Then choose how strict the propagation should be, and run the analysis.
+          (reference set). Then choose how strict the analysis settings should be, and run the analysis.
         </p>
 
         <!-- ============================================================== -->
@@ -342,19 +348,29 @@
               </label>
               <label class="goa-radio">
                 <input type="radio" name="evidence_preset" value="curated">
-                <span><strong>Curated</strong>: experimental + author-statement + PAINT (IBA)</span>
+                <span><strong>Curated</strong>: experimental + traceable author/curator statements + PAINT (IBA)</span>
               </label>
               <label class="goa-radio">
                 <input type="radio" name="evidence_preset" value="experimental">
-                <span><strong>Experimental only</strong>: strictest (EXP, IDA, IPI, IMP, IGI, IEP, HEP/HDA/HMP/HGI)</span>
+                <span><strong>Experimental only</strong>: strictest (EXP, IDA, IPI, IMP, IGI, IEP, HTP/HEP/HDA/HMP/HGI)</span>
               </label>
               <div class="figure-help-popover" data-help-for="evidence" hidden>
                 GO annotations carry an <em>evidence code</em>. <strong>All</strong> includes
                 IEA (Inferred from Electronic Annotation): the bulk of annotations in any GOA file,
-                but the lowest quality. <strong>Curated</strong> keeps human-curated entries plus
-                PAINT-derived IBA: a good default if you can spare some recall.
+                so it maximises recall at the cost of confidence. <strong>Curated</strong> drops IEA and keeps
+                human-curated evidence plus PAINT-derived IBA: a good default if you can spare some recall.
                 <strong>Experimental only</strong> is the safest choice when you have well-annotated
                 model organisms; expect fewer hits but with strong wet-lab support.
+                <p class="goa-help-codes"><strong>Exactly which codes each preset keeps:</strong></p>
+                <ul class="goa-help-codes-list">
+                  <li><strong>All</strong> — every code present in the GOA files, IEA included.</li>
+                  <li><strong>Curated</strong> — EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI, TAS, IC, IBA.
+                      Excludes IEA and the computational-analysis codes (ISS, ISO, ISA, ISM, IGC, RCA), and also
+                      excludes <strong>NAS</strong> (non-traceable author statement), which cannot be traced back to
+                      a source.</li>
+                  <li><strong>Experimental only</strong> — EXP, IDA, IPI, IMP, IGI, IEP and the high-throughput
+                      variants HTP, HEP, HDA, HMP, HGI.</li>
+                </ul>
               </div>
             </fieldset>
 
@@ -521,6 +537,10 @@
                   be considered significant. <code>0.05</code> is the field default;
                   drop it to <code>0.01</code> for a tighter set, or raise to
                   <code>0.10</code> when looking at hypothesis-generating exploratory data.
+                  The correction is applied <strong>once over all three namespaces
+                  together</strong> (BP + CC + MF as a single family of tests), not
+                  separately per namespace, so q-values will differ slightly from tools
+                  that correct each aspect on its own.
                 </div>
               </div>
               <div class="goa-param">
@@ -545,9 +565,9 @@
           <h3>Enriched &amp; depleted terms: interactive table</h3>
           <div class="go-ev-legend" role="note">
             <span class="go-ev-legend-label">Evidence tier:</span>
-            <span class="go-ev-chip is-experimental" title="Experimental evidence codes (EXP, IDA, IPI, IMP, IGI, IEP and high-throughput variants). Strongest support.">Experimental</span>
-            <span class="go-ev-chip is-curated" title="Author-statement and PAINT-curated annotations (TAS, IC, IBA, NAS). Medium-strong support.">Curated</span>
-            <span class="go-ev-chip is-computational" title="Inferred from Electronic Annotation and sequence-similarity codes (IEA, ISS, ISA, ISM, ISO). Lowest confidence.">Computational</span>
+            <span class="go-ev-chip is-experimental" title="Experimental evidence codes: EXP, IDA, IPI, IMP, IGI, IEP, plus the high-throughput variants HTP, HEP, HDA, HMP, HGI. Strongest support.">Experimental</span>
+            <span class="go-ev-chip is-curated" title="Human-curated annotations: author statements TAS and NAS, curator statement IC, and the PAINT phylogenetic codes IBA, IBD, IKR, IRD. Medium-strong support. Note: the Curated preset keeps TAS, IC and IBA but excludes NAS.">Curated</span>
+            <span class="go-ev-chip is-computational" title="Electronic and computational-analysis codes: IEA, ISS, ISO, ISA, ISM, IGC, RCA. Lowest confidence. ND (no biological data available) is also shown here.">Computational / other</span>
           </div>
           <div class="go-table-toolbar">
             <input type="search" id="go-table-search" placeholder="Filter by name or GO ID…" aria-label="Filter terms" />
@@ -1277,22 +1297,22 @@
             <div class="go-dist-stat">
               <span class="go-dist-stat-label">Orthogroups</span>
               <span class="go-dist-stat-value">${(sAll.n || 0).toLocaleString()}</span>
-              <span class="go-dist-stat-sub">${nZeroOG.toLocaleString()} have 0% annotation</span>
+              <span class="go-dist-stat-sub">${nZeroOG.toLocaleString()} have 0% GOA coverage</span>
             </div>
             <div class="go-dist-stat">
-              <span class="go-dist-stat-label">With ≥ 1% annotation</span>
+              <span class="go-dist-stat-label">With ≥ 1% GOA coverage</span>
               <span class="go-dist-stat-value">${(sNz.n || 0).toLocaleString()}</span>
               <span class="go-dist-stat-sub">
                 ${sAll.n ? Math.round(100 * sNz.n / sAll.n) : 0}% of total
               </span>
             </div>
             <div class="go-dist-stat">
-              <span class="go-dist-stat-label">Median annotation %</span>
+              <span class="go-dist-stat-label">Median GOA coverage</span>
               <span class="go-dist-stat-value">${(sNz.median || 0).toFixed(1)}%</span>
-              <span class="go-dist-stat-sub">among annotated OGs</span>
+              <span class="go-dist-stat-sub">among covered OGs</span>
             </div>
             <div class="go-dist-stat">
-              <span class="go-dist-stat-label">Annotated species</span>
+              <span class="go-dist-stat-label">GOA-covered species</span>
               <span class="go-dist-stat-value">${nAnnotatedSpecies.toLocaleString()}</span>
               <span class="go-dist-stat-sub">had a GOA file</span>
             </div>
@@ -1389,7 +1409,7 @@
               x0: c.meanBin, x1: c.meanBin, y0: 0, y1: 1,
               line: { color: "#1f5f9c", width: 2, dash: "dot" } },
           ],
-          xaxis: { title: "Annotation % per orthogroup", tickfont: { size: 11 } },
+          xaxis: { title: "% of proteins from GOA-covered species", tickfont: { size: 11 } },
           yaxis: { title: "Number of orthogroups", gridcolor: "#eee" },
         };
         const config = {
@@ -1469,27 +1489,35 @@
         ];
       }
 
-      // GO evidence-code tier classification.
-      // Mirrors backend EVIDENCE_PRESETS in app.py — keep in sync.
+      // GO evidence-code tier classification, following the official GO evidence
+      // groups (geneontology.org/docs/guide-go-evidence-codes/).
+      // These tiers are DESCRIPTIVE (they colour the chips). The authoritative
+      // filter is EVIDENCE_PRESETS in orthogather/core/goa.py, which is narrower:
+      // the "curated" preset keeps TAS/IC/IBA but not NAS. The evidence-quality
+      // popover above spells out each preset code-by-code — keep the two in sync.
       const EVIDENCE_TIER = {
-        // Experimental
+        // Experimental + high-throughput experimental (GO "experimental" group).
         "EXP": "experimental", "IDA": "experimental", "IPI": "experimental",
         "IMP": "experimental", "IGI": "experimental", "IEP": "experimental",
-        "HEP": "experimental", "HDA": "experimental", "HMP": "experimental",
-        "HGI": "experimental", "HTP": "experimental",
-        // Curated (author statement, curator, PAINT)
-        "TAS": "curated", "NAS": "curated", "IC": "curated", "IBA": "curated",
-        // Computational (electronic / sequence similarity)
-        "IEA": "computational", "ISS": "computational", "ISA": "computational",
-        "ISM": "computational", "ISO": "computational", "IGC": "computational",
-        "RCA": "computational", "IKR": "computational", "IRD": "computational",
-        "ND":  "computational",
+        "HTP": "experimental", "HEP": "experimental", "HDA": "experimental",
+        "HMP": "experimental", "HGI": "experimental",
+        // Human-curated: author statements, curator statement, and the PAINT
+        // phylogenetic codes. IBD/IKR/IRD are PAINT siblings of IBA — they are
+        // curator output, NOT electronic inference, so they belong here.
+        "TAS": "curated", "NAS": "curated", "IC": "curated",
+        "IBA": "curated", "IBD": "curated", "IKR": "curated", "IRD": "curated",
+        // Electronic + computational analysis. ND ("no biological data
+        // available") is not an inference at all; it is grouped here so it is
+        // never mistaken for evidence.
+        "IEA": "computational", "ISS": "computational", "ISO": "computational",
+        "ISA": "computational", "ISM": "computational", "IGC": "computational",
+        "RCA": "computational", "ND":  "computational",
       };
 
       const TIER_LABEL = {
         experimental:  "experimental",
         curated:       "curated",
-        computational: "computational",
+        computational: "computational / other",
       };
 
       function evidenceChips(breakdown) {

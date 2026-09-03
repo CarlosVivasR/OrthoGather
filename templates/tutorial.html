@@ -226,6 +226,16 @@
             <li><strong>Figure 4 — UpSet of shared proteins</strong>: the same intersections, but
               weighted by total <em>proteins</em> rather than orthogroup count.</li>
           </ul>
+          <p class="tutorial-note">
+            <strong>The intersections are exclusive.</strong> Every orthogroup is counted in exactly
+            one bar — the one matching the <em>exact</em> set of species it is present in. The bar for
+            A&nbsp;∩&nbsp;B holds the orthogroups found in A and B <em>and in no other selected
+            species</em>; those also present in C sit in the A&nbsp;∩&nbsp;B&nbsp;∩&nbsp;C bar instead.
+            Nothing is double-counted, so the bars add up to the total. Note also that combinations are
+            computed over the <strong>species you selected</strong>: if you tick 3 of 10 species, an
+            orthogroup present in all 10 falls in the 3-species bar, because the other 7 are not part
+            of that comparison.
+          </p>
           <p>Hover a bar to see the exact count, click to drill into that intersection.
             Use each figure's <strong>Image</strong> menu (PNG/SVG) to download the figure, or the
             <strong>Data</strong> menu to grab the underlying table as Excel/CSV/TSV/JSON.</p>
@@ -314,9 +324,14 @@
           </p>
           <p>
             Once the download finishes, an <strong>Annotation overview</strong> panel appears: a
-            quick sanity check on how well-annotated your dataset is, with a distribution chart of
-            the share of proteins per orthogroup that carry GO terms. Use it to judge whether an
-            enrichment will have enough signal <em>before</em> you run it.
+            quick sanity check on how much of your dataset GO annotation can reach, with a
+            distribution chart of the share of proteins per orthogroup that belong to a species
+            with a GOA file. Read it as a <strong>ceiling</strong>, not as the real annotation rate:
+            a species with a GOA file still leaves a fraction of its proteins with no GO term at all
+            (in the six-species example that fraction ranges from 4% for <em>E. coli</em> to 28% for
+            <em>M. abscessus</em>). The exact per-protein number appears later, in the coverage
+            banner of the enrichment run. Use this chart to judge whether an enrichment will have
+            enough signal <em>before</em> you run it.
           </p>
           <h4>GOA, GAF, UniProt: who provides what?</h4>
           <ul>
@@ -437,6 +452,13 @@
             column of the table — a tall bar is never silently read as "enriched". The results
             table is headed <em>"Enriched &amp; depleted terms"</em> for this reason.
           </p>
+          <p class="tutorial-note">
+            <strong>How the FDR is computed:</strong> Benjamini-Hochberg correction is applied
+            <em>once over the three namespaces together</em> (BP + CC + MF as a single family of
+            tests), before the results are split into tabs. This is a valid single-experiment
+            correction, but it is not per-aspect: q-values will differ slightly from tools that
+            correct each namespace separately. Worth stating in a methods section.
+          </p>
 
           <h4>Coverage banner</h4>
           <p>
@@ -546,6 +568,33 @@
           <h2>Frequently asked questions</h2>
 
           <details class="tutorial-faq">
+            <summary>Why are some of my UniProt IDs reported as "unassigned"?</summary>
+            <p>
+              OrthoFinder only calls a cluster an <strong>orthogroup</strong> when at least two
+              sequences group together. A protein for which no homolog is found anywhere in the
+              analysed dataset stays on its own, and a lone protein is not reported as a one-gene
+              orthogroup: it is written to <code>Orthogroups_UnassignedGenes.tsv</code> instead.
+              Those are the IDs the UniProt filter reports as unassigned.
+            </p>
+            <p>
+              "Anywhere in the dataset" includes the protein's <em>own</em> species. This is the
+              part that trips people up: an orthogroup can perfectly well contain proteins from a
+              single species — two or more paralogues that cluster with each other — and OrthoFinder
+              calls those <strong>species-specific orthogroups</strong>. They are counted in
+              Figure 2 at <em>x</em>&nbsp;=&nbsp;1 and they do appear in the UpSet plots, in the
+              single-species bars. So the distinction is not "does this protein have homologs in
+              the <em>other</em> species?" but "does it have any homolog at all in the run?".
+            </p>
+            <p>
+              Unassigned genes are biologically expected: lineage-specific single-copy proteins, or
+              sequences that have diverged past what the sequence-similarity search can detect. They
+              cannot appear in the UpSet plots because those plots visualise orthogroup sharing, and
+              these proteins belong to no orthogroup. Their count is reported so the numbers add up:
+              pasted IDs = found + unassigned + not found.
+            </p>
+          </details>
+
+          <details class="tutorial-faq">
             <summary>Why didn't <em>E. coli</em> match in the species table?</summary>
             <p>
               OrthoGather automatically expands common Latin abbreviations (E. coli →
@@ -592,11 +641,24 @@
             <p>
               <strong>Experimental</strong>: EXP (Inferred from Experiment), IDA (Direct Assay),
               IPI (Physical Interaction), IMP (Mutant Phenotype), IGI (Genetic Interaction),
-              IEP (Expression Pattern). <strong>High-throughput experimental</strong>: HEP, HDA,
-              HMP, HGI. <strong>Author statement</strong>: TAS (Traceable), NAS (Non-traceable).
+              IEP (Expression Pattern). <strong>High-throughput experimental</strong>: HTP, HEP,
+              HDA, HMP, HGI. <strong>Author statement</strong>: TAS (Traceable), NAS (Non-traceable).
               <strong>Curator</strong>: IC (Inferred by Curator). <strong>Phylogenetic</strong>:
-              IBA (Inferred from Biological aspect of Ancestor, i.e. PAINT). <strong>Computational</strong>:
-              IEA (Inferred from Electronic Annotation).
+              IBA (Inferred from Biological aspect of Ancestor, i.e. PAINT) and its siblings IBD,
+              IKR, IRD — all PAINT curator output, not electronic inference.
+              <strong>Computational analysis</strong>: ISS, ISO, ISA, ISM, IGC, RCA.
+              <strong>Electronic</strong>: IEA (Inferred from Electronic Annotation).
+              <strong>ND</strong> means no biological data is available — it is the absence of
+              evidence, not a weak form of it.
+            </p>
+            <p>
+              The colour of each chip in the results table follows these groups. The
+              <strong>filter presets</strong> are narrower than the groups: <em>Experimental only</em>
+              keeps EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI; <em>Curated</em> adds TAS,
+              IC and IBA on top of those. <strong>NAS is not kept by any preset except All</strong> —
+              a non-traceable author statement cannot be checked against a source, and in a typical
+              bacterial GOA set it is more frequent than TAS, so including it would quietly loosen
+              the "curated" filter.
             </p>
             <p>
               The full reference is at <a href="https://geneontology.org/docs/guide-go-evidence-codes/" target="_blank" rel="noopener">geneontology.org</a>.

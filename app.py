@@ -3438,6 +3438,11 @@ def gene_ontology_analysis():
                 ("GOA source",                   g.get("source")),
                 ("GOA files used",               g.get("n_files")),
                 ("Evidence preset",              evidence_preset),
+                # Record the resolved code list, not just the preset name: a
+                # methods section needs the exact codes, and the presets can
+                # change between OrthoGather versions.
+                ("Evidence codes kept",          ("all codes (no filter)" if evidence_codes is None
+                                                  else ", ".join(sorted(evidence_codes)))),
                 ("Counting mode requested",      counting_mode_requested),
                 ("Counting mode applied",        counting_mode),
                 ("FDR method",                   "Benjamini-Hochberg (fdr_bh)"),

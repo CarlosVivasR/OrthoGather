@@ -23,7 +23,7 @@ Download **UniProt** proteomes, run **OrthoFinder**, perform **Gene Ontology enr
 It enables users to:
 - Download reference proteomes from **UniProt** and infer orthogroups using **OrthoFinder**.
 - Explore shared and species-specific orthogroups through interactive **UpSet plots**.
-- Perform **Gene Ontology (GO) enrichment** with **GOATOOLS**, leveraging orthogroup relationships to propagate functional information across species.
+- Perform **Gene Ontology (GO) enrichment** with **GOATOOLS**, optionally pooling the *existing* annotations of every protein in an orthogroup so well-annotated orthologs contribute evidence for their poorly annotated counterparts. Annotations are never transferred or assigned to individual proteins — OrthoGather does not do phylogeny-based annotation propagation.
 - Generate **publication-ready figures** and **Excel tables** for downstream analysis.
 
 All analyses run **locally**, favouring **privacy**, **reproducibility**, and **rapid iteration**, and are particularly useful when working with **poorly annotated or non-model organisms**.
@@ -173,7 +173,7 @@ This module helps you examine the **presence and distribution of orthogroups** a
 This module turns orthogroup-level findings into **functional hypotheses**.
 
 **Workflow:**
-- **GOA download (per species)** and an **annotation coverage panel (4-in-1)** to gauge how well proteins are annotated before enrichment.
+- **GOA download (per species)** and an **annotation coverage panel (4-in-1)** to gauge how much of your dataset GO annotation can reach before enrichment. The panel reports GOA-file coverage — an upper bound; the exact per-protein annotation rate is shown in the enrichment run itself.
 - **Define sets:**
   - **Foreground** — paste UniProt IDs for the set to be tested.
   - **Background** — paste UniProt IDs or use “all species with GOA” from your selection.

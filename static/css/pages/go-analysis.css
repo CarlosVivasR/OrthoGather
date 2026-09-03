@@ -1171,3 +1171,20 @@
   border-radius: 50%;
   animation: og-spin 0.9s linear infinite;
 }
+
+/* ── Evidence-quality popover: per-preset code list ────────────────────────
+   This popover carries an explicit code-by-code breakdown of each preset (the
+   authoritative list users act on), so it needs more room than the
+   one-paragraph popovers. */
+.figure-help-popover[data-help-for="evidence"] { max-width: 420px; }
+.goa-help-codes {
+  margin: var(--space-3) 0 var(--space-2);
+  color: var(--color-text-inverse, #fff);
+}
+.goa-help-codes-list {
+  margin: 0;
+  padding-left: 1.15em;
+  list-style: disc;
+}
+.goa-help-codes-list li { margin-bottom: var(--space-2); }
+.goa-help-codes-list li:last-child { margin-bottom: 0; }

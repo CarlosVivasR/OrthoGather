@@ -124,13 +124,35 @@ def generate_go_excel(tsv_path: str, species_to_goafile: dict,
 
     try:
         with pd.ExcelWriter(output_excel_path) as writer:
+            # The Meta sheet is the only context a reader gets when this file is
+            # opened on its own (a reviewer, a collaborator, a supplementary
+            # data archive). "Annotation Percentage" is easy to over-read as
+            # "share of proteins carrying GO terms", so state what it really
+            # counts, and which sheet is which.
             meta = pd.DataFrame({
                 "key": ["n_orthogroups", "n_species_cols",
-                        "rows_nonzero_annotation", "rows_zero_annotation"],
+                        "rows_nonzero_annotation", "rows_zero_annotation",
+                        "Annotation Percentage — definition",
+                        "Annotation Percentage — caveat",
+                        "Sheet: Initial Groups",
+                        "Sheet: Filtered Groups",
+                        "Sheet: Removed Groups",
+                        "Sheet: Groups of Interest"],
                 "value": [summary["n_orthogroups"],
                           summary["n_species_cols"],
                           summary["rows_nonzero_annotation"],
-                          summary["rows_zero_annotation"]],
+                          summary["rows_zero_annotation"],
+                          ("For each orthogroup, the percentage of its proteins that belong to a "
+                           "species with a GOA annotation file available."),
+                          ("This is an upper bound on GO coverage, NOT the share of proteins that "
+                           "carry GO terms: a species can have a GOA file and still leave part of "
+                           "its proteome without a single GO annotation."),
+                          "Every orthogroup, with its Annotation Percentage.",
+                          "Orthogroups with Annotation Percentage > 0 (kept).",
+                          "Orthogroups with Annotation Percentage = 0 (no GOA-covered species).",
+                          ("Every orthogroup, restricted to the species columns that have a GOA "
+                           "file. This is the sheet the per-orthogroup counting mode reads."),
+                          ],
             })
             meta.to_excel(writer, sheet_name="Meta", index=False)
             initial.to_excel(writer, sheet_name="Initial Groups", index=False)
