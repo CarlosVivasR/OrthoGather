@@ -2868,7 +2868,10 @@ def download_go_excel():
     # Descriptive filename: include species count + ISO date so the user can
     # tell several downloads apart on disk.
     from orthogather.utils.filenames import descriptive_filename
-    species = session.get('species') or []
+    # session['species'] is `gene_count_df.columns[1:]`, which trails a "Total"
+    # column (a per-row sum, not a species). Counting it made the download name
+    # claim one species more than the analysis actually has.
+    species = [n for n in (session.get('species') or []) if n != 'Total']
     ctx = [f"{len(species)}species"] if species else []
     fmt = (request.args.get("fmt") or "xlsx").lower()
     if fmt in ("csv", "tsv"):
