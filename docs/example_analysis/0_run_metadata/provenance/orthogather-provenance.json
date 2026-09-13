@@ -1,0 +1,24 @@
+{
+  "orthogather_version": "1.0.0",
+  "generated_at": "2026-09-13T21:27:06.978472+00:00",
+  "mode": "generated",
+  "catalogue": {
+    "version": "2026-06-03",
+    "downloaded_at": "2026-06-03T14:19:15Z",
+    "proteome_count": 1013422,
+    "is_fallback": false
+  },
+  "goa": null,
+  "proteome": {
+    "source": "UniProt (rest.uniprot.org)",
+    "release": "2026_02",
+    "release_date": "10-June-2026",
+    "downloaded_at": "2026-08-05T18:58:41.604773+00:00",
+    "n_proteomes": 6
+  },
+  "ontology": {
+    "data_version": "releases/2026-07-26",
+    "format_version": "1.2"
+  },
+  "orthofinder_version": "2.5.5"
+}

@@ -1,0 +1,4 @@
+GO	name	namespace	direction	depth	study_count	study_n	pop_count	pop_n	p_fdr_bh	neg_log10_fdr
+GO:0019538	protein metabolic process	biological_process	enriched	4	27	162	179	2470	0.012520810072746205	1.9023675721844833
+GO:0006412	translation	biological_process	enriched	5	16	162	94	2470	0.05853779843478005	1.232563615103559
+GO:0160307	protein biosynthetic process	biological_process	enriched	5	16	162	94	2470	0.05853779843478005	1.232563615103559

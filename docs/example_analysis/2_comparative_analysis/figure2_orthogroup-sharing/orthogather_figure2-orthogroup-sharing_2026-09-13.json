@@ -1,0 +1,26 @@
+[
+  {
+    "n_species_sharing":1,
+    "n_orthogroups":778
+  },
+  {
+    "n_species_sharing":2,
+    "n_orthogroups":2397
+  },
+  {
+    "n_species_sharing":3,
+    "n_orthogroups":917
+  },
+  {
+    "n_species_sharing":4,
+    "n_orthogroups":714
+  },
+  {
+    "n_species_sharing":5,
+    "n_orthogroups":371
+  },
+  {
+    "n_species_sharing":6,
+    "n_orthogroups":772
+  }
+]

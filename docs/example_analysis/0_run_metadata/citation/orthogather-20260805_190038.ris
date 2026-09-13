@@ -1,0 +1,41 @@
+TY  - JOUR
+TI  - OrthoGather: a local platform for orthology-based proteome and proteomics comparisons and Gene Ontology enrichment
+AU  - Carlos Vivas-Rodriguez
+AU  - David Matallanas
+AU  - Colm J. Ryan
+AU  - Siobhán McClean
+AU  - Olivier Dennler
+AU  - Joanna Drabińska
+PY  - 2026
+JO  - bioRxiv
+DO  - 10.64898/2026.01.30.702851
+ER  - 
+TY  - DATA
+TI  - OrthoGather analysis of 6 proteomes
+AU  - OrthoGather user
+PY  - 2026
+DA  - 2026-08-05
+AB  - OrthoGather run 20260805_190038. Species: Acinetobacter baumannii (strain ATCC 19606   DSM 30007   JCM 6841   CCUG 19606   CIP 70.34   NBRC 109757   NCIMB 12457   NCTC 12156   81), Burkholderia cenocepacia (strain ATCC BAA-245   DSM 16553   LMG 16656   NCTC 13227   J2315   CF5610), Escherichia coli (strain K12), Mycobacteroides abscessus (strain ATCC 19977   DSM 44196   CCUG 20993   CIP 104536   JCM 13569   NCTC 13031   TMC 1543   L948), Mycolicibacterium smegmatis (strain ATCC 700084   mc(2)155), Pseudomonas aeruginosa (strain ATCC 15692   DSM 22644   CIP 104116   JCM 14847   LMG 12228   1C   PRS 101   PAO1). 5949 orthogroups. Pipeline: OrthoFinder + UniProt proteomes.
+PB  - OrthoGather (local)
+ER  - 
+TY  - JOUR
+TI  - OrthoFinder: phylogenetic orthology inference for comparative genomics
+AU  - Emms, David M
+AU  - Kelly, Steven
+PY  - 2019
+JO  - Genome Biology
+VL  - 20
+SP  - 238
+DO  - 10.1186/s13059-019-1832-y
+ER  - 
+TY  - JOUR
+TI  - UniProt: the Universal Protein Knowledgebase in 2023
+AU  - The UniProt Consortium
+PY  - 2023
+JO  - Nucleic Acids Research
+VL  - 51
+IS  - D1
+SP  - D523
+EP  - D531
+DO  - 10.1093/nar/gkac1052
+ER  - 

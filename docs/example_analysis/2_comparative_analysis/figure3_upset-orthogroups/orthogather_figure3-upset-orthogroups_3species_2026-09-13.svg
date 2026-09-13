@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="root-upset-uo1e9798" width="1003" height="416" viewBox="0 0 1003 416" data-theme="light" style="background-color: rgb(255, 255, 255);"><style>
+  
+  .root-upset-uo1e9798 {
+    font-family: Inter, system-ui, sans-serif;
+  }
+  
+  
+  .titleTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 18px;
+  }
+  .descTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 16px;
+  }
+
+  .legendTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 13px;
+    text-anchor: middle;
+    dominant-baseline: hanging;
+    pointer-events: none;
+  }
+  
+
+  .axisTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .barTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 13px;
+  }
+  .cBarTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .sBarTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 13px;
+    text-anchor: end;
+    dominant-baseline: central;
+  }
+  .hoverBarTextStyle-upset-uo1e9798 {
+    font-size: 13px;
+    fill: rgba(251, 191, 36, 0.10);
+    display: none;
+    text-anchor: middle;
+  }
+  .setTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 15px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .cChartTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .sChartTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 14px;
+    text-anchor: middle;
+    dominant-baseline: hanging;
+  }
+
+  
+  .fillPrimary-upset-uo1e9798 { fill: #0a0a0a; fill-opacity: 1; }
+  .fillOverflow1-upset-uo1e9798 { fill-opacity: 0.7; }
+  .fillOverflow2-upset-uo1e9798 { fill-opacity: 0.4; }
+  
+  
+  .fillSelection-upset-uo1e9798 { fill: #fbbf24; }
+  .fillTransparent-upset-uo1e9798 { fill: transparent; }
+
+  .selectionHint-upset-uo1e9798 {
+    fill: transparent;
+    pointer-events: none;
+    stroke: #fbbf24;
+  }
+  .clickAble-upset-uo1e9798 {
+    cursor: pointer;
+  }
+
+  .startText-upset-uo1e9798 {
+    text-anchor: start;
+  }
+  .endText-upset-uo1e9798 {
+    text-anchor: end;
+  }
+  .pnone-upset-uo1e9798 {
+    pointer-events: none;
+  }
+  .fillNotMember-upset-uo1e9798 { fill: #d1d5db; }
+  .fillAlternating-upset-uo1e9798 { fill: rgba(0,0,0,0.05); }
+
+  .axisLine-upset-uo1e9798 {
+    fill: none;
+    stroke: #0a0a0a;
+  }
+  .hoverBar-upset-uo1e9798 {
+    fill: transparent;
+  }
+
+  .interactive-upset-uo1e9798:hover &gt; .hoverBar-upset-uo1e9798 {
+    stroke: rgba(251, 191, 36, 0.10);
+  }
+  .interactive-upset-uo1e9798:hover &gt; .hoverBarTextStyle-upset-uo1e9798 {
+    display: unset;
+  }
+
+  
+  .exportTextStyle-upset-uo1e9798 {
+    fill: #0a0a0a;
+    font-size: 10px;
+  }
+  .exportButtons-upset-uo1e9798 {
+    text-anchor: middle;
+  }
+  .exportButton-upset-uo1e9798 {
+    cursor: pointer;
+    opacity: 0.5;
+  }
+  .exportButton-upset-uo1e9798:hover {
+    opacity: 1;
+  }
+  .exportButton-upset-uo1e9798 &gt; rect {
+    fill: none;
+    stroke: #0a0a0a;
+  }
+  
+
+  .upsetLine-upset-qxr2i7c3g {
+    stroke-width: 6.9706293706293705;
+    stroke: #0a0a0a;
+    stroke-opacity: 1;
+  }
+  
+
+  .upsetSelectionLine-upset-qxr2i7c3g {
+    stroke-width: 7.667692307692308;
+    stroke: #fbbf24;
+    pointer-events: none;
+  }
+
+  
+  </style><defs><clipPath id="clip-upset-cgrie9t8a"><rect x="192.02392821535392" y="0" width="367.7258225324028" height="142.4"/></clipPath></defs><g transform="translate(20,20)" data-upset="base"><g><g transform="translate(559.7497507477567,0)" data-upset="csaxis"><g><g transform="translate(0, 214.1)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">0</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 190.72154208357858)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">200</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 167.34308416715714)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">400</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 143.9646262507357)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">600</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 120.58616833431431)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">800</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 97.20771041789288)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">1000</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 73.82925250147144)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">1200</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 50.45079458505003)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">1400</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(0, 27.072336668628623)"><text x="-9" dy="0.32em" class="axisTextStyle-upset-uo1e9798 endText-upset-uo1e9798">1600</text><line x2="-6" class="axisLine-upset-uo1e9798"/></g><path class="axisLine-upset-uo1e9798" d="M-6,15H0.5V213.6H-6"/></g><line x1="0" x2="403.25024925224335" y1="214.6" y2="214.6" class="axisLine-upset-uo1e9798"/><text class="cChartTextStyle-upset-uo1e9798" transform="translate(-45, 106.8)rotate(-90)">Intersection Size</text></g><g transform="translate(0,213.6)" data-upset="setaxis"><g transform="translate(0, 142.4)"><g transform="translate(192.52392821535392, 0)"><text y="9" dy="0.71em" class="axisTextStyle-upset-uo1e9798">0</text><line y2="6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(145.35539016139353, 0)"><text y="9" dy="0.71em" class="axisTextStyle-upset-uo1e9798">1000</text><line y2="6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(98.18685210743315, 0)"><text y="9" dy="0.71em" class="axisTextStyle-upset-uo1e9798">2000</text><line y2="6" class="axisLine-upset-uo1e9798"/></g><g transform="translate(51.01831405347275, 0)"><text y="9" dy="0.71em" class="axisTextStyle-upset-uo1e9798">3000</text><line y2="6" class="axisLine-upset-uo1e9798"/></g><path class="axisLine-upset-uo1e9798" d="M30,6V0.5H192.02392821535392V6"/></g><text class="sChartTextStyle-upset-uo1e9798" transform="translate(96.01196410767696, 168.4)">Set Size</text></g></g><g><g transform="translate(0,213.6)" data-upset="sets"><g transform="translate(0, 99.24848484848485)" class="interactive-upset-uo1e9798" data-cardinality="2449" data-og-set-idx="0"><title>Escherichia coli K12: 2449</title><rect x="0" width="963" height="33.193473193473196" class="hoverBar-upset-uo1e9798"/><rect x="76.50817852120493" y="0" width="115.515749694149" height="33.193473193473196" class="fillPrimary-upset-uo1e9798"/><text x="76.50817852120493" dx="-2" y="16.596736596736598" class="sBarTextStyle-upset-uo1e9798">2449</text><text x="375.8868394815553" y="16.596736596736598" class="setTextStyle-upset-uo1e9798" clip-path="url(#clip-upset-cgrie9t8a)">Escherichia coli K12</text></g><g transform="translate(0, 56.096969696969694)" class="interactive-upset-uo1e9798" data-cardinality="2997" data-og-set-idx="1"><title>Mycobacteroides abscessus ATCC 19977: 2997</title><rect x="0" width="963" height="33.193473193473196" class="hoverBar-upset-uo1e9798"/><rect x="192.02392821535392" width="770.9760717846461" height="33.193473193473196" class="fillAlternating-upset-uo1e9798"/><rect x="50.65981966763465" y="0" width="141.36410854771927" height="33.193473193473196" class="fillPrimary-upset-uo1e9798"/><text x="50.65981966763465" dx="-2" y="16.596736596736598" class="sBarTextStyle-upset-uo1e9798">2997</text><text x="375.8868394815553" y="16.596736596736598" class="setTextStyle-upset-uo1e9798" clip-path="url(#clip-upset-cgrie9t8a)">Mycobacteroides abscessus ATCC 19977</text></g><g transform="translate(0, 12.945454545454538)" class="interactive-upset-uo1e9798" data-cardinality="3435" data-og-set-idx="2"><title>Mycolicibacterium smegmatis ATCC 700084: 3435</title><rect x="0" width="963" height="33.193473193473196" class="hoverBar-upset-uo1e9798"/><rect x="30" y="0" width="162.02392821535392" height="33.193473193473196" class="fillPrimary-upset-uo1e9798"/><text x="30" dx="-2" y="16.596736596736598" class="sBarTextStyle-upset-uo1e9798">3435</text><text x="375.8868394815553" y="16.596736596736598" class="setTextStyle-upset-uo1e9798" clip-path="url(#clip-upset-cgrie9t8a)">Mycolicibacterium smegmatis ATCC 700084</text></g></g><g transform="translate(559.7497507477567,0)" data-upset="cs"><g transform="translate(16.571928051462066, 0)" class="interactive-upset-uo1e9798" data-cardinality="1091" data-og-combo-idx="0"><title>Escherichia coli K12: 1091</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="86.07051206592114" height="127.52948793407886" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="84.07051206592114" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">1091</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Escherichia coli K12</text><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillNotMember-upset-uo1e9798" data-og-set-idx="1"><title>Escherichia coli K12</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillNotMember-upset-uo1e9798" data-og-set-idx="2"><title>Escherichia coli K12</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillPrimary-upset-uo1e9798" data-og-set-idx="0"><title>Escherichia coli K12</title></circle></g><g transform="translate(71.81168822300225, 0)" class="interactive-upset-uo1e9798" data-cardinality="447" data-og-combo-idx="1"><title>Mycolicibacterium smegmatis ATCC 700084: 447</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="161.3491465567981" height="52.25085344320189" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="159.3491465567981" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">447</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Mycolicibacterium smegmatis ATCC 700084</text><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillNotMember-upset-uo1e9798" data-og-set-idx="0"><title>Mycolicibacterium smegmatis ATCC 700084</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillNotMember-upset-uo1e9798" data-og-set-idx="1"><title>Mycolicibacterium smegmatis ATCC 700084</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillPrimary-upset-uo1e9798" data-og-set-idx="2"><title>Mycolicibacterium smegmatis ATCC 700084</title></circle></g><g transform="translate(127.05144839454243, 0)" class="interactive-upset-uo1e9798" data-cardinality="205" data-og-combo-idx="2"><title>Mycobacteroides abscessus ATCC 19977: 205</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="189.63708063566804" height="23.962919364331952" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="187.63708063566804" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">205</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Mycobacteroides abscessus ATCC 19977</text><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillNotMember-upset-uo1e9798" data-og-set-idx="0"><title>Mycobacteroides abscessus ATCC 19977</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillNotMember-upset-uo1e9798" data-og-set-idx="2"><title>Mycobacteroides abscessus ATCC 19977</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillPrimary-upset-uo1e9798" data-og-set-idx="1"><title>Mycobacteroides abscessus ATCC 19977</title></circle></g><g transform="translate(182.29120856608262, 0)" class="interactive-upset-uo1e9798" data-cardinality="1699" data-og-combo-idx="3"><title>Mycobacteroides abscessus ATCC 19977 ∩ Mycolicibacterium smegmatis ATCC 700084: 1699</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="15" height="198.6" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="13" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">1699</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Mycobacteroides abscessus ATCC 19977 ∩ Mycolicibacterium smegmatis ATCC 700084</text><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillNotMember-upset-uo1e9798" data-og-set-idx="0"><title>Mycobacteroides abscessus ATCC 19977 ∩ Mycolicibacterium smegmatis ATCC 700084</title></circle><line x1="21.24606160443853" y1="275.67599067599065" x2="21.24606160443853" y2="253.75990675990676" class="upsetLine-upset-qxr2i7c3g"/><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillPrimary-upset-uo1e9798" data-og-set-idx="1"><title>Mycobacteroides abscessus ATCC 19977</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillPrimary-upset-uo1e9798" data-og-set-idx="2"><title>Mycolicibacterium smegmatis ATCC 700084</title></circle></g><g transform="translate(237.5309687376228, 0)" class="interactive-upset-uo1e9798" data-cardinality="265" data-og-combo-idx="4"><title>Escherichia coli K12 ∩ Mycolicibacterium smegmatis ATCC 700084: 265</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="182.6235432607416" height="30.976456739258396" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="180.6235432607416" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">265</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Escherichia coli K12 ∩ Mycolicibacterium smegmatis ATCC 700084</text><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillNotMember-upset-uo1e9798" data-og-set-idx="1"><title>Escherichia coli K12 ∩ Mycolicibacterium smegmatis ATCC 700084</title></circle><line x1="21.24606160443853" y1="318.8275058275059" x2="21.24606160443853" y2="253.75990675990676" class="upsetLine-upset-qxr2i7c3g"/><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillPrimary-upset-uo1e9798" data-og-set-idx="0"><title>Escherichia coli K12</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillPrimary-upset-uo1e9798" data-og-set-idx="2"><title>Mycolicibacterium smegmatis ATCC 700084</title></circle></g><g transform="translate(292.770728909163, 0)" class="interactive-upset-uo1e9798" data-cardinality="69" data-og-combo-idx="5"><title>Escherichia coli K12 ∩ Mycobacteroides abscessus ATCC 19977: 69</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="205.5344320188346" height="8.065567981165401" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="203.5344320188346" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">69</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Escherichia coli K12 ∩ Mycobacteroides abscessus ATCC 19977</text><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillNotMember-upset-uo1e9798" data-og-set-idx="2"><title>Escherichia coli K12 ∩ Mycobacteroides abscessus ATCC 19977</title></circle><line x1="21.24606160443853" y1="318.8275058275059" x2="21.24606160443853" y2="296.91142191142194" class="upsetLine-upset-qxr2i7c3g"/><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillPrimary-upset-uo1e9798" data-og-set-idx="0"><title>Escherichia coli K12</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillPrimary-upset-uo1e9798" data-og-set-idx="1"><title>Mycobacteroides abscessus ATCC 19977</title></circle></g><g transform="translate(348.01048908070317, 0)" class="interactive-upset-uo1e9798" data-cardinality="1024" data-og-combo-idx="6"><title>Escherichia coli K12 ∩ Mycobacteroides abscessus ATCC 19977 ∩ Mycolicibacterium smegmatis ATCC 700084: 1024</title><rect y="0" width="42.49212320887706" height="356" class="hoverBar-upset-uo1e9798"/><rect x="0" y="93.90229546792231" height="119.69770453207768" width="42.49212320887706" class="fillPrimary-upset-uo1e9798"/><text y="91.90229546792231" x="21.24606160443853" class="cBarTextStyle-upset-uo1e9798">1024</text><text y="-2" x="21.24606160443853" class="hoverBarTextStyle-upset-uo1e9798">Escherichia coli K12 ∩ Mycobacteroides abscessus ATCC 19977 ∩ Mycolicibacterium smegmatis ATCC 700084</text><line x1="21.24606160443853" y1="318.8275058275059" x2="21.24606160443853" y2="253.75990675990676" class="upsetLine-upset-qxr2i7c3g"/><circle r="11.617715617715618" cx="21.24606160443853" cy="329.4452214452215" class="fillPrimary-upset-uo1e9798" data-og-set-idx="0"><title>Escherichia coli K12</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="286.2937062937063" class="fillPrimary-upset-uo1e9798" data-og-set-idx="1"><title>Mycobacteroides abscessus ATCC 19977</title></circle><circle r="11.617715617715618" cx="21.24606160443853" cy="243.14219114219114" class="fillPrimary-upset-uo1e9798" data-og-set-idx="2"><title>Mycolicibacterium smegmatis ATCC 700084</title></circle></g></g></g><g class="pnone-upset-uo1e9798"><g transform="translate(559.7497507477567,0)" data-upset="cs-s"><rect x="16.571928051462066" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/><rect x="71.81168822300225" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/><rect x="127.05144839454243" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/><rect x="182.29120856608262" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/><rect x="237.5309687376228" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/><rect x="292.770728909163" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/><rect x="348.01048908070317" y="213.6" height="0" width="42.49212320887706" class="fillSelection-upset-uo1e9798 pnone-upset-uo1e9798"/></g><g transform="translate(0,213.6)" data-upset="sets-s"><rect x="192.02392821535392" y="99.24848484848485" width="0" height="33.193473193473196" class="fillSelection-upset-uo1e9798  pnone-upset-uo1e9798"/><rect x="192.02392821535392" y="56.096969696969694" width="0" height="33.193473193473196" class="fillSelection-upset-uo1e9798  pnone-upset-uo1e9798"/><rect x="192.02392821535392" y="12.945454545454538" width="0" height="33.193473193473196" class="fillSelection-upset-uo1e9798  pnone-upset-uo1e9798"/></g><g transform="translate(192.02392821535392,213.6)"/></g><g><g transform="translate(0,213.6)"/><g transform="translate(559.7497507477567,0)"/></g></g></svg>

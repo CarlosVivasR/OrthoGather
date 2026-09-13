@@ -1886,7 +1886,10 @@
           if (s) parts.push(s);
         });
         parts.push(today);
-        return parts.filter(Boolean).join("_") + "." + slug(ext);
+        // Callers pass an empty ext when the consumer adds its own (Plotly's
+        // toImageButtonOptions does). Appending a bare "." there produced
+        // names like "...2026-09-13..png".
+        return parts.filter(Boolean).join("_") + (ext ? "." + slug(ext) : "");
       }
 
       // Plot downloads. We use Plotly.toImage + an anchor click rather than

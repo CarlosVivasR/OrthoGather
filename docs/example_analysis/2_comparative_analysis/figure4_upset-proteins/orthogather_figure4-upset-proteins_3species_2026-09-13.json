@@ -1,0 +1,44 @@
+[
+  {
+    "combination":"Escherichia_coli_(strain_K12)",
+    "n_species":1,
+    "species":"Escherichia_coli_(strain_K12)",
+    "n_proteins":1504
+  },
+  {
+    "combination":"Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_species":1,
+    "species":"Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_proteins":817
+  },
+  {
+    "combination":"Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948)",
+    "n_species":1,
+    "species":"Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948)",
+    "n_proteins":430
+  },
+  {
+    "combination":"Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948) \u2229 Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_species":2,
+    "species":"Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948) + Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_proteins":4709
+  },
+  {
+    "combination":"Escherichia_coli_(strain_K12) \u2229 Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_species":2,
+    "species":"Escherichia_coli_(strain_K12) + Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_proteins":766
+  },
+  {
+    "combination":"Escherichia_coli_(strain_K12) \u2229 Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948)",
+    "n_species":2,
+    "species":"Escherichia_coli_(strain_K12) + Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948)",
+    "n_proteins":172
+  },
+  {
+    "combination":"Escherichia_coli_(strain_K12) \u2229 Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948) \u2229 Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_species":3,
+    "species":"Escherichia_coli_(strain_K12) + Mycobacteroides_abscessus_(strain_ATCC_19977___DSM_44196___CCUG_20993___CIP_104536___JCM_13569___NCTC_13031___TMC_1543___L948) + Mycolicibacterium_smegmatis_(strain_ATCC_700084___mc(2)155)",
+    "n_proteins":4599
+  }
+]

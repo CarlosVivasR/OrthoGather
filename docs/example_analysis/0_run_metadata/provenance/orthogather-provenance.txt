@@ -1,0 +1,31 @@
+OrthoGather — analysis provenance
+==========================================
+OrthoGather version  : 1.0.0
+Generated at         : 2026-09-13T21:27:03.425461+00:00
+Analysis mode        : generated
+
+Proteome data (UniProt)
+  release            : 2026_02
+  release date       : 10-June-2026
+  source             : UniProt (rest.uniprot.org)
+
+OrthoFinder
+  version            : 2.5.5
+
+Gene Ontology ontology
+  release (OBO)      : releases/2026-07-26
+
+GOA annotations (EBI)
+  data generated     : —
+  GO-version         : —
+  downloaded at      : —
+  files              : —
+  source             : —
+
+Proteome catalogue
+  version            : 2026-06-03
+  downloaded at      : 2026-06-03T14:19:15Z
+  proteome count     : 1013422
+
+Cite: https://doi.org/10.64898/2026.01.30.702851
+

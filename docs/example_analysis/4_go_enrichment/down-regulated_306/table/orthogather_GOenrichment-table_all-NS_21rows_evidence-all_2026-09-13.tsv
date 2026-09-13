@@ -1,0 +1,22 @@
+GO	name	namespace	direction	depth	study_count	study_n	pop_count	pop_n	p_fdr_bh	neg_log10_fdr
+GO:0007154	cell communication	biological_process	enriched	2	13	250	43	2470	0.02976694841311876	1.5262656851810479
+GO:0007165	signal transduction	biological_process	enriched	4	13	250	43	2470	0.02976694841311876	1.5262656851810479
+GO:0023052	signaling	biological_process	enriched	3	13	250	43	2470	0.02976694841311876	1.5262656851810479
+GO:0016411	acylglycerol O-acyltransferase activity	molecular_function	enriched	5	7	250	12	2470	0.02976694841311876	1.5262656851810479
+GO:0010558	negative regulation of macromolecule biosynthetic process	biological_process	enriched	7	13	250	45	2470	0.032878925421588316	1.4830823849002588
+GO:0010605	negative regulation of macromolecule metabolic process	biological_process	enriched	6	13	250	45	2470	0.032878925421588316	1.4830823849002588
+GO:0000160	phosphorelay signal transduction system	biological_process	enriched	6	11	250	35	2470	0.036738529103500936	1.4348782354831406
+GO:0045017	glycerolipid biosynthetic process	biological_process	enriched	6	6	250	12	2470	0.042437001478156496	1.372255310149972
+GO:0009890	negative regulation of biosynthetic process	biological_process	enriched	6	13	250	48	2470	0.04381971681466313	1.3583304333984663
+GO:0009892	negative regulation of metabolic process	biological_process	enriched	5	13	250	49	2470	0.044654095695821114	1.3501387012430988
+GO:0046486	glycerolipid metabolic process	biological_process	enriched	5	9	250	27	2470	0.044654095695821114	1.3501387012430988
+GO:0035556	intracellular signal transduction	biological_process	enriched	5	11	250	39	2470	0.044654095695821114	1.3501387012430988
+GO:0045892	negative regulation of DNA-templated transcription	biological_process	enriched	10	11	250	39	2470	0.044654095695821114	1.3501387012430988
+GO:0045934	negative regulation of nucleobase-containing compound metabolic process	biological_process	enriched	7	11	250	39	2470	0.044654095695821114	1.3501387012430988
+GO:0051253	negative regulation of RNA metabolic process	biological_process	enriched	8	11	250	39	2470	0.044654095695821114	1.3501387012430988
+GO:1902679	negative regulation of RNA biosynthetic process	biological_process	enriched	9	11	250	39	2470	0.044654095695821114	1.3501387012430988
+GO:0009057	macromolecule catabolic process	biological_process	enriched	4	8	250	23	2470	0.04504805728475715	1.3463239334019501
+GO:0048519	negative regulation of biological process	biological_process	enriched	3	13	250	52	2470	0.047120461935377604	1.3267904606869536
+GO:0048523	negative regulation of cellular process	biological_process	enriched	4	13	250	52	2470	0.047120461935377604	1.3267904606869536
+GO:0044042	glucan metabolic process	biological_process	enriched	6	5	250	10	2470	0.0490111619090565	1.309705001533274
+GO:0072348	sulfur compound transport	biological_process	enriched	4	5	250	10	2470	0.0490111619090565	1.309705001533274
