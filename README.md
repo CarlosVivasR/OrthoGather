@@ -136,7 +136,7 @@ If you prefer a guided installer that also checks prerequisites, run the script 
 
 ```bash
 ./installers/install_orthogather_mac.sh   # macOS (Apple Silicon or Intel)
-./installers/install_orthogather_wsl.sh   # Linux / WSL
+bash installers/install_orthogather_wsl.sh   # WSL only
 ```
 
 Both create an `orthogather` environment and check that OrthoFinder is detected, but they are not
@@ -144,11 +144,8 @@ identical: the macOS script builds it from [`environment.yml`](environment.yml),
 installs the packages explicitly. The macOS script needs **Conda**; the WSL script needs
 **Micromamba**. If you only have one of the two, use the Conda route above.
 
-The WSL script ships without the executable bit, so invoke it through the shell:
-
-```bash
-bash installers/install_orthogather_wsl.sh
-```
+The WSL script checks `/proc/version` for a WSL kernel and exits on native Linux, so on a Linux
+machine use the Conda route above.
 
 ⚠️ **Prerequisite:** Conda or Micromamba must already be installed (e.g. via [Miniforge](https://github.com/conda-forge/miniforge)). For a step-by-step walkthrough and troubleshooting, see [installation_guide.pdf](docs/Installation_guide.pdf).
 
@@ -160,15 +157,17 @@ You can start an analysis in **three ways**:
 
 ### New Analysis
 **Start from nothing.** Search the UniProt catalogue by scientific name, common name, taxonomic
-synonym, abbreviated binomial or proteome ID; the proteomes download in the background and
+synonym or proteome ID (the search matches the catalogue label, so type `Escherichia coli` rather
+than `E. coli`); the proteomes download in the background and
 OrthoFinder runs locally with its log streaming to the page. Use this when the species you need are
 not already on disk — which is the usual case.
 
 ### Preselected Dataset
-**Start from a worked example.** 47 proteomes from species associated with cystic fibrosis infection
-and antimicrobial resistance, shipped inside the repository with orthogroups already inferred. Every
-module works immediately, with no downloads and no OrthoFinder run — the fastest way to see what the
-tool does before committing your own data to it.
+**Start from a worked example.** The orthogroups for 47 proteomes from species associated with
+cystic fibrosis infection and antimicrobial resistance, inferred in advance and shipped inside the
+repository. The comparative module works immediately, with no proteome downloads and no OrthoFinder
+run; the enrichment module still fetches annotation files from the EBI on first use, since those are
+not distributed here.
 
 ### External Data Upload
 **Start from an analysis you already have.** Upload a `.zip` containing an OrthoFinder `Orthogroups`
@@ -193,7 +192,7 @@ OrthoGather invokes OrthoFinder with `-og` (skip gene/species trees — we only 
 ORTHOGATHER_OF_THREADS=6 ORTHOGATHER_OF_ANALYSIS_THREADS=1 python app.py
 ```
 
-The convention `-a ≈ -t / 4` follows OrthoFinder's own recommendation: the analysis phase is memory-bound and oversubscription hurts more than it helps.
+The `-a ≈ -t / 4` ratio is OrthoGather's default, not something OrthoFinder prescribes: the analysis phase is memory-bound, so oversubscribing it hurts more than it helps.
 
 ---
 
@@ -266,7 +265,7 @@ because it is not in the background.
 > and each orthogroup counts once.
 
 **Workflow:**
-- **GOA download (per species)** and an **annotation coverage panel (4-in-1)** to gauge how much of your dataset GO annotation can reach before enrichment. The panel reports GOA-file coverage — an upper bound; the exact per-protein annotation rate is shown in the enrichment run itself.
+- **GOA download (per species)** and an **annotation coverage histogram**, with four summary figures, to gauge how much of your dataset GO annotation can reach before enrichment. The panel reports GOA-file coverage — an upper bound; the exact per-protein annotation rate is shown in the enrichment run itself.
 - **Define sets:**
   - **Foreground** — paste UniProt IDs for the set to be tested.
   - **Background** — paste UniProt IDs or use “all species with GOA” from your selection.
@@ -295,8 +294,8 @@ Quote the `ERR_` code when you
 reports and feature requests.
 
 Categories: `input`, `state`, `data`, `network`, `external`, `not-found`,
-`system`. Severities: `error`, `warning`, `info`. The frontend toast styles
-itself accordingly (red / amber / blue border, matching icon).
+`system`. Severities: `error`, `warning`, `info`. The border colour follows the severity
+(red / amber / blue) and the icon follows the category.
 
 Global error handlers (`@app.errorhandler(404)`, `@app.errorhandler(500)`,
 `@app.errorhandler(Exception)`) catch anything that escapes and render
@@ -307,7 +306,7 @@ branded `templates/error.html` page (for HTML requests).
 
 ## 🧪 Running the test suite
 
-OrthoGather ships with a pytest suite that locks in the species-matching contract (see `tests/test_species_matching.py`). To run it:
+OrthoGather ships with 101 tests over species matching, taxonomy, the error catalogue, OrthoXML import, catalogue building, filenames and provenance. They do not cover the enrichment statistics themselves, which are exercised through the worked example in [`example_analysis/`](example_analysis/). To run them:
 
 ```bash
 conda activate orthogather
