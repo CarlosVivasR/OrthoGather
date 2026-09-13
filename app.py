@@ -3224,6 +3224,36 @@ def gene_ontology_analysis():
         p_value_threshold = float(data.get('p_value', 0.05))
         max_terms = data.get('max_terms')  # None or int
         min_depth = int(data.get('min_depth', 2))
+        # GO term size bounds, counted over the background. Terms smaller than
+        # ``min_term_size`` are the ones topGO's vignette warns about ("detected
+        # to be significantly enriched due to artifacts in the statistical test");
+        # terms larger than ``max_term_size`` are too generic to interpret.
+        # Defaults 10/500 match clusterProfiler's minGSSize/maxGSSize and
+        # WebGestalt's minNum/maxNum.
+        # Universe convention. BOTH values are symmetric -- the study set and the
+        # population are built by the same rule -- which is the property that
+        # matters; the original bug was that they were not.
+        #   'pooled'       one annotated universe shared by all three aspects.
+        #                  This is PANTHER's convention: querying its API for the
+        #                  same gene list against BP, MF and CC returns the same
+        #                  reference size (4,403 for E. coli) in all three, so its
+        #                  aspect roots are not 1.000 either.
+        #   'per_ontology' each aspect tested against the background annotated in
+        #                  THAT aspect -- topGO's "feasible genes", and what
+        #                  clusterProfiler and GOstats do. Stricter: the three
+        #                  roots then return exactly fold 1.000, p = 1.
+        # Default is 'pooled'; 'per_ontology' is offered as a sensitivity analysis.
+        universe_scope = str(data.get('universe_scope', 'pooled')).lower().strip()
+        if universe_scope not in ('per_ontology', 'pooled'):
+            universe_scope = 'pooled'
+        # Tail of the Fisher test. 'greater' = over-representation only, which is
+        # what every comparable tool reports; 'two-sided' also surfaces depleted
+        # terms (see the recomputation after run_study for why that is a trap).
+        test_direction = str(data.get('test_direction', 'greater')).lower().strip()
+        if test_direction not in ('greater', 'two-sided'):
+            test_direction = 'greater'
+        min_term_size = max(1, int(data.get('min_term_size', 10)))
+        max_term_size = int(data.get('max_term_size', 500))
         # NEW user-selectable toggles (Phase B). Defaults preserve legacy behaviour:
         #   - all evidence codes
         #   - per-protein counting
@@ -3340,7 +3370,12 @@ def gene_ontology_analysis():
             "after_expansion":  len(foreground),
             "with_annotations": len(fg_in_bg),
             "used_orthogroups": bool(session.get("foreground_used_orthogroups", False)),
+            # ``background_size`` is what the user SUBMITTED. The test runs against
+            # the annotated subset (and, per aspect, against a smaller one still),
+            # so report both -- labelling the submitted count "universe" is what
+            # hid the original denominator bug.
             "background_size":  len(bg_set),
+            "background_annotated": len(assoc_bg),
         }
 
         if not fg_in_bg:
@@ -3418,43 +3453,128 @@ def gene_ontology_analysis():
         # ENRICHMENT ANALYSIS
         # -------------------------------
         logging.info("[GO] Running GOEnrichmentStudy ...")
-        # NOTE: this name re-exports the PLAIN GOEnrichmentStudy (NOT the
-        # per-namespace GOEnrichmentStudyNS). Benjamini-Hochberg FDR is therefore
-        # computed ONCE over BP+CC+MF pooled as a single family, before the
-        # namespace split and the depth/max_terms filters below. This is a valid
-        # single-experiment correction but is not per-aspect; q-values will not
-        # match tools that correct each namespace separately.
+        # ONE ENRICHMENT PER ONTOLOGY. The universe each one is tested against is
+        # controlled by ``universe_scope`` (documented where it is parsed).
+        #
+        # The three ontologies are disjoint DAGs with different annotation
+        # coverage -- in the bundled example 65% of the annotated background
+        # carries a BP term, 49% a CC term, 91% an MF term -- so the choice of
+        # universe changes BP results more than MF ones. Both conventions in the
+        # field are implemented here; neither is the asymmetric comparison that
+        # the annotated-universe fix above removed.
+        #
+        # BH is applied ONCE across the three aspects either way: the universes
+        # may be per-ontology, the correction family never is.
         from goatools.goea.go_enrichment_ns import GOEnrichmentStudy
 
+        _NS_OF = lambda go: (godag[go].namespace if go in godag else None)
+        # Annotations propagate over is_a AND part_of (the True Path Rule).
+        # ensure_godag() loads the relationship attributes this needs.
+        _RELS = {'part_of'}
+
+        results = []
+        universe_by_ns = {}
         try:
-            goea = GOEnrichmentStudy(
-                list(bg_set),   # universe
-                assoc_bg,       # gene -> set(GO)
-                godag,
-                propagate_counts=True,  # explicit: annotations propagate up the GO DAG
-                methods=['fdr_bh'],
-                log=None
-            )
+            for _ns in ('biological_process', 'cellular_component', 'molecular_function'):
+                # Universe: background proteins carrying at least one term in THIS
+                # ontology. Association restricted to this ontology's terms.
+                if universe_scope == 'pooled':
+                    # PANTHER convention: every aspect shares the whole annotated
+                    # background. Symmetric (the study set is restricted the same
+                    # way), but the aspect roots do not return exactly 1.000
+                    # because annotation coverage differs between the study and
+                    # the background within each ontology.
+                    ns_univ = set(assoc_bg.keys())
+                else:
+                    ns_univ = {p for p, gos in assoc_bg.items()
+                               if any(_NS_OF(g) == _ns for g in gos)}
+                if not ns_univ:
+                    continue
+                ns_assoc = {p: {g for g in assoc_bg[p] if _NS_OF(g) == _ns}
+                            for p in ns_univ}
+                ns_study = [p for p in fg_in_bg if p in ns_univ]
+                universe_by_ns[_ns] = (len(ns_study), len(ns_univ))
+                if len(ns_study) < 1:
+                    continue
+                goea = GOEnrichmentStudy(
+                    list(ns_univ),          # universe: background n this ontology
+                    ns_assoc,               # gene -> set(GO) in this ontology
+                    godag,
+                    propagate_counts=True,  # explicit: annotations propagate up the DAG
+                    relationships=_RELS,    # ... over is_a AND part_of
+                    methods=['fdr_bh'],     # overwritten below; kept for API parity
+                    log=None
+                )
+                results.extend(goea.run_study(ns_study, prt=None))
+                logging.info(f"[GO] {_ns}: study={len(ns_study)} universe={len(ns_univ)}")
+
+            # GOATOOLS calls scipy's fisher_exact with its default two-sided
+            # alternative, so a term that is strongly UNDER-represented gets a
+            # small p-value and is reported alongside the over-represented ones.
+            # Since the chart plots -log10(FDR) -- magnitude with no sign -- a
+            # depleted term draws a bar as tall as an enriched one. topGO,
+            # clusterProfiler, GOstats, DAVID and PANTHER all test the upper tail
+            # only, so recompute one-sided here.
+            #
+            # Depletion is also close to uninterpretable under GO's open-world
+            # assumption: absence of an annotation is not an assertion that the
+            # function is absent, and it usually means "no recognisable domain".
+            if test_direction == 'greater':
+                from scipy.stats import fisher_exact as _fisher
+                for r in results:
+                    a = r.study_count
+                    b = r.study_n - r.study_count
+                    c = r.pop_count - r.study_count
+                    d = (r.pop_n - r.study_n) - (r.pop_count - r.study_count)
+                    if min(a, b, c, d) < 0:      # defensive: never seen in practice
+                        continue
+                    r.p_uncorrected = float(_fisher([[a, b], [c, d]],
+                                                    alternative='greater')[1])
         except Exception as e:
-            logging.error("[GO][CRASH] ❌ Error initializing GOEA")
+            logging.error("[GO][CRASH] ❌ Error running per-namespace GOEA")
             logging.info(f"    - assoc_bg type={type(assoc_bg)} size={len(assoc_bg)}")
             sample = [(g, type(v), list(v)[:10]) for g, v in list(assoc_bg.items())[:5]]
             logging.info(f"    - Sample entries: {sample}")
             raise
 
-        results = goea.run_study(fg_in_bg)
         logging.info(f"[GO] Raw results: {len(results)} terms")
 
         # -------------------------------
         # FILTER SIGNIFICANT RESULTS
         # -------------------------------
-        sig = []
-        for r in results:
-            if r.p_fdr_bh is None or r.p_fdr_bh >= p_value_threshold:
-                continue
-            depth = godag[r.GO].depth if r.GO in godag else 0
-            if depth >= min_depth:
-                sig.append(r)
+        # The correction family must contain only the terms that can actually be
+        # reported. GOATOOLS corrects over every term in the DAG, including the
+        # three ontology roots and the ~80% of terms carrying fewer than ten
+        # background proteins, which are then hidden by the depth filter below --
+        # they dilute the BH denominator without ever being shown. Restricting
+        # the family first, then correcting, is what topGO (nodeSize),
+        # clusterProfiler (minGSSize=10, maxGSSize=500) and WebGestalt
+        # (minNum=10, maxNum=500) do.
+        def _bh(pvals):
+            """Benjamini-Hochberg step-up. Kept inline: numpy is already a
+            dependency, statsmodels is not."""
+            p = np.asarray(pvals, dtype=float)
+            n = p.size
+            if n == 0:
+                return p
+            order = np.argsort(p)
+            ranked = p[order] * n / (np.arange(n) + 1)
+            ranked = np.minimum.accumulate(ranked[::-1])[::-1]
+            out = np.empty(n)
+            out[order] = np.minimum(ranked, 1.0)
+            return out
+
+        testable = [
+            r for r in results
+            if (godag[r.GO].depth if r.GO in godag else 0) >= min_depth
+            and min_term_size <= r.pop_count <= max_term_size
+        ]
+        logging.info(f"[GO] Correction family: {len(testable)} of {len(results)} terms "
+                     f"(depth>={min_depth}, {min_term_size}<=size<={max_term_size})")
+        for r, q in zip(testable, _bh([r.p_uncorrected for r in testable])):
+            r.p_fdr_bh = float(q)
+
+        sig = [r for r in testable if r.p_fdr_bh < p_value_threshold]
 
         logging.info(f"[GO] Significant after FDR<{p_value_threshold} & depth≥{min_depth}: {len(sig)}")
 
@@ -3498,8 +3618,19 @@ def gene_ontology_analysis():
                     "name": [r.name for r in res],
                     "NS": [r.goterm.namespace for r in res],
                     "Direction": [_direction(r) for r in res],
+                    # Raw and adjusted p-values are exported so a reader can
+                    # recompute the correction; -log10 is floored so a q-value
+                    # that underflows to 0.0 does not render as least-significant.
+                    "p_uncorrected": [r.p_uncorrected for r in res],
+                    "p_fdr_bh": [r.p_fdr_bh for r in res],
                     "-log10(FDR)": [
-                        ((-float(np.log10(r.p_fdr_bh))) if (r.p_fdr_bh and r.p_fdr_bh > 0) else 0.0)
+                        (-float(np.log10(max(r.p_fdr_bh, 1e-300)))
+                         if r.p_fdr_bh is not None else 0.0)
+                        for r in res
+                    ],
+                    "fold_enrichment": [
+                        ((r.study_count / r.study_n) / (r.pop_count / r.pop_n))
+                        if (r.study_n and r.pop_count and r.pop_n) else None
                         for r in res
                     ],
                     "study_count": [r.study_count for r in res],
@@ -3541,13 +3672,31 @@ def gene_ontology_analysis():
                                                   else ", ".join(sorted(evidence_codes)))),
                 ("Counting mode requested",      counting_mode_requested),
                 ("Counting mode applied",        counting_mode),
+                ("Test",                         ("Fisher exact, one-sided (over-representation only)"
+                                                  if test_direction == 'greater' else
+                                                  "Fisher exact, two-sided (reports depleted terms too)")),
                 ("FDR method",                   "Benjamini-Hochberg (fdr_bh)"),
-                ("FDR scope",                    "pooled across BP/CC/MF (single family); applied before depth & max_terms filters"),
+                ("FDR scope",                    "pooled across BP/CC/MF (single family); "
+                                                 "applied after the depth and term-size filters, "
+                                                 "before max_terms"),
+                ("Universe scope",               ("pooled: one annotated universe shared by all "
+                                                  "three aspects, as in PANTHER's overrepresentation test"
+                                                  if universe_scope == 'pooled' else
+                                                  "per-ontology: each aspect against the background "
+                                                  "annotated in that aspect, as in topGO's feasible genes")),
+                ("Study / universe per aspect",  "; ".join(f"{k[:2].upper()} {s}/{u}"
+                                                           for k, (s, u) in universe_by_ns.items())),
+                ("Annotation propagation edges", "is_a, part_of (True Path Rule)"),
                 ("Annotation propagation",       "enabled (propagate_counts=True)"),
                 ("FDR threshold",                p_value_threshold),
                 ("Min depth",                    min_depth),
+                ("GO term size range",           f"{min_term_size}-{max_term_size} background proteins"),
+                ("Terms in correction family",   len(testable)),
                 ("Foreground units",             len(fg_in_bg)),
-                ("Background units",             len(bg_set)),
+                # The universe actually passed to GOATOOLS is the annotated
+                # background, not every background protein. Report what was used.
+                ("Background units (annotated)",  len(assoc_bg)),
+                ("Background units (submitted)",  len(bg_set)),
             ]
             if counting_mode == 'per_orthogroup':
                 prov_rows.append((
@@ -3613,7 +3762,11 @@ def gene_ontology_analysis():
                     "depth": godag[r.GO].depth if r.GO in godag else 0,
                     "p_uncorrected": r.p_uncorrected,
                     "p_fdr_bh": r.p_fdr_bh,
-                    "neg_log10_fdr": (-float(np.log10(r.p_fdr_bh))) if r.p_fdr_bh and r.p_fdr_bh > 0 else 0.0,
+                    # Floor the q-value before the log: a q that underflows to
+                    # exactly 0.0 is falsy, and the old guard turned the MOST
+                    # significant term into 0.0, i.e. the least significant.
+                    "neg_log10_fdr": (-float(np.log10(max(r.p_fdr_bh, 1e-300)))
+                                      if r.p_fdr_bh is not None else 0.0),
                     "study_count": r.study_count,
                     "study_n": r.study_n,
                     "pop_count": r.pop_count,

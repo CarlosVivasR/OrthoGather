@@ -136,10 +136,17 @@ def build_id2gos_from_goa_folder(goa_folder: str,
                     if len(cols) < 9:
                         continue
                     gene_id = cols[1].strip()
+                    qualifier = cols[3].strip()
                     go_id   = cols[4].strip()
                     ev      = cols[6].strip()
                     aspect  = cols[8].strip()
                     if not gene_id or not go_id or not go_id.startswith("GO:"):
+                        continue
+                    # A NOT-qualified annotation asserts the OPPOSITE of the term
+                    # ("this gene product does NOT enable X"). The GO Consortium
+                    # requires these to be excluded from enrichment; ingesting them
+                    # as positive evidence inverts their meaning.
+                    if "NOT" in qualifier.split("|"):
                         continue
                     if evidence_codes is not None and ev not in evidence_codes:
                         continue
@@ -303,7 +310,12 @@ def ensure_godag(path: str):
         return _godag_cache["godag"]
 
     logging.info(f"[INFO] GODag cache MISS — loading from {path} ...")
-    godag = GODag(path, prt=None)
+    # ``optional_attrs={'relationship'}`` is required for the True Path Rule:
+    # without it GOTerm objects carry no relationship data and GOATOOLS can only
+    # propagate annotations over is_a, ignoring part_of. The R tools that use
+    # GO.db's *ANCESTOR tables (topGO, GOstats, clusterProfiler) traverse both.
+    # Callers pass relationships={'part_of'} to GOEnrichmentStudy to use this.
+    godag = GODag(path, prt=None, optional_attrs={'relationship'})
     _godag_cache["path"] = resolved
     _godag_cache["mtime"] = mtime
     _godag_cache["godag"] = godag
