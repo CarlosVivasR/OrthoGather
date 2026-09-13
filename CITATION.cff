@@ -1,7 +1,30 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "OrthoGather"
+abstract: >
+  A locally hosted web application that integrates orthology inference with
+  Gene Ontology enrichment for comparative proteome analysis. It retrieves
+  reference and non-reference proteomes from UniProt, runs OrthoFinder to
+  infer orthogroups, explores orthogroup composition across species, and
+  tests Gene Ontology over-representation with GOATOOLS.
+type: software
+version: "2.1.0"
+date-released: "2026-09-14"
+license: GPL-3.0-or-later
 url: "https://github.com/CarlosVivasR/OrthoGather"
+repository-code: "https://github.com/CarlosVivasR/OrthoGather"
+keywords:
+  - comparative proteomics
+  - orthology
+  - orthogroups
+  - Gene Ontology enrichment
+  - OrthoFinder
+  - non-model organisms
+# Después de publicar la release, Zenodo acuña un DOI. Añádelo aquí como:
+#   doi: "10.5281/zenodo.XXXXXXXX"
+# Usa el DOI de concepto (el que Zenodo etiqueta "all versions"), no el de
+# esta versión concreta: así la cita sigue resolviendo cuando publiques la
+# siguiente.
 
 authors:
   - family-names: "Vivas-Rodríguez"

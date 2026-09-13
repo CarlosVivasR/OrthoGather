@@ -15,7 +15,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 # Stamped onto every analysis's provenance block so a result can be traced back
 # to the exact OrthoGather release that produced it. Bump on each release.
-ORTHOGATHER_VERSION = "1.0.0"
+ORTHOGATHER_VERSION = "2.1.0"
 
 # ---------------------------------------------------------------------------
 # Directories

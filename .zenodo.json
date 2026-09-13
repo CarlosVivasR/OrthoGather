@@ -1,0 +1,27 @@
+{
+  "title": "OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment",
+  "description": "<p>A locally hosted web application that integrates orthology inference with Gene Ontology enrichment for comparative proteome analysis. It retrieves reference and non-reference proteomes from UniProt, runs OrthoFinder to infer orthogroups, explores orthogroup composition across species through interactive UpSet plots, and tests Gene Ontology over-representation with GOATOOLS. Every analysis carries a provenance record of the software and database versions behind it.</p><p>This release accompanies a manuscript under review. The complete worked example described in the supplementary material is included in the <code>example_analysis/</code> folder.</p>",
+  "upload_type": "software",
+  "license": "GPL-3.0-or-later",
+  "access_right": "open",
+  "version": "2.1.0",
+  "language": "eng",
+  "keywords": [
+    "comparative proteomics",
+    "orthology",
+    "orthogroups",
+    "Gene Ontology enrichment",
+    "OrthoFinder",
+    "GOATOOLS",
+    "non-model organisms",
+    "bioinformatics"
+  ],
+  "creators": [
+    { "name": "Vivas-Rodríguez, Carlos", "orcid": "0009-0008-0544-1776", "affiliation": "School of Biomolecular and Biomedical Science, University College Dublin, Ireland" },
+    { "name": "Gomez Matallanas, David", "orcid": "0000-0002-2360-3141", "affiliation": "School of Medicine, University College Dublin, Ireland" },
+    { "name": "Ryan, Colm J.", "orcid": "0000-0003-2750-9854", "affiliation": "UCD Conway Institute of Biomedical and Biomolecular Research, Dublin, Ireland" },
+    { "name": "McClean, Siobhán", "orcid": "0000-0001-6389-2542", "affiliation": "School of Biomolecular and Biomedical Science, University College Dublin, Ireland" },
+    { "name": "Dennler, Olivier", "orcid": "0009-0005-2408-1102", "affiliation": "UCD Conway Institute of Biomedical and Biomolecular Research, Dublin, Ireland" },
+    { "name": "Drabińska, Joanna", "orcid": "0000-0003-2068-238X", "affiliation": "School of Biomolecular and Biomedical Science, University College Dublin, Ireland" }
+  ]
+}

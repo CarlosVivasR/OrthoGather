@@ -1,6 +1,6 @@
 # OrthoGather — worked example
 
-Every file here was produced by OrthoGather v1.0.0 from the example dataset
+Every file here was produced by OrthoGather v2.1.0 from the example dataset
 described in **Supplementary File S1** of the manuscript, and is the
 application's own export: nothing has been edited, renamed or reformatted by
 hand. Each artifact has its own folder holding every format the application
@@ -95,7 +95,7 @@ exact versions used:
 
 | | |
 |---|---|
-| OrthoGather | 1.0.0 |
+| OrthoGather | 2.1.0 |
 | OrthoFinder | 2.5.5 |
 | GOATOOLS | 1.6.4 |
 | UniProt release | 2026_02 |
