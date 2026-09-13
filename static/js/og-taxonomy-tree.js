@@ -21,6 +21,21 @@
 (function () {
   "use strict";
 
+  /* Las hojas llegan con el nombre completo de UniProt
+     ("Escherichia coli (strain K12) [UP000000625]"), que no cabe en el margen
+     derecho y se cortaba a mitad de palabra. Se dibuja genero + especie + la
+     primera designacion de cepa; el nombre entero sigue en el tooltip y en el
+     Newick que se descarga. */
+  function shortLeafName(raw) {
+    const clean = String(raw).replace(/_/g, ' ').replace(/\s*\[[^\]]*\]\s*/g, ' ').trim();
+    const m = clean.match(/^(\S+)\s+(\S+)/);
+    if (!m) return clean;
+    const st = clean.match(/\(strain\s+([^)]*)\)/);
+    let strain = '';
+    if (st) strain = st[1].split(/\s{2,}|\s*\/\s*/)[0].replace(/[)\s]+$/, '').trim();
+    return (m[1] + ' ' + m[2] + (strain ? ' ' + strain : '')).trim();
+  }
+
   function _render({ containerId, treeData, perLeaf = 36, width = 600 }) {
     if (!treeData || !window.d3) return;
     const root = d3.hierarchy(treeData);
@@ -28,8 +43,13 @@
 
     // Generous right margin so even long species names ("Mycobacterium
     // tuberculosis H37Rv") fit without clipping.
-    const margin = { top: 12, right: 240, bottom: 12, left: 12 };
-    const innerW = width - margin.left - margin.right;
+    // El margen derecho se estima de la etiqueta mas larga en vez de fijarlo a
+    // 240 px: con seis especies de UniProt ese valor cortaba las seis.
+    const longest = root.leaves()
+      .reduce((n, d) => Math.max(n, shortLeafName(d.data.name).length), 0);
+    const margin = { top: 12, right: Math.max(160, Math.ceil(longest * 7.1) + 24),
+                     bottom: 12, left: 12 };
+    const innerW = Math.max(120, width - margin.left - margin.right);
     const innerH = Math.max(120, nLeaves * perLeaf);
     const height = innerH + margin.top + margin.bottom;
 
@@ -122,7 +142,7 @@
     leaf.append("text").attr("class", "leaf-name")
       .attr("dx", 8)
       .attr("dominant-baseline", "middle")
-      .text(d => d.data.name);
+      .text(d => shortLeafName(d.data.name));
     leaf
       .on("mouseover", function (event, d) {
         const tid = d.data.taxon_id ? `<span class="og-tax-tip-rank">taxon ${d.data.taxon_id}</span>` : "";

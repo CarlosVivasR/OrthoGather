@@ -151,7 +151,7 @@
                 <tr data-original="{{ row.original }}">
                   <td>
                     <span class="hover-box">
-                      <span class="name-ellipsis">{{ row.original }}</span>
+                      <span class="name-ellipsis">{{ row.original|short_species }}</span>
                       <span class="name-tooltip">{{ row.original }}</span>
                     </span>
                   </td>
@@ -160,7 +160,7 @@
                       <span class="ok clip">
                         <i class="fa-solid fa-check"></i>
                         <span class="hover-box">
-                          <span class="name-ellipsis">{{ row.match.label }}</span>
+                          <span class="name-ellipsis">{{ row.match.label|short_species }}</span>
                           <span class="name-tooltip" role="tooltip">{{ row.match.label }}</span>
                         </span>
                       </span>
@@ -231,11 +231,10 @@
         <p class="section-helper">
           A quick check on how much of your dataset is <em>reachable</em> by GO annotation —
           whether an enrichment will have enough signal to be meaningful.
-          <strong>What is measured:</strong> for each orthogroup, the share of its proteins that come
-          from a species with a GOA annotation file. It is a ceiling, not the real annotation rate:
-          a species can have a GOA file and still leave many of its proteins without a single GO
-          term. The exact per-protein figure is reported later, in the coverage banner of the
-          enrichment run ("With GO annotations").
+          <strong>What is measured:</strong> for each orthogroup, the share of its proteins that
+          carry at least one GO term in the downloaded GOA files. An orthogroup at 0% has no
+          annotated protein and contributes nothing to enrichment, even though it still appears
+          in the orthogroup analysis.
         </p>
         <div id="go-distribution-summary" class="go-dist-summary"></div>
 
@@ -246,9 +245,9 @@
             <i class="fa-solid fa-chevron-down go-dist-collapse-chev" aria-hidden="true"></i>
           </summary>
           <p class="section-helper">
-            Distribution of per-orthogroup GOA coverage — the share of each orthogroup's proteins
-            that belong to a species with a GOA file — across the orthogroups with non-zero
-            coverage. Each bar is coloured by how many GOA-covered species contributed proteins,
+            Distribution of per-orthogroup GO annotation coverage — the share of each orthogroup's
+            proteins that carry at least one GO term — across the orthogroups with non-zero
+            coverage. Each bar is coloured by how many annotated species contributed proteins,
             a "breadth of evidence" axis. Hover for exact values; use the camera icon to export
             PNG/SVG.
           </p>
@@ -1296,24 +1295,24 @@
           distSummaryEl.innerHTML = `
             <div class="go-dist-stat">
               <span class="go-dist-stat-label">Orthogroups</span>
-              <span class="go-dist-stat-value">${(sAll.n || 0).toLocaleString()}</span>
-              <span class="go-dist-stat-sub">${nZeroOG.toLocaleString()} have 0% GOA coverage</span>
+              <span class="go-dist-stat-value">${(sAll.n || 0).toLocaleString('en-US')}</span>
+              <span class="go-dist-stat-sub">${nZeroOG.toLocaleString('en-US')} have no annotated protein</span>
             </div>
             <div class="go-dist-stat">
-              <span class="go-dist-stat-label">With ≥ 1% GOA coverage</span>
-              <span class="go-dist-stat-value">${(sNz.n || 0).toLocaleString()}</span>
+              <span class="go-dist-stat-label">With GO annotation</span>
+              <span class="go-dist-stat-value">${(sNz.n || 0).toLocaleString('en-US')}</span>
               <span class="go-dist-stat-sub">
                 ${sAll.n ? Math.round(100 * sNz.n / sAll.n) : 0}% of total
               </span>
             </div>
             <div class="go-dist-stat">
-              <span class="go-dist-stat-label">Median GOA coverage</span>
-              <span class="go-dist-stat-value">${(sNz.median || 0).toFixed(1)}%</span>
-              <span class="go-dist-stat-sub">among covered OGs</span>
+              <span class="go-dist-stat-label">Mean GO coverage</span>
+              <span class="go-dist-stat-value">${(sNz.mean || 0).toFixed(1)}%</span>
+              <span class="go-dist-stat-sub">among annotated OGs</span>
             </div>
             <div class="go-dist-stat">
-              <span class="go-dist-stat-label">GOA-covered species</span>
-              <span class="go-dist-stat-value">${nAnnotatedSpecies.toLocaleString()}</span>
+              <span class="go-dist-stat-label">Annotated species</span>
+              <span class="go-dist-stat-value">${nAnnotatedSpecies.toLocaleString('en-US')}</span>
               <span class="go-dist-stat-sub">had a GOA file</span>
             </div>
           `;
@@ -1409,7 +1408,7 @@
               x0: c.meanBin, x1: c.meanBin, y0: 0, y1: 1,
               line: { color: "#1f5f9c", width: 2, dash: "dot" } },
           ],
-          xaxis: { title: "% of proteins from GOA-covered species", tickfont: { size: 11 } },
+          xaxis: { title: "% of proteins with at least one GO term", tickfont: { size: 11 } },
           yaxis: { title: "Number of orthogroups", gridcolor: "#eee" },
         };
         const config = {
@@ -1449,7 +1448,7 @@
         setText("go-cov-input",     stats.original_input ?? "–");
         setText("go-cov-expanded",  stats.after_expansion ?? "–");
         setText("go-cov-annotated", stats.with_annotations ?? "–");
-        setText("go-cov-bg",        (stats.background_size ?? 0).toLocaleString());
+        setText("go-cov-bg",        (stats.background_size ?? 0).toLocaleString('en-US'));
 
         const pct = stats.after_expansion
           ? Math.round((stats.with_annotations / stats.after_expansion) * 100)

@@ -73,6 +73,27 @@ app.config["SESSION_PERMANENT"] = False
 Session(app)
 
 
+@app.template_filter("short_species")
+def _short_species(raw: str) -> str:
+    """Genus + species + first strain designation, for display only.
+
+    OrthoFinder keeps the FASTA header as the species name, so these strings
+    arrive as ``Acinetobacter_baumannii_(strain_ATCC_19606___DSM_30007___JCM_
+    6841___...)``. Shown in full they overflow their column and the CSS ellipsis
+    cuts them mid-word on both sides of the GOA match table, which is exactly
+    what the supplementary figure has to show. The full string stays in the
+    tooltip, in ``data-original`` and in everything that gets exported."""
+    clean = re.sub(r"\s*\[[^\]]*\]\s*", " ", str(raw).replace("_", " ")).strip()
+    m = re.match(r"^(\S+)\s+(\S+)", clean)
+    if not m:
+        return clean
+    st = re.search(r"\(strain\s+([^)]*)\)", clean)
+    strain = ""
+    if st:
+        strain = re.split(r"\s{2,}|\s*/\s*", st.group(1))[0].rstrip(") ").strip()
+    return " ".join(x for x in (m.group(1), m.group(2), strain) if x)
+
+
 @app.url_defaults
 def _static_cache_bust(endpoint, values):
     """Append each static file's mtime as ``?v=`` so browsers refetch CSS/JS the
@@ -1513,6 +1534,66 @@ def download_provenance():
                      as_attachment=True, download_name="orthogather-provenance.txt")
 
 
+@app.route("/download_orthofinder_files")
+def download_orthofinder_files():
+    """Download OrthoFinder's orthogroup assignments as a ZIP.
+
+    This is the archive OrthoGather already writes when OrthoFinder finishes —
+    Orthogroups.tsv, Orthogroups.txt, Orthogroups.GeneCount.tsv and
+    Orthogroups_UnassignedGenes.tsv. Before this route existed the files were
+    only reachable by digging into the history folder on disk, which no user
+    would think to do.
+
+    Without ``run_id`` it serves the run the session is currently on; with one,
+    that saved run's own copy, so older analyses stay retrievable.
+    """
+    from orthogather.utils.filenames import descriptive_filename
+
+    requested = request.args.get("run_id")
+    run_id = requested or session.get("last_run_id")
+
+    zip_src = None
+    if run_id:
+        candidate = HISTORY_DIR / run_id / "Orthogroups.zip"
+        if candidate.exists():
+            zip_src = candidate
+        elif requested:
+            # An explicitly requested run whose snapshot is gone. Never fall
+            # back here: silently handing over a different run's orthogroups
+            # would corrupt whatever the user does next.
+            flash(
+                f"This run's OrthoFinder output is missing on disk (run id: "
+                f"{requested}). Nothing was downloaded.",
+                "error",
+            )
+            return redirect(url_for("history_page"))
+
+    if zip_src is None:
+        # No specific run asked for: fall back to the working copy, which a run
+        # that finished but failed to snapshot still leaves behind.
+        candidate = Path(PROTEOMES_FOLDER) / "Orthogroups.zip"
+        if candidate.exists():
+            zip_src, run_id = candidate, None
+
+    if zip_src is None:
+        flash(
+            "There is no OrthoFinder output to download yet. Run an analysis "
+            "first, or open a saved run from History.",
+            "error",
+        )
+        return redirect(url_for("history_page"))
+
+    return send_file(
+        str(zip_src),
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name=descriptive_filename(
+            "orthofinder-orthogroups", "zip",
+            context=[run_id] if run_id else [],
+        ),
+    )
+
+
 def _xlsx_to_delimited_zip(xlsx_path: str, sep: str) -> io.BytesIO:
     """Read every sheet of an .xlsx workbook and return an in-memory ZIP with
     one delimited text file per sheet (``,`` → CSV, ``\\t`` → TSV)."""
@@ -2736,8 +2817,23 @@ def download_goa_files():
             os.makedirs(RESULTS_FOLDER, exist_ok=True)
             output_excel = os.path.join(RESULTS_FOLDER, 'Gene_Ontology_Analysis.xlsx')
             try:
+                # The annotation percentage is per-protein, so the Excel needs the
+                # set of accessions that actually carry a GO term. The GOA files
+                # were just downloaded, and build_id2gos_from_goa_folder is cached,
+                # so this costs a fraction of a second.
+                try:
+                    _id2gos = build_id2gos_from_goa_folder(
+                        GOA_DOWNLOAD_FOLDER, limit_files=list(goa_mapping.values()))
+                    _annotated_ids = set(_id2gos.keys())
+                    logging.info(f"[GOA] {len(_annotated_ids):,} accessions carry at least one GO term")
+                except Exception as e:
+                    # Fall back to the species-level proxy rather than failing the run.
+                    logging.warning(f"[GOA] could not read GOA accessions ({e}); "
+                                    f"annotation percentage falls back to the species proxy")
+                    _annotated_ids = None
                 excel_summary = generate_go_excel(orthogroups_path, goa_mapping, output_excel,
-                                                   provenance=build_provenance())
+                                                   provenance=build_provenance(),
+                                                   annotated_ids=_annotated_ids)
             except Exception as e:
                 logging.error(f"[GOA] Excel generation failed: {e}")
                 yield _sse({"phase": "error", "reason": f"Excel generation failed: {e}"})

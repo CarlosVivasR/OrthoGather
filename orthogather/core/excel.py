@@ -20,8 +20,20 @@ import pandas as pd
 # either library.
 
 
+def _accession(entry: str) -> str:
+    """UniProt accession from an OrthoFinder cell entry.
+
+    OrthoFinder keeps the FASTA header, so entries look like
+    ``tr|A0QNX2|A0QNX2_MYCS2`` and the accession is the middle field. Bare
+    accessions are returned unchanged.
+    """
+    parts = entry.split("|")
+    return parts[1] if len(parts) >= 3 else entry
+
+
 def generate_go_excel(tsv_path: str, species_to_goafile: dict,
-                      output_excel_path: str, provenance: dict = None) -> dict:
+                      output_excel_path: str, provenance: dict = None,
+                      annotated_ids: set = None) -> dict:
     """Build the Gene_Ontology_Analysis.xlsx with five sheets:
     Meta, Initial Groups, Filtered Groups, Removed Groups, Groups of Interest,
     and Species & GOA Map.
@@ -104,7 +116,14 @@ def generate_go_excel(tsv_path: str, species_to_goafile: dict,
                 continue
             prots = [p for p in splitter.split(s) if p]
             total_proteins += len(prots)
-            if sp in goa_species_set:
+            if annotated_ids is not None:
+                # Per-protein: does this accession actually carry a GO term?
+                annotated_proteins += sum(
+                    1 for p in prots if _accession(p) in annotated_ids
+                )
+            elif sp in goa_species_set:
+                # Fallback when the caller cannot supply the GOA accessions:
+                # species-level proxy, which is only an upper bound.
                 annotated_proteins += len(prots)
         pct = (annotated_proteins / total_proteins * 100.0) if total_proteins > 0 else 0.0
         percentages.append(pct)
@@ -142,11 +161,19 @@ def generate_go_excel(tsv_path: str, species_to_goafile: dict,
                           summary["n_species_cols"],
                           summary["rows_nonzero_annotation"],
                           summary["rows_zero_annotation"],
-                          ("For each orthogroup, the percentage of its proteins that belong to a "
-                           "species with a GOA annotation file available."),
-                          ("This is an upper bound on GO coverage, NOT the share of proteins that "
-                           "carry GO terms: a species can have a GOA file and still leave part of "
-                           "its proteome without a single GO annotation."),
+                          (("For each orthogroup, the percentage of its proteins that carry at "
+                            "least one GO annotation in the downloaded GOA files, matched by "
+                            "UniProt accession.")
+                           if annotated_ids is not None else
+                           ("For each orthogroup, the percentage of its proteins that belong to a "
+                            "species with a GOA annotation file available.")),
+                          (("An orthogroup at 0% has no annotated protein and therefore contributes "
+                            "nothing to GO enrichment, although it is still listed under 'Groups of "
+                            "Interest'.")
+                           if annotated_ids is not None else
+                           ("This is an upper bound on GO coverage, NOT the share of proteins that "
+                            "carry GO terms: a species can have a GOA file and still leave part of "
+                            "its proteome without a single GO annotation.")),
                           "Every orthogroup, with its Annotation Percentage.",
                           "Orthogroups with Annotation Percentage > 0 (kept).",
                           "Orthogroups with Annotation Percentage = 0 (no GOA-covered species).",

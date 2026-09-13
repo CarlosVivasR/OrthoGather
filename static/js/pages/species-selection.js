@@ -95,7 +95,7 @@
       return `
         <div class="species-chip ${isRef ? '' : 'is-non-reference'}" role="listitem" title="${escapeHtml(tooltip)}">
           <span class="chip-dot" aria-hidden="true"></span>
-          <span class="chip-name">${escapeHtml(item.label)}</span>
+          <span class="chip-name">${escapeHtml(shortSpeciesName(item.label))}</span>
           <button type="button" class="chip-remove" data-index="${index}" aria-label="Remove ${escapeHtml(item.label)}">
             <i class="fa-solid fa-xmark" aria-hidden="true"></i>
           </button>
@@ -518,7 +518,7 @@
             <i class="fa-solid fa-circle-check alert-icon" aria-hidden="true"></i>
             <div class="alert-message">
               <div class="alert-title">Catalogue updated successfully</div>
-              <div>New version: <strong>${data.manifest.version}</strong> · ${(data.manifest.proteome_count || 0).toLocaleString()} proteomes.</div>
+              <div>New version: <strong>${data.manifest.version}</strong> · ${(data.manifest.proteome_count || 0).toLocaleString('en-US')} proteomes.</div>
               <div style="margin-top: var(--space-2);">
                 <button type="button" class="btn btn-primary btn-sm" onclick="location.reload()">
                   <i class="fa-solid fa-rotate"></i> Reload page to apply
@@ -626,7 +626,7 @@
       }
       hint.innerHTML = msg
         ? msg
-        : `Catalogue ready — <strong>${proteomeData.length.toLocaleString()}</strong> proteomes<span class="catalogue-version-tail">${versionTail}</span>`;
+        : `Catalogue ready — <strong>${proteomeData.length.toLocaleString('en-US')}</strong> proteomes<span class="catalogue-version-tail">${versionTail}</span>`;
       hint.className = 'label-helper is-ready';
       // Trigger a fresh search in case the user already typed something
       const evt = new Event('input', { bubbles: true });
@@ -1206,6 +1206,22 @@
      workflow indicators + action bar + post-analysis CTAs, so a page
      refresh after a completed run doesn't lose the user's place.
      ──────────────────────────────────────────────────────────────── */
+  /* OrthoFinder conserva la cabecera FASTA como nombre de especie, asi que
+     aqui llegan cosas como "Acinetobacter_baumannii_(strain_ATCC_19606___DSM_
+     30007___JCM_6841___...)". Esa cadena hacia 1313 px de tabla dentro de una
+     tarjeta de 1178 y se salia del recuadro. Se muestra genero + especie + la
+     primera designacion de cepa; el nombre completo queda en el title y en
+     todo lo que se exporta. */
+  function shortSpeciesName(raw) {
+    const clean = String(raw).replace(/_/g, ' ').replace(/\s*\[[^\]]*\]\s*/g, ' ').trim();
+    const m = clean.match(/^(\S+)\s+(\S+)/);
+    if (!m) return clean;
+    const st = clean.match(/\(strain\s+([^)]*)\)/);
+    let strain = '';
+    if (st) strain = st[1].split(/\s{2,}|\s*\/\s*/)[0].replace(/[)\s]+$/, '').trim();
+    return (m[1] + ' ' + m[2] + (strain ? ' ' + strain : '')).trim();
+  }
+
   async function renderRunSummary(opts) {
     opts = opts || {};
     let meta;
@@ -1222,7 +1238,7 @@
     const container = document.getElementById('run-summary');
     if (!container) return;
 
-    const fmt = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString());
+    const fmt = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString('en-US'));
     const fmtPct = (n) => (n === null || n === undefined ? '—' : `${n}%`);
     const durationMin = meta.duration_s ? Math.floor(meta.duration_s / 60) : 0;
     const durationSec = meta.duration_s ? Math.round(meta.duration_s % 60) : 0;
@@ -1235,7 +1251,7 @@
       const rowClass = issue ? 'is-issue' : '';
       return `
         <tr class="${rowClass}">
-          <td><span class="sp-name">${escapeHtml(sp.name)}</span></td>
+          <td><span class="sp-name" title="${escapeHtml(sp.name)}">${escapeHtml(shortSpeciesName(sp.name))}</span></td>
           <td class="num">${fmt(sp.n_proteins)}</td>
           <td class="num">${fmtPct(sp.pct_in_og)}</td>
           <td class="num">${fmt(sp.n_in_og)}</td>
@@ -1268,7 +1284,7 @@
         </div>
         <div class="stat-block">
           <span class="stat-value">${fmtPct(summary.mean_pct_in_og)}</span>
-          <span class="stat-label">mean proteins in OG${summary.min_pct_in_og != null ? `<br><span class="stat-sub">(range ${summary.min_pct_in_og}–${summary.max_pct_in_og}%)</span>` : ''}</span>
+          <span class="stat-label">mean % of proteins in OG${summary.min_pct_in_og != null ? `<br><span class="stat-sub">(range ${summary.min_pct_in_og}–${summary.max_pct_in_og}%)</span>` : ''}</span>
         </div>
         <div class="stat-block">
           <span class="stat-value">${fmt(summary.species_specific_orthogroups)}</span>
@@ -1291,6 +1307,14 @@
 
       ${spreadHint}
       ${issues.length > 0 ? `<p class="run-summary-issue-note"><i class="fa-solid fa-triangle-exclamation"></i> ${issues.length} technical issue${issues.length>1?'s':''} detected — see rows above.</p>` : ''}
+
+      <div class="run-summary-actions">
+        <a class="run-summary-download" href="/download_orthofinder_files" download
+           title="Orthogroups.tsv, Orthogroups.txt, Orthogroups.GeneCount.tsv and Orthogroups_UnassignedGenes.tsv">
+          <i class="fa-solid fa-download" aria-hidden="true"></i> Download OrthoFinder files
+        </a>
+        <span class="run-summary-actions-sub">The four orthogroup files, as a .zip</span>
+      </div>
     `;
     container.classList.add('is-visible');
     container.removeAttribute('hidden');

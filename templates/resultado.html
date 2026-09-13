@@ -516,6 +516,25 @@
     const pickerRoot = document.querySelector('.upset-picker');
     if (!pickerRoot) return;
 
+      // UpSetJS row labels: UniProt proteome names carry every strain synonym
+      // ("(strain ATCC 19977 / DSM 44196 / CCUG 20993 / ...)"), which pushes the
+      // matrix off the right of the chart and leaves most of the width blank.
+      // Show genus + species + the FIRST strain designation only. The full name
+      // is untouched in the payload, the Excel exports and the sheet names.
+      function speciesLabel(raw) {
+        const clean = String(raw).replace(/_/g, ' ').replace(/\s*\[[^\]]*\]\s*/g, ' ').trim();
+        const m = clean.match(/^(\S+)\s+(\S+)/);
+        if (!m) return clean;
+        const st = clean.match(/\(strain\s+([^)]*)\)/);
+        let strain = '';
+        if (st) strain = st[1].split(/\s{2,}|\s*\/\s*/)[0].replace(/[)\s]+$/, '').trim();
+        return (m[1] + ' ' + m[2] + (strain ? ' ' + strain : '')).trim();
+      }
+      function comboLabel(raw) {
+        return String(raw).split(' ∩ ').map(speciesLabel).join(' ∩ ');
+      }
+
+
     const SPECIES = (function () {
       try {
         const raw = JSON.parse(pickerRoot.getAttribute('data-species') || '[]');
@@ -548,8 +567,11 @@
         chip.setAttribute('aria-pressed', selected.has(sp) ? 'true' : 'false');
         if (selected.has(sp)) chip.classList.add('is-selected');
         chip.dataset.species = sp;
+        // Nombre corto, igual que en el resto de la interfaz; el completo se
+        // conserva en el title y en todo lo que se exporta.
+        chip.title = sp.replace(/_/g, ' ');
         chip.innerHTML = '<span class="upset-chip-dot" aria-hidden="true"></span>' +
-                         '<span class="upset-chip-label">' + escapeHtml(sp.replace(/_/g, ' ')) + '</span>';
+                         '<span class="upset-chip-label">' + escapeHtml(speciesLabel(sp)) + '</span>';
         chip.addEventListener('click', function () { toggleSpecies(sp, chip); });
         frag.appendChild(chip);
       });
@@ -653,6 +675,7 @@
           return;
         }
 
+
         // ── Build proper UpSetJS data structures ──
         // - sets[i].elems  = orthogroup IDs belonging to species i
         // - comb.sets      = Set of REFERENCES to those set objects (same identity
@@ -661,7 +684,7 @@
         const sets = figData.sets.map(function (s) {
           return {
             type: 'set',
-            name: s.name.replace(/_/g, ' '),
+            name: speciesLabel(s.name),
             cardinality: s.cardinality,
             elems: Array.isArray(s.elems) ? s.elems : [],
           };
@@ -672,7 +695,7 @@
 
         const combinations = figData.combinations.map(function (c) {
           const refs = c.sets
-            .map(function (n) { return setByName[n.replace(/_/g, ' ')]; })
+            .map(function (n) { return setByName[speciesLabel(n)]; })
             .filter(Boolean);
           // Re-key species_proteins to use the SAME normalised names we use
           // in `sets` (underscores → spaces) so lookups by speciesName match.
@@ -680,12 +703,12 @@
           if (c.species_proteins) {
             speciesProteins = {};
             Object.keys(c.species_proteins).forEach(function (k) {
-              speciesProteins[k.replace(/_/g, ' ')] = c.species_proteins[k];
+              speciesProteins[speciesLabel(k)] = c.species_proteins[k];
             });
           }
           return {
             type: 'intersection',
-            name: c.name.replace(/_/g, ' '),
+            name: comboLabel(c.name),
             cardinality: c.cardinality,
             sets: new Set(refs),
             degree: refs.length,
@@ -837,7 +860,7 @@
           const memberSets = Array.from(combo.sets);
           let html = '<h5>' + escapeHtml(combo.name) + '</h5>' +
                      '<p class="upset-tooltip-total">' +
-                       Number(combo.cardinality).toLocaleString() + ' ' + tooltipUnit(combo.cardinality) +
+                       Number(combo.cardinality).toLocaleString('en-US') + ' ' + tooltipUnit(combo.cardinality) +
                      '</p>';
           html += '<ul>';
           if (isProteinView && combo.species_proteins) {
@@ -850,7 +873,7 @@
                 ? Math.round((r.n / combo.cardinality) * 100) : 0;
               html += '<li>' +
                 '<span class="sp-name">' + escapeHtml(r.name) + '</span>' +
-                '<span class="sp-count">' + Number(r.n).toLocaleString() +
+                '<span class="sp-count">' + Number(r.n).toLocaleString('en-US') +
                   '<span class="sp-pct">(' + pct + '%)</span></span>' +
               '</li>';
             });
@@ -1726,8 +1749,8 @@
       // Stats moved out of the Plotly annotation (was unreadable: 11 px grey
       // text crammed at y=1.02) into a real HTML chip in the figure-card head.
       renderFigureStats('fig1-stats', [
-        { value: fig1Data.total.toLocaleString(), label: 'orthogroups' },
-        { value: max_x.toLocaleString(),          label: 'max proteins' },
+        { value: fig1Data.total.toLocaleString('en-US'), label: 'orthogroups' },
+        { value: max_x.toLocaleString('en-US'),          label: 'max proteins' },
       ]);
       const config = {
         responsive: true, displaylogo: false,
@@ -1810,7 +1833,7 @@
         ]
       };
       renderFigureStats('fig2-stats', [
-        { value: fig2Data.total.toLocaleString(), label: 'orthogroups' },
+        { value: fig2Data.total.toLocaleString('en-US'), label: 'orthogroups' },
         { value: String(N),                        label: 'species' },
       ]);
       const config = {

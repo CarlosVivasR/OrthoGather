@@ -1139,7 +1139,10 @@
    Chip drops the visible proteome ID (now in tooltip) → fits 2–3 per row.
    #selected container caps at 480px with internal scroll. */
 .species-chip { padding: 4px 8px 4px 10px; gap: 6px; }
-.species-chip .chip-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+/* 220px venia de cuando la ficha mostraba el nombre entero de UniProt. Ahora
+   muestra genero + especie + cepa, y el mas largo del catalogo de ejemplo
+   mide 285px: con el tope viejo se cortaban cuatro de seis sin necesidad. */
+.species-chip .chip-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
 .species-chip .chip-id { display: none; }     /* hidden — see tooltip */
 .species-chip .chip-dot { width: 6px; height: 6px; }
 .species-chip .chip-remove { width: 18px; height: 18px; font-size: 11px; }
@@ -1261,6 +1264,16 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+/* Desde que la columna de especie muestra el nombre corto, se quedaba con
+   todo el ancho sobrante y empujaba las tres columnas numericas al borde
+   derecho, dejando un vacio de un tercio de la tabla. Ahora todas las columnas
+   se reparten en proporciones fijas, de modo que las cifras quedan repartidas
+   por el ancho de la tabla en vez de amontonadas en un extremo. */
+.run-summary-table th:first-child,
+.run-summary-table td:first-child { width: 40%; }
+.run-summary-table th.num,
+.run-summary-table td.num         { width: 16%; }
+
 .run-summary-table td.num,
 .run-summary-table th.num {
   text-align: right;
@@ -1277,6 +1290,44 @@
 }
 .run-summary-table tr.is-issue .sp-name { color: #7f1d1d; font-weight: 600; }
 .run-summary-table .issue-cell { font-style: italic; font-size: 12px; }
+
+/* Footer action of the run summary card: the only place the OrthoFinder
+   output files are reachable from, together with the History menu. */
+.run-summary-actions {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+/* Deliberately not a .btn: base.css overrides the .btn-* variants on this page,
+   and a solid button here would compete with the two analysis cards below. */
+.run-summary-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #1f2937);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+.run-summary-download:hover {
+  border-color: var(--color-primary, #0072b2);
+  background: var(--color-primary-soft, #eff6ff);
+  color: var(--color-primary, #0072b2);
+}
+.run-summary-download i { font-size: 12px; }
+.run-summary-actions-sub {
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--text-body-sm);
+}
 .run-summary-table .issue-cell i { margin-right: 4px; color: var(--color-error); }
 
 /* Footnotes */

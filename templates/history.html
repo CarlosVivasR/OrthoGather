@@ -93,6 +93,10 @@
                     <i class="fa-solid fa-rotate-right"></i> Reproduce
                   </a>
                   {% endif %}
+                  <a class="history-menu-item" href="{{ url_for('download_orthofinder_files', run_id=r.id) }}"
+                     title="Download this run's OrthoFinder output files (.zip)" download>
+                    <i class="fa-solid fa-download"></i> Download files
+                  </a>
                   <button type="button" class="history-menu-item" data-action="cite">
                     <i class="fa-solid fa-quote-right"></i> Cite
                   </button>
