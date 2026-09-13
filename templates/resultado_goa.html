@@ -347,7 +347,7 @@
               </label>
               <label class="goa-radio">
                 <input type="radio" name="evidence_preset" value="curated">
-                <span><strong>Curated</strong>: experimental + traceable author/curator statements + PAINT (IBA)</span>
+                <span><strong>Non-IEA</strong>: everything except electronic annotation — experimental, traceable author/curator statements and PAINT (IBA)</span>
               </label>
               <label class="goa-radio">
                 <input type="radio" name="evidence_preset" value="experimental">
@@ -356,14 +356,16 @@
               <div class="figure-help-popover" data-help-for="evidence" hidden>
                 GO annotations carry an <em>evidence code</em>. <strong>All</strong> includes
                 IEA (Inferred from Electronic Annotation): the bulk of annotations in any GOA file,
-                so it maximises recall at the cost of confidence. <strong>Curated</strong> drops IEA and keeps
-                human-curated evidence plus PAINT-derived IBA: a good default if you can spare some recall.
+                so it maximises recall at the cost of confidence. <strong>Non-IEA</strong> drops IEA and keeps
+                human-curated evidence plus PAINT-derived IBA. Note that IBA is a phylogenetic inference, not
+                human curation, which is why this preset is named for what it excludes rather than "curated":
+                a good default if you can spare some recall.
                 <strong>Experimental only</strong> is the safest choice when you have well-annotated
                 model organisms; expect fewer hits but with strong wet-lab support.
                 <p class="goa-help-codes"><strong>Exactly which codes each preset keeps:</strong></p>
                 <ul class="goa-help-codes-list">
                   <li><strong>All</strong> — every code present in the GOA files, IEA included.</li>
-                  <li><strong>Curated</strong> — EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI, TAS, IC, IBA.
+                  <li><strong>Non-IEA</strong> — EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI, TAS, IC, IBA.
                       Excludes IEA and the computational-analysis codes (ISS, ISO, ISA, ISM, IGC, RCA), and also
                       excludes <strong>NAS</strong> (non-traceable author statement), which cannot be traced back to
                       a source.</li>
@@ -587,7 +589,7 @@
           <div class="go-ev-legend" role="note">
             <span class="go-ev-legend-label">Evidence tier:</span>
             <span class="go-ev-chip is-experimental" title="Experimental evidence codes: EXP, IDA, IPI, IMP, IGI, IEP, plus the high-throughput variants HTP, HEP, HDA, HMP, HGI. Strongest support.">Experimental</span>
-            <span class="go-ev-chip is-curated" title="Human-curated annotations: author statements TAS and NAS, curator statement IC, and the PAINT phylogenetic codes IBA, IBD, IKR, IRD. Medium-strong support. Note: the Curated preset keeps TAS, IC and IBA but excludes NAS.">Curated</span>
+            <span class="go-ev-chip is-curated" title="Human-curated annotations: author statements TAS and NAS, curator statement IC, and the PAINT phylogenetic codes IBA, IBD, IKR, IRD. Medium-strong support. Note: the Non-IEA preset keeps TAS, IC and IBA but excludes NAS.">Curated</span>
             <span class="go-ev-chip is-computational" title="Electronic and computational-analysis codes: IEA, ISS, ISO, ISA, ISM, IGC, RCA. Lowest confidence. ND (no biological data available) is also shown here.">Computational / other</span>
           </div>
           <div class="go-table-toolbar">
