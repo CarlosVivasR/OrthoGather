@@ -1188,3 +1188,29 @@
 }
 .goa-help-codes-list li { margin-bottom: var(--space-2); }
 .goa-help-codes-list li:last-child { margin-bottom: 0; }
+
+/* Rows shown only because the display threshold is looser than the
+   significance threshold. Same idea as the hollow bars in the chart: visible
+   for context, clearly not a finding. */
+#go-table tbody tr.is-not-significant td {
+  color: #7b8794;
+}
+#go-table tbody tr.is-not-significant td a {
+  color: #7b8794;
+}
+.go-ns-flag {
+  display: inline-block;
+  margin-left: .4em;
+  padding: .05em .4em;
+  border: 1px solid #c9d1d9;
+  border-radius: 3px;
+  font-size: .78em;
+  font-style: italic;
+  font-weight: 500;
+  color: #7b8794;
+  background: #f5f7fa;
+  vertical-align: middle;
+}
+#go-table tbody tr.is-not-significant td .go-dir {
+  color: #7b8794 !important;
+}

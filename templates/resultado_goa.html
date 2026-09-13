@@ -437,7 +437,9 @@
           <h3>Figure 9: Gene Ontology enrichment</h3>
           <p class="section-helper">
             Bars show <strong>−log₁₀(FDR)</strong> for each significant GO term, grouped by namespace.
-            Bars are direction-agnostic (magnitude only); <strong>depleted</strong> (purified) terms are drawn in a distinct warm colour — see the Direction column in the table.
+            The test is one-sided, so only <strong>over-represented</strong> terms are reported.
+            Bars drawn <strong>hollow</strong> fall below the significance threshold but above the
+            display threshold: they are shown for context and are not significant findings.
             Hover for full names, p-values, and evidence breakdown. Use the table below to filter and export.
           </p>
 
@@ -460,9 +462,10 @@
                 <span class="go-coverage-unit">(<span id="go-cov-pct">–</span>)</span>
               </div>
               <div class="go-coverage-cell">
-                <span class="go-coverage-label">Background universe</span>
+                <span class="go-coverage-label"
+                      title="The denominator the enrichment test actually uses: background proteins that carry at least one GO term.">Background universe</span>
                 <span class="go-coverage-value" id="go-cov-bg">–</span>
-                <span class="go-coverage-unit">proteins</span>
+                <span class="go-coverage-unit" id="go-cov-bg-unit">proteins</span>
               </div>
             </div>
             <p class="go-coverage-note" id="go-cov-note"></p>
@@ -580,7 +583,7 @@
             </button>
           </div>
 
-          <h3>Enriched &amp; depleted terms: interactive table</h3>
+          <h3>Enrichment results: interactive table</h3>
           <div class="go-ev-legend" role="note">
             <span class="go-ev-legend-label">Evidence tier:</span>
             <span class="go-ev-chip is-experimental" title="Experimental evidence codes: EXP, IDA, IPI, IMP, IGI, IEP, plus the high-throughput variants HTP, HEP, HDA, HMP, HGI. Strongest support.">Experimental</span>
@@ -640,7 +643,7 @@
                     NS <span class="go-th-hint">(?)</span>
                   </th>
                   <th data-sort="direction"
-                      title="Direction of the two-sided test: 'enriched' = over-represented in your foreground vs the background; 'depleted' = under-represented (purified). Chart bars show magnitude only.">
+                      title="Direction of the comparison: 'enriched' = over-represented in your foreground relative to the background. The test is one-sided, so only over-represented terms can reach significance.">
                     Dir <span class="go-th-hint">(?)</span>
                   </th>
                   <th data-sort="depth" class="num"
@@ -1467,7 +1470,16 @@
         setText("go-cov-input",     stats.original_input ?? "–");
         setText("go-cov-expanded",  stats.after_expansion ?? "–");
         setText("go-cov-annotated", stats.with_annotations ?? "–");
-        setText("go-cov-bg",        (stats.background_size ?? 0).toLocaleString('en-US'));
+        // Show the annotated universe (what the test runs against), with the
+        // submitted count as context when the two differ.
+        const bgSubmitted = stats.background_size ?? 0;
+        const bgAnnotated = stats.background_annotated;
+        const bgUsed = (bgAnnotated ?? bgSubmitted);
+        setText("go-cov-bg", bgUsed.toLocaleString('en-US'));
+        setText("go-cov-bg-unit",
+                (bgAnnotated != null && bgAnnotated !== bgSubmitted)
+                  ? `annotated, of ${bgSubmitted.toLocaleString('en-US')} submitted`
+                  : "proteins");
 
         const pct = stats.after_expansion
           ? Math.round((stats.with_annotations / stats.after_expansion) * 100)
@@ -1745,8 +1757,14 @@
         }
         empty.hidden = true;
         const frag = document.createDocumentFragment();
+        // Rows can be shown below the significance threshold when the user
+        // widens the display threshold. Mark them, or a reader takes a
+        // near-miss for a finding -- the table equivalent of a hollow bar.
+        const alpha = (window.__goSettings && window.__goSettings.p_value) || 0.05;
         rows.forEach(r => {
           const tr = document.createElement("tr");
+          const ns = (r.p_fdr_bh != null) && (r.p_fdr_bh >= alpha);
+          if (ns) tr.classList.add("is-not-significant");
           tr.innerHTML = `
             <td><a href="https://amigo.geneontology.org/amigo/term/${r.GO}" target="_blank" rel="noopener">${r.GO}</a></td>
             <td>${r.name}</td>
@@ -1755,7 +1773,9 @@
             <td class="num">${r.depth}</td>
             <td class="num">${r.study_count}/${r.study_n}</td>
             <td class="num">${r.pop_count}/${r.pop_n}</td>
-            <td class="num">${(r.neg_log10_fdr || 0).toFixed(2)}</td>
+            <td class="num">${(r.neg_log10_fdr || 0).toFixed(2)}${ns
+              ? ` <span class="go-ns-flag" title="FDR ${(+r.p_fdr_bh).toFixed(3)} does not reach the significance threshold of ${alpha}; this row is shown because the display threshold is looser.">n.s.</span>`
+              : ""}</td>
             <td class="go-ev-cell">${evidenceChips(r.evidence_breakdown)}</td>
           `;
           frag.appendChild(tr);
