@@ -1,86 +1,184 @@
-# 🧬 OrthoGather
+# OrthoGather
 
-**A local web application that pairs orthology inference with Gene Ontology enrichment, for proteomes that are not well annotated.**
+**Compare proteomes and test Gene Ontology enrichment, without the command line.**
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18510911.svg)](https://doi.org/10.5281/zenodo.18510911)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![OrthoFinder](https://img.shields.io/badge/OrthoFinder-2.5.5-2c6ea8)
 ![GOATOOLS](https://img.shields.io/badge/GOATOOLS-1.6.4-2c6ea8)
 ![Platforms](https://img.shields.io/badge/macOS%20·%20Windows%20·%20Linux-supported-555)
-![Tests](https://img.shields.io/badge/tests-101%20passing-3fb950)
 ![License](https://img.shields.io/badge/License-GPLv3-blue)
 
-Download **UniProt** proteomes, run **OrthoFinder**, explore orthogroups across species, and test
-Gene Ontology enrichment with **GOATOOLS** — in one interface, on your own machine, with every
-figure and table exportable.
-
 <p align="center">
-  <img src="docs/screenshots/home.png" alt="OrthoGather — local, open, reproducible" width="820">
+  <img src="docs/images/readme/hero_species-picker.png" width="880"
+       alt="The species picker with six bacterial species selected and the catalogue reporting 1,013,422 proteomes ready to search">
 </p>
+<p align="center"><i>Search 1,013,422 UniProt proteomes, pick your species, and OrthoFinder runs on your own machine.</i></p>
+
+OrthoGather is a web application you run locally. It downloads reference proteomes from UniProt,
+infers orthogroups with **OrthoFinder**, lets you explore which orthogroups species share, and tests
+Gene Ontology over-representation with **GOATOOLS** — with every figure and table exportable, and a
+provenance record attached to each run.
+
+**28,475** of those proteomes have Gene Ontology annotations at the EBI, which is what decides
+whether your organism can be taken through the enrichment step.
+
+```bash
+git clone https://github.com/CarlosVivasR/OrthoGather.git && cd OrthoGather
+conda env create -f environment.yml
+conda activate orthogather
+python app.py
+```
+
+Prefer not to touch a terminal? There is a double-click installer for macOS and Windows on the
+[Releases page](https://github.com/CarlosVivasR/OrthoGather/releases).
 
 ---
 
-## What it does
+## Is this the right tool for you?
 
-- **Retrieves proteomes.** Search 1,013,422 UniProt proteomes by scientific name, common name,
-  taxonomic synonym, abbreviated binomial or proteome ID, and stream them as FASTA.
-- **Infers orthogroups.** Runs OrthoFinder 2.5.5 locally with live logs, keeping only the
-  `Orthogroups` output so the workspace stays small.
-- **Compares species.** Interactive UpSet plots of orthogroup and protein intersections, filterable
-  by a list of UniProt identifiers of your own.
-- **Tests function.** GO over-representation with a one-sided Fisher exact test and
-  Benjamini–Hochberg correction, with an option to widen each protein set to the orthogroups that
-  contain it — so annotations that already exist on well-annotated orthologues can contribute
-  evidence for the species you actually care about.
+**Yes, if** you have a list of proteins from a differential experiment, you want to know which of
+them have counterparts in other species, and your organism is not well annotated.
 
-> **What this is not.** Orthogroup expansion pools *existing* annotations for the purpose of the
-> enrichment test. No annotation is ever transferred to, or written onto, an individual protein.
-> OrthoGather does not perform phylogeny-based annotation propagation.
+**Probably not, if:**
 
-<p align="center">
-  <img src="docs/screenshots/species-selection.png" alt="Pick species from the UniProt catalogue with live search" width="820">
-  <br><sub>Live search over the full UniProt proteome catalogue, then OrthoFinder runs locally.</sub>
-</p>
+1. You need hierarchical orthologous groups, gene trees or dated phylogenies. OrthoGather runs
+   OrthoFinder with `-og`, which stops after orthogroup clustering — see
+   [OMA](https://omabrowser.org), [OrthoDB](https://www.orthodb.org) or
+   [OrthoFinder](https://github.com/davidemms/OrthoFinder) run in full.
+2. You are working at the scale of hundreds of proteomes. This is built for focused comparisons of
+   a handful of species; OrthoFinder inference is the bottleneck.
+3. Your species has no GOA file at the EBI. It will still take part in the orthogroup analysis, but
+   it cannot contribute annotations to the enrichment.
+4. You want annotations *assigned* to your unannotated proteins. OrthoGather never writes an
+   annotation onto a protein — see [What orthogroup expansion does](#what-orthogroup-expansion-does).
 
 ---
 
 ## What it produces
 
-Every figure below was exported by the application itself, from the worked example in
-[`example_analysis/`](example_analysis/). Nothing was redrawn by hand.
+### Which orthogroups your species share
 
 <p align="center">
-  <img src="example_analysis/2_comparative_analysis/figure3_upset-orthogroups/orthogather_figure3-upset-orthogroups_3species_2026-09-13.png" alt="UpSet plot of orthogroup intersections across three species" width="760">
-  <br><sub><b>Orthogroup intersections.</b> Hovering an intersection highlights it and reports its members.
-  Intersections are exclusive: each orthogroup is counted once.</sub>
+  <img src="docs/images/readme/upset-interactive.png" width="880"
+       alt="UpSet plot of orthogroup intersections with a tooltip reading: Mycobacteroides abscessus ATCC 19977 intersect Mycolicibacterium smegmatis ATCC 700084, 1,699 orthogroups">
 </p>
+<p align="center"><i>Intersections are exclusive — every orthogroup is counted in exactly one bar. Hovering highlights the bar and names its members.</i></p>
+
+Narrow the plots to your own list of UniProt identifiers and OrthoGather tells you which of them
+mapped, which are in the proteomes but were left unassigned by OrthoFinder, and which are absent
+altogether.
+
+### Which functions are over-represented
 
 <p align="center">
-  <img src="example_analysis/3_go_annotation/annotation-coverage-histogram/orthogather_GOA-annotation-distribution_5949OGs_2026-09-13.png" alt="Distribution of GO annotation coverage across orthogroups" width="760">
-  <br><sub><b>Annotation coverage.</b> How much of each orthogroup carries a GO term, before any test is run —
-  a quick check of whether adding a better-annotated species would help.</sub>
+  <img src="docs/images/readme/go-enrichment.png" width="880"
+       alt="Gene Ontology enrichment bar chart: 21 significant terms in blue and red, five hollow bars below a dotted FDR 0.05 line, coloured by namespace">
 </p>
+<p align="center"><i>Bars are −log₁₀(FDR), coloured by namespace. Hollow bars fall below the significance threshold but above a looser display threshold: they are shown for context, and are not findings.</i></p>
+
+A one-sided Fisher exact test with Benjamini–Hochberg correction, and an interactive table you can
+filter by namespace, evidence code, FDR and ontology depth, then export.
+
+### A record of how you got there
 
 <p align="center">
-  <img src="example_analysis/4_go_enrichment/down-regulated_306/chart/orthogather_GOenrichment-chart_all-NS_topall_evidence-all_2026-09-13.png" alt="Gene Ontology enrichment results" width="760">
-  <br><sub><b>Enrichment.</b> Bars are −log₁₀(FDR), coloured by namespace. Terms above the significance
-  threshold but below a looser display threshold are drawn hollow, so near misses are visible without
-  being counted as findings.</sub>
+  <img src="docs/images/readme/provenance.png" width="880"
+       alt="Data provenance panel listing UniProt release, GOA download date, proteome catalogue version, Gene Ontology release, OrthoFinder version and OrthoGather version">
+</p>
+<p align="center"><i>Every run records the versions behind it, exportable as text or JSON. The Analysis History lets you reload, compare and cite past runs.</i></p>
+
+---
+
+## What orthogroup expansion does
+
+Both the foreground and the background can be widened to the full orthogroups that contain them.
+Annotations that already exist on well-annotated orthologues then count towards the enrichment
+test, which is what makes the method useful for a poorly annotated organism.
+
+> [!IMPORTANT]
+> Expansion pools *existing* annotations for the purpose of the test. No annotation is transferred
+> to, or written onto, any individual protein, and OrthoGather does not perform phylogeny-based
+> annotation propagation such as PAINT.
+
+---
+
+## Installation
+
+### Double-click installer
+
+Download for your platform from the [Releases page](https://github.com/CarlosVivasR/OrthoGather/releases).
+It installs the package manager, Python 3.11, OrthoFinder and the application, and puts a launcher
+on your Desktop.
+
+- **macOS** (Apple Silicon and Intel): `Install OrthoGather.command`
+- **Windows 10/11**: `Install OrthoGather.bat` — enables WSL automatically, since OrthoFinder has no
+  native Windows build. Needs administrator rights and one restart, then continues on its own.
+
+### Conda
+
+Requires Git, Conda or Micromamba, and a Unix-like environment (macOS, Linux or WSL).
+
+```bash
+git clone https://github.com/CarlosVivasR/OrthoGather.git && cd OrthoGather
+conda env create -f environment.yml
+conda activate orthogather
+python app.py
+```
+
+The environment brings Python 3.11, OrthoFinder 2.5.5 and every dependency, and runs natively on
+Apple Silicon, Intel macOS, Linux and WSL — no Rosetta. Replace `conda` with `micromamba` if that is
+what you have.
+
+> [!NOTE]
+> **Disk.** The proteome catalogue ships compressed (20 MB) and is unpacked on first launch to a
+> **260 MB** JSON. With the ontology and the repository, budget around 350 MB before any analysis,
+> plus whatever the proteomes you download need.
+
+<details>
+<summary>Guided install scripts, and the step-by-step guide</summary>
+
+```bash
+./installers/install_orthogather_mac.sh   # macOS (Apple Silicon or Intel)
+./installers/install_orthogather_wsl.sh   # Linux / WSL
+```
+
+Both create the same `orthogather` environment from `environment.yml` and check that OrthoFinder is
+detected. Conda or Micromamba must already be installed — for example via
+[Miniforge](https://github.com/conda-forge/miniforge).
+
+For a walkthrough with screenshots and troubleshooting, see
+[Installation_guide.pdf](docs/Installation_guide.pdf).
+</details>
+
+---
+
+## Three ways in
+
+<p align="center">
+  <img src="docs/images/readme/input-modes.png" width="880"
+       alt="The three input modes offered on the home screen: New Analysis, Preselected Dataset and External Upload">
 </p>
 
-Each figure comes with its data in XLSX, CSV, TSV and JSON, and each chart exports as PNG and SVG.
+| Mode | Use it when |
+|---|---|
+| **New Analysis** | You want to pick species from UniProt and run OrthoFinder yourself. |
+| **Preselected Dataset** | You want to try it straight away: 47 proteomes from 35 species across 19 genera associated with cystic fibrosis infection and antimicrobial resistance, shipped with the app. |
+| **External Upload** | You already have OrthoFinder results, or orthology relationships in OrthoXML, and want to reuse them. |
+
+Whichever you choose, everything downstream works from the standard `Orthogroups` output.
 
 ---
 
 ## Worked example
 
-[`example_analysis/`](example_analysis/) holds a complete run, start to finish, of the example
-published with the manuscript: six bacterial species, the 491 proteins reported as differentially
-abundant in *Mycolicibacterium smegmatis* under sub-lethal rifampicin
-([Giddey *et al.* 2017](https://doi.org/10.1038/srep43858)), split by direction of change and
-tested against the 3,181 proteins detected in that study.
+[`example_analysis/`](example_analysis/) is a complete run of the example published with the
+manuscript: six bacterial species, and the 491 proteins reported as differentially abundant in
+*Mycolicibacterium smegmatis* under sub-lethal rifampicin
+([Giddey *et al.* 2017](https://doi.org/10.1038/srep43858)), split by direction of change and tested
+against the 3,181 proteins detected in that study.
 
-| | |
+| Folder | Contents |
 |---|---|
 | [`0_run_metadata/`](example_analysis/0_run_metadata/) | software and database versions, a citation for this exact run, the taxonomic tree |
 | [`1_orthofinder/`](example_analysis/1_orthofinder/) | the OrthoFinder output — 5,949 orthogroups |
@@ -90,141 +188,40 @@ tested against the 3,181 proteins detected in that study.
 | [`input_dataset/`](example_analysis/input_dataset/) | the exact identifier lists, ready to paste back in |
 
 Every file there is the application's own export. Paste the lists from `input_dataset/` into a fresh
-install and you should reproduce the run — see the [README in that folder](example_analysis/README.md)
-for the versions used, since the EBI GOA repository is refreshed monthly.
+install and you should reproduce the run — see the
+[README in that folder](example_analysis/README.md) for the exact versions, since the EBI GOA
+repository is refreshed monthly.
 
 ---
 
-## Reproducibility
+## How the enrichment works
 
-Every analysis records what produced it. The Summary panel and every exported workbook carry a
-provenance block: OrthoGather version, OrthoFinder version, GOATOOLS version, the UniProt release and
-proteome-catalogue version, the Gene Ontology release, the date the GOA files were generated at the
-EBI, and every statistical parameter of the run — evidence codes kept, counting mode, test tail, FDR
-method and scope, propagation relations, term-size bounds, and the size of the correction family.
+- **Test** — one-sided Fisher exact test for over-representation.
+- **Propagation** — annotations are propagated to parent terms over `is_a` and `part_of`
+  (the True Path Rule); `regulates` relations are not traversed.
+- **Qualifiers** — annotations carrying `NOT` are discarded.
+- **Term size** — terms annotating fewer than 10 or more than 500 proteins of the annotated
+  background are removed before correction.
+- **Correction** — Benjamini–Hochberg, applied once across the three namespaces, which share a
+  single annotated reference universe.
+- **Denominators** — foreground and background are both restricted to annotated proteins, so the two
+  always match.
 
-It exports as text or JSON, and the Analysis History lets you browse, reload, compare and cite past
-runs, with BibTeX and RIS for each.
-
----
-
-## Download and installation
-
-### ⚡ Easiest: one-click installer (no terminal)
-
-For non-technical users — download the installer for your computer, double-click,
-and it sets up **everything** (package manager, the app, Python 3.11, OrthoFinder)
-and adds an **OrthoGather** launcher to your Desktop:
-
-- **macOS** (Apple Silicon & Intel): `Install OrthoGather.command`
-- **Windows 10/11**: `Install OrthoGather.bat` (enables WSL automatically — OrthoFinder
-  has no native Windows build; needs admin + one restart, then continues by itself)
-
-Get them from the [Releases page](https://github.com/CarlosVivasR/OrthoGather/releases).
-See [`installers/`](installers/) for details. The manual conda route below still works
-for advanced users.
-
-### Prerequisites
-
-- **Git** (a plain clone is enough — **no Git LFS required**)
-- **Conda** or **Micromamba**
-- A Unix-based environment (macOS, Linux, or WSL)
-
-> The proteome catalogue ships compressed inside the repo
-> (`static/Proteomes_json/proteomes_list.json.gz`, ~19 MB) and is unpacked
-> automatically on the first launch. The app also checks GitHub for a newer
-> catalogue and offers a one-click update.
-
-### Clone the repository
-
-```bash
-git clone https://github.com/CarlosVivasR/OrthoGather.git
-cd OrthoGather
-```
-
-### ✅ Recommended: one-line install with Conda (all platforms)
-
-The canonical setup is a single Conda environment defined in [`environment.yml`](environment.yml).
-It installs Python 3.11, OrthoFinder 2.5.5, and every Python dependency — and runs
-**natively** on Apple Silicon, Intel macOS, Linux, and WSL (no Rosetta).
-
-```bash
-conda env create -f environment.yml
-conda activate orthogather
-python app.py
-```
-
-That's it. Every time you want to use OrthoGather, just `conda activate orthogather` and `python app.py`.
-
-> Using **Micromamba** instead of Conda? Replace `conda` with `micromamba` in the commands above.
-
-### 🧩 Optional: guided install scripts
-
-```bash
-./installers/install_orthogather_mac.sh   # macOS (Apple Silicon or Intel)
-./installers/install_orthogather_wsl.sh   # Linux / WSL
-```
-
-Both scripts create the same `orthogather` environment from `environment.yml` and verify that
-OrthoFinder is detected.
-
-⚠️ **Prerequisite:** Conda or Micromamba must already be installed (e.g. via
-[Miniforge](https://github.com/conda-forge/miniforge)). For a step-by-step walkthrough and
-troubleshooting, see [Installation_guide.pdf](docs/Installation_guide.pdf).
+Adjustable without re-running: FDR threshold, minimum GO depth, maximum terms per namespace, and the
+display threshold. Adjustable per run: evidence-code stringency (all, non-IEA, or experimental
+only), all orthogroups or single-copy only, and counting per protein or per orthogroup.
 
 ---
 
-## Input modes
+## When something goes wrong
 
-| Mode | Use it when |
-|---|---|
-| **New Analysis** | You want to pick species from UniProt and run OrthoFinder yourself. |
-| **Preselected Dataset** | You want to try the platform immediately: 47 proteomes from 35 species across 19 genera associated with cystic fibrosis infection and antimicrobial resistance, shipped with the app. |
-| **External Data Upload** | You already have OrthoFinder results, or orthology relationships in OrthoXML, and want to reuse them. |
+OrthoGather has an error catalogue rather than stack traces. Every failure gets a stable code, a
+message in plain language and a hint saying what to do — a missing ontology file, a foreground that
+does not overlap the background, a species with no GOA file, an OrthoFinder run that runs out of
+memory.
 
-Whichever you choose, everything downstream works from the standard `Orthogroups` output.
-
-**OrthoFinder threads.** OrthoGather calls OrthoFinder with `-og` — which stops after orthogroup
-clustering and skips gene-tree and pairwise-ortholog inference — and auto-detects your CPU count for
-`-t` and `-a`. On a 10-core Mac you get `-t 10 -a 2`; on a 4-core laptop, `-t 4 -a 1`. Both are
-overridable if you want to leave headroom.
-
----
-
-## Analysis routes
-
-### 1. Comparative Orthogroup Analysis
-
-Select two or more species and get UpSet plots of orthogroup and protein intersections. Narrow
-further with your own list of UniProt identifiers: OrthoGather reports which of them mapped, which
-are in the proteomes but were left unassigned by OrthoFinder, and which are absent altogether, then
-redraws the plots over the orthogroups that survive.
-
-### 2. Gene Ontology Enrichment
-
-OrthoGather matches each species to its GOA file at the EBI, reports annotation coverage per
-orthogroup, and then tests a foreground against a background.
-
-The test is a one-sided Fisher exact test for over-representation. Annotations are propagated to
-parent terms over `is_a` and `part_of` (the True Path Rule); annotations carrying the `NOT`
-qualifier are discarded; terms annotating fewer than 10 or more than 500 proteins of the annotated
-background are removed before correction; and Benjamini–Hochberg is then applied once across the
-three namespaces, which share a single annotated reference universe. Both the foreground and the
-background are restricted to annotated proteins, so the two denominators always match.
-
-Adjustable without re-running the analysis: FDR threshold, minimum GO depth, maximum terms per
-namespace, and a separate display threshold that draws near-significant terms as hollow bars.
-Adjustable per run: evidence-code stringency (all, non-IEA, or experimental only), all orthogroups
-or single-copy only, and counting per protein or per orthogroup.
-
----
-
-## Errors
-
-OrthoGather has a single error catalogue instead of stack traces: every failure gets a stable code,
-a message in plain language, and a hint saying what to do about it. A missing ontology file, a
-foreground that does not overlap the background, a species with no GOA file, an OrthoFinder run that
-dies for lack of memory — each one tells you what happened and where to look.
+Found a bug, or want something it does not do? Open an
+[issue](https://github.com/CarlosVivasR/OrthoGather/issues) — there are templates for both.
 
 ---
 
@@ -242,23 +239,24 @@ error catalogue.
 
 ## Citation
 
-If you use OrthoGather, please cite the software through its Zenodo record (see the DOI badge at the
-top of this page). The `CITATION.cff` in this repository is picked up by GitHub's *Cite this
-repository* button and by most reference managers.
+Cite the software through its Zenodo record — the DOI badge at the top of this page. GitHub's
+*Cite this repository* button reads [`CITATION.cff`](CITATION.cff) and will give you the entry in
+your preferred format.
 
-> Manuscript under review. This section will be updated with the journal reference once available.
+> The manuscript describing OrthoGather is under review. This section will carry the journal
+> reference once it is available.
+
+If you use the enrichment module, please also cite **OrthoFinder** and **GOATOOLS** — OrthoGather
+orchestrates them, it does not replace them.
 
 ---
 
 ## Built on
 
-- [OrthoFinder](https://github.com/davidemms/OrthoFinder) — orthogroup inference
-- [GOATOOLS](https://github.com/tanghaibao/goatools) — Gene Ontology analysis
-- [UniProt](https://www.uniprot.org/) — reference proteomes and the proteome catalogue
-- [EBI GOA](https://www.ebi.ac.uk/GOA/) — Gene Ontology annotation files
-- [Gene Ontology](http://geneontology.org/) — the ontology itself
-- [UpSet](https://upset.app/) — set-intersection visualisation
-- [Plotly.js](https://plotly.com/javascript/) — interactive charts
+[OrthoFinder](https://github.com/davidemms/OrthoFinder) · [GOATOOLS](https://github.com/tanghaibao/goatools) ·
+[UniProt](https://www.uniprot.org/) · [EBI GOA](https://www.ebi.ac.uk/GOA/) ·
+[Gene Ontology](http://geneontology.org/) · [UpSet](https://upset.app/) ·
+[Plotly.js](https://plotly.com/javascript/)
 
 ## Licence
 
