@@ -543,6 +543,25 @@
                 </div>
               </div>
               <div class="goa-param">
+                <label for="display-pvalue-input">
+                  Show down to FDR
+                  <button type="button" class="figure-help-btn" data-help="rerun-display-pvalue" aria-label="Help: display threshold">?</button>
+                </label>
+                <input type="number" id="display-pvalue-input" step="0.01" min="0" max="1" value="0.05">
+                <div class="figure-help-popover" data-help-for="rerun-display-pvalue" hidden>
+                  How far <em>below</em> the significance cutoff the chart is drawn.
+                  Leave it equal to the FDR threshold to plot only significant terms.
+                  Raise it — <code>0.10</code> is a common choice — and terms that
+                  just missed the cutoff appear as <strong>hollow bars</strong> to the
+                  left of a dotted line marking the threshold. The cutoff at
+                  <code>0.05</code> is a convention, not a property of the data: a term
+                  at q&nbsp;=&nbsp;0.049 and one at q&nbsp;=&nbsp;0.059 are the same
+                  observation, and truncating the chart at the line hides that.
+                  Sub-threshold terms are never counted as findings, in this page or in
+                  any export.
+                </div>
+              </div>
+              <div class="goa-param">
                 <label for="terms-input">
                   Max terms per NS
                   <button type="button" class="figure-help-btn" data-help="rerun-terms" aria-label="Help: term cap per namespace">?</button>
@@ -1573,9 +1592,23 @@
             y: subset.map(r => r.name.length > 50 ? r.name.slice(0, 50) + "…" : r.name),
             x: subset.map(r => r.neg_log10_fdr),
             // Depleted (purified) terms are drawn in a distinct warm colour so a
-            // tall bar is never silently read as "enriched".
-            marker: { color: subset.map(r => r.direction === "depleted" ? "#b4541f" : NS_COLOR[ns]) },
-            customdata: subset.map(r => [r.GO, r.namespace, r.depth, r.study_count, r.study_n, r.p_fdr_bh, r.direction || "n/a"]),
+            // tall bar is never silently read as "enriched". Terms drawn only
+            // because the display threshold is looser than the significance one
+            // are hollow: same hue, near-transparent fill, solid outline, so
+            // "below the line" is unmistakable at a glance and in the PNG.
+            marker: {
+              color: subset.map(r => {
+                const base = r.direction === "depleted" ? "#b4541f" : NS_COLOR[ns];
+                return r.significant === false ? "rgba(0,0,0,0)" : base;
+              }),
+              line: {
+                width: subset.map(r => r.significant === false ? 1.5 : 0),
+                color: subset.map(r => r.direction === "depleted" ? "#b4541f" : NS_COLOR[ns])
+              }
+            },
+            customdata: subset.map(r => [r.GO, r.namespace, r.depth, r.study_count, r.study_n,
+                                         r.p_fdr_bh, r.direction || "n/a",
+                                         r.significant === false ? "below threshold" : "significant"]),
             hovertemplate:
               "<b>%{y}</b><br>" +
               "GO: %{customdata[0]}<br>" +
@@ -1583,7 +1616,7 @@
               "Direction: %{customdata[6]}<br>" +
               "Depth: %{customdata[2]}<br>" +
               "Study: %{customdata[3]}/%{customdata[4]}<br>" +
-              "FDR: %{customdata[5]:.2e}<br>" +
+              "FDR: %{customdata[5]:.2e} (%{customdata[7]})<br>" +
               "−log₁₀(FDR): %{x:.2f}<extra></extra>"
           });
         });
@@ -1593,11 +1626,29 @@
         // anything taller squishes the labels and corrupts the PNG).
         const totalBars = traces.reduce((s, t) => s + t.y.length, 0);
         const computedH = 22 * totalBars + 100;
+
+        // Significance line. Drawn whenever sub-threshold terms are on the chart:
+        // without it a hollow bar is just a pale bar, and 0.05 is a convention
+        // the reader has to be able to see rather than infer.
+        const alpha = (window.__goSettings && window.__goSettings.p_value) || 0.05;
+        const alphaX = -Math.log10(alpha);
+        const anyBelow = results.some(r => r.significant === false);
+        const shapes = [], annotations = [];
+        if (anyBelow) {
+          shapes.push({ type: "line", xref: "x", yref: "paper",
+                        x0: alphaX, x1: alphaX, y0: 0, y1: 1,
+                        line: { color: "#c0392b", width: 1.5, dash: "dot" } });
+          annotations.push({ x: alphaX, xref: "x", y: 1, yref: "paper",
+                             text: `FDR ${alpha}`, showarrow: false, xanchor: "left",
+                             yanchor: "bottom", font: { size: 10, color: "#c0392b" } });
+        }
+
         const layout = {
           barmode: "group",
           margin: { l: 240, r: 24, t: 12, b: 48 },
           xaxis: { title: "−log₁₀(FDR)", zeroline: true, gridcolor: "#eee" },
           yaxis: { automargin: true },
+          shapes, annotations,
           height: Math.min(1200, Math.max(360, computedH)),
           showlegend: traces.length > 1,
           legend: { orientation: "h", y: -0.12 },
@@ -1610,14 +1661,22 @@
         // Truncation note below the chart
         const note = document.getElementById("go-plot-truncation");
         if (note) {
+          const parts = [];
           if (isFinite(perNsLimit) && totalShown < totalAvailable) {
-            note.textContent =
-              `Showing top ${totalShown} of ${totalAvailable} terms in the chart. ` +
-              `Increase the "Top N" selector above, or use the table below for the full list.`;
-            note.hidden = false;
-          } else {
-            note.hidden = true;
+            parts.push(`Showing top ${totalShown} of ${totalAvailable} terms in the chart. ` +
+                       `Increase the "Top N" selector above, or use the table below for the full list.`);
           }
+          if (anyBelow) {
+            const nBelow = results.filter(r => r.significant === false).length;
+            // State the count of findings explicitly: the number of BARS is not
+            // the number of results, and that is the one thing a reader of this
+            // chart could get wrong.
+            parts.push(`Hollow bars to the left of the dotted line are ${nBelow} term` +
+                       `${nBelow === 1 ? "" : "s"} that did NOT reach FDR ${alpha}; ` +
+                       `they are shown for context and are not findings.`);
+          }
+          note.textContent = parts.join(" ");
+          note.hidden = parts.length === 0;
         }
       }
 
@@ -1888,6 +1947,9 @@
           const flat = flattenResults(data);
           window.__goResults.all = flat;
           window.__goResults.settings = data.payload?.settings || data.settings || null;
+          // The chart needs the significance threshold to place its line, and it
+          // is built outside this scope.
+          window.__goSettings = window.__goResults.settings;
           window.__goResults.excelUrl = (data.payload?.excel_file_path || data.excel_file_path) || null;
           window.__goResults.stats = data.payload?.annotation_stats || data.annotation_stats || null;
 
@@ -1926,7 +1988,13 @@
           } else if (notice) {
             setStatus(`ℹ️ ${notice}`, "info");
           } else {
-            setStatus(`✅ GO Enrichment generated (${flat.length} terms).`, "ok");
+            // Count findings, not rows: ``flat`` can include sub-threshold terms
+            // kept for the chart, and they are not results.
+            const nSig = flat.filter(r => r.significant !== false).length;
+            setStatus(
+              `✅ GO Enrichment generated (${nSig} significant term${nSig === 1 ? "" : "s"}` +
+              `${flat.length > nSig ? `, ${flat.length - nSig} more shown below the threshold` : ""}).`,
+              "ok");
           }
         } catch (err) {
           console.error(err);
@@ -1943,7 +2011,11 @@
         const minDepth = parseInt(document.getElementById("depth-input").value) || 2;
         const pValue   = parseFloat(document.getElementById("pvalue-input").value) || 0.05;
         const maxTerms = parseInt(document.getElementById("terms-input").value) || null;
-        runGOAnalysis({ min_depth: minDepth, p_value: pValue, max_terms: maxTerms });
+        // Never stricter than the significance threshold; the server clamps too.
+        const dispRaw  = parseFloat(document.getElementById("display-pvalue-input")?.value);
+        const dispP    = Math.max(pValue, isNaN(dispRaw) ? pValue : dispRaw);
+        runGOAnalysis({ min_depth: minDepth, p_value: pValue, max_terms: maxTerms,
+                        display_p_value: dispP });
       });
     });
   </script>

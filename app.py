@@ -3249,6 +3249,11 @@ def gene_ontology_analysis():
         # Tail of the Fisher test. 'greater' = over-representation only, which is
         # what every comparable tool reports; 'two-sided' also surfaces depleted
         # terms (see the recomputation after run_study for why that is a trap).
+        # How far below the significance cutoff the chart is drawn. Defaults to
+        # the significance threshold itself, i.e. the previous behaviour: nothing
+        # but findings. Clamped so it can never be stricter than p_value.
+        display_p_value_threshold = max(p_value_threshold,
+                                        float(data.get('display_p_value', p_value_threshold)))
         test_direction = str(data.get('test_direction', 'greater')).lower().strip()
         if test_direction not in ('greater', 'two-sided'):
             test_direction = 'greater'
@@ -3574,15 +3579,26 @@ def gene_ontology_analysis():
         for r, q in zip(testable, _bh([r.p_uncorrected for r in testable])):
             r.p_fdr_bh = float(q)
 
+        # Two thresholds, deliberately separate:
+        #   p_value_threshold          what counts as a finding (FDR 0.05)
+        #   display_p_value_threshold  how far down the chart is drawn
+        # 0.05 is a convention, not a fact about the data: a term at q = 0.049 and
+        # one at q = 0.059 are the same observation. Truncating the chart at the
+        # cutoff hides that, so terms between the two thresholds are returned as
+        # well, flagged ``significant: false`` for the front end to render hollow
+        # below a marked line. They are NEVER counted as findings -- ``total_sig``
+        # and every log line below use ``sig``, not ``shown``.
         sig = [r for r in testable if r.p_fdr_bh < p_value_threshold]
+        shown = [r for r in testable if r.p_fdr_bh < display_p_value_threshold]
 
-        logging.info(f"[GO] Significant after FDR<{p_value_threshold} & depth≥{min_depth}: {len(sig)}")
+        logging.info(f"[GO] Significant at FDR<{p_value_threshold} & depth>={min_depth}: "
+                     f"{len(sig)}; shown down to FDR<{display_p_value_threshold}: {len(shown)}")
 
         # -------------------------------
         # SPLIT BY NAMESPACE
         # -------------------------------
         def top_by_ns(ns, N=None):
-            arr = [r for r in sig if r.goterm.namespace == ns]
+            arr = [r for r in shown if r.goterm.namespace == ns]
             # GO id as final tie-breaker => deterministic ordering at the max_terms
             # cutoff (terms with identical p-values no longer swap between runs).
             arr = sorted(arr, key=lambda x: (x.p_fdr_bh, x.p_uncorrected, x.GO))
@@ -3773,6 +3789,11 @@ def gene_ontology_analysis():
                     "pop_n": r.pop_n,
                     "enrichment": r.enrichment if hasattr(r, 'enrichment') else None,
                     "direction": _direction(r),
+                    # False for terms drawn only because display_p_value is
+                    # looser than p_value. The chart must render these hollow,
+                    # below the marked threshold line; they are not findings.
+                    "significant": bool(r.p_fdr_bh is not None
+                                        and r.p_fdr_bh < p_value_threshold),
                     "study_items": study_items,
                     "evidence_breakdown": evidence_breakdown_for_term(r.GO, study_items),
                 })
@@ -3784,6 +3805,7 @@ def gene_ontology_analysis():
             "evidence_preset": evidence_preset,
             "counting_mode":   counting_mode,
             "p_value":         p_value_threshold,
+            "display_p_value": display_p_value_threshold,
             "min_depth":       min_depth,
             "max_terms":       max_terms,
         }
@@ -3795,7 +3817,11 @@ def gene_ontology_analysis():
         # per_protein mode, orthogroup IDs in per_orthogroup mode. When the
         # per-orthogroup collapse leaves only a handful of OGs, enrichment has no
         # power and returns nothing — which looks broken unless we explain it.
-        total_sig = len(bp_results) + len(cc_results) + len(mf_results)
+        # Findings only. bp/cc/mf_results may also carry sub-threshold terms for
+        # display, so count against ``sig`` rather than the length of the lists.
+        _sig_ids = {r.GO for r in sig}
+        total_sig = sum(1 for r in (bp_results + cc_results + mf_results)
+                        if r.GO in _sig_ids)
         foreground_units = len(fg_in_bg)
         if foreground_units and foreground_units < 5:
             warnings.append(
