@@ -20,11 +20,16 @@ keywords:
   - Gene Ontology enrichment
   - OrthoFinder
   - non-model organisms
-# Después de publicar la release, Zenodo acuña un DOI. Añádelo aquí como:
-#   doi: "10.5281/zenodo.XXXXXXXX"
-# Usa el DOI de concepto (el que Zenodo etiqueta "all versions"), no el de
-# esta versión concreta: así la cita sigue resolviendo cuando publiques la
-# siguiente.
+# Concept DOI: always resolves to the most recent version of the record.
+# The DOI of this specific release is 10.5281/zenodo.22738813
+doi: "10.5281/zenodo.18510910"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.18510910"
+    description: "Concept DOI — all versions"
+  - type: doi
+    value: "10.5281/zenodo.22738813"
+    description: "This release (v2.1.0)"
 
 authors:
   - family-names: "Vivas-Rodríguez"

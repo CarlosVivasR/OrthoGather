@@ -1,6 +1,6 @@
 # 🧬 OrthoGather: a local platform for orthology-based proteome comparison and Gene Ontology enrichment
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18510911.svg)](https://doi.org/10.5281/zenodo.18510911)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18510910.svg)](https://doi.org/10.5281/zenodo.18510910)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![OrthoFinder](https://img.shields.io/badge/OrthoFinder-2.5.5-2c6ea8)
 ![Platforms](https://img.shields.io/badge/macOS%20·%20Windows%20·%20Linux-supported-555)
