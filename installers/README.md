@@ -2,7 +2,7 @@
 
 This folder contains the scripts that install OrthoGather without the command line on macOS and
 Windows, and the guided scripts for the Conda route. Instructions for users are in the
-installation guide ([PDF](../docs/Installation_guide.pdf), [web page](../docs/INSTALL.html)); this
+installation guide ([PDF](../docs/Installation_guide.pdf), [web page](https://carlosvivasr.github.io/OrthoGather/INSTALL.html)); this
 page describes the files for maintainers.
 
 OrthoFinder 2.5.5 has no native Windows build, so on Windows OrthoGather runs inside the Windows

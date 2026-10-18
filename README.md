@@ -53,7 +53,7 @@ replace specialised orthology or phylogenetic analyses.
 Use an installer if you prefer not to type commands; otherwise use Conda, the reference setup. The
 [installation guide](docs/Installation_guide.pdf) gives every step, including the security
 prompts, with troubleshooting and uninstall instructions; it is also available as a
-[web page](docs/INSTALL.html) to download and open in a browser.
+[web page](https://carlosvivasr.github.io/OrthoGather/INSTALL.html).
 
 ### Requirements
 
@@ -185,7 +185,7 @@ respectively. UniProt and the EBI update their data regularly, so a later run ca
 
 ## Documentation
 
-- [Installation guide](docs/Installation_guide.pdf) ([web version](docs/INSTALL.html)):
+- [Installation guide](docs/Installation_guide.pdf) ([web version](https://carlosvivasr.github.io/OrthoGather/INSTALL.html)):
   installers, Conda, troubleshooting and uninstalling.
 - [docs/ADVANCED.md](docs/ADVANCED.md): enrichment test settings, OrthoFinder threads, repository
   layout, error codes and tests.
