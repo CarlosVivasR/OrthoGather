@@ -13,9 +13,9 @@
 #  bare executable.
 #
 #  Each zip contains exactly ONE file, at the zip root (no folders, no
-#  __MACOSX/.DS_Store cruft), with the exact name the in-app HTML download
-#  buttons already link to:
-#    installers/How to install OrthoGather.html
+#  __MACOSX/.DS_Store cruft), with the exact name the download buttons of the
+#  installation guide link to:
+#    docs/INSTALL.html (and docs/Installation_guide.pdf)
 #
 #  USAGE:
 #    ./build_installer_zips.sh

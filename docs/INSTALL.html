@@ -19,14 +19,15 @@
   html,body{margin:0;padding:0}
   body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
   a{color:var(--navy)}
+  code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.92em}
   .wrap{max-width:820px;margin:0 auto;padding:0 20px}
 
   /* Hero */
   header.hero{background:linear-gradient(160deg,#04284f 0%,var(--navy-2) 100%);color:#fff;padding:54px 0 46px;text-align:center}
-  .mark{width:54px;height:54px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(124,184,238,.14);border:1px solid rgba(124,184,238,.35);font-size:26px}
+  .mark{width:54px;height:54px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(124,184,238,.14);border:1px solid rgba(124,184,238,.35);font-size:24px;color:var(--accent)}
   .hero h1{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:clamp(28px,4vw,40px);margin:0 0 8px;letter-spacing:-.01em}
   .hero h1 .accent{color:var(--accent)}
-  .hero p{color:#cdd6e3;max-width:560px;margin:0 auto;font-size:15px}
+  .hero p{color:#cdd6e3;max-width:600px;margin:0 auto;font-size:15px}
   .badges{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
   .badge{font-size:12px;font-weight:600;color:#cdd6e3;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);padding:5px 11px;border-radius:999px}
   .badge i{color:var(--accent);margin-right:6px}
@@ -35,8 +36,9 @@
   main{padding:40px 0 60px}
   .section-title{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:38px 0 14px;display:flex;align-items:center;gap:12px}
   .section-title::after{content:"";flex:1;height:1px;background:var(--border)}
+  .lead{font-size:14.5px;color:#374151;margin-top:0}
 
-  /* Prereq cards */
+  /* Cards */
   .prereqs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:620px){.prereqs{grid-template-columns:1fr}}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
@@ -45,6 +47,10 @@
   .card p{margin:0;font-size:13.5px;color:var(--muted)}
   .card a{font-weight:600;text-decoration:none}
   .card a:hover{text-decoration:underline}
+
+  /* Download buttons */
+  .dl{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;text-decoration:none;font-weight:600;font-size:14px;padding:9px 16px;border-radius:9px;margin:2px 0 14px}
+  .dl:hover{background:#04284f}
 
   /* Steps */
   .step{display:flex;gap:16px;margin:0 0 14px}
@@ -57,13 +63,12 @@
 
   /* Code block + copy */
   .code{position:relative;background:var(--code-bg);border-radius:10px;margin:0 0 4px;overflow:hidden}
-  .code pre{margin:0;padding:14px 50px 14px 16px;overflow-x:auto;color:var(--code-fg);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13.5px;line-height:1.7}
-  .code .cmt{color:#7e8aa0}
+  .code pre{margin:0;padding:14px 50px 14px 16px;overflow-x:auto;color:var(--code-fg);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13.5px;line-height:1.7;white-space:pre-wrap;word-break:break-all}
   .copy{position:absolute;top:9px;right:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#cdd6e3;border-radius:7px;padding:5px 9px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:background .12s}
   .copy:hover{background:rgba(124,184,238,.22);color:#fff}
   .copy.done{background:rgba(22,163,74,.28);border-color:rgba(22,163,74,.5);color:#dcfce7}
 
-  /* OS tabs */
+  /* Tabs */
   .tabs{display:flex;gap:6px;margin:0 0 10px}
   .tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer}
   .tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -71,10 +76,12 @@
   .tabpane.active{display:block}
 
   /* Callouts */
-  .callout{display:flex;gap:11px;background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:13px 15px;font-size:13.5px;color:#7c5310;margin:6px 0}
+  .callout{display:flex;gap:11px;background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:10px;padding:13px 15px;font-size:13.5px;color:#7c5310;margin:6px 0 14px}
   .callout i{color:var(--warn);margin-top:2px}
   .success{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
   .success i{color:var(--ok)}
+  .info{background:#eff6ff;border-color:#bfdbfe;color:#1e3a5f}
+  .info i{color:var(--navy)}
 
   /* Troubleshooting */
   details{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0 16px;margin:0 0 10px}
@@ -83,78 +90,169 @@
   summary::before{content:"\f105";font-family:"Font Awesome 6 Free";font-weight:900;color:var(--navy);margin-right:10px;display:inline-block;transition:transform .15s}
   details[open] summary::before{transform:rotate(90deg)}
   details .det-body{padding:0 0 14px;font-size:13.5px;color:#374151}
+  details .det-body p{margin:0 0 8px}
 
   footer{border-top:1px solid var(--border);padding:26px 0 40px;text-align:center;color:var(--muted);font-size:13px}
   footer a{font-weight:600;text-decoration:none;margin:0 8px}
   footer a:hover{text-decoration:underline}
+
+  @media print{
+    body{background:#fff}
+    .copy,.tabs{display:none}
+    .tabpane{display:block}
+    .tabpane::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--muted);margin:6px 0 4px}
+    .step,.card,details,.callout{break-inside:avoid}
+  }
 </style>
 </head>
 <body>
 
 <header class="hero">
   <div class="wrap">
-    <div class="mark">🧬</div>
+    <div class="mark"><i class="fa-solid fa-dna"></i></div>
     <h1>Install <span class="accent">OrthoGather</span></h1>
-    <p>A local platform for orthology-based proteome comparison and Gene Ontology enrichment. Three steps and you're running it on your own machine — no cloud, no command-line expertise required.</p>
+    <p>OrthoGather runs on your own computer and opens in your web browser. This guide covers the installers for macOS and Windows, which need no typed commands, and the Conda route for macOS, Linux and WSL.</p>
     <div class="badges">
+      <span class="badge"><i class="fa-solid fa-tag"></i>Version 2.1.0</span>
       <span class="badge"><i class="fa-brands fa-python"></i>Python 3.11</span>
       <span class="badge"><i class="fa-solid fa-dna"></i>OrthoFinder 2.5.5</span>
-      <span class="badge"><i class="fa-solid fa-laptop"></i>macOS · Linux · WSL</span>
-      <span class="badge"><i class="fa-solid fa-bolt"></i>No Rosetta</span>
+      <span class="badge"><i class="fa-solid fa-laptop"></i>macOS · Windows · Linux</span>
     </div>
   </div>
 </header>
 
 <main class="wrap">
 
-  <!-- ONE-CLICK INSTALL -->
-  <div class="section-title">Easiest: one-click installer</div>
-  <p style="font-size:14.5px;color:#374151;margin-top:0">No terminal, no commands. Download the installer for your computer, double-click it, and it sets up <strong>everything</strong> — including OrthoFinder — and puts an <strong>OrthoGather</strong> launcher on your Desktop.</p>
+  <!-- REQUIREMENTS -->
+  <div class="section-title">Before you start</div>
   <div class="prereqs">
     <div class="card">
-      <h3><i class="fa-brands fa-apple"></i> macOS</h3>
-      <p>Apple Silicon &amp; Intel. Download <a href="https://github.com/CarlosVivasR/OrthoGather/releases" target="_blank" rel="noopener"><strong>Install OrthoGather.command</strong></a> and double-click it.</p>
-      <p class="note" style="margin-top:8px"><i class="fa-solid fa-circle-info"></i> First time: right-click → <strong>Open</strong> to get past the macOS security prompt.</p>
+      <h3><i class="fa-solid fa-hard-drive"></i> Disk space</h3>
+      <p>About 3 GB on macOS and 5 GB on Windows, where a small Linux system (WSL) is added. The first installation downloads 1–2 GB.</p>
     </div>
     <div class="card">
-      <h3><i class="fa-brands fa-windows"></i> Windows 10/11</h3>
-      <p>Download <a href="https://github.com/CarlosVivasR/OrthoGather/releases" target="_blank" rel="noopener"><strong>Install OrthoGather.bat</strong></a> and double-click it. It enables WSL (needs admin + <strong>one restart</strong>, then continues by itself).</p>
-      <p class="note" style="margin-top:8px"><i class="fa-solid fa-circle-info"></i> If SmartScreen warns: <strong>More info → Run anyway</strong>.</p>
-    </div>
-  </div>
-  <div class="callout"><i class="fa-solid fa-lightbulb"></i><div>The installer downloads ~1–2 GB the first time (OrthoFinder + scientific packages) — give it a few minutes. Re-running it later just updates your install.</div></div>
-
-  <!-- PREREQS -->
-  <div class="section-title">Advanced: manual install</div>
-  <p style="font-size:14.5px;color:#374151;margin-top:0">Prefer the command line, or already use conda? Here's the manual route.</p>
-  <div class="section-title" style="margin-top:18px">Before you start</div>
-  <div class="prereqs">
-    <div class="card">
-      <h3><i class="fa-solid fa-box-open"></i> Conda or Micromamba</h3>
-      <p>The package manager that builds the environment. Don't have it? Install <a href="https://github.com/conda-forge/miniforge" target="_blank" rel="noopener">Miniforge</a> (free, lightweight).</p>
+      <h3><i class="fa-solid fa-memory"></i> Memory</h3>
+      <p>8 GB of RAM or more. OrthoFinder is the step that uses most memory and time.</p>
     </div>
     <div class="card">
-      <h3><i class="fa-solid fa-code-branch"></i> Git</h3>
-      <p>To download the code. The proteome catalogue ships compressed inside the repo — <strong>no Git LFS needed</strong>, it unpacks itself on first launch.</p>
+      <h3><i class="fa-solid fa-desktop"></i> System</h3>
+      <p>macOS on Apple Silicon or Intel; Windows 10 version 2004 or later, or Windows 11, with administrator rights; Linux through Conda.</p>
     </div>
     <div class="card">
-      <h3><i class="fa-solid fa-terminal"></i> A terminal</h3>
-      <p>macOS Terminal, a Linux shell, or Windows + WSL. Everything below is copy-paste.</p>
-    </div>
-    <div class="card">
-      <h3><i class="fa-solid fa-hard-drive"></i> ~3 GB free space</h3>
-      <p>For Python 3.11, OrthoFinder and the UniProt catalogue (~3 GB on macOS/Linux; ~5 GB on Windows because of WSL). 8 GB RAM recommended.</p>
+      <h3><i class="fa-solid fa-wifi"></i> Internet connection</h3>
+      <p>To install, to download proteomes and GO annotation files, and to load the plotting libraries. The analyses themselves run on your computer.</p>
     </div>
   </div>
 
-  <!-- STEPS -->
-  <div class="section-title">Install in 3 steps</div>
+  <!-- MACOS INSTALLER -->
+  <div class="section-title">Installer for macOS</div>
+  <a class="dl" href="https://github.com/CarlosVivasR/OrthoGather/releases/latest/download/Install-OrthoGather-Mac.zip"><i class="fa-solid fa-download"></i> Download Install-OrthoGather-Mac.zip</a>
 
   <div class="step">
     <div class="step-num">1</div>
     <div class="step-body">
+      <h3>Unzip</h3>
+      <p>Double-click the downloaded <code>Install-OrthoGather-Mac.zip</code> (usually in your Downloads folder). You get a file called <code>Install OrthoGather.command</code>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Open it and allow it once</h3>
+      <p>Double-click <code>Install OrthoGather.command</code>. Because the installer is not signed, macOS warns that it cannot verify the file. Close the warning, open <strong>System Settings &gt; Privacy &amp; Security</strong>, scroll down to the message about <code>Install OrthoGather.command</code> and click <strong>Open Anyway</strong>, confirming if asked. This is needed only once. On older versions of macOS you can instead Control-click the file and choose <strong>Open</strong>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Let it run</h3>
+      <p>A Terminal window opens and shows the progress. The installer sets up Miniforge (Conda) if it is not already present, creates an environment with Python 3.11, OrthoFinder 2.5.5 and the other dependencies, and downloads the current version of OrthoGather from GitHub. This takes about 5–15 minutes, and the window can look idle for a minute or two at a time. Leave it open until it shows <strong>OrthoGather is installed!</strong> or an error message.</p>
+      <p>Along the way you may be asked three things. If Conda is not installed, the installer asks whether to install Miniforge (about 400 MB, in your home folder): press Return to accept. macOS may ask whether Terminal can access your Desktop or other folders: allow it, because the launcher is created there. At the end, the installer offers to start OrthoGather.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Start OrthoGather</h3>
+      <p>The installer adds an <strong>OrthoGather</strong> app, with the OrthoGather logo, to your Desktop and to the Applications folder in your home folder. Double-click it whenever you want to use OrthoGather; it opens in your web browser, usually at <code>http://127.0.0.1:5000</code>, or at <code>http://127.0.0.1:5001</code> if AirPlay Receiver is using port 5000. Closing the browser tab does not stop OrthoGather: open the same address to return to it.</p>
+      <p>On macOS, OrthoGather runs without a window of its own. To stop it, choose <strong>Force Quit</strong> from the Apple menu and select OrthoGather, or restart the computer.</p>
+    </div>
+  </div>
+
+  <!-- WINDOWS INSTALLER -->
+  <div class="section-title">Installer for Windows</div>
+  <p class="lead">OrthoFinder has no native Windows build, so the Windows installer sets up the Windows Subsystem for Linux (WSL) with Ubuntu and installs OrthoGather inside it. It needs administrator rights, hardware virtualisation enabled in the BIOS, and one restart.</p>
+  <a class="dl" href="https://github.com/CarlosVivasR/OrthoGather/releases/latest/download/Install-OrthoGather-Windows.zip"><i class="fa-solid fa-download"></i> Download Install-OrthoGather-Windows.zip</a>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h3>Extract the zip</h3>
+      <p>Right-click <code>Install-OrthoGather-Windows.zip</code>, choose <strong>Extract All</strong> and open the extracted folder, which contains <code>Install OrthoGather.bat</code>. Do not run the installer from inside the zip preview window, as it can fail.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h3>Run it</h3>
+      <p>Double-click <code>Install OrthoGather.bat</code>. If a "Windows protected your PC" message appears, click <strong>More info &gt; Run anyway</strong>, then <strong>Yes</strong> on the permission prompt. The warning appears because the installer is not signed.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h3>Restart when asked</h3>
+      <p>If WSL has to be enabled, the installer asks to restart the computer; save your work and press <strong>Y</strong>. After the restart it should reopen by itself and ask once more for administrator permission: click <strong>Yes</strong> to let it continue. If it has not reopened a minute or two after you log in, run <code>Install OrthoGather.bat</code> again: it resumes where it stopped.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h3>Let it run</h3>
+      <p>The installer installs Ubuntu and downloads the scientific packages and OrthoGather, which takes about 5–15 minutes. There is no Linux username or password to create. Leave the window open until it shows <strong>OrthoGather is installed!</strong> or an error message. If the window closes unexpectedly, run the installer again.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <h3>Start OrthoGather</h3>
+      <p>Double-click the <strong>OrthoGather</strong> shortcut on the Desktop. A small window opens and, a few seconds later, the app appears in your web browser.</p>
+    </div>
+  </div>
+
+  <div class="callout info"><i class="fa-solid fa-circle-info"></i><div>You install only once. On Windows, a small OrthoGather window stays open while you work: that is the application running, and closing it stops OrthoGather. To update, on either system, run the installer again; it refreshes the installation and keeps your data.</div></div>
+
+  <!-- VERSION -->
+  <div class="section-title">Which version is installed</div>
+  <p class="lead">The installers download the current version of OrthoGather from GitHub (the <code>main</code> branch). To install exactly version 2.1.0, the version described in the paper, use the Conda route below and clone that release:</p>
+  <div class="code"><button class="copy">Copy</button><pre>git clone --branch v2.1.0 https://github.com/CarlosVivasR/OrthoGather.git</pre></div>
+  <p class="note"><i class="fa-solid fa-circle-info"></i> The version in use is shown in the application's sidebar and in every provenance file it exports. A clone of a release is not on a branch, so to move to the latest version later, run <code>git checkout main</code> and then <code>git pull</code>.</p>
+
+  <!-- CONDA -->
+  <div class="section-title">Conda: macOS, Linux and WSL</div>
+  <p class="lead">For users who prefer the command line, and the supported route on Linux.</p>
+  <div class="prereqs">
+    <div class="card">
+      <h3><i class="fa-solid fa-box-open"></i> Conda or Micromamba</h3>
+      <p>The package manager that builds the environment. If you do not have one, install <a href="https://github.com/conda-forge/miniforge" target="_blank" rel="noopener">Miniforge</a>.</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-code-branch"></i> Git</h3>
+      <p>To download the code. A plain clone is enough: the proteome catalogue is stored compressed in the repository, so Git LFS is not needed.</p>
+    </div>
+  </div>
+
+  <div class="step" style="margin-top:16px">
+    <div class="step-num">1</div>
+    <div class="step-body">
       <h3>Download OrthoGather</h3>
-      <p>Clone the repository and move into the folder. A plain <code>git clone</code> is all you need — the proteome catalogue travels inside the repo, compressed.</p>
       <div class="code"><button class="copy">Copy</button><pre>git clone https://github.com/CarlosVivasR/OrthoGather.git
 cd OrthoGather</pre></div>
     </div>
@@ -164,63 +262,66 @@ cd OrthoGather</pre></div>
     <div class="step-num">2</div>
     <div class="step-body">
       <h3>Create the environment</h3>
-      <p>This one command installs Python 3.11, OrthoFinder 2.5.5 and every dependency, then activates it.</p>
+      <p>This installs Python 3.11, OrthoFinder 2.5.5 and the Python dependencies, and runs natively on Apple Silicon. The first build takes a few minutes.</p>
       <div class="tabs">
         <button class="tab active" data-tab="conda">Conda</button>
         <button class="tab" data-tab="mamba">Micromamba</button>
       </div>
-      <div class="tabpane active" data-pane="conda">
+      <div class="tabpane active" data-pane="conda" data-label="With Conda">
         <div class="code"><button class="copy">Copy</button><pre>conda env create -f environment.yml
 conda activate orthogather</pre></div>
       </div>
-      <div class="tabpane" data-pane="mamba">
+      <div class="tabpane" data-pane="mamba" data-label="With Micromamba">
         <div class="code"><button class="copy">Copy</button><pre>micromamba env create -f environment.yml
 micromamba activate orthogather</pre></div>
       </div>
-      <p class="note"><i class="fa-solid fa-clock"></i> The first build takes a few minutes — it downloads OrthoFinder and the scientific packages.</p>
     </div>
   </div>
 
   <div class="step">
     <div class="step-num">3</div>
     <div class="step-body">
-      <h3>Launch it</h3>
-      <p>Start the app — it picks a free port and <strong>opens your browser automatically</strong>.</p>
+      <h3>Start OrthoGather</h3>
+      <p>The application picks a free port and opens your browser. To stop it, press <strong>Ctrl+C</strong> in the terminal.</p>
       <div class="code"><button class="copy">Copy</button><pre>python app.py</pre></div>
-      <p class="note"><i class="fa-solid fa-box-open"></i> On the <strong>first</strong> launch the app unpacks the proteome catalogue (~250 MB) from its compressed copy — this happens once and takes a few seconds. It also checks GitHub for a newer catalogue and offers a one-click update if one exists.</p>
-      <div class="callout success"><i class="fa-solid fa-circle-check"></i><div>That's it — OrthoGather opens in your browser. From here pick <strong>New Analysis</strong>, the <strong>Preselected Dataset</strong>, or <strong>External Upload</strong>.</div></div>
+      <p class="note"><i class="fa-solid fa-box-open"></i> On the first launch, the proteome catalogue (about 260 MB) is unpacked from its compressed copy. This happens once and takes a few seconds. OrthoGather also checks GitHub for a newer catalogue and offers to update it.</p>
     </div>
   </div>
 
-  <div class="callout"><i class="fa-solid fa-rotate-right"></i><div><strong>Every time after this</strong>, you only need two lines:
-    <div class="code" style="margin-top:8px"><button class="copy">Copy</button><pre>conda activate orthogather
+  <div class="callout success"><i class="fa-solid fa-circle-check"></i><div>OrthoGather opens in your browser. From there, choose <strong>New Analysis</strong>, the <strong>Preselected Dataset</strong> or <strong>External Upload</strong>.</div></div>
+
+  <p class="lead">To start it again later, from the <code>OrthoGather</code> folder:</p>
+  <div class="code"><button class="copy">Copy</button><pre>conda activate orthogather
 python app.py</pre></div>
-  </div></div>
+
+  <p class="lead" style="margin-top:14px">To update to the latest version, from the <code>OrthoGather</code> folder:</p>
+  <div class="code"><button class="copy">Copy</button><pre>git pull
+conda env update -f environment.yml --prune</pre></div>
 
   <!-- GUIDED SCRIPTS -->
-  <div class="section-title">Prefer a guided installer?</div>
-  <p style="font-size:14.5px;color:#374151;margin-top:0">From inside the <code>OrthoGather</code> folder, run the script for your system. It checks prerequisites, builds the same <code>orthogather</code> environment and verifies OrthoFinder.</p>
+  <div class="section-title">Guided install scripts</div>
+  <p class="lead">As an alternative to the commands above, two scripts check the prerequisites, create the <code>orthogather</code> environment and check that OrthoFinder is found: the macOS script builds it from <code>environment.yml</code>, and the WSL script installs the packages directly. Run them from the <code>OrthoGather</code> folder. The macOS script needs Conda. The WSL script needs Micromamba, which is not part of Miniforge, and stops on native Linux; on Linux, use the Conda commands above.</p>
   <div class="tabs">
     <button class="tab active" data-tab="mac">macOS</button>
-    <button class="tab" data-tab="wsl">Linux / WSL</button>
+    <button class="tab" data-tab="wsl">WSL</button>
   </div>
-  <div class="tabpane active" data-pane="mac">
+  <div class="tabpane active" data-pane="mac" data-label="macOS">
     <div class="code"><button class="copy">Copy</button><pre>./installers/install_orthogather_mac.sh</pre></div>
   </div>
-  <div class="tabpane" data-pane="wsl">
-    <div class="code"><button class="copy">Copy</button><pre>./installers/install_orthogather_wsl.sh</pre></div>
+  <div class="tabpane" data-pane="wsl" data-label="WSL">
+    <div class="code"><button class="copy">Copy</button><pre>bash installers/install_orthogather_wsl.sh</pre></div>
   </div>
 
   <!-- OTHER OPTIONS -->
   <div class="section-title">Other ways to install</div>
   <div class="prereqs">
     <div class="card">
-      <h3><i class="fa-brands fa-windows"></i> Windows</h3>
-      <p>OrthoFinder runs on Linux/macOS, so on Windows install <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL</a> first, then follow the Linux / WSL steps inside it.</p>
+      <h3><i class="fa-brands fa-windows"></i> Windows without the installer</h3>
+      <p>Install <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener">WSL</a> first, then follow the Conda steps inside it.</p>
     </div>
     <div class="card">
-      <h3><i class="fa-solid fa-cube"></i> pip (advanced)</h3>
-      <p>Already have Python 3.11? <code>pip install -r requirements.txt</code> covers the Python packages, but you must install <strong>OrthoFinder 2.5.5</strong> separately (it is not on PyPI) — conda/bioconda is the supported route.</p>
+      <h3><i class="fa-solid fa-cube"></i> pip</h3>
+      <p>With Python 3.11, <code>pip install -r requirements.txt</code> installs the Python packages, but OrthoFinder 2.5.5 is not on PyPI and must be installed separately. Conda is the supported route.</p>
     </div>
   </div>
 
@@ -228,38 +329,113 @@ python app.py</pre></div>
   <div class="section-title">Troubleshooting</div>
 
   <details>
+    <summary>macOS will not open the installer</summary>
+    <div class="det-body">
+      <p>Open <strong>System Settings &gt; Privacy &amp; Security</strong>, scroll down to the message about the file and click <strong>Open Anyway</strong>. On older versions of macOS, Control-click the file and choose <strong>Open</strong>.</p>
+      <p>If both are blocked, open Terminal and run the line below, changing the path if the file is not in Downloads:</p>
+      <div class="code"><button class="copy">Copy</button><pre>xattr -dr com.apple.quarantine ~/Downloads/"Install OrthoGather.command"
+chmod +x ~/Downloads/"Install OrthoGather.command"</pre></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Windows shows "Windows protected your PC"</summary>
+    <div class="det-body"><p>Click <strong>More info</strong>, then <strong>Run anyway</strong>. The message appears because the installer is not code-signed.</p></div>
+  </details>
+
+  <details>
+    <summary>The antivirus blocked or deleted the download</summary>
+    <div class="det-body"><p>Some managed or work computers block downloads of program files, which is why the installers are distributed as .zip files. If the download is still blocked, or the file disappears after downloading, it is your organisation's security policy: ask your IT support to allow it, or <a href="https://github.com/CarlosVivasR/OrthoGather/issues" target="_blank" rel="noopener">open an issue</a> on GitHub.</p></div>
+  </details>
+
+  <details>
+    <summary>Windows says Linux cannot start, or virtualisation is off</summary>
+    <div class="det-body">
+      <p>WSL needs hardware virtualisation switched on in the computer's BIOS/UEFI, and this is the one step an installer cannot do for you. Restart the computer, open the BIOS (usually by pressing F2, F10, Del or Esc as it starts), find the setting called Virtualization Technology, Intel VT-x, AMD-V or SVM, set it to Enabled, save and exit, then run the installer again.</p>
+      <p>The installer keeps a log at <code>%LOCALAPPDATA%\OrthoGather\install-log.txt</code>; attach it if you report a problem.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>The installer seems frozen</summary>
+    <div class="det-body"><p>The first installation downloads large scientific packages and can stay quiet for a minute or two at a time. Wait until it shows <strong>OrthoGather is installed!</strong> or an error message. Closing the window is the only thing that cancels it.</p></div>
+  </details>
+
+  <details>
+    <summary>The browser did not open</summary>
+    <div class="det-body"><p>Open <code>http://localhost:5000</code> in your browser. If port 5000 was busy, OrthoGather uses the next free port (5001, 5002 and so on). On Windows, the small OrthoGather window shows the address; keep that window open while you use OrthoGather.</p></div>
+  </details>
+
+  <details>
+    <summary>macOS: OrthoGather opens on port 5001</summary>
+    <div class="det-body"><p>AirPlay Receiver, which is on by default in recent versions of macOS, uses port 5000, so OrthoGather runs on the next free port, usually <code>http://127.0.0.1:5001</code>. This does not affect the analyses. To keep port 5000 for OrthoGather, turn off AirPlay Receiver in <strong>System Settings &gt; General &gt; AirDrop &amp; Handoff</strong>.</p></div>
+  </details>
+
+  <details>
     <summary><code>conda: command not found</code></summary>
-    <div class="det-body">Conda isn't installed (or your terminal hasn't loaded it). Install <a href="https://github.com/conda-forge/miniforge" target="_blank" rel="noopener">Miniforge</a>, then close and reopen your terminal and try again.</div>
+    <div class="det-body"><p>Conda is not installed, or your terminal has not loaded it. Install <a href="https://github.com/conda-forge/miniforge" target="_blank" rel="noopener">Miniforge</a>, close and reopen the terminal, and try again.</p></div>
   </details>
 
   <details>
-    <summary>Species list is empty / catalogue didn't load</summary>
-    <div class="det-body">The catalogue unpacks itself from the compressed copy on first launch, so this is rare. If it happens, delete the half-written raw file and restart — the app re-unpacks it from <code>proteomes_list.json.gz</code>:
-      <div class="code"><button class="copy">Copy</button><pre>rm -f static/Proteomes_json/proteomes_list.json
-python app.py</pre></div>
-      Still stuck? Open the catalogue menu on the species page and click <strong>Check for updates</strong> to download a fresh copy from GitHub.</div>
+    <summary>The species list is empty or the catalogue did not load</summary>
+    <div class="det-body">
+      <p>The catalogue is unpacked from its compressed copy on first launch, so this is rare. If it happens, stop OrthoGather, delete the half-written file with the command for your installation, and start OrthoGather again as usual; it unpacks the catalogue again from <code>proteomes_list.json.gz</code>.</p>
+      <p><strong>Conda installation</strong> (from the OrthoGather folder):</p>
+      <div class="code"><button class="copy">Copy</button><pre>rm -f static/Proteomes_json/proteomes_list.json</pre></div>
+      <p style="margin-top:8px"><strong>macOS installer</strong> (in Terminal):</p>
+      <div class="code"><button class="copy">Copy</button><pre>rm -f ~/Applications/OrthoGather/static/Proteomes_json/proteomes_list.json</pre></div>
+      <p style="margin-top:8px"><strong>Windows installer</strong> (in Command Prompt):</p>
+      <div class="code"><button class="copy">Copy</button><pre>wsl -d Ubuntu -u root -- rm -f /root/OrthoGather/static/Proteomes_json/proteomes_list.json</pre></div>
+      <p style="margin-top:8px">If that does not help, open the catalogue menu on the species page and click <strong>Check for updates</strong> to download a fresh copy from GitHub.</p>
+    </div>
   </details>
 
   <details>
-    <summary>"OrthoFinder not detected"</summary>
-    <div class="det-body">Make sure the environment is active — your prompt should show <code>(orthogather)</code>. If not, run <code>conda activate orthogather</code> and launch again.</div>
+    <summary><code>ModuleNotFoundError</code> on start, or "OrthoFinder not detected" from a guided script</summary>
+    <div class="det-body"><p>The environment is not active, or it did not finish building. Run <code>conda activate orthogather</code> (the prompt should then show <code>(orthogather)</code>); if the error remains, run <code>conda env update -f environment.yml --prune</code> from the OrthoGather folder and start OrthoGather again.</p></div>
   </details>
 
   <details>
-    <summary>OrthoFinder runs slowly or uses too much CPU</summary>
-    <div class="det-body">OrthoGather auto-detects your cores. To leave headroom for other work, set the thread counts before launching:
+    <summary>OrthoFinder is slow or uses too much CPU</summary>
+    <div class="det-body">
+      <p>OrthoGather uses all logical CPUs for the sequence search. To leave some free for other work, start it from the OrthoGather folder of a Conda installation with lower thread counts:</p>
       <div class="code"><button class="copy">Copy</button><pre>ORTHOGATHER_OF_THREADS=6 ORTHOGATHER_OF_ANALYSIS_THREADS=1 python app.py</pre></div>
     </div>
   </details>
+
+  <!-- UNINSTALL -->
+  <div class="section-title">Uninstalling</div>
+  <div class="prereqs">
+    <div class="card">
+      <h3><i class="fa-brands fa-apple"></i> macOS installer</h3>
+      <p>Delete <code>OrthoGather.app</code> from the Desktop and from the Applications folder in your home folder, the folder <code>~/Applications/OrthoGather</code>, and the environment with <code>conda env remove -n orthogather</code>. If Miniforge was installed only for OrthoGather, run <code>conda init --reverse bash zsh</code> and then delete <code>~/miniforge3</code>.</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-brands fa-windows"></i> Windows installer</h3>
+      <p>Delete the OrthoGather shortcut on the Desktop and the folder <code>%LOCALAPPDATA%\OrthoGather</code>. If Ubuntu was installed only for OrthoGather, this removes it completely, including everything stored in it:</p>
+      <div class="code" style="margin-top:6px"><pre>wsl --unregister Ubuntu</pre></div>
+      <p style="margin-top:6px">If you keep Ubuntu, remove OrthoGather from it instead, and <code>/root/miniforge3</code> as well if nothing else uses it:</p>
+      <div class="code" style="margin-top:6px"><pre>wsl -d Ubuntu -u root -- rm -rf /root/OrthoGather /root/.orthogather</pre></div>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-terminal"></i> Conda installation</h3>
+      <p>Delete the cloned <code>OrthoGather</code> folder and remove the environment with <code>conda env remove -n orthogather</code>.</p>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-clock-rotate-left"></i> Saved analyses</h3>
+      <p>The analysis history is kept in <code>~/.orthogather</code> (inside Ubuntu on Windows). Delete it only if you no longer need your saved runs.</p>
+    </div>
+  </div>
 
 </main>
 
 <footer>
   <div class="wrap">
     <a href="https://github.com/CarlosVivasR/OrthoGather" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Repository</a>·
-    <a href="https://github.com/CarlosVivasR/OrthoGather#readme" target="_blank" rel="noopener">Full README</a>·
-    <a href="https://doi.org/10.5281/zenodo.18510911" target="_blank" rel="noopener">DOI</a>
-    <p style="margin-top:12px">OrthoGather · developed at UCD Conway Institute &amp; UCD Cancer Data Lab · GPL-3.0</p>
+    <a href="https://github.com/CarlosVivasR/OrthoGather#readme" target="_blank" rel="noopener">README</a>·
+    <a href="https://github.com/CarlosVivasR/OrthoGather/blob/main/docs/Installation_guide.pdf" target="_blank" rel="noopener">PDF version</a>·
+    <a href="https://doi.org/10.5281/zenodo.18510910" target="_blank" rel="noopener">DOI</a>
+    <p style="margin-top:12px">OrthoGather · UCD Conway Institute and UCD Cancer Data Lab · GPL-3.0-or-later</p>
   </div>
 </footer>
 
@@ -268,17 +444,15 @@ python app.py</pre></div>
   document.querySelectorAll('.copy').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const pre=btn.parentElement.querySelector('pre');
-      const text=pre.innerText;
-      navigator.clipboard.writeText(text).then(()=>{
+      navigator.clipboard.writeText(pre.innerText).then(()=>{
         const old=btn.textContent;btn.textContent='Copied!';btn.classList.add('done');
         setTimeout(()=>{btn.textContent=old;btn.classList.remove('done');},1400);
       });
     });
   });
-  // OS / tool tabs (scoped to the tab group's following panes)
+  // Tabs: each tab group switches the .tabpane siblings that follow it
   document.querySelectorAll('.tabs').forEach(group=>{
     const tabs=group.querySelectorAll('.tab');
-    // panes are the .tabpane siblings that follow this group until the next .tabs
     let panes=[];let el=group.nextElementSibling;
     while(el && !el.classList.contains('tabs') && !el.classList.contains('section-title')){
       if(el.classList.contains('tabpane'))panes.push(el);
@@ -288,8 +462,7 @@ python app.py</pre></div>
       tab.addEventListener('click',()=>{
         tabs.forEach(t=>t.classList.remove('active'));
         tab.classList.add('active');
-        const key=tab.dataset.tab;
-        panes.forEach(p=>p.classList.toggle('active',p.dataset.pane===key));
+        panes.forEach(p=>p.classList.toggle('active',p.dataset.pane===tab.dataset.tab));
       });
     });
   });

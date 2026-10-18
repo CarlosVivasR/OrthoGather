@@ -1,6 +1,6 @@
 # OrthoGather runtime Python dependencies (Python 3.11).
 #
-# Recommended install is conda via environment.yml — it also pulls OrthoFinder:
+# Recommended install is conda via environment.yml, which also installs OrthoFinder:
 #     conda env create -f environment.yml
 #     conda activate orthogather
 #

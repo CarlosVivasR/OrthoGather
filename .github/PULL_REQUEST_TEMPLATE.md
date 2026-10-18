@@ -1,4 +1,4 @@
-<!-- Thanks for contributing to OrthoGather! -->
+<!-- See CONTRIBUTING.md before opening a pull request. -->
 
 ## What does this PR do?
 

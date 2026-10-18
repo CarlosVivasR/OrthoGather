@@ -26,7 +26,7 @@ doi: "10.5281/zenodo.18510910"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.18510910"
-    description: "Concept DOI — all versions"
+    description: "Concept DOI, all versions"
   - type: doi
     value: "10.5281/zenodo.22738813"
     description: "This release (v2.1.0)"
@@ -75,3 +75,33 @@ authors:
       School of Biomolecular and Biomedical Science, University College Dublin, Dublin, Ireland;
       UCD Conway Institute of Biomedical and Biomolecular Research, Dublin, Ireland
     orcid: "https://orcid.org/0000-0003-2068-238X"
+
+# The preferred citation lists the authors as they appear on the preprint, which is why one
+# spelling differs from the software authors above.
+preferred-citation:
+  type: article
+  status: preprint
+  title: "OrthoGather: a local platform for orthology-based proteome comparisons and Gene Ontology enrichment"
+  journal: "bioRxiv"
+  year: 2026
+  doi: "10.64898/2026.01.30.702851"
+  url: "https://doi.org/10.64898/2026.01.30.702851"
+  authors:
+    - family-names: "Vivas-Rodríguez"
+      given-names: "Carlos"
+      orcid: "https://orcid.org/0009-0008-0544-1776"
+    - family-names: "Gomez Matallanas"
+      given-names: "David"
+      orcid: "https://orcid.org/0000-0002-2360-3141"
+    - family-names: "Ryan"
+      given-names: "Colm J."
+      orcid: "https://orcid.org/0000-0003-2750-9854"
+    - family-names: "McClean"
+      given-names: "Siobhán"
+      orcid: "https://orcid.org/0000-0001-6389-2542"
+    - family-names: "Dennler"
+      given-names: "Olivier"
+      orcid: "https://orcid.org/0009-0005-2408-1102"
+    - family-names: "Drabinska"
+      given-names: "Joanna"
+      orcid: "https://orcid.org/0000-0003-2068-238X"

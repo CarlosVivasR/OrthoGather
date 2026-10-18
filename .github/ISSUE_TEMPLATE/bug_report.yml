@@ -1,10 +1,10 @@
-name: 🐛 Bug report
+name: Bug report
 description: Something in OrthoGather isn't working as expected.
 labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Thanks for helping improve OrthoGather! Please fill in what you can.
+      value: Thank you for reporting a problem. Please fill in what you can; the version and any ERR_ code help most.
   - type: textarea
     id: what-happened
     attributes:
@@ -31,13 +31,27 @@ body:
     validations:
       required: true
   - type: input
+    id: version
+    attributes:
+      label: OrthoGather version
+      description: Shown in the sidebar of the application and in any exported provenance file.
+      placeholder: "2.1.0"
+    validations:
+      required: true
+  - type: input
     id: install
     attributes:
       label: How did you install it?
-      placeholder: One-click installer / conda environment.yml / other
+      placeholder: macOS installer / Windows installer / Conda (environment.yml) / other
+  - type: input
+    id: error-code
+    attributes:
+      label: Error code
+      description: If OrthoGather showed a code starting with ERR_, paste it here.
+      placeholder: ERR_...
   - type: textarea
     id: logs
     attributes:
       label: Error message or terminal output
-      description: Paste any red error text or the message OrthoGather showed.
+      description: Paste the message OrthoGather showed and any error text from the terminal or the OrthoGather window. On Windows, the installer log is in %LOCALAPPDATA%\OrthoGather\install-log.txt.
       render: shell

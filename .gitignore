@@ -19,29 +19,11 @@ static/plots/*
 static/results/*
 static/flask_sessions/*
 
-# keep placeholder readmes
-!Proteomas/README.md
-!GOAfiles/README.md
-!static/data_folder/README.md
-!static/plots/README.md
-!static/results/README.md
-!static/flask_sessions/README.md
-
 .DS_Store
 
-# Local-only (do not commit)
+# Local sessions, caches and backups
 .orthogather_sessions/
-UpSetPlot_Data_v2.xlsx
-UpSetPlot_Filtrado.xlsx
-GO_Analysis_Evolution.pptx
-IMPROVEMENT_PLAN.md
-REWORK_PLAN.md
-
-# Editor / local tooling, caches and scratch (local-only, do not commit)
 .pytest_cache/
-tasks/
-static/mockups/
-templates/*.bak
 *.bak
 
 # Build output from installers/packaging/build_installer_zips.sh (regenerate
