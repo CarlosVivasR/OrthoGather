@@ -25,7 +25,7 @@ installed and started without the command line.
 [Help](#getting-help-and-contributing)
 
 <p align="center">
-  <img src="example_analysis/2_comparative_analysis/figure3_upset-orthogroups/orthogather_figure3-upset-orthogroups_3species_2026-09-13.png" alt="UpSet plot of the orthogroups shared by three species in the worked example" width="820">
+  <img src="docs/screenshots/home.png" alt="OrthoGather home screen" width="820">
 </p>
 
 ## What it does
@@ -142,6 +142,11 @@ orthogroups and one counting proteins; each orthogroup is counted in only one co
 species. A pasted list of UniProt identifiers, such as the differentially abundant proteins of an
 experiment, restricts the plots to the orthogroups that contain them, and identifiers that are not
 found are reported.
+
+<p align="center">
+  <img src="example_analysis/2_comparative_analysis/figure3_upset-orthogroups/orthogather_figure3-upset-orthogroups_3species_2026-09-13.png" alt="UpSet plot of the orthogroups shared by three species in the worked example" width="760">
+  <br><sub>Orthogroups shared by <i>M. smegmatis</i>, <i>M. abscessus</i> and <i>E. coli</i> in the worked example.</sub>
+</p>
 
 ### Gene Ontology enrichment
 
