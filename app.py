@@ -668,7 +668,7 @@ def cargar_carpeta():
 #
 # Backend stops generating PNGs for Figures 3/4/5. Instead it returns the raw
 # combination / count data as JSON; the frontend renders Figures 4 & 5 with
-# UpSetJS (@upsetjs/bundle, MIT) and Figure 3 with Plotly. This makes the
+# UpSetJS (@upsetjs/bundle, AGPL-3.0 or commercial) and Figure 3 with Plotly. This makes the
 # figures interactive, exportable as JSON/CSV/Excel by the user, and a fraction
 # of the size on the wire (KB vs MB).
 # ════════════════════════════════════════════════════════════════════════════
@@ -3703,8 +3703,9 @@ def gene_ontology_analysis():
                                                   if universe_scope == 'pooled' else
                                                   "per-ontology: each aspect against the background "
                                                   "annotated in that aspect, as in topGO's feasible genes")),
-                ("Study / universe per aspect",  "; ".join(f"{k[:2].upper()} {s}/{u}"
-                                                           for k, (s, u) in universe_by_ns.items())),
+                ("Study / universe per aspect",  "; ".join(
+                    f"{ {'biological_process': 'BP', 'cellular_component': 'CC', 'molecular_function': 'MF'}.get(k, k[:2].upper()) } {s}/{u}"
+                    for k, (s, u) in universe_by_ns.items())),
                 ("Annotation propagation edges", "is_a, part_of (True Path Rule)"),
                 ("Annotation propagation",       "enabled (propagate_counts=True)"),
                 ("FDR threshold",                p_value_threshold),

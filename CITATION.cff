@@ -8,8 +8,8 @@ abstract: >
   infer orthogroups, explores orthogroup composition across species, and
   tests Gene Ontology over-representation with GOATOOLS.
 type: software
-version: "2.1.0"
-date-released: "2026-09-14"
+version: "2.1.1"
+date-released: "2026-10-18"
 license: GPL-3.0-or-later
 url: "https://github.com/CarlosVivasR/OrthoGather"
 repository-code: "https://github.com/CarlosVivasR/OrthoGather"
@@ -21,7 +21,7 @@ keywords:
   - OrthoFinder
   - non-model organisms
 # Concept DOI: always resolves to the most recent version of the record.
-# The DOI of this specific release is 10.5281/zenodo.22738813
+# Version 2.1.0, the version described in the preprint, is 10.5281/zenodo.22738813
 doi: "10.5281/zenodo.18510910"
 identifiers:
   - type: doi
@@ -29,7 +29,7 @@ identifiers:
     description: "Concept DOI, all versions"
   - type: doi
     value: "10.5281/zenodo.22738813"
-    description: "This release (v2.1.0)"
+    description: "Version 2.1.0, described in the preprint"
 
 authors:
   - family-names: "Vivas-Rodríguez"

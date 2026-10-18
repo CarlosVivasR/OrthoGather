@@ -100,8 +100,8 @@
             </div>
             <div class="tutorial-path">
               <h3><i class="fa-solid fa-database"></i> Preselected Dataset</h3>
-              <p>Try a curated example with 47 bacterial species. Best to learn the
-                interface without waiting for OrthoFinder to finish.</p>
+              <p>Try a ready-made example: orthogroups for 47 proteomes from 35 bacterial
+                species. Best to learn the interface without waiting for OrthoFinder to finish.</p>
             </div>
             <div class="tutorial-path">
               <h3><i class="fa-solid fa-file-zipper"></i> External Upload</h3>
@@ -358,10 +358,14 @@
           </p>
           <p>
             Tick <strong>Expand to full orthogroups</strong> to broaden the test: any orthogroup
-            that contains one of your hits contributes <em>all</em> its members to the foreground.
-            This is the heart of orthogroup-based propagation. You're asking
+            that contains one of your hits contributes <em>all</em> its members, from every species
+            with a GOA file, to the foreground. You are then asking
             <em>"what functions are enriched across these protein families?"</em> rather than
-            <em>"what functions are enriched in this exact set of human proteins?"</em>.
+            <em>"what functions are enriched in this exact set of proteins?"</em>. No annotation is
+            transferred to your proteins: the test counts the annotations of all the members.
+            Some of those annotations may apply only to the other species, so count per
+            orthogroup and check that the enriched terms make sense for your organism. Expanded
+            proteins are tested only if they are also in the background.
           </p>
 
           <figure class="tutorial-figure">
@@ -377,12 +381,15 @@
             Three common choices:
           </p>
           <ul>
-            <li><strong>"Use all GOA files"</strong>: the simplest default, every protein in
-              every species' GOA file. Good when your foreground could have come from anywhere.</li>
-            <li><strong>Custom IDs without orthogroup expansion</strong>: paste a restricted
-              list (e.g. only kinases). Use when your experiment was technically restricted.</li>
-            <li><strong>Custom IDs with orthogroup expansion</strong>: same idea, but propagated
-              across orthogroups. Symmetrical to the foreground.</li>
+            <li><strong>Custom IDs without orthogroup expansion</strong>: paste the proteins
+              detected in your experiment. This is the right background for a proteomics
+              experiment, as in the worked example of the paper, because only detected proteins
+              could have appeared in your hit list.</li>
+            <li><strong>"Use all GOA files"</strong>: every protein in the GOA files of the
+              selected species. Use it when there is no experimental background, for example for
+              a list of proteins taken from the literature.</li>
+            <li><strong>Custom IDs with orthogroup expansion</strong>: the same list expanded to
+              full orthogroups, to match an expanded foreground.</li>
           </ul>
 
           <h3>5. Analysis settings &amp; run</h3>
@@ -402,36 +409,39 @@
           <ul>
             <li><strong>All</strong>: every annotation, including IEA (Inferred from Electronic
               Annotation). Most permissive. The vast majority of annotations in any GOA file are
-              IEA. They propagate by sequence similarity from a small number of curated
-              annotations.</li>
-            <li><strong>Curated</strong>: keeps human-curated entries plus IBA
-              (Inferred from Biological aspect of Ancestor, i.e. <em>PAINT-curated</em>
-              phylogenetic propagation done by GO Consortium biocurators). A defensible middle
-              ground that includes high-quality computational inference.</li>
+              IEA, inferred automatically, for example from protein domains.</li>
+            <li><strong>Non-IEA</strong>: keeps the experimental and high-throughput codes, the
+              author and curator statements TAS and IC, and IBA (Inferred from Biological aspect
+              of Ancestor, i.e. PAINT phylogenetic annotation by GO Consortium biocurators).
+              Besides IEA, it also leaves out ISS, ISO, ISA, ISM, IGC, RCA, NAS, IBD, IKR, IRD
+              and ND. A defensible middle ground.</li>
             <li><strong>Experimental only</strong>: strictest. Just experimental codes (EXP, IDA,
-              IPI, IMP, IGI, IEP) and high-throughput experimental codes (HEP, HDA, HMP, HGI).
+              IPI, IMP, IGI, IEP) and high-throughput experimental codes (HTP, HEP, HDA, HMP, HGI).
               Expect fewer hits but very high confidence.</li>
           </ul>
           <p>
             <strong>When to use which?</strong> If you study a single well-annotated model organism
             (human, mouse, yeast), Experimental only often gives a cleaner story.
-            If you study a non-model species, Curated lets you leverage PAINT-derived inferences
-            without drowning in IEA noise.
+            If you study a non-model species, Non-IEA keeps PAINT-derived inferences while
+            leaving out electronic annotations.
           </p>
 
           <h4>Orthogroups</h4>
           <ul>
             <li><strong>All orthogroups</strong>: every OG that contains at least one foreground
-              hit is propagated. Maximises recall.</li>
-            <li><strong>Single-copy only</strong>: restrict to OGs with exactly one protein per
+              hit is used for expansion. Maximises recall.</li>
+            <li><strong>Single-copy only</strong>: expand only OGs with exactly one protein per
               species (the safest 1:1:1 orthology relationships). More conservative but immune
               to paralog confusion.</li>
           </ul>
+          <p>
+            This setting matters only when the sets are expanded to full orthogroups.
+          </p>
 
           <h4>Counting</h4>
           <ul>
-            <li><strong>Per protein</strong> (default): every protein in the propagated foreground
-              counts as one observation. Compatible with most published enrichment workflows.</li>
+            <li><strong>Per protein</strong> (default): every protein in the foreground (after
+              expansion, if used) counts as one observation. Compatible with most published enrichment workflows.</li>
             <li><strong>Per orthogroup</strong>: collapse each OG to a single observation
               (one anchor protein per OG). Mitigates pseudoreplication: an OG with 10 species
               members would otherwise contribute 10 near-identical observations.</li>
@@ -445,12 +455,11 @@
             <strong>interactive table</strong>.
           </p>
           <p class="tutorial-note">
-            <strong>Enriched vs depleted:</strong> the test is two-sided, so a term can be
-            <em>enriched</em> (▲ over-represented in your foreground) or <em>depleted</em>
-            (▼ purified, under-represented). The chart bars show magnitude only, so depleted
-            terms are drawn in a distinct warm colour and flagged in the <strong>Direction</strong>
-            column of the table — a tall bar is never silently read as "enriched". The results
-            table is headed <em>"Enriched &amp; depleted terms"</em> for this reason.
+            <strong>One-sided test:</strong> OrthoGather tests for over-representation only
+            (Fisher's exact test, one-sided), so every term it reports is enriched in your
+            foreground. Terms that miss the significance threshold but pass the display threshold
+            (<strong>Show down to FDR</strong>, in the re-run bar) are drawn as hollow bars and
+            flagged <em>n.s.</em> in the table: they are shown for context, not as findings.
           </p>
           <p class="tutorial-note">
             <strong>How the FDR is computed:</strong> Benjamini-Hochberg correction is applied
@@ -468,7 +477,7 @@
           <ul>
             <li><strong>You pasted</strong>: the raw count of UniProt IDs you submitted.</li>
             <li><strong>After orthogroup expansion</strong> (only shown when you ticked
-              "Expand to full orthogroups"): the propagated foreground size, i.e. how many
+              "Expand to full orthogroups"): the expanded foreground size, i.e. how many
               proteins the test actually runs on.</li>
             <li><strong>With GO annotations</strong>: the subset that has at least one GO
               term in the background, plus the percentage. Below 30% triggers a warning
@@ -501,8 +510,9 @@
           <h4>Re-run bar</h4>
           <p>
             Sits directly under the chart so you can tighten the analysis without scrolling.
-            Tweak <strong>Min depth</strong>, <strong>P-value (FDR)</strong>, or
-            <strong>Max terms per NS</strong> and click <strong>Re-run with new thresholds</strong>.
+            Tweak <strong>Min depth</strong>, <strong>P-value (FDR)</strong>,
+            <strong>Show down to FDR</strong> or <strong>Max terms per NS</strong> and click
+            <strong>Re-run with new thresholds</strong>.
             Each input has a <code>?</code> popover explaining when to use it.
           </p>
 
@@ -512,8 +522,8 @@
               see what the column means (e.g. <em>"study_count / study_n: how many of your
               foreground proteins are annotated with this term, out of how many were tested"</em>).</li>
             <li><strong>Sort</strong>: click any column header to sort ascending / descending.</li>
-            <li><strong>Direction column</strong>: each row is tagged ▲ <em>enriched</em> or
-              ▼ <em>depleted</em>, matching the warm-coloured bars in the chart above.</li>
+            <li><strong>n.s. flag</strong>: rows shown only because of a looser display
+              threshold are marked <em>n.s.</em>, matching the hollow bars in the chart above.</li>
             <li><strong>Filter</strong>: search box (free text on GO ID + name), namespace
               chips (All / BP / CC / MF), FDR and Depth numeric inputs all update the
               table live.</li>
@@ -546,12 +556,13 @@
             you can:
           </p>
           <ul>
-            <li><strong>Reproduce</strong>: re-open the run with its original species, OrthoFinder
-              parameters and selection state.</li>
-            <li><strong>Cite</strong>: export a BibTeX or RIS entry with the exact OrthoGather
-              version and date.</li>
-            <li><strong>Compare</strong>: load two runs side-by-side to see differences in
-              orthogroup composition, foreground hits, etc.</li>
+            <li><strong>Open</strong>: restore a saved run as the active analysis.</li>
+            <li><strong>Reproduce</strong>: pre-fill the species picker with the same proteomes,
+              ready to run again.</li>
+            <li><strong>Cite</strong>: export a BibTeX or RIS entry for the paper and for the run,
+              with its species, number of orthogroups and date.</li>
+            <li><strong>Compare</strong>: show two runs side by side, with the differences in
+              their orthogroup statistics.</li>
             <li><strong>Rename / delete</strong>: keep your history tidy.</li>
           </ul>
 
@@ -606,18 +617,20 @@
           </details>
 
           <details class="tutorial-faq">
-            <summary>What is orthogroup-based propagation?</summary>
+            <summary>What does "Expand to full orthogroups" do?</summary>
             <p>
-              When you tick "Expand to full orthogroups", OrthoGather pulls in every other
-              member of each foreground orthogroup (across all species in your analysis)
-              and unions their GO annotations. This is how a protein in a poorly annotated
-              species can "inherit" GO terms from its well-annotated orthologs.
+              It adds every other member of each foreground orthogroup, from the species with
+              GOA files, to the set being tested, so the test counts the GO annotations of
+              all of them. No annotation is transferred to or assigned to any protein: a protein
+              without GO terms still has none. What changes is which annotations the test counts.
             </p>
             <p>
-              <strong>Note:</strong> this is propagation by <em>union</em>, not by majority vote.
-              If 9 out of 10 orthologs say "DNA repair" and 1 says "kinase activity", the OG
-              gets both annotations. If you want stricter propagation, pair this with
-              <em>Experimental only</em> evidence + <em>Single-copy</em> orthogroups.
+              <strong>Note:</strong> the annotations of an orthogroup are combined, not voted on.
+              If 9 out of 10 members say "DNA repair" and 1 says "kinase activity", both are
+              counted, and annotations that apply only to another lineage are counted too. Use
+              per-orthogroup counting with expansion, check that the enriched terms make sense
+              for your organism, and for a stricter test combine it with
+              <em>Experimental only</em> evidence and <em>Single-copy</em> orthogroups.
             </p>
           </details>
 
@@ -630,8 +643,8 @@
               <strong>IBA</strong> evidence code that you see in GOA files.
             </p>
             <p>
-              OrthoGather doesn't replace PAINT; it <em>uses</em> PAINT-curated annotations
-              when you select the "Curated" evidence preset. PAINT is upstream curation;
+              OrthoGather doesn't replace PAINT; it <em>uses</em> PAINT-curated annotations,
+              which the Non-IEA evidence preset keeps. PAINT is upstream curation;
               OrthoGather is downstream analysis.
             </p>
           </details>
@@ -654,11 +667,11 @@
             <p>
               The colour of each chip in the results table follows these groups. The
               <strong>filter presets</strong> are narrower than the groups: <em>Experimental only</em>
-              keeps EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI; <em>Curated</em> adds TAS,
-              IC and IBA on top of those. <strong>NAS is not kept by any preset except All</strong> —
+              keeps EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI; <em>Non-IEA</em> adds TAS,
+              IC and IBA on top of those. <strong>NAS is not kept by any preset except All</strong>:
               a non-traceable author statement cannot be checked against a source, and in a typical
               bacterial GOA set it is more frequent than TAS, so including it would quietly loosen
-              the "curated" filter.
+              the Non-IEA filter.
             </p>
             <p>
               The full reference is at <a href="https://geneontology.org/docs/guide-go-evidence-codes/" target="_blank" rel="noopener">geneontology.org</a>.
@@ -682,18 +695,20 @@
           <h2>Citing OrthoGather</h2>
           <p>If OrthoGather contributed to your published work, please cite it as:</p>
           <pre><code>{% raw %}@article{VivasRodriguez2026OrthoGather,
-  author  = {Carlos Vivas-Rodriguez, David Matallanas, Colm J. Ryan,
-             Siobhán McClean, Olivier Dennler, Joanna Drabińska},
+  author  = {Vivas-Rodríguez, Carlos and Gomez Matallanas, David and Ryan, Colm J.
+             and McClean, Siobhán and Dennler, Olivier and Drabinska, Joanna},
   title   = {{OrthoGather}: a local platform for orthology-based proteome
-             and proteomics comparisons and Gene Ontology enrichment},
+             comparisons and Gene Ontology enrichment},
   year    = {2026},
   journal = {bioRxiv},
   url     = {https://github.com/CarlosVivasR/OrthoGather},
   doi     = {10.64898/2026.01.30.702851}
 }{% endraw %}</code></pre>
           <p>
-            Per-run citations (with exact version + parameters) can be exported from the
-            <a href="/history">History</a> page.
+            Please also cite the OrthoGather version you used through its Zenodo record
+            (<a href="https://doi.org/10.5281/zenodo.18510910" target="_blank" rel="noopener">10.5281/zenodo.18510910</a>).
+            Per-run citations, with the run's species, number of orthogroups and date, can be
+            exported from the <a href="/history">History</a> page.
           </p>
         </section>
 

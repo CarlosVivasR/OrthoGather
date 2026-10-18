@@ -4,7 +4,27 @@ Notable changes to OrthoGather. Versions are tagged `vMAJOR.MINOR.PATCH`, and ev
 1.1.1 is archived on Zenodo (all versions:
 [10.5281/zenodo.18510910](https://doi.org/10.5281/zenodo.18510910)).
 
-## Unreleased
+## 2.1.1 (2026-10-18)
+
+Text and documentation corrections; the analyses are unchanged and give the same results as
+2.1.0.
+
+### Changed
+- In-app tutorial brought in line with the application and the paper: the test is one-sided;
+  orthogroup expansion counts the annotations of all members and transfers none; the evidence
+  preset is called Non-IEA, with the codes it keeps; the Preselected Dataset is 47 proteomes from
+  35 species; the History actions are described as they work; the citation shows the current
+  title.
+- Gene Ontology page: the background help recommends the proteins detected in the experiment,
+  and the Non-IEA description lists what it leaves out.
+- Home page: the Preselected Dataset card says 47 proteomes from 35 species.
+
+### Fixed
+- The home page links "Read the docs", "Cite OrthoGather" and "Get help" now open the README,
+  the citation section of the tutorial and the issue tracker.
+- Citation export (BibTeX and RIS): current title of the paper, full author names, and an author
+  list in BibTeX format.
+- Provenance sheet of the enrichment results: the aspects are labelled BP, CC and MF.
 
 ### Documentation
 - README rewritten: installation routes and requirements, the worked example with its UniProt

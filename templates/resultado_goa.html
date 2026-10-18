@@ -300,13 +300,15 @@
             <h3 class="goa-explainer-title"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> What is the Background?</h3>
             <p>
               The <strong>background</strong> is the reference universe against which enrichment is tested.
-              A meaningful background represents <em>"every protein that could have been picked"</em>. For most
-              users, the easiest choice is <strong>"Use all GOA files"</strong>: the full annotated proteome of
-              every species in your analysis.
+              A meaningful background represents <em>"every protein that could have been picked"</em>. For a
+              proteomics experiment, that is the list of proteins detected in the experiment: paste it here, as in
+              the worked example of the paper.
             </p>
             <p class="goa-explainer-tip">
-              <strong>When to paste a custom list:</strong> if your experiment was restricted to a specific subset
-              (e.g. only membrane proteins, only kinases), paste those IDs to avoid inflating enrichment.
+              <strong>When to use "Use all GOA files":</strong> when there is no experimental background, for
+              example for a list of proteins taken from the literature. It tests against the full annotated
+              proteome of every species in your analysis, which can inflate enrichment for proteins that were
+              never detectable in your experiment.
             </p>
           </div>
 
@@ -347,7 +349,7 @@
               </label>
               <label class="goa-radio">
                 <input type="radio" name="evidence_preset" value="curated">
-                <span><strong>Non-IEA</strong>: everything except electronic annotation — experimental, traceable author/curator statements and PAINT (IBA)</span>
+                <span><strong>Non-IEA</strong>: experimental and high-throughput codes, author and curator statements (TAS, IC) and PAINT (IBA); leaves out IEA and the other computational codes, NAS and ND</span>
               </label>
               <label class="goa-radio">
                 <input type="radio" name="evidence_preset" value="experimental">
@@ -356,8 +358,9 @@
               <div class="figure-help-popover" data-help-for="evidence" hidden>
                 GO annotations carry an <em>evidence code</em>. <strong>All</strong> includes
                 IEA (Inferred from Electronic Annotation): the bulk of annotations in any GOA file,
-                so it maximises recall at the cost of confidence. <strong>Non-IEA</strong> drops IEA and keeps
-                human-curated evidence plus PAINT-derived IBA. Note that IBA is a phylogenetic inference, not
+                so it maximises recall at the cost of confidence. <strong>Non-IEA</strong> drops IEA and the other
+                computational codes (ISS, ISO, ISA, ISM, IGC, RCA), as well as NAS and ND, and keeps experimental
+                evidence, TAS, IC and PAINT-derived IBA. Note that IBA is a phylogenetic inference, not
                 human curation, which is why this preset is named for what it excludes rather than "curated":
                 a good default if you can spare some recall.
                 <strong>Experimental only</strong> is the safest choice when you have well-annotated
