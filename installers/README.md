@@ -1,7 +1,7 @@
 # Installers
 
 This folder contains the scripts that install OrthoGather without the command line on macOS and
-Windows, and the guided scripts for the Conda route. Instructions for users are in the
+Windows. Instructions for users are in the
 installation guide ([PDF](../docs/Installation_guide.pdf), [web page](https://carlosvivasr.github.io/OrthoGather/INSTALL.html)); this
 page describes the files for maintainers.
 
@@ -18,9 +18,6 @@ Subsystem for Linux (WSL), which the Windows installer sets up.
 | `windows/Update OrthoGather.bat` | Windows | Updates an existing WSL installation, and its Conda environment, to the latest release. |
 | `windows/tests/test_installer_logic.bat` | Windows | Checks the `cmd.exe` logic of the installer; run by `.github/workflows/test-windows-installer.yml`. |
 | `common/setup_linux_env.sh` | Linux, inside WSL | Linux-side setup (Miniforge, environment, application), used by the Windows installer. |
-| `install_orthogather_mac.sh` | macOS | Guided Conda installation from a cloned repository; needs Conda. |
-| `install_orthogather_wsl.sh` | WSL | Guided installation from a cloned repository; needs Micromamba and stops on native Linux. |
-| `start_orthogather.sh`, `Start_Orthogather.command` | macOS, Linux | Launchers for a Conda installation; they expect the `orthogather` environment to exist. |
 | `assets/` | All | Application icons (`OrthoGather.icns`, `OrthoGather.ico`) built from `OrthoGather-icon.svg` with `build_icons.sh`. |
 | `packaging/build_installer_zips.sh` | All | Builds `Install-OrthoGather-Mac.zip` and `Install-OrthoGather-Windows.zip`, the release assets. |
 | `packaging/build_macos_pkg.sh`, `packaging/orthogather.iss` | macOS, Windows | Drafts for signed native packages (`.pkg`, `.exe`). They need an Apple Developer ID and a code-signing certificate. |

@@ -299,20 +299,6 @@ python app.py</pre></div>
 git checkout v2.2.0
 conda env update -f environment.yml --prune</pre></div>
 
-  <!-- GUIDED SCRIPTS -->
-  <div class="section-title">Guided install scripts</div>
-  <p class="lead">As an alternative to the commands above, two scripts check the prerequisites, create the <code>orthogather</code> environment and check that OrthoFinder is found: the macOS script builds it from <code>environment.yml</code>, and the WSL script installs the packages directly. Run them from the <code>OrthoGather</code> folder. The macOS script needs Conda. The WSL script needs Micromamba, which is not part of Miniforge, and stops on native Linux; on Linux, use the Conda commands above.</p>
-  <div class="tabs">
-    <button class="tab active" data-tab="mac">macOS</button>
-    <button class="tab" data-tab="wsl">WSL</button>
-  </div>
-  <div class="tabpane active" data-pane="mac" data-label="macOS">
-    <div class="code"><button class="copy">Copy</button><pre>./installers/install_orthogather_mac.sh</pre></div>
-  </div>
-  <div class="tabpane" data-pane="wsl" data-label="WSL">
-    <div class="code"><button class="copy">Copy</button><pre>bash installers/install_orthogather_wsl.sh</pre></div>
-  </div>
-
   <!-- OTHER OPTIONS -->
   <div class="section-title">Other ways to install</div>
   <div class="prereqs">
@@ -392,7 +378,7 @@ chmod +x ~/Downloads/"Install OrthoGather.command"</pre></div>
   </details>
 
   <details>
-    <summary><code>ModuleNotFoundError</code> on start, or "OrthoFinder not detected" from a guided script</summary>
+    <summary><code>ModuleNotFoundError</code> or "OrthoFinder not found" on start</summary>
     <div class="det-body"><p>The environment is not active, or it did not finish building. Run <code>conda activate orthogather</code> (the prompt should then show <code>(orthogather)</code>); if the error remains, run <code>conda env update -f environment.yml --prune</code> from the OrthoGather folder and start OrthoGather again.</p></div>
   </details>
 

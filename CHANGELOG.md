@@ -4,6 +4,19 @@ Notable changes to OrthoGather. Versions are tagged `vMAJOR.MINOR.PATCH`, and ev
 1.1.1 is archived on Zenodo (all versions:
 [10.5281/zenodo.18510910](https://doi.org/10.5281/zenodo.18510910)).
 
+## Unreleased
+
+### Removed
+- Code and files nothing used: the legacy `/download` and `/download_upset_data` routes (the
+  application uses `/stream_download` and `/download_figure_data`), three unused helpers in
+  `app.py`, the empty `orthogather/routes` package, 29 error-catalogue entries that were never
+  raised (some with outdated hints; a test now checks that every entry is used), an unused image
+  and two outdated end-to-end scripts in `tools/`.
+- The guided Conda scripts (`installers/install_orthogather_mac.sh`,
+  `installers/install_orthogather_wsl.sh`) and the Conda launchers (`installers/start_orthogather.sh`,
+  `installers/Start_Orthogather.command`): they repeated what the installers and the Conda
+  commands of the README and the installation guide do.
+
 ## 2.2.0 (2026-10-22)
 
 Fixes from the October 2026 audit and review. The default analysis (per-protein counting against a

@@ -169,14 +169,6 @@ def load_folder_data(folder_path):
 
     return gene_count_df, orthogroups_df, single_copy_df, unassigned_df
 
-def delete_file(file_path):
-    if os.path.exists(file_path):
-        os.remove(file_path)
-
-def create_plots_directory():
-    if not os.path.exists(os.path.join('static', 'plots')):
-        os.makedirs(os.path.join('static', 'plots'))
-
 # Figure-1/2 data builders moved to orthogather.core.figures (English names).
 # Spanish aliases kept here so the existing route handlers don't have to be
 # touched in this commit — they'll be renamed in Step 5.
@@ -187,13 +179,6 @@ generar_figura_2 = generate_figure_2
 # Legacy matplotlib UpSet/Excel helpers removed 2026-05-24 — replaced by
 # /upset_data (JSON) + UpSetJS frontend + /download_figure_data.
 # See git log for the deleted functions.
-
-
-def read_orthogroups_data(zip_path):
-    """Read and return the contents of the Orthogroups.tsv file from a ZIP archive."""
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        with zip_ref.open('Orthogroups.tsv') as file:
-            return pd.read_csv(file, sep='\t')
 
 
 # Species catalogue + matching moved to orthogather.core.catalogue
@@ -650,7 +635,7 @@ def cargar_carpeta():
 
         # --- C) Legacy POST handler for matplotlib UpSet figures has been
         # retired. Figures 3/4/5 are now generated client-side via UpSetJS
-        # + Plotly using /upset_data (JSON) and /download_upset_data.
+        # + Plotly using /upset_data (JSON) and /download_figure_data.
         # Any old form submit will fall through to the GET re-render below.
 
     # -------------------------
@@ -929,7 +914,7 @@ def upset_data():
         logging.error(f"[/upset_data] Computation failed: {e}")
         return respond_error("ERR_UPSET_COMPUTE_FAILED", where="upset_data", detail=str(e))
 
-    # Remember the species selection so /download_upset_data can re-export
+    # Remember the species selection so /download_figure_data can re-export
     # without the client having to send it again.
     session['upset_species_selected'] = species_selected
     return jsonify({"ok": True, **payload})
@@ -1340,15 +1325,8 @@ def download_figure_data():
     )
 
 
-# Backwards-compat alias for the old endpoint name. Same params, but
-# /download_upset_data only ever served figs 3-4 (formerly 4-5).
-@app.route('/download_upset_data')
-def download_upset_data_compat():
-    return download_figure_data()
-
-
-# Legacy Flask endpoints removed 2026-05-24 (no frontend caller):
-#   /create_excel, /download_excel, /download/<filename>,
+# Legacy Flask endpoints removed (no frontend caller): /download and
+# /download_upset_data (2026-10-22); /create_excel, /download_excel, /download/<filename>,
 #   /generate_new_figures, /create_excel_proteome_filtrado
 # Replaced by /upset_data + /download_figure_data (JSON-first architecture).
 
@@ -1359,83 +1337,6 @@ def species_selection_page():
     # screenshotted in the tutorial. Template filename also Spanish for the
     # same reason. Only the Python function name got anglicised.
     return render_template("1-seleccion_especies.html")
-
-@app.route("/download", methods=["POST"])
-def download_proteomes():
-    proteome_ids = request.json.get("proteome_ids", [])
-
-    if not proteome_ids:
-        logging.error("❌ No proteomes received from frontend.")
-        return jsonify({"error": "No proteomes provided."}), 400
-
-    logging.info("🔁 Cleaning Proteomes folder...")
-    for f in os.listdir(PROTEOMES_FOLDER):
-        path = os.path.join(PROTEOMES_FOLDER, f)
-        try:
-            if os.path.isfile(path):
-                os.remove(path)
-            elif os.path.isdir(path):
-                shutil.rmtree(path)
-        except Exception as e:
-            logging.error(f"❌ Error deleting {path}: {e}")
-
-    descargados = []
-    errores = []
-    vacios = []
-
-    for pid in proteome_ids:
-        logging.info(f"\n🔍 Processing {pid}...")
-
-        # METADATA
-        url_metadata = f"https://rest.uniprot.org/proteomes/{pid}"
-        try:
-            r_meta = requests.get(url_metadata)
-            if r_meta.status_code != 200:
-                raise Exception(f"Metadata HTTP {r_meta.status_code}")
-            metadata = r_meta.json()
-        except Exception as e:
-            logging.error(f"❌ Failed to download metadata for {pid}: {e}")
-            errores.append(f"{pid} (metadata failed: {e})")
-            continue
-
-        # File name
-        organism_name = metadata.get("taxonomy", {}).get("scientificName", "Unknown_organism")
-        safe_name = re.sub(r"[^\w\-_\.() ]", "_", organism_name).replace(" ", "_")
-        filename = f"{safe_name}.fasta"
-        filepath = os.path.join(PROTEOMES_FOLDER, filename)
-
-        # FASTA
-        fasta_url = f"https://rest.uniprot.org/uniprotkb/stream?format=fasta&compressed=false&query=(proteome:{pid})"
-        try:
-            r_fasta = requests.get(fasta_url)
-            if r_fasta.status_code != 200:
-                raise Exception(f"FASTA HTTP {r_fasta.status_code}")
-            with open(filepath, "w") as f:
-                f.write(r_fasta.text)
-            logging.info(f"📁 Saved to: {filepath}")
-        except Exception as e:
-            logging.error(f"❌ Failed to save FASTA for {pid}: {e}")
-            errores.append(f"{pid} (fasta failed: {e})")
-            continue
-
-        # Size verification
-        if os.path.getsize(filepath) == 0:
-            os.remove(filepath)
-            logging.warning(f"⚠️ Empty file removed: {filename}")
-            vacios.append(filename)
-        else:
-            descargados.append(filename)
-
-    logging.info("\n✅ DOWNLOAD COMPLETED")
-    logging.info(f"✔️ Downloaded: {descargados}")
-    logging.warning(f"⚠️ Empty: {vacios}")
-    logging.error(f"❌ Errors: {errores}")
-
-    return jsonify({
-        "descargados": descargados,
-        "vacios": vacios,
-        "errores": errores
-    })
 
 # ----------------------------------------------------------------------------
 # Catalogue manifest & GitHub-Releases-based update mechanism
@@ -1989,10 +1890,9 @@ def catalog_update():
 
 
 # ----------------------------------------------------------------------------
-# Streaming download (SSE) — robust replacement for the legacy /download POST.
+# Streaming download (SSE) of the selected proteomes.
 #
-# Improvements vs legacy:
-#   * timeout=30s on every requests.get (legacy: no timeout, could hang ~75s)
+#   * timeout=30s on every requests.get
 #   * up to MAX_DOWNLOAD_ATTEMPTS per proteome with exponential backoff
 #   * streams progress events so the frontend can show real-time status
 #   * supports mode=retry to re-attempt only failed IDs without wiping the

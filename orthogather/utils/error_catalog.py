@@ -108,48 +108,6 @@ ERRORS: Dict[str, ErrorSpec] = {
         category="input",
     ),
 
-    "ERR_NO_FILE_SELECTED": ErrorSpec(
-        message="No file selected for upload",
-        hint="Click the upload button and choose an OrthoFinder .zip or an OrthoXML .xml/.orthoxml file.",
-        category="input",
-    ),
-
-    "ERR_UNSUPPORTED_UPLOAD_FORMAT": ErrorSpec(
-        message="Unsupported upload format",
-        hint="Accepted formats: OrthoFinder .zip, or OrthoXML .xml / .orthoxml (Quest for Orthologs standard).",
-        category="input",
-    ),
-
-    "ERR_MISSING_TAXON_INPUT": ErrorSpec(
-        message="Missing taxon_id (or species_name)",
-        hint="In the Fix field, paste either a NCBI Taxon ID (digits only) or the full species name.",
-        category="input",
-    ),
-
-    "ERR_NO_MATCH_FOR_TAXON": ErrorSpec(
-        message="No match found for that Taxon ID or species name",
-        hint="Double-check the spelling against UniProt. For Taxon IDs, use the numeric NCBI ID (e.g. 9606 for Homo sapiens).",
-        category="input",
-    ),
-
-    "ERR_MISSING_SPECIES_URL_MAPPING": ErrorSpec(
-        message="Missing species_to_url mapping",
-        hint="The request body must include species_to_url. This usually means the species table on the GO page wasn't filled in.",
-        category="input",
-    ),
-
-    "ERR_NO_GOA_URLS": ErrorSpec(
-        message="No GOA URLs received for download",
-        hint="The species table on the GO page has no resolved GOA files. Use the Fix field to provide a Taxon ID or full species name for each unmatched row.",
-        category="input",
-    ),
-
-    "ERR_BACKGROUND_CHOICE_INVALID": ErrorSpec(
-        message="Unknown background choice",
-        hint="Use option 4 (pasted UniProt IDs) or option 5 (use every downloaded GOA file).",
-        category="input",
-    ),
-
     "ERR_SPECIES_NOT_IN_ANALYSIS": ErrorSpec(
         message="One or more species are not in the loaded analysis",
         hint="Use the species picker to choose names from the chip list — typing a species manually can mismatch.",
@@ -215,46 +173,9 @@ ERRORS: Dict[str, ErrorSpec] = {
         category="state",
     ),
 
-    "ERR_NO_UPLOAD_DATA": ErrorSpec(
-        message="No upload data prepared",
-        hint="Click the External Upload card on the home page and choose a file before continuing.",
-        category="state",
-    ),
-
-    "ERR_WORKDIR_NOT_PREPARED": ErrorSpec(
-        message="Working directory not prepared",
-        hint="Run 'Download GOA files' first from the GO page — this sets up the GOA folder.",
-        category="state",
-    ),
-
     "ERR_FOREGROUND_MISSING": ErrorSpec(
         message="Foreground proteins are missing from the session",
         hint="Load a foreground (paste UniProt IDs + click 'Load foreground') before running GO enrichment.",
-        category="state",
-    ),
-
-    "ERR_BACKGROUND_MISSING": ErrorSpec(
-        message="Background is missing from the session",
-        hint="Define a background — either paste IDs or tick 'Use all GOA files' — before running enrichment.",
-        category="state",
-    ),
-
-    "ERR_NO_FG_GO_OVERLAP": ErrorSpec(
-        message="None of your foreground IDs has GO annotations in the background",
-        hint="Either broaden the foreground or tick 'Expand to full orthogroups' so OrthoGather propagates annotations across orthologs.",
-        category="state",
-        http_code=400,
-    ),
-
-    "ERR_NO_UPSET_SELECTION": ErrorSpec(
-        message="No UpSet selection found",
-        hint="Generate the UpSet figure first (pick ≥ 2 species + click Generate), then try the download.",
-        category="state",
-    ),
-
-    "ERR_NO_UPSET_FILTERED_OGS": ErrorSpec(
-        message="No filtered orthogroups in the session",
-        hint="Run the UniProt filter step (Figures 5 & 6) first to produce the filtered set.",
         category="state",
     ),
 
@@ -262,60 +183,11 @@ ERRORS: Dict[str, ErrorSpec] = {
     # DATA — required file or sheet missing on disk
     # =========================================================================
 
-    "ERR_REQUIRED_FILES_MISSING": ErrorSpec(
-        message="Required OrthoFinder files are missing",
-        hint="The upload must contain Orthogroups.GeneCount.tsv and Orthogroups.tsv at the top level. Check the ZIP layout.",
-        category="data",
-        http_code=400,
-    ),
-
-    "ERR_PRESELECTED_ZIP_MISSING": ErrorSpec(
-        message="Preselected dataset not found on disk",
-        hint="static/Orthogroups.zip is not present. Reinstall the app, or re-clone the repo to recover the bundled example.",
-        category="data",
-        http_code=500,
-    ),
-
-    "ERR_GENERATED_ZIP_MISSING": ErrorSpec(
-        message="OrthoFinder output ZIP not found",
-        hint="Run OrthoFinder first (New Analysis → Download proteomes → Run OrthoFinder). The expected file is Proteomas/Orthogroups.zip.",
-        category="data",
-        http_code=404,
-    ),
-
-    "ERR_ORTHOGROUPS_TSV_MISSING": ErrorSpec(
-        message="Orthogroups.tsv not found",
-        hint="Re-run the analysis or re-upload the OrthoFinder output. The Orthogroups.tsv file is the entry point for OrthoGather.",
-        category="data",
-        http_code=404,
-    ),
-
-    "ERR_GOA_EXCEL_MISSING": ErrorSpec(
-        message="GOA Excel not generated yet",
-        hint="Click 'Download GOA files' on the GO page first — it produces the Gene_Ontology_Analysis.xlsx used by every downstream step.",
-        category="data",
-        http_code=404,
-    ),
-
     "ERR_GO_ANALYSIS_EXCEL_MISSING": ErrorSpec(
         message="GO analysis Excel file not found",
         hint="Click 'Download GOA files' first so OrthoGather can build Gene_Ontology_Analysis.xlsx.",
         category="data",
         http_code=404,
-    ),
-
-    "ERR_GOA_FOLDER_MISSING": ErrorSpec(
-        message="GOA download folder not found",
-        hint="The GOAfiles/ directory doesn't exist yet — click 'Download GOA files' on the GO page to create it.",
-        category="data",
-        http_code=400,
-    ),
-
-    "ERR_NO_GOA_FILES": ErrorSpec(
-        message="No GOA files have been downloaded",
-        hint="Click 'Download GOA files' on the GO page. The button pulls the .goa files for every matched species from EBI.",
-        category="data",
-        http_code=400,
     ),
 
     "ERR_EXCEL_NOT_GENERATED": ErrorSpec(
@@ -335,27 +207,6 @@ ERRORS: Dict[str, ErrorSpec] = {
     "ERR_MALFORMED_EXCEL": ErrorSpec(
         message="Malformed Gene Ontology Excel file",
         hint="Re-generate the Excel by clicking 'Download GOA files' again. The file likely got corrupted mid-write.",
-        category="data",
-        http_code=500,
-    ),
-
-    "ERR_ORTHOXML_PARSE": ErrorSpec(
-        message="Could not parse OrthoXML",
-        hint="Open the file in a validator — it must conform to the QfO OrthoXML schema. Common causes: missing <groups> section, malformed XML, wrong namespace.",
-        category="data",
-        http_code=400,
-    ),
-
-    "ERR_ZIP_EXTRACT": ErrorSpec(
-        message="Could not extract the uploaded ZIP",
-        hint="The file may be corrupt or password-protected. Re-download it from OrthoFinder and try again.",
-        category="data",
-        http_code=400,
-    ),
-
-    "ERR_GENERATED_ZIP_EXTRACT": ErrorSpec(
-        message="Could not extract the generated OrthoFinder ZIP",
-        hint="Re-run OrthoFinder; the output ZIP at Proteomas/Orthogroups.zip is corrupt.",
         category="data",
         http_code=500,
     ),
@@ -403,21 +254,6 @@ ERRORS: Dict[str, ErrorSpec] = {
         http_code=200,
     ),
 
-    "ERR_GOA_DOWNLOAD_FAILED": ErrorSpec(
-        message="Could not download one or more GOA files",
-        hint="Check your network connection. The EBI server may be temporarily slow. Already-downloaded files are kept and you can retry.",
-        category="network",
-        severity="warning",
-        http_code=502,
-    ),
-
-    "ERR_UNIPROT_DOWNLOAD_FAILED": ErrorSpec(
-        message="UniProt proteome download failed",
-        hint="Verify your network. If only some species fail, the issue is on UniProt's side — retry in 10 minutes.",
-        category="network",
-        http_code=502,
-    ),
-
     # =========================================================================
     # COMPUTATIONAL — internal pipeline failure
     # =========================================================================
@@ -443,20 +279,6 @@ ERRORS: Dict[str, ErrorSpec] = {
         http_code=500,
     ),
 
-    "ERR_GO_ENRICHMENT_FAILED": ErrorSpec(
-        message="GO enrichment run failed",
-        hint="Check the server log for the GOATOOLS error. Common causes: missing go-basic.obo, evidence preset filtered out every annotation, foreground too small.",
-        category="system",
-        http_code=500,
-    ),
-
-    "ERR_OBO_MISSING": ErrorSpec(
-        message="go-basic.obo ontology file not found",
-        hint="Re-download go-basic.obo from http://purl.obolibrary.org/obo/go/go-basic.obo and place it next to app.py.",
-        category="data",
-        http_code=500,
-    ),
-
     # =========================================================================
     # NOT-FOUND — explicit 404 for missing resources
     # =========================================================================
@@ -466,13 +288,6 @@ ERRORS: Dict[str, ErrorSpec] = {
         hint="The run may have been deleted from disk. Pick a different one from the History page.",
         category="not-found",
         http_code=404,
-    ),
-
-    "ERR_RUN_PRE_FEATURE": ErrorSpec(
-        message="Run saved before this feature existed",
-        hint="Re-run the analysis (Reproduce → Run OrthoFinder) so the new snapshot is compatible with this feature.",
-        category="not-found",
-        http_code=400,
     ),
 
     "ERR_RUN_READ_FAILED": ErrorSpec(
@@ -513,14 +328,6 @@ ERRORS: Dict[str, ErrorSpec] = {
         category="state",
         severity="info",
         http_code=400,
-    ),
-
-    "ERR_PLOTLY_NOT_LOADED": ErrorSpec(
-        message="The Plotly library failed to load",
-        hint="Check your internet connection — Plotly is loaded from a CDN. Refresh the page.",
-        category="external",
-        severity="warning",
-        http_code=503,
     ),
 
     "ERR_UPSETJS_NOT_LOADED": ErrorSpec(

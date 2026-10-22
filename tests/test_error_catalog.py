@@ -25,9 +25,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 class TestCatalogShape:
-    def test_at_least_50_errors(self):
-        """We catalogued ~58. Guard against accidental deletions."""
-        assert len(ERRORS) >= 50
+    def test_every_entry_is_used(self):
+        """Every catalogued error is raised somewhere, so no entry goes stale
+        with a hint that no longer matches the application."""
+        sources = [REPO_ROOT / "app.py"]
+        for pattern in ("orthogather/**/*.py", "templates/**/*.html", "static/js/**/*.js"):
+            sources += [p for p in REPO_ROOT.glob(pattern) if p.name != "error_catalog.py"]
+        text = "\n".join(p.read_text(errors="ignore") for p in sources)
+        unused = [c for c in ERRORS if not re.search(rf"\b{c}\b", text)]
+        assert not unused, f"catalogued but never raised: {unused}"
 
     def test_every_code_starts_with_err(self):
         for code in ERRORS:

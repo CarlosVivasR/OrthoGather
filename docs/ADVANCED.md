@@ -1,7 +1,7 @@
 # OrthoGather: advanced notes
 
 This page collects details that most users do not need: the enrichment test settings, OrthoFinder
-thread settings, the guided install scripts, disk use, the repository layout, the error codes and
+thread settings, disk use, the repository layout, the error codes and
 the test suite. For installation and use, see the [README](../README.md) and the
 [installation guide](Installation_guide.pdf).
 
@@ -86,21 +86,6 @@ To leave CPUs free for other work, set the thread counts when starting the appli
 ORTHOGATHER_OF_THREADS=6 ORTHOGATHER_OF_ANALYSIS_THREADS=1 python app.py
 ```
 
-## Guided install scripts
-
-As an alternative to the Conda commands in the README, two scripts check the prerequisites and
-create the `orthogather` environment:
-
-```bash
-./installers/install_orthogather_mac.sh      # macOS, needs Conda
-bash installers/install_orthogather_wsl.sh   # WSL, needs Micromamba
-```
-
-The macOS script builds the environment from `environment.yml`; the WSL script installs the
-packages explicitly. The WSL script checks `/proc/version` for a WSL kernel and stops on native
-Linux, so on Linux use the Conda commands in the README. Conda can be installed through
-[Miniforge](https://github.com/conda-forge/miniforge); Micromamba is a separate program, not part of
-Miniforge.
 
 ## Disk use
 
@@ -119,7 +104,7 @@ application checks GitHub for a newer catalogue and offers to update it.
 | `templates/`, `static/` | Web pages, styles, scripts and images. `static/Orthogroups.zip` holds the Preselected Dataset, `static/Proteomes_json/` the proteome catalogue and `static/vendor/` the bundled UpSetJS and its licence |
 | `go-basic.obo` | The Gene Ontology release used for enrichment, read by the application from the repository root |
 | `example_analysis/` | The worked example from the paper, as exported by the application |
-| `installers/` | The macOS and Windows installers and the guided install scripts (see [installers/README.md](../installers/README.md)) |
+| `installers/` | The macOS and Windows installers (see [installers/README.md](../installers/README.md)) |
 | `docs/` | The installation guide (PDF and HTML) and this page |
 | `tests/`, `tools/` | The test suite and maintenance scripts (catalogue building, end-to-end checks, tutorial screenshots) |
 | `environment.yml`, `requirements*.txt` | Conda environment and pip requirements |
@@ -128,15 +113,15 @@ application checks GitHub for a newer catalogue and offers to update it.
 ## Error codes
 
 Many errors shown by OrthoGather carry a stable code (`ERR_...`), a message and a hint; the rest
-are shown as plain messages. The codes are defined in `orthogather/utils/error_catalog.py` (about
-65 entries). Backend routes call `respond_error("ERR_CODE", where=..., detail=...)`, and the
+are shown as plain messages. The codes are defined in `orthogather/utils/error_catalog.py` (36
+entries). Backend routes call `respond_error("ERR_CODE", where=..., detail=...)`, and the
 frontend shows the response as a notification through `static/js/og-errors.js`. The categories are
 `input`, `state`, `data`, `network`, `external`, `not-found` and `system`; the severities are
 `error`, `warning` and `info`.
 
 To add an error, add an `ErrorSpec` with a code starting with `ERR_` to `error_catalog.py` and
 reference it from the route. `tests/test_error_catalog.py` checks that every code used in `app.py`
-exists in the catalogue. Errors that escape the routes are caught by global handlers for 404, 500
+exists in the catalogue, and that every catalogued code is used. Errors that escape the routes are caught by global handlers for 404, 500
 and unhandled exceptions, which return JSON for API requests and `templates/error.html` for pages.
 
 When reporting a problem, quote the `ERR_` code in the
