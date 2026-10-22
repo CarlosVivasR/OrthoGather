@@ -238,8 +238,9 @@ If you use OrthoGather, please cite the preprint:
 > local platform for orthology-based proteome comparisons and Gene Ontology enrichment. *bioRxiv*
 > (2026). https://doi.org/10.64898/2026.01.30.702851
 
-Please also cite the version you used through Zenodo (v2.1.0:
-[10.5281/zenodo.22738813](https://doi.org/10.5281/zenodo.22738813); all versions:
+Please also cite the version you used through Zenodo (v2.2.0:
+[10.5281/zenodo.23568679](https://doi.org/10.5281/zenodo.23568679); v2.1.0, described in the
+preprint: [10.5281/zenodo.22738813](https://doi.org/10.5281/zenodo.22738813); all versions:
 [10.5281/zenodo.18510910](https://doi.org/10.5281/zenodo.18510910)), and the tools and resources
 the analysis relies on: OrthoFinder, GOATOOLS, SciPy, the Gene Ontology, EBI GOA and UniProt.
 

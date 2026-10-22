@@ -21,7 +21,8 @@ keywords:
   - OrthoFinder
   - non-model organisms
 # Concept DOI: always resolves to the most recent version of the record.
-# Version 2.1.0, the version described in the preprint, is 10.5281/zenodo.22738813
+# Version 2.1.0, the version described in the preprint, is 10.5281/zenodo.22738813;
+# version 2.2.0 is 10.5281/zenodo.23568679.
 doi: "10.5281/zenodo.18510910"
 identifiers:
   - type: doi
@@ -30,6 +31,9 @@ identifiers:
   - type: doi
     value: "10.5281/zenodo.22738813"
     description: "Version 2.1.0, described in the preprint"
+  - type: doi
+    value: "10.5281/zenodo.23568679"
+    description: "Version 2.2.0"
 
 authors:
   - family-names: "Vivas-Rodríguez"
