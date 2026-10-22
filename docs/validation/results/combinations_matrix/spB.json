@@ -1,0 +1,26 @@
+{
+ "measured_species": "spB",
+ "combinations": 432,
+ "analysed": 360,
+ "refused_by_design": {
+  "None of the 30 orthogroups containing your identifiers is single-copy (one protein in every species).": 3
+ },
+ "answered_400": {
+  "Foreground IDs have no GO terms in background": 54
+ },
+ "modes_applied": {
+  "custom|fg_expand=False|per_protein -> per_protein": 32,
+  "custom|fg_expand=False|per_orthogroup -> per_orthogroup": 32,
+  "custom|fg_expand=True|per_protein -> per_orthogroup": 29,
+  "custom|fg_expand=True|per_orthogroup -> per_orthogroup": 29,
+  "custom_exp|fg_expand=False|per_protein -> per_orthogroup": 29,
+  "custom_exp|fg_expand=False|per_orthogroup -> per_orthogroup": 29,
+  "custom_exp|fg_expand=True|per_protein -> per_orthogroup": 29,
+  "custom_exp|fg_expand=True|per_orthogroup -> per_orthogroup": 29,
+  "allgoa|fg_expand=False|per_protein -> per_protein": 32,
+  "allgoa|fg_expand=False|per_orthogroup -> per_orthogroup": 32,
+  "allgoa|fg_expand=True|per_protein -> per_orthogroup": 29,
+  "allgoa|fg_expand=True|per_orthogroup -> per_orthogroup": 29
+ },
+ "failures": []
+}

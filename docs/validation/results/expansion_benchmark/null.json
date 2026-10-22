@@ -1,0 +1,32 @@
+{
+ "replicates": 100,
+ "foreground_size": 40,
+ "background": 4403,
+ "with_a_significant_term": 2,
+ "rate": 0.02,
+ "mode_applied": {
+  "per_orthogroup": 100
+ },
+ "most_frequent_terms": [
+  [
+   "L-amino acid transport",
+   1
+  ],
+  [
+   "L-amino acid transmembrane transporter activity",
+   1
+  ],
+  [
+   "amino acid transmembrane transporter activity",
+   1
+  ],
+  [
+   "channel activity",
+   1
+  ],
+  [
+   "passive transmembrane transporter activity",
+   1
+  ]
+ ]
+}

@@ -91,7 +91,10 @@
     selectedDiv.innerHTML = selectedTemp.map((item, index) => {
       const isRef = item.type === 'reference';
       const proteomeId = item.id || '';
-      const tooltip = `${item.label}${proteomeId ? '  ·  ' + proteomeId : ''}  ·  ${isRef ? 'Reference' : 'Non-reference'} proteome`;
+      // A non-reference proteome is downloaded from UniParc (UPI… identifiers),
+      // which GOA files do not annotate: say so before it is downloaded.
+      const tooltip = `${item.label}${proteomeId ? '  ·  ' + proteomeId : ''}  ·  ` +
+        (isRef ? 'Reference proteome' : 'Non-reference proteome: joins the orthogroups but has no GO annotation');
       return `
         <div class="species-chip ${isRef ? '' : 'is-non-reference'}" role="listitem" title="${escapeHtml(tooltip)}">
           <span class="chip-dot" aria-hidden="true"></span>
@@ -1058,6 +1061,16 @@
           break;
         case 'proteome_saved':
           appendDownloadLog(`  ✓ saved ${data.filename} (${Math.round(data.size_bytes / 1024)} KB)`, 'success');
+          if (data.source === 'UniParc') {
+            // UniProtKB only holds reference proteomes; the others come from
+            // UniParc, whose identifiers (UPI…) carry no GO annotation.
+            appendDownloadLog(`  ⚠️ ${data.proteome_type || 'Non-reference proteome'}: sequences from UniParc ` +
+                              `(UPI… identifiers). It joins the orthogroups but contributes no GO annotation.`, 'warning');
+          }
+          if (data.expected_sequences && data.n_sequences != null &&
+              Math.abs(data.n_sequences - data.expected_sequences) > 0.1 * data.expected_sequences) {
+            appendDownloadLog(`  ⚠️ ${data.n_sequences} sequences downloaded; UniProt lists ${data.expected_sequences}.`, 'warning');
+          }
           passResult.downloaded.push({ pid: data.pid, filename: data.filename, species: data.species, size_bytes: data.size_bytes });
           setProgressBar(perPassCurrent, perPassTotal);
           break;
@@ -1176,6 +1189,15 @@
           eventSource.close();
           setWorkflowStates(['done', 'done', 'done']);
           renderRunSummary();
+        } else if (event.data === 'FAILED') {
+          // The server saved nothing: leave the button ready for another try and
+          // keep the post-analysis buttons hidden, so no earlier result is opened.
+          logPanel.insertAdjacentHTML('beforeend', '<div class="log-line log-error">OrthoFinder did not finish. Nothing was saved; see the messages above.</div>');
+          gif.classList.remove('is-visible');
+          OG.setButtonLoading('runOrthofinderBtn', false);
+          setActionState(btn, 'ready', 'Run again');
+          eventSource.close();
+          setWorkflowStates(['done', 'done', 'pending']);
         } else {
           const cls = /error|fail|❌/i.test(event.data)
             ? 'log-error'

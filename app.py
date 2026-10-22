@@ -14,6 +14,7 @@ import subprocess
 import secrets
 import traceback
 import datetime
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import List, Optional, Dict, Set
 import numpy as np
@@ -34,6 +35,7 @@ from goatools.goea.go_enrichment_ns import GOEnrichmentStudy
 from collections import defaultdict
 
 import logging
+from werkzeug.utils import secure_filename
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
@@ -52,7 +54,10 @@ from orthogather.config import (
     ORTHOGATHER_VERSION,
 )
 from orthogather.utils.responses import respond, respond_error
-from orthogather.utils.parsing import normalize, parse_uniprot_block
+from orthogather.utils.parsing import (
+    normalize, parse_uniprot_block, parse_identifier_list, orthogroup_cell_accessions,
+    _ACCESSION_RE,
+)
 from orthogather.utils.network import (
     find_free_port,
     open_browser,
@@ -290,7 +295,7 @@ def _orthofinder_thread_settings() -> tuple:
 # GOA / GAF parsing + evidence presets moved to orthogather.core.goa
 from orthogather.core.goa import (
     EVIDENCE_PRESETS, _open_gaf, build_id2gos_from_goa_folder, ensure_godag as _ensure_godag,
-    read_obo_metadata, read_goa_header,
+    read_obo_metadata, read_goa_header, proteins_by_goa_file,
 )
 from orthogather.core import single_copy as _sc_mod
 from orthogather.core.single_copy import (
@@ -304,9 +309,10 @@ def ensure_godag(path=GO_ROOT_OBO):
 
 
 def get_single_copy_orthogroups() -> set:
-    """Backward-compat wrapper. The new module needs the upload root passed
-    explicitly; we read it from app.config here and forward."""
-    return _sc_mod.get_single_copy_orthogroups(app.config.get('UPLOAD_FOLDER'))
+    """Single-copy orthogroups of the active analysis (session['folder_path']).
+    It used to read app.config['UPLOAD_FOLDER'], which is never set, so the set
+    was always empty and "Single-copy only" removed every orthogroup."""
+    return _sc_mod.get_single_copy_orthogroups(session.get('folder_path'))
 
 
 ############################################################################################################
@@ -372,6 +378,27 @@ def _handle_exception(e):
         "ERR_UNEXPECTED", 500,
         detail=str(e) if app.debug else None,
     )
+
+
+@app.before_request
+def _same_origin_only():
+    """Refuse state-changing requests sent by another website.
+
+    OrthoGather listens on 127.0.0.1, but any page open in the same browser can
+    send it a form or a fetch: without this check another site could upload a
+    file or delete a saved run. Browsers send ``Origin`` with every cross-site
+    POST; requests without it (curl, the test client) are not from a web page.
+    The Host check also blocks DNS rebinding, where a foreign name resolves to
+    127.0.0.1 and Origin and Host would otherwise agree."""
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return None
+    host = (request.host or "").rsplit(":", 1)[0].strip("[]")
+    origin = request.headers.get("Origin")
+    if host not in ("127.0.0.1", "localhost", "::1") or (
+            origin is not None and urlparse(origin).netloc != request.host):
+        return respond(False, "Request refused: it did not come from the OrthoGather page.",
+                       where="same_origin_only", code=403)
+    return None
 
 
 @app.route('/')
@@ -514,7 +541,8 @@ def cargar_carpeta():
                 plot_url_1=plot_url_1,
                 plot_url_2=plot_url_2,
                 species=list(gene_count_df_.columns[1:]),
-                folder_path=folder_path
+                folder_path=folder_path,
+                upload_id_note=session.get('upload_id_note') if mode_flag == 'upload' else None
             )
 
         except Exception as e:
@@ -546,7 +574,11 @@ def cargar_carpeta():
 
             folder_path = os.path.join('static', 'data_folder', 'upload')
             _clean_dir(folder_path)
-            saved_path = os.path.join(folder_path, folder.filename)
+            session.pop('upload_id_note', None)
+            # The browser sends the file name; a name such as '../../x.zip' would be
+            # written outside the upload folder.
+            saved_path = os.path.join(folder_path, secure_filename(folder.filename)
+                                      or ('upload.xml' if is_xml else 'upload.zip'))
             folder.save(saved_path)
 
             if is_zip:
@@ -569,6 +601,21 @@ def cargar_carpeta():
                     # reproducibility manifest (Point 4) can pick it up.
                     session['source_format'] = 'orthoxml'
                     session['orthoxml_meta'] = xml_meta
+                    # OMA, OrthoDB and Ensembl write their own gene identifiers.
+                    # The orthogroups work with any of them, but GO annotation and
+                    # the protein filter match UniProt accessions.
+                    ids = [a for col in og_df.columns[1:] for cell in og_df[col].dropna()
+                           for a in orthogroup_cell_accessions(cell)]
+                    n_uniprot = sum(bool(_ACCESSION_RE.fullmatch(a)) for a in ids)
+                    if ids and n_uniprot < len(ids) / 2:
+                        session['upload_id_note'] = (
+                            f"{len(ids) - n_uniprot:,} of the {len(ids):,} identifiers in this "
+                            f"OrthoXML file are not UniProt accessions (for example "
+                            f"{next(a for a in ids if not _ACCESSION_RE.fullmatch(a))}). "
+                            f"The orthogroup analyses work with them, but GO enrichment and the "
+                            f"protein filter match UniProt accessions, so those identifiers will "
+                            f"not be found there. Map them to UniProt accessions before export "
+                            f"to use the Gene Ontology module.")
                     logging.info(
                         f"[upload] OrthoXML parsed: {xml_meta['n_orthogroups']} OGs, "
                         f"{xml_meta['n_species']} species, "
@@ -888,6 +935,37 @@ def upset_data():
     return jsonify({"ok": True, **payload})
 
 
+def _identifier_notes(parsed):
+    """What :func:`parse_identifier_list` changed in a pasted list, for the user.
+
+    Returns ``(warnings, notes)``. Removing an isoform suffix is a warning: the
+    isoform is counted as its canonical protein, and two isoforms become one.
+    The notes only record how the list was read."""
+    def plural(n, word):
+        return f"{n} {word}{'' if n == 1 else 's'}"
+
+    def changed(kind):
+        return [c for c in parsed["changed"] if kind in c["changes"]]
+
+    warnings, notes = [], []
+    iso = changed("isoform")
+    if iso:
+        examples = ", ".join(f"{c['input'].lstrip('>')} → {c['id']}" for c in iso[:3])
+        warnings.append(
+            f"Isoform suffix removed from {plural(len(iso), 'identifier')} ({examples}"
+            f"{', …' if len(iso) > 3 else ''}). Proteomes and GOA files list the canonical "
+            f"accession, so each isoform is counted as its canonical protein.")
+    if changed("fasta_header"):
+        notes.append(f"{plural(len(changed('fasta_header')), 'accession')} read from FASTA headers.")
+    if changed("upper_case"):
+        notes.append(f"{plural(len(changed('upper_case')), 'identifier')} converted to upper case.")
+    if parsed["sequence_lines"]:
+        notes.append(f"{plural(parsed['sequence_lines'], 'sequence line')} skipped.")
+    if parsed["duplicates"]:
+        notes.append(f"{plural(parsed['duplicates'], 'duplicate')} removed.")
+    return warnings, notes
+
+
 @app.route('/upset_data_filtered', methods=['POST'])
 def upset_data_filtered():
     """Same as /upset_data but restricted to orthogroups that contain at least
@@ -906,8 +984,10 @@ def upset_data_filtered():
     if not isinstance(raw_ids, list) or not raw_ids:
         return respond_error("ERR_NO_FILTER_IDS", where="upset_data_filtered")
 
-    # Sanitise the IDs: strip whitespace, drop empties, de-duplicate.
-    uniprot_ids = sorted({str(i).strip() for i in raw_ids if str(i).strip()})
+    # Read accessions, FASTA headers included, and normalise them; de-duplicate.
+    parsed = parse_identifier_list(raw_ids)
+    uniprot_ids = sorted(parsed["ids"])
+    id_warnings, id_notes = _identifier_notes(parsed)
     if not uniprot_ids:
         return respond_error("ERR_EMPTY_ID_LIST", where="upset_data_filtered")
 
@@ -954,10 +1034,12 @@ def upset_data_filtered():
             "severity": "warning",
             "category": "input",
             "message": f"None of the {len(uniprot_ids)} UniProt IDs were found in the selected species' orthogroups",
-            "hint":    "Double-check the IDs (case-sensitive) or pick a broader species selection.",
+            "hint":    "Double-check the IDs or pick a broader species selection.",
             "ids_found": [],
             "ids_not_found": ids_not_found,
             "ids_unassigned": ids_unassigned,
+            "input_warnings": id_warnings,
+            "input_notes": id_notes,
         }), 200
 
     # Build Figures 5 + 6 from the filtered subset.
@@ -982,6 +1064,8 @@ def upset_data_filtered():
         "ids_not_found":  ids_not_found,
         "ids_unassigned": ids_unassigned,
         "n_ids_searched": len(uniprot_ids),
+        "input_warnings": id_warnings,
+        "input_notes":    id_notes,
         **payload,
     })
 
@@ -1932,6 +2016,13 @@ def _safe_filename_from_metadata(metadata: dict, fallback_pid: str) -> str:
     return f"{safe_name}.fasta"
 
 
+# FASTA files written by the current download, file name -> proteome ID. Many
+# proteomes share a scientific name (139,155 non-reference proteomes in the
+# catalogue are just "Escherichia coli"), and the file name is built from it, so
+# a second proteome used to overwrite the first without any warning.
+_fasta_owner = {}
+
+
 def _attempt_download_one(pid: str, attempt: int):
     """
     Try to download metadata + FASTA for one proteome.
@@ -1957,15 +2048,35 @@ def _attempt_download_one(pid: str, attempt: int):
     organism_name = metadata.get("taxonomy", {}).get("scientificName") or pid
     filename = _safe_filename_from_metadata(metadata, pid)
     filepath = os.path.join(PROTEOMES_FOLDER, filename)
+    owner = _fasta_owner.get(filename)
+    if (owner is not None and owner != pid) or (owner is None and os.path.exists(filepath)):
+        # Another proteome of this download already has this name: keep both.
+        filename = f"{os.path.splitext(filename)[0]}_{pid}.fasta"
+        filepath = os.path.join(PROTEOMES_FOLDER, filename)
+    _fasta_owner[filename] = pid
     yield _sse({"phase": "metadata_ok", "pid": pid, "species": organism_name, "filename": filename})
 
     # --- FASTA ---
+    # UniProtKB holds the proteins of reference proteomes only: for every other
+    # proteome type ("Non Reference", "Excluded", redundant) the UniProtKB query
+    # answers HTTP 200 with an empty body, and the sequences live in UniParc. A
+    # sample of the catalogue gave 0 of 60 non-reference proteomes in UniProtKB
+    # and 60 of 60 in UniParc. UniParc FASTA carries UniParc identifiers
+    # (UPI...), which have no GOA annotation: such a proteome takes part in the
+    # orthogroups but contributes no GO terms.
     yield _sse({"phase": "attempt", "pid": pid, "attempt": attempt, "step": "fasta"})
-    fasta_url = f"https://rest.uniprot.org/uniprotkb/stream?format=fasta&compressed=false&query=(proteome:{pid})"
+    sources = (
+        ("UniProtKB", f"https://rest.uniprot.org/uniprotkb/stream?format=fasta&compressed=false&query=(proteome:{pid})"),
+        ("UniParc",   f"https://rest.uniprot.org/uniparc/stream?format=fasta&compressed=false&query=(upid:{pid})"),
+    )
+    source, r_fasta = None, None
     try:
-        r_fasta = requests.get(fasta_url, timeout=DOWNLOAD_REQUEST_TIMEOUT)
-        if r_fasta.status_code != 200:
-            raise RuntimeError(f"FASTA HTTP {r_fasta.status_code}")
+        for source, fasta_url in sources:
+            r_fasta = requests.get(fasta_url, timeout=DOWNLOAD_REQUEST_TIMEOUT)
+            if r_fasta.status_code != 200:
+                raise RuntimeError(f"FASTA HTTP {r_fasta.status_code} from {source}")
+            if r_fasta.text.strip():
+                break
         with open(filepath, "w") as f:
             f.write(r_fasta.text)
     except requests.exceptions.Timeout:
@@ -1974,6 +2085,8 @@ def _attempt_download_one(pid: str, attempt: int):
     except Exception as e:
         yield _sse({"phase": "_result", "status": "failed", "reason": f"FASTA error: {e}"})
         return
+    n_sequences = r_fasta.text.count("\n>") + (1 if r_fasta.text.startswith(">") else 0)
+    expected = metadata.get("proteinCount")
 
     # UniProt stamps every REST response with the exact release that produced
     # the data (e.g. "2026_01" / "28-January-2026"). Capture it so provenance
@@ -1999,7 +2112,9 @@ def _attempt_download_one(pid: str, attempt: int):
 
     yield _sse({"phase": "_result", "status": "saved", "filename": filename, "size_bytes": size,
                 "species": organism_name, "uniprot_release": uniprot_release,
-                "uniprot_release_date": uniprot_release_date})
+                "uniprot_release_date": uniprot_release_date, "source": source,
+                "proteome_type": metadata.get("proteomeType"),
+                "n_sequences": n_sequences, "expected_sequences": expected})
 
 
 @app.route("/stream_download")
@@ -2041,6 +2156,7 @@ def stream_download():
 
         # In "all" mode we clean the folder first; in "retry" we preserve it.
         if mode != "retry":
+            _fasta_owner.clear()
             try:
                 os.makedirs(PROTEOMES_FOLDER, exist_ok=True)
                 for entry in os.listdir(PROTEOMES_FOLDER):
@@ -2097,11 +2213,19 @@ def stream_download():
                     "size_bytes": result.get("size_bytes", 0),
                     "uniprot_release": result.get("uniprot_release"),
                     "uniprot_release_date": result.get("uniprot_release_date"),
+                    "source": result.get("source"),
+                    "proteome_type": result.get("proteome_type"),
+                    "n_sequences": result.get("n_sequences"),
+                    "expected_sequences": result.get("expected_sequences"),
                 })
                 yield _sse({"phase": "proteome_saved", "pid": pid,
                             "filename": result.get("filename"),
                             "species": result.get("species"),
-                            "size_bytes": result.get("size_bytes", 0)})
+                            "size_bytes": result.get("size_bytes", 0),
+                            "source": result.get("source"),
+                            "proteome_type": result.get("proteome_type"),
+                            "n_sequences": result.get("n_sequences"),
+                            "expected_sequences": result.get("expected_sequences")})
             elif result and result.get("status") == "empty":
                 empty.append({"pid": pid, "filename": result.get("filename")})
                 yield _sse({"phase": "proteome_empty", "pid": pid, "filename": result.get("filename")})
@@ -2127,6 +2251,14 @@ def stream_download():
                         "release_date": (rel_dates[0] if len(rel_dates) == 1 else rel_dates) if rel_dates else None,
                         "downloaded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                         "n_proteomes": len(downloaded),
+                        # Which database each proteome came from, and how many
+                        # sequences it had against UniProt's own count.
+                        "per_proteome": {d["pid"]: {"filename": d.get("filename"),
+                                                    "source": d.get("source"),
+                                                    "proteome_type": d.get("proteome_type"),
+                                                    "sequences": d.get("n_sequences"),
+                                                    "expected": d.get("expected_sequences")}
+                                         for d in downloaded},
                     }, f)
         except Exception as e:
             logging.warning(f"[proteome] could not persist proteome_provenance.json: {e}")
@@ -2157,13 +2289,30 @@ def stream_orthofinder():
         )
         yield (f"data: ⚙️  Using -t {t} (sequence-search threads) and -a {a} "
                f"(analysis threads) — detected {os.cpu_count()} CPUs\n\n")
-        process = subprocess.Popen(
-            ["orthofinder", "-f", PROTEOMES_FOLDER,
-             "-t", str(t), "-a", str(a), "-og"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True
-        )
+
+        # Outputs of an earlier attempt must not survive into this one: if this
+        # run fails, a leftover Results_* folder (or Orthogroups.zip) would be
+        # picked up and reported as this run's orthogroups. Saved runs keep their
+        # own copy of Orthogroups.zip under ~/.orthogather/runs.
+        resultados_base = os.path.join(PROTEOMES_FOLDER, "OrthoFinder")
+        zip_path = os.path.join(PROTEOMES_FOLDER, "Orthogroups.zip")
+        shutil.rmtree(resultados_base, ignore_errors=True)
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+
+        try:
+            process = subprocess.Popen(
+                ["orthofinder", "-f", PROTEOMES_FOLDER,
+                 "-t", str(t), "-a", str(a), "-og"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True
+            )
+        except FileNotFoundError:
+            yield ("data: ❌ OrthoFinder was not found. Start OrthoGather from its launcher, "
+                   "or activate the 'orthogather' conda environment before running app.py.\n\n")
+            yield "data: FAILED\n\n"
+            return
 
         of_version = None
         for line in iter(process.stdout.readline, ''):
@@ -2190,14 +2339,23 @@ def stream_orthofinder():
         except Exception as e:
             logging.warning(f"[orthofinder] could not persist version: {e}")
 
-        resultados_base = os.path.join(PROTEOMES_FOLDER, "OrthoFinder")
-        subdirs = [d for d in os.listdir(resultados_base) if d.startswith("Results_")]
-        if not subdirs:
-            yield "data: ❌ No 'Results_' folder found.\n\n"
-            yield "data: DONE\n\n"
+        if process.returncode != 0:
+            yield (f"data: ❌ OrthoFinder stopped with exit code {process.returncode}. "
+                   f"The run was not saved; the lines above show OrthoFinder's own message.\n\n")
+            yield "data: FAILED\n\n"
             return
 
-        latest_result = sorted(subdirs)[-1]
+        subdirs = ([d for d in os.listdir(resultados_base) if d.startswith("Results_")]
+                   if os.path.isdir(resultados_base) else [])
+        if not subdirs:
+            yield "data: ❌ OrthoFinder finished but wrote no 'Results_' folder. The run was not saved.\n\n"
+            yield "data: FAILED\n\n"
+            return
+
+        # The folder was emptied before the run, so there is normally one; the
+        # newest by modification time is the safe choice either way (the names
+        # are Results_<Mon><Day>[_N], which do not sort chronologically).
+        latest_result = max(subdirs, key=lambda d: os.path.getmtime(os.path.join(resultados_base, d)))
         results_full_path = os.path.join(resultados_base, latest_result)
         orthogroups_path = os.path.join(results_full_path, "Orthogroups")
 
@@ -2207,10 +2365,16 @@ def stream_orthofinder():
             "Orthogroups.GeneCount.tsv",
             "Orthogroups_UnassignedGenes.tsv"
         ]
-
-        zip_path = os.path.join(PROTEOMES_FOLDER, "Orthogroups.zip")
-        if os.path.exists(zip_path):
-            os.remove(zip_path)
+        # The two files every later step needs. Without them the run is not
+        # usable, so it is reported as failed instead of zipped and saved.
+        required = ("Orthogroups.tsv", "Orthogroups.GeneCount.tsv")
+        missing_required = [f for f in required
+                            if not os.path.exists(os.path.join(orthogroups_path, f))]
+        if missing_required:
+            yield (f"data: ❌ OrthoFinder output is incomplete (missing "
+                   f"{', '.join(missing_required)}). The run was not saved.\n\n")
+            yield "data: FAILED\n\n"
+            return
 
         with zipfile.ZipFile(zip_path, 'w') as zipf:
             for filename in files_to_zip:
@@ -2631,6 +2795,26 @@ def resultado_goa():
     # Automatic species matching
     species_cache = match_species(species, proteomes)
 
+    # A proteome downloaded from UniParc has UniParc identifiers (UPI...), so no
+    # GOA file can annotate it, even when the catalogue lists one for its taxon
+    # (that file belongs to the taxon's reference proteome). OrthoFinder names
+    # each species after its FASTA file, which is how the two are paired.
+    try:
+        prov_path = os.path.join(session.get("folder_path") or "", "proteome_provenance.json")
+        if os.path.exists(prov_path):
+            with open(prov_path) as fh:
+                per = (json.load(fh) or {}).get("per_proteome") or {}
+            uniparc = {os.path.splitext(v.get("filename") or "")[0]
+                       for v in per.values() if v.get("source") == "UniParc"}
+            if uniparc:
+                species_cache = [
+                    {**row, "match": ({**row["match"], "file_url": "NA"} if row.get("match") else None),
+                     "uniparc": True}
+                    if row.get("original") in uniparc else row
+                    for row in species_cache]
+    except Exception as e:
+        logging.warning(f"[GOA] could not read proteome sources: {e}")
+
     # Save information in session
     session["species_detected"] = species
     session["species_matches"] = species_cache
@@ -2954,7 +3138,9 @@ def foreground_analysis():
     """Stores the foreground (pasted IDs or orthogroup-expanded IDs) in session, with detailed logs."""
     try:
         data = request.get_json(silent=True) or {}
-        uniprot_ids = parse_uniprot_block(data.get('uniprot_ids', []))
+        parsed = parse_identifier_list(data.get('uniprot_ids', []))
+        uniprot_ids = parsed["ids"]
+        id_warnings, id_notes = _identifier_notes(parsed)
         use_orthogroups = bool(data.get('use_orthogroups', False))
         single_copy_only = bool(data.get('single_copy_only', False))
         logging.info(f"[FG] Received UniProt IDs (n={len(uniprot_ids)}): {uniprot_ids}")
@@ -3013,6 +3199,13 @@ def foreground_analysis():
                 before = len(selected_orthogroups)
                 selected_orthogroups = {og for og in selected_orthogroups if og in sc_set}
                 logging.info(f"[FG] Single-copy filter: {before} -> {len(selected_orthogroups)} OGs")
+                if before and not selected_orthogroups:
+                    return respond(False,
+                                   f"None of the {before} orthogroups containing your identifiers is "
+                                   f"single-copy (one protein in every species).",
+                                   where="foreground_analysis",
+                                   hint="Choose 'All orthogroups', or analyse the identifiers without expansion.",
+                                   code=400)
 
             # Expand IDs from 'Groups of Interest'
             exp_added = 0
@@ -3055,6 +3248,16 @@ def foreground_analysis():
         # "you pasted N IDs / after expansion: M proteins" to the user.
         session['foreground_original_count'] = len(uniprot_ids)
         session['foreground_used_orthogroups'] = bool(use_orthogroups)
+        # The orthogroup filter the expansion used; the run checks it against
+        # the current setting, since the filter only acts when a set is loaded.
+        session['foreground_single_copy'] = bool(use_orthogroups and single_copy_only)
+        # The identifiers as pasted, before any expansion: per-orthogroup
+        # counting shuffles these labels to build its null distribution.
+        session['foreground_input'] = list(dict.fromkeys(uniprot_ids))
+        # How each rewritten identifier was pasted, and the isoform warning, so
+        # the results can show them next to the identifiers left out of the test.
+        session['foreground_id_changes'] = parsed["changed"]
+        session['foreground_id_warnings'] = id_warnings
 
         # Clear logs
         logging.info(f"[FG] Selected Orthogroups (n={len(selected_orthogroups_list)}): {selected_orthogroups_list}")
@@ -3062,7 +3265,9 @@ def foreground_analysis():
 
         return respond(True, "Foreground analysis completed successfully",
                        where="foreground_analysis",
-                       payload={"foreground_proteins": final_protein_list})
+                       payload={"foreground_proteins": final_protein_list,
+                                "input": {"n_ids": len(uniprot_ids),
+                                          "warnings": id_warnings, "notes": id_notes}})
     except Exception as e:
         logging.error(f"[FG][ERR] Unexpected error: {str(e)}")
         return respond(False, f"Unexpected error: {e}",
@@ -3081,7 +3286,9 @@ def background_analysis():
         choice = str(data.get('background_choice', '')).strip()
         use_orthogroups = bool(data.get('use_orthogroups', False))
         single_copy_only = bool(data.get('single_copy_only', False))
-        custom_uniprot_ids = parse_uniprot_block(data.get('custom_uniprot_ids', []))
+        parsed = parse_identifier_list(data.get('custom_uniprot_ids', []))
+        custom_uniprot_ids = parsed["ids"]
+        id_warnings, id_notes = _identifier_notes(parsed)
 
         logging.info(f"[BG] choice={choice} use_orthogroups={use_orthogroups} "
                      f"single_copy_only={single_copy_only} custom_ids={len(custom_uniprot_ids)}")
@@ -3134,6 +3341,13 @@ def background_analysis():
                     before = len(sel_ogs)
                     sel_ogs = {og for og in sel_ogs if og in sc_set}
                     logging.info(f"[BG] Single-copy filter: {before} -> {len(sel_ogs)} OGs")
+                    if before and not sel_ogs:
+                        return respond(False,
+                                       f"None of the {before} orthogroups containing the background "
+                                       f"identifiers is single-copy (one protein in every species).",
+                                       where="background_analysis",
+                                       hint="Choose 'All orthogroups', or use the background without expansion.",
+                                       code=400)
                 # Expand IDs from 'Groups of Interest'
                 exp_added = 0
                 for og in sel_ogs:
@@ -3170,6 +3384,10 @@ def background_analysis():
 
             session["background_mode"] = "goa_all"
             session["background_goa_files"] = goa_files
+            session["background_input"] = None
+            session["background_used_orthogroups"] = False
+            session["background_single_copy"] = False
+            session["background_id_warnings"] = []
             # background_ids left empty; will be calculated later in /gene_ontology_analysis
             session["background_ids"] = session.get("background_ids", [])
             logging.info(f"[BG] ✅ Set to ALL GOA files ({len(goa_files)})")
@@ -3187,10 +3405,18 @@ def background_analysis():
         # Save to session (option 4)
         session["background_mode"] = "ids"
         session["background_ids"] = sorted(background_ids)
+        # The proteins the experiment measured, before any expansion: the base
+        # among which per-orthogroup counting shuffles the foreground labels.
+        session["background_input"] = list(dict.fromkeys(custom_uniprot_ids))
+        session["background_used_orthogroups"] = bool(use_orthogroups)
+        session["background_single_copy"] = bool(use_orthogroups and single_copy_only)
+        session["background_id_warnings"] = id_warnings
         logging.info(f"[BG] ✅ Selected background IDs: {len(background_ids)}")
         return respond(True, "Background successfully stored",
                        where="background_analysis",
-                       payload={"background_ids": sorted(background_ids)})
+                       payload={"background_ids": sorted(background_ids),
+                                "input": {"n_ids": len(custom_uniprot_ids),
+                                          "warnings": id_warnings, "notes": id_notes}})
     except Exception as e:
         logging.error(f"[BG][ERR] Unexpected error: {e}")
         return respond(False, str(e), where="background_analysis", code=500)
@@ -3215,6 +3441,79 @@ def _goa_folder_signature(folder):
         return tuple(sorted(files))
     except OSError:
         return None
+
+
+_ANALYSIS_ACCESSIONS_CACHE = {}
+
+
+def _analysis_accessions_by_species(folder_path):
+    """The accessions of each species in the active analysis: its orthogroups
+    and its unassigned genes. Cached on the files' size and mtime."""
+    if not folder_path:
+        return {}
+    try:
+        files = [f for f in (Path(folder_path) / "Orthogroups.tsv",
+                             Path(folder_path) / "Orthogroups_UnassignedGenes.tsv") if f.is_file()]
+        key = tuple((str(f), f.stat().st_mtime_ns, f.stat().st_size) for f in files)
+        if key not in _ANALYSIS_ACCESSIONS_CACHE:
+            by_species = defaultdict(set)
+            for f in files:
+                df = pd.read_csv(f, sep="\t", dtype=str)
+                for col in df.columns[1:]:
+                    for cell in df[col].dropna():
+                        by_species[col].update(orthogroup_cell_accessions(cell))
+            _ANALYSIS_ACCESSIONS_CACHE.clear()
+            _ANALYSIS_ACCESSIONS_CACHE[key] = dict(by_species)
+        return _ANALYSIS_ACCESSIONS_CACHE[key]
+    except Exception as e:
+        logging.warning(f"[GO][WARN] Could not read the analysis accessions: {e}")
+        return {}
+
+
+def _analysis_accessions(folder_path):
+    """Every accession in the active analysis: the orthogroups and the
+    unassigned genes."""
+    return set().union(*_analysis_accessions_by_species(folder_path).values())
+
+
+# Why a pasted foreground identifier did not enter the test, in the order the
+# reasons are checked.
+UNTESTED_REASONS = {
+    "not_found": "not found in this analysis",
+    "not_in_background": "not in the background",
+    "no_annotation": "no GO annotation",
+    "not_expanded": "left out by the orthogroup expansion",
+}
+
+
+def _untested_ids(pasted, tested, background, has_annotation, known, pasted_as):
+    """The pasted foreground identifiers that are not in the test, each with the
+    first reason that applies: not in the proteomes, GOA files or background of
+    the analysis; not in the background; no GO annotation; or, with expansion,
+    in an orthogroup that was not kept (it is in none, or the single-copy filter
+    removed it). ``pasted_as`` maps an accession to the text it was read from."""
+    rows = []
+    for acc in pasted:
+        if acc in tested:
+            continue
+        if acc not in background:
+            reason = "not_in_background" if acc in known else "not_found"
+        elif not has_annotation(acc):
+            reason = "no_annotation"
+        else:
+            reason = "not_expanded"
+        rows.append({"id": acc, "pasted_as": pasted_as.get(acc, acc), "reason": reason})
+    return rows
+
+
+def _untested_summary(rows, n_pasted, labels):
+    counts = {k: sum(1 for r in rows if r["reason"] == k) for k in UNTESTED_REASONS}
+    parts = [f"{n} {labels[k]}" for k, n in counts.items() if n]
+    if not parts:
+        return ""
+    listed = ", ".join(parts[:-1]) + " and " + parts[-1] if len(parts) > 1 else parts[0]
+    return (f"{len(rows)} of the {n_pasted} pasted foreground identifier"
+            f"{'' if n_pasted == 1 else 's'} did not enter the test: {listed}.")
 
 
 @app.route('/gene_ontology_analysis', methods=['POST'])
@@ -3278,6 +3577,34 @@ def gene_ontology_analysis():
         # User-facing, non-fatal warnings accumulated during the run (silent
         # fallback, version drift, low power). Surfaced in the JSON response.
         warnings = []
+        # Expansion adds every member of an orthogroup, so per-protein counting
+        # gives a family one observation per paralogue: with unequal families
+        # that alone makes the functions of the large ones look enriched (any
+        # term in 100% of random foregrounds in the expansion benchmark).
+        # Expanded sets are therefore always counted per orthogroup.
+        sets_expanded = bool(session.get("foreground_used_orthogroups")
+                             or session.get("background_used_orthogroups"))
+        counting_forced = sets_expanded and counting_mode == 'per_protein'
+        if counting_forced:
+            counting_mode = 'per_orthogroup'
+        # "Single-copy only" acts when an expanded set is loaded. If it was
+        # changed afterwards, the loaded sets do not follow it: say so rather
+        # than run with the old filter.
+        if data.get('single_copy_only') is not None:
+            stale = [name for name in ("foreground", "background")
+                     if session.get(f"{name}_used_orthogroups")
+                     and session.get(f"{name}_single_copy") is not None
+                     and session.get(f"{name}_single_copy") != bool(data.get('single_copy_only'))]
+            if stale:
+                return respond(False, "The orthogroup setting changed after the expanded sets were loaded",
+                               where="gene_ontology_analysis",
+                               hint=(f"Load the {' and the '.join(stale)} again to apply "
+                                     f"'{'Single-copy only' if data.get('single_copy_only') else 'All orthogroups'}'."),
+                               code=400)
+        # Isoform suffixes removed when the lists were loaded.
+        warnings.extend(f"Foreground: {w}" for w in session.get("foreground_id_warnings") or [])
+        if session.get("background_mode") == "ids":
+            warnings.extend(f"Background: {w}" for w in session.get("background_id_warnings") or [])
 
         logging.info("="*80)
         logging.info(f"[GO] ▶ Starting GO Analysis")
@@ -3339,16 +3666,76 @@ def gene_ontology_analysis():
         # -------------------------------
         # DEFINE BACKGROUND
         # -------------------------------
+        # 'goa_all' used to pool the annotated proteomes of every species with a
+        # GOA file. With a foreground from one species, that makes any function
+        # commoner in that species than in the others look enriched (a null
+        # simulation flagged 42.5 % of random foregrounds). The universe is now
+        # the GOA files of the species the foreground actually comes from;
+        # goa_all_scope='all' keeps the old pool for users who want it.
+        goa_all_scope = str(data.get('goa_all_scope', 'foreground_species')).lower().strip()
+        if goa_all_scope not in ('foreground_species', 'all'):
+            goa_all_scope = 'foreground_species'
+        background_desc = "pasted identifiers"
+        goa_less_species, proteome_universe = [], False
         if bg_mode == "goa_all":
-            background_ids = sorted(id2gos.keys())
-            logging.info(f"[GO] Background mode=ALL, proteins={len(background_ids)}")
+            file_to_species = {f: sp for sp, f in (goa_mapping or {}).items()}
+            by_file = proteins_by_goa_file(GOA_DOWNLOAD_FOLDER, limit_files=limit_files)
+            fg_lookup = set(foreground)
+            fg_files = sorted(f for f, accs in by_file.items() if fg_lookup & accs)
+            used_files = sorted(by_file) if goa_all_scope == 'all' else fg_files
+            # Counted per orthogroup, the universe is the whole proteome in this
+            # analysis of the species the pasted proteins come from, each protein
+            # taking part through its orthogroup, and the orthogroups carry the
+            # annotations of every GOA file: the same as pasting that proteome as
+            # the background and expanding it. It works the same for a species
+            # with a complete, a partial or no GOA file.
+            pasted_lookup = set(session.get("foreground_input") or foreground)
+            pasted_species = sorted(
+                sp for sp, accs in _analysis_accessions_by_species(session.get("folder_path")).items()
+                if pasted_lookup & accs)
+            proteome_universe = (counting_mode == 'per_orthogroup' and goa_all_scope != 'all'
+                                 and bool(pasted_species))
+            if not any(pasted_lookup & a for a in by_file.values()):
+                goa_less_species = pasted_species
+            if proteome_universe:
+                used_files = sorted(by_file)
+            allowed = set().union(*(by_file[f] for f in used_files)) if used_files else set()
+            background_ids = sorted(p for p in id2gos if p in allowed)
+            used_species = [file_to_species.get(f, f) for f in used_files]
+            background_desc = ("all GOA files, every species" if goa_all_scope == 'all'
+                               else "GOA files of the foreground's species: " + "; ".join(used_species))
+            if proteome_universe:
+                background_desc = ("proteome in this analysis of " + "; ".join(pasted_species)
+                                   + ", each protein through its orthogroup; orthogroups annotated "
+                                   "from every GOA file")
+                if len(pasted_species) > 1:
+                    warnings.append(
+                        f"The foreground spans {len(pasted_species)} species and the universe "
+                        f"pools their proteomes. If the species are represented in different "
+                        f"proportions in the foreground and in the universe, species composition "
+                        f"can produce enrichment.")
+            if goa_all_scope == 'all' and len(used_files) > len(fg_files):
+                warnings.append(
+                    "The universe pools the annotated proteomes of every species with a GOA "
+                    "file, but the foreground comes from fewer species. Functions that are "
+                    "simply commoner in the foreground's species will look enriched.")
+            elif len(fg_files) > 1 and not proteome_universe:
+                warnings.append(
+                    f"The foreground spans {len(fg_files)} species and the universe pools them. "
+                    f"If the species are represented in different proportions in the foreground "
+                    f"and in the universe, species composition can produce enrichment.")
+            logging.info(f"[GO] Background mode=GOA ({goa_all_scope}), files={used_files}, "
+                         f"proteins={len(background_ids)}")
 
         if not background_ids:
             logging.error("[GO][ERR] ❌ Background missing")
-            return respond(False, "Background missing",
-                           where="gene_ontology_analysis",
-                           hint="Define the background before proceeding.",
-                           code=400)
+            hint = "Define the background before proceeding."
+            if bg_mode == "goa_all" and goa_less_species:
+                hint = ("The species of your proteins has no GOA file, so 'Use all GOA files' has "
+                        "no annotated proteome for it. Count per orthogroup, or expand the "
+                        "foreground to full orthogroups, to test them through their orthologues.")
+            return respond(False, "Background missing", where="gene_ontology_analysis",
+                           hint=hint, code=400)
 
         bg_set = set(background_ids)
         assoc_bg = {str(g): set(gos) for g, gos in id2gos.items() if g in bg_set and gos}
@@ -3386,27 +3773,62 @@ def gene_ontology_analysis():
             "background_annotated": len(assoc_bg),
         }
 
-        if not fg_in_bg:
+        # The pasted foreground identifiers that do not enter the test, and why.
+        # Per-orthogroup counting below replaces this with its own units.
+        pasted_fg = session.get("foreground_input") or list(dict.fromkeys(foreground))
+        pasted_as = {c["id"]: c["input"] for c in reversed(session.get("foreground_id_changes") or [])}
+        known_ids = _analysis_accessions(session.get("folder_path")) | set(id2gos)
+        untested = _untested_ids(pasted_fg, set(fg_in_bg),
+                                 allowed if bg_mode == "goa_all" else bg_set,
+                                 lambda p: bool(id2gos.get(p)), known_ids, pasted_as)
+        untested_labels = dict(UNTESTED_REASONS)
+        if evidence_preset != 'all':
+            untested_labels["no_annotation"] += " with the selected evidence codes"
+
+        def _no_overlap():
             logging.error("[GO][ERR] ❌ Foreground has no overlap with background+GO")
+            hint = (_untested_summary(untested, len(pasted_fg), untested_labels)
+                    or "Check that your foreground IDs have GO annotations.")
+            if bg_mode == "goa_all" and goa_less_species and counting_mode == 'per_protein':
+                hint += (" Their species has no GOA file: count per orthogroup, or expand the "
+                         "foreground to full orthogroups, to test them through their orthologues.")
+            elif (bg_mode == "ids" and not assoc_bg and evidence_preset == 'all'
+                  and not session.get("background_used_orthogroups")):
+                hint += (" None of the background proteins has a GO annotation: expand the "
+                         "background to full orthogroups to use the annotations of their "
+                         "orthologues.")
             return respond(False, "Foreground IDs have no GO terms in background",
-                           where="gene_ontology_analysis",
-                           hint="Check that your foreground IDs have GO annotations.",
+                           where="gene_ontology_analysis", hint=hint,
+                           payload={"input_ids": {"pasted": len(pasted_fg), "untested": untested,
+                                                  "labels": untested_labels}},
                            code=400)
+
+        # Per-orthogroup counting can still reach unannotated pasted proteins
+        # through their orthogroups; it checks again after the collapse.
+        if not fg_in_bg and counting_mode != 'per_orthogroup':
+            return _no_overlap()
 
         # -------------------------------
         # COUNTING MODE — per-orthogroup collapse (optional)
         # -------------------------------
-        # When ``counting_mode == 'per_orthogroup'`` we replace each protein in the
-        # study/population with its orthogroup representative. This mitigates
-        # pseudoreplication: an OG with 10 members would otherwise contribute 10
-        # near-identical observations to the enrichment statistic.
+        # When ``counting_mode == 'per_orthogroup'`` each orthogroup is one unit:
+        # it carries the union of the annotations of its background members, and
+        # it is in the foreground when it contains a foreground protein. A protein
+        # that OrthoFinder left in no orthogroup is its own unit (dropping those
+        # silently shrank both sets). Because a large family is more likely to
+        # contain a foreground protein by chance, the p-values of this mode come
+        # from shuffling the foreground labels among the background proteins
+        # (orthogather.core.og_permutation), not from the hypergeometric tail.
+        og_perm = None
         if counting_mode == 'per_orthogroup':
             try:
                 excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
-                interest_df = pd.read_excel(excel_path, sheet_name='Groups of Interest')
-                # Build protein -> OG map and OG -> GO union
+                # Every species, not only those with a GOA file ('Groups of
+                # Interest'): the measured proteins may belong to a species
+                # without annotations, and they reach the test through their
+                # orthogroup.
+                interest_df = pd.read_excel(excel_path, sheet_name='Initial Groups')
                 protein_to_og = {}
-                og_to_gos = defaultdict(set)
                 exclude_cols = {'Orthogroup', 'Annotation Percentage', 'Porcentaje de Anotación'}
                 for _, row in interest_df.iterrows():
                     og = row.get('Orthogroup')
@@ -3415,30 +3837,105 @@ def gene_ontology_analysis():
                     for col, val in row.items():
                         if col in exclude_cols or pd.isna(val):
                             continue
-                        for pid in re.findall(r'\|([^|]+)\|', str(val)):
+                        for pid in orthogroup_cell_accessions(val):
                             protein_to_og[pid] = og
-                            if pid in assoc_bg:
-                                og_to_gos[og].update(assoc_bg[pid])
-                # Collapse foreground and background to OG representatives
-                fg_ogs = sorted({protein_to_og[p] for p in fg_in_bg if p in protein_to_og})
-                bg_ogs = sorted({og for og in og_to_gos.keys()})
-                if fg_ogs and bg_ogs:
-                    # Re-key the association by OG. The OG ID itself becomes the
-                    # "gene" identifier passed to GOATOOLS.
-                    assoc_bg = {og: og_to_gos[og] for og in bg_ogs if og_to_gos[og]}
-                    bg_set = set(assoc_bg.keys())
-                    fg_in_bg = [og for og in fg_ogs if og in assoc_bg]
-                    logging.info(f"[GO] Per-orthogroup counting: "
-                                 f"foreground OGs={len(fg_in_bg)}, "
-                                 f"background OGs={len(assoc_bg)}")
+                # The labels are shuffled among the proteins the experiment
+                # measured, before any expansion; with 'Use all GOA files' that is
+                # the proteome in this analysis of the species the pasted foreground
+                # comes from. A measured protein takes part when its unit (its orthogroup,
+                # or itself when it is in none) carries annotation, even if the
+                # protein has none of its own: with expansion, that is how the
+                # annotations of its orthologues reach the test.
+                fg_input = session.get("foreground_input")
+                if bg_mode == "ids":
+                    measured = session.get("background_input")
+                elif proteome_universe:
+                    by_species = _analysis_accessions_by_species(session.get("folder_path"))
+                    measured = sorted(set().union(*(by_species[sp] for sp in pasted_species)))
                 else:
-                    logging.warning("[GO][WARN] per_orthogroup requested but no OG "
-                                    "mapping available — falling back to per_protein.")
+                    pasted = set(fg_input or fg_in_bg)
+                    measured = [p for f in sorted(by_file) if pasted & by_file[f]
+                                for p in sorted(by_file[f])]
+                if not fg_input or (bg_mode == "ids" and not measured):
+                    # Sets loaded before 2.2.0 do not keep the pasted lists.
+                    warnings.append(
+                        "The foreground or background was loaded before this version and "
+                        "does not record the identifiers as pasted. Load both again for "
+                        "per-orthogroup counting to use them.")
+                    fg_input = fg_input or fg_in_bg
+                    measured = measured or list(assoc_bg)
+                elif not measured:
+                    warnings.append(
+                        "None of the pasted foreground proteins is in a downloaded GOA file, so "
+                        "'Use all GOA files' has no proteome of their species to shuffle them in.")
+                unit_of = {p: protein_to_og.get(p, p)
+                           for p in set(assoc_bg) | set(measured) | set(fg_input)}
+                og_to_gos = defaultdict(set)
+                for p, gos in assoc_bg.items():
+                    og_to_gos[unit_of[p]].update(gos)
+                # A measured protein in no orthogroup is its own unit with its own
+                # annotations. Expanding the background adds orthogroup members
+                # only, so without this such proteins would silently drop out.
+                for p in measured:
+                    if p not in protein_to_og and p not in assoc_bg and id2gos.get(p):
+                        og_to_gos[p].update(id2gos[p])
+                perm_base = [p for p in dict.fromkeys(measured) if og_to_gos.get(unit_of[p])]
+                base_set = set(perm_base)
+                perm_fg = [p for p in dict.fromkeys(fg_input) if p in base_set]
+                if protein_to_og and perm_fg:
+                    n_unassigned = (sum(1 for p in perm_base if p not in protein_to_og),
+                                    sum(1 for p in perm_fg if p not in protein_to_og))
+                    # Re-key the association by unit. The OG ID (or the accession
+                    # of an unassigned protein) becomes the "gene" passed to GOATOOLS.
+                    # Only the units of measured proteins: a unit no measured protein
+                    # belongs to can never be in the foreground, observed or shuffled,
+                    # and would only inflate the population counts.
+                    reach = {unit_of[p] for p in perm_base}
+                    # The annotated background proteins behind each unit, for
+                    # the evidence breakdown of the results table.
+                    unit_members = defaultdict(list)
+                    for p in assoc_bg:
+                        unit_members[unit_of[p]].append(p)
+                    for p in measured:
+                        if p not in protein_to_og and p not in assoc_bg and id2gos.get(p):
+                            unit_members[p].append(p)
+                    assoc_bg = {unit: gos for unit, gos in og_to_gos.items()
+                                if gos and unit in reach}
+                    bg_set = set(assoc_bg.keys())
+                    fg_in_bg = sorted({unit_of[p] for p in perm_fg})
+                    og_perm = {"unit_of": unit_of, "base": perm_base, "fg": perm_fg,
+                               "n_unassigned": n_unassigned, "members": unit_members,
+                               "n_measured": len(dict.fromkeys(measured))}
+                    # The coverage banner reports what this test used: the pasted
+                    # proteins that entered (through their orthogroups) and the
+                    # units, not the proteins of the expanded sets.
+                    annotation_stats.update({
+                        "counting": "per_orthogroup",
+                        "tested_proteins": len(perm_fg),
+                        "foreground_units": len(fg_in_bg),
+                        "background_units": len(assoc_bg),
+                        "background_proteins": og_perm["n_measured"],
+                    })
+                    pasted_fg = list(dict.fromkeys(fg_input))
+                    untested = _untested_ids(pasted_fg, set(perm_fg), set(measured),
+                                             lambda p: bool(og_to_gos.get(unit_of[p])),
+                                             known_ids, pasted_as)
+                    untested_labels["no_annotation"] += ", its own or its orthogroup's"
+                    logging.info(f"[GO] Per-orthogroup counting: "
+                                 f"foreground units={len(fg_in_bg)}, "
+                                 f"background units={len(assoc_bg)}, "
+                                 f"unassigned bg/fg proteins={n_unassigned}")
+                else:
+                    logging.warning("[GO][WARN] per_orthogroup requested but no foreground "
+                                    "protein maps to an annotated unit — falling back to per_protein.")
                     counting_mode = 'per_protein'
                     warnings.append(
-                        "Requested per_orthogroup counting, but no orthogroup mapping "
-                        "was available — fell back to per_protein. Pseudoreplication "
-                        "was NOT corrected.")
+                        "Per-orthogroup counting was not possible: "
+                        + ("no orthogroup mapping was available"
+                           if not protein_to_og else
+                           "none of the pasted foreground proteins is in the background with "
+                           "GO annotation, its own or that of its orthogroup")
+                        + " — fell back to per_protein. Pseudoreplication was NOT corrected.")
             except Exception as e:
                 logging.warning(f"[GO][WARN] per_orthogroup collapse failed ({e}); "
                                 f"falling back to per_protein.")
@@ -3446,6 +3943,31 @@ def gene_ontology_analysis():
                 warnings.append(
                     f"per_orthogroup collapse failed ({e}) — fell back to per_protein. "
                     f"Pseudoreplication was NOT corrected.")
+        if counting_forced and counting_mode == 'per_orthogroup':
+            warnings.append(
+                "The foreground or background was expanded to full orthogroups, so it was "
+                "counted per orthogroup: counted per protein, every member of an orthogroup "
+                "would be a separate observation and the functions of large paralogue "
+                "families would look enriched by chance.")
+        if proteome_universe and counting_mode == 'per_protein':
+            # The universe above pools every GOA file for the per-orthogroup test;
+            # counted per protein it would mix species, so do not report it.
+            logging.error("[GO][ERR] per-orthogroup counting failed with 'Use all GOA files'")
+            return respond(False, "Foreground IDs have no GO terms in background",
+                           where="gene_ontology_analysis",
+                           hint=("None of the pasted foreground proteins has a GO annotation"
+                                 + (" with the selected evidence codes" if evidence_preset != 'all' else "")
+                                 + ", its own or that of its orthogroup."),
+                           code=400)
+        if not fg_in_bg:
+            return _no_overlap()
+        if counting_mode == 'per_protein' and sets_expanded:
+            # Only reached when the per-orthogroup collapse above fell back.
+            warnings.append(
+                "The foreground or background was expanded to full orthogroups and counted "
+                "per protein: every member of an orthogroup counts as a separate observation, "
+                "which over-weights large paralogue families and can make their functions "
+                "look enriched by chance. Do not rely on these results.")
 
         # -------------------------------
         # LOAD ONTOLOGY
@@ -3482,6 +4004,7 @@ def gene_ontology_analysis():
 
         results = []
         universe_by_ns = {}
+        ns_universes = {}       # the units themselves, for the per-orthogroup permutation
         try:
             for _ns in ('biological_process', 'cellular_component', 'molecular_function'):
                 # Universe: background proteins carrying at least one term in THIS
@@ -3502,6 +4025,7 @@ def gene_ontology_analysis():
                             for p in ns_univ}
                 ns_study = [p for p in fg_in_bg if p in ns_univ]
                 universe_by_ns[_ns] = (len(ns_study), len(ns_univ))
+                ns_universes[_ns] = ns_univ
                 if len(ns_study) < 1:
                     continue
                 goea = GOEnrichmentStudy(
@@ -3579,6 +4103,40 @@ def gene_ontology_analysis():
         ]
         logging.info(f"[GO] Correction family: {len(testable)} of {len(results)} terms "
                      f"(depth>={min_depth}, {min_term_size}<=size<={max_term_size})")
+
+        # Per-orthogroup counting: replace each term's hypergeometric p-value by
+        # its permutation p-value (see the COUNTING MODE block). The hypergeometric
+        # value stays available as ``p_hypergeom``; it is the test statistic.
+        n_perm = None
+        if og_perm is not None and testable:
+            if test_direction == 'greater':
+                from orthogather.core.og_permutation import permutation_pvalues, n_permutations
+                n_perm = n_permutations(len(testable), p_value_threshold)
+                unit_of = og_perm["unit_of"]
+                for _ns, univ in ns_universes.items():
+                    recs = [r for r in testable if r.goterm.namespace == _ns]
+                    if not recs:
+                        continue
+                    idx = {u: i for i, u in enumerate(sorted(univ))}
+                    base_unit = np.array([idx[unit_of[p]] for p in og_perm["base"]
+                                          if unit_of[p] in idx])
+                    fg_prot = [p for p in og_perm["fg"] if unit_of[p] in idx]
+                    if not fg_prot:
+                        continue
+                    p_perm, p_hyp = permutation_pvalues(
+                        base_unit, len(fg_prot),
+                        np.array([idx[unit_of[p]] for p in fg_prot]),
+                        [np.array([idx[u] for u in r.pop_items]) for r in recs],
+                        len(idx), n_perm)
+                    for r, pp, ph in zip(recs, p_perm, p_hyp):
+                        r.p_hypergeom = float(ph)
+                        r.p_uncorrected = float(pp)
+                logging.info(f"[GO] Per-orthogroup permutation p-values: {n_perm} shuffles")
+            else:
+                warnings.append(
+                    "Per-orthogroup counting with a two-sided test uses hypergeometric "
+                    "p-values, which do not account for family size.")
+
         for r, q in zip(testable, _bh([r.p_uncorrected for r in testable])):
             r.p_fdr_bh = float(q)
 
@@ -3659,6 +4217,11 @@ def gene_ontology_analysis():
                 }) if res else pd.DataFrame(columns=[
                     "GO","name","NS","Direction","-log10(FDR)","study_count","study_n","pop_count","pop_n"
                 ])
+                if res and n_perm:
+                    # Per-orthogroup: p_uncorrected is the permutation p-value;
+                    # keep the hypergeometric statistic it was computed from.
+                    df.insert(df.columns.get_loc("p_uncorrected") + 1, "p_hypergeom",
+                              [getattr(r, "p_hypergeom", None) for r in res])
                 df.to_excel(xw, sheet_name=ns, index=False)
             # Provenance + run settings, so a downloaded report is reproducible.
             prov = build_provenance()
@@ -3677,6 +4240,7 @@ def gene_ontology_analysis():
                 ("Proteome catalogue downloaded", cat.get("downloaded_at")),
                 ("Proteome count",               cat.get("proteome_count")),
                 ("OrthoFinder version",          prov.get("orthofinder_version")),
+                ("GOATOOLS version",             _goatools_version()),
                 ("GO ontology version",          onto.get("data_version")),
                 ("GOA data generated (EBI)",     _join(g.get("data_generated"))),
                 ("GOA GO-version (EBI)",         _join(g.get("go_version"))),
@@ -3691,6 +4255,12 @@ def gene_ontology_analysis():
                                                   else ", ".join(sorted(evidence_codes)))),
                 ("Counting mode requested",      counting_mode_requested),
                 ("Counting mode applied",        counting_mode),
+                ("Foreground expanded to orthogroups", bool(session.get("foreground_used_orthogroups"))),
+                ("Background expanded to orthogroups", bool(session.get("background_used_orthogroups"))),
+                ("Orthogroups used for expansion", (
+                    "single-copy only" if (session.get("foreground_single_copy")
+                                           or session.get("background_single_copy"))
+                    else "all" if sets_expanded else "no expansion")),
                 ("Test",                         ("Fisher exact, one-sided (over-representation only)"
                                                   if test_direction == 'greater' else
                                                   "Fisher exact, two-sided (reports depleted terms too)")),
@@ -3709,20 +4279,35 @@ def gene_ontology_analysis():
                 ("Annotation propagation edges", "is_a, part_of (True Path Rule)"),
                 ("Annotation propagation",       "enabled (propagate_counts=True)"),
                 ("FDR threshold",                p_value_threshold),
+                ("Display threshold (FDR)",      display_p_value_threshold),
+                ("Max terms per namespace",      max_terms if max_terms else "all"),
                 ("Min depth",                    min_depth),
-                ("GO term size range",           f"{min_term_size}-{max_term_size} background proteins"),
+                ("GO term size range",           f"{min_term_size}-{max_term_size} background "
+                                                 f"{'units (orthogroups or unassigned proteins)' if og_perm else 'proteins'}"),
                 ("Terms in correction family",   len(testable)),
+                ("Background",                   background_desc),
                 ("Foreground units",             len(fg_in_bg)),
                 # The universe actually passed to GOATOOLS is the annotated
                 # background, not every background protein. Report what was used.
                 ("Background units (annotated)",  len(assoc_bg)),
-                ("Background units (submitted)",  len(bg_set)),
+                # Per orthogroup, the units come from the measured proteins; per
+                # protein, the annotated units are a subset of those submitted.
+                (("Background proteins (measured)", og_perm["n_measured"]) if og_perm else
+                 ("Background units (submitted)",  len(bg_set))),
             ]
-            if counting_mode == 'per_orthogroup':
-                prov_rows.append((
-                    "Background universe note",
-                    "per_orthogroup: background = orthogroups in 'Groups of Interest' "
-                    "with an annotated member (not all GOA proteins)"))
+            if counting_mode == 'per_orthogroup' and og_perm:
+                prov_rows.extend([
+                    ("Background universe note",
+                     "per_orthogroup: one unit per orthogroup with an annotated background "
+                     "member, plus one per annotated background protein in no orthogroup"),
+                    ("Proteins in no orthogroup (background / foreground)",
+                     "{} / {}, each counted as its own unit".format(*og_perm["n_unassigned"])),
+                    ("Per-orthogroup p-values",
+                     (f"permutation: {n_perm} shuffles of {len(og_perm['fg'])} foreground labels "
+                      f"among {len(og_perm['base'])} background proteins (seed 20261020); "
+                      f"p_hypergeom is the statistic") if n_perm else
+                     "hypergeometric (two-sided test; family size not accounted for)"),
+                ])
             pd.DataFrame(prov_rows, columns=["key", "value"]).to_excel(
                 xw, sheet_name="Provenance", index=False)
         logging.info(f"[GO] 📑 Excel generated: {out_xlsx}")
@@ -3735,7 +4320,11 @@ def gene_ontology_analysis():
             _goa_v = g.get("go_version")
             if isinstance(_goa_v, list):
                 _goa_v = _goa_v[0] if _goa_v else None
-            if _obo_v and _goa_v and str(_obo_v) != str(_goa_v):
+            # The OBO says "releases/2026-07-26"; the GOA header gives the full
+            # purl ".../releases/2026-07-26/extensions/go-plus.ofn". Compare the
+            # release dates, not the strings, or every run would be flagged.
+            _date = lambda v: (re.search(r"\d{4}-\d{2}-\d{2}", str(v)) or [str(v)])[0]
+            if _obo_v and _goa_v and _date(_obo_v) != _date(_goa_v):
                 warnings.append(
                     f"GO ontology version ({_obo_v}) differs from the GOA GO-version "
                     f"({_goa_v}); a few annotations referencing terms outside the loaded "
@@ -3752,17 +4341,11 @@ def gene_ontology_analysis():
         # that contributed to that OG.
         def evidence_breakdown_for_term(go_id, study_ids):
             counts = defaultdict(int)
-            if counting_mode == 'per_orthogroup':
-                # study_ids are OG IDs; pull back to constituent proteins
-                # (those whose protein_to_og maps here AND that carry the term)
-                proteins_for_og = defaultdict(list)
-                try:
-                    for p, og in protein_to_og.items():
-                        proteins_for_og[og].append(p)
-                except NameError:
-                    pass
+            if og_perm is not None:
+                # study_ids are units (orthogroups, or proteins in none): count
+                # the evidence of the annotated background proteins behind them.
                 for og in study_ids:
-                    for p in proteins_for_og.get(og, []):
+                    for p in og_perm["members"].get(og, []):
                         for ev in id2evidence.get(p, {}).get(go_id, []):
                             counts[ev] += 1
             else:
@@ -3781,6 +4364,7 @@ def gene_ontology_analysis():
                     "namespace": r.goterm.namespace,
                     "depth": godag[r.GO].depth if r.GO in godag else 0,
                     "p_uncorrected": r.p_uncorrected,
+                    "p_hypergeom": getattr(r, "p_hypergeom", None),
                     "p_fdr_bh": r.p_fdr_bh,
                     # Floor the q-value before the log: a q that underflows to
                     # exactly 0.0 is falsy, and the old guard turned the MOST
@@ -3834,12 +4418,12 @@ def gene_ontology_analysis():
         notice = None
         if counting_mode == 'per_orthogroup' and total_sig == 0:
             notice = (
-                f"Per-orthogroup counting collapsed your foreground to "
-                f"{foreground_units} orthogroup{'s' if foreground_units != 1 else ''}, "
-                f"too few to reach significance — so no terms came up. This is "
-                f"expected when the foreground spans few orthogroups: per-protein "
-                f"mode may report terms, but those are driven by paralogs within "
-                f"these groups (pseudoreplication), which per-orthogroup removes."
+                f"Per-orthogroup counting tested {foreground_units} foreground "
+                f"unit{'s' if foreground_units != 1 else ''} (orthogroups, plus proteins in "
+                f"no orthogroup) and no term reached significance. Its p-values come from "
+                f"shuffling your foreground labels among the background proteins, so they "
+                f"allow for large families being hit by chance; terms that per-protein "
+                f"counting reports may rest on several paralogues of the same family."
             )
 
         # -------------------------------
@@ -3853,6 +4437,13 @@ def gene_ontology_analysis():
                            "mf_results": serialise(mf_results),
                            "excel_file_path": "download_go_enrichment_excel",
                            "annotation_stats": annotation_stats,
+                           "input_ids": {
+                               "pasted": len(pasted_fg),
+                               "untested": untested,
+                               "labels": untested_labels,
+                               "summary": _untested_summary(untested, len(pasted_fg),
+                                                            untested_labels),
+                           },
                            "settings": session['go_settings'],
                            "counting": {
                                "mode": counting_mode,
@@ -3871,6 +4462,14 @@ def gene_ontology_analysis():
                        where="gene_ontology_analysis",
                        hint="Check logs and make sure OBO/GOA files exist.",
                        code=500)
+
+def _goatools_version():
+    try:
+        import goatools
+        return getattr(goatools, "__version__", None)
+    except Exception:
+        return None
+
 
 @app.route("/download_go_enrichment_excel")
 def download_go_enrichment_excel():
@@ -4018,4 +4617,5 @@ if __name__ == "__main__":
     logging.info(f"🚀 Starting Flask on port {port}")
     if not no_browser:
         threading.Timer(1.25, open_browser, args=(port,)).start()
-    app.run(debug=True, use_reloader=False, port=port)
+    # The Werkzeug debugger runs code typed into an error page; never on by default.
+    app.run(debug=os.environ.get("ORTHOGATHER_DEBUG") == "1", use_reloader=False, port=port)

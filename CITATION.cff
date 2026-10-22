@@ -8,8 +8,8 @@ abstract: >
   infer orthogroups, explores orthogroup composition across species, and
   tests Gene Ontology over-representation with GOATOOLS.
 type: software
-version: "2.1.1"
-date-released: "2026-10-18"
+version: "2.2.0"
+date-released: "2026-10-22"
 license: GPL-3.0-or-later
 url: "https://github.com/CarlosVivasR/OrthoGather"
 repository-code: "https://github.com/CarlosVivasR/OrthoGather"

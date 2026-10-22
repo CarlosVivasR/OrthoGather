@@ -23,6 +23,13 @@ Benjamini–Hochberg correction itself:
 - The foreground is restricted to proteins that are annotated and present in the background. An
   identifier that carries GO terms but was not detected in the experiment is left out, because it
   is not in the background.
+- Pasted identifiers are read before the test. A FASTA header (`>sp|P0A6F5|CH60_ECOLI …`, or
+  `sp|P0A6F5|CH60_ECOLI` followed by a description) gives its accession and the sequence lines
+  are skipped; accessions are converted to upper case; an isoform suffix (`P00350-2`) is removed,
+  with a warning, because GOA files annotate the canonical accession; duplicates are dropped.
+  Identifiers that are not UniProt accessions keep their case. The results list each pasted
+  foreground identifier that did not enter the test, with the reason: not found in the analysis,
+  not in the background, no GO annotation, or left out by the orthogroup expansion.
 
 There are three evidence presets. All keeps every annotation. Non-IEA (called "curated" in the
 exported files) keeps EXP, IDA, IPI, IMP, IGI, IEP, TAS, IC, IBA and the high-throughput codes
@@ -32,14 +39,37 @@ codes.
 
 Counting can be per protein or per orthogroup. With per-protein counting, an orthogroup with ten
 members contributes ten observations to a term, which overstates the evidence when the sets are
-expanded to full orthogroups; per-orthogroup counting counts each orthogroup once. The Orthogroups
-setting (all, or single-copy only) affects only expansion.
+expanded to full orthogroups; per-orthogroup counting counts each orthogroup once, with the union of
+the annotations of its background members, and counts each annotated protein that is in no
+orthogroup as a unit of its own. When the foreground or the background is expanded, counting is
+always per orthogroup: per protein, a family would count once per paralogue, and in a benchmark
+with random foregrounds that gave a significant term in every replicate. Counted per orthogroup,
+the foreground is always the pasted proteins, each through its orthogroup, so expanding the
+foreground only sets the counting; expanding the background is what gives each orthogroup the
+annotations of its members in the other species. An orthogroup is in the foreground when it contains a foreground
+protein, so a family of many detected paralogues is more likely to be there by chance than a pair.
+The p-values of this mode therefore come from a permutation test: the foreground labels are
+shuffled among the background proteins as pasted (before any expansion; with **Use all GOA files**,
+the proteome of the foreground's species in the analysis), each shuffle is collapsed to orthogroups in
+the same way (a pasted protein with no annotation of its own takes part through the annotations of
+its orthogroup, which is what expansion adds), and the observed hypergeometric p-value (exported as `p_hypergeom`) is compared with
+the shuffled ones. The number of shuffles is 2m/α, between 5,000 and 50,000, where m is the number
+of terms in the correction family; the seed is fixed, so a run is reproducible. The Orthogroups
+setting (all, or single-copy only) affects only expansion, and is applied when a set is loaded.
 
-The `Provenance` worksheet of each results file records the evidence codes, the counting mode, the
-test, the FDR threshold, the minimum depth, the term-size limits and the sizes of the foreground
-and background. It does not record whether either set was expanded, the single-copy filter, the
-background type, the maximum number of terms shown, the display threshold or the GOATOOLS version,
-so report these in your methods.
+With **Use all GOA files**, the universe is the annotated proteome of the species the foreground
+proteins belong to, not of every species in the analysis: with a foreground from one species, a
+pooled universe makes any function that is commoner in that species look enriched. Counted per
+orthogroup, the universe is the whole proteome of that species in the analysis, each protein taking
+part through its orthogroup, and the orthogroups carry the annotations of every GOA file. That is
+the same as pasting the proteome as the background and expanding it, and it works the same for a
+species with a complete, a partial or no GOA file.
+
+The `Provenance` worksheet of each results file records the data versions (UniProt, GOA, the GO
+ontology, OrthoFinder and GOATOOLS) and every setting of the run: the evidence codes, the counting
+mode, whether each set was expanded and with which orthogroups, the background, the test, the FDR
+and display thresholds, the maximum number of terms shown, the minimum depth, the term-size limits
+and the sizes of the foreground and background.
 
 ## OrthoFinder thread settings
 
@@ -114,10 +144,16 @@ When reporting a problem, quote the `ERR_` code in the
 
 ## Test suite
 
-The repository has 101 tests covering species matching, taxonomy, the error catalogue, OrthoXML
-import, catalogue building, file names and provenance. The enrichment statistics have no automated
-test; the worked example in [`example_analysis/`](../example_analysis/) is the reference for
-checking them.
+The repository has 165 tests covering species matching, taxonomy, the error catalogue, OrthoXML
+import, catalogue building, file names, provenance, pasted identifiers, local security, the
+per-orthogroup permutation test (its calibration on random foregrounds and its power), the GOA files
+per species, single-copy orthogroups, failed OrthoFinder runs, and every combination of the Gene
+Ontology settings through the real routes (`tests/test_go_combinations.py`: the counting mode applied,
+the notes that explain it, Fisher p-values equal to SciPy's and a Benjamini-Hochberg correction that
+reproduces). The worked example is checked number by number by
+`docs/validation/verify_example.py`; [`docs/validation/`](validation/) also holds the calibration of
+every setting on random foregrounds and the benchmark of expansion with a species' annotations
+hidden. GitHub Actions runs the tests and the example check on Linux and macOS on every change.
 
 ```bash
 conda activate orthogather

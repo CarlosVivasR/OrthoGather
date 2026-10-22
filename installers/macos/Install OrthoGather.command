@@ -14,10 +14,24 @@ set -euo pipefail
 
 # ---- Configuration ---------------------------------------------------------
 REPO="CarlosVivasR/OrthoGather"
-BRANCH="main"          # switch to a release tag when one exists
 ENV_NAME="${ORTHOGATHER_ENV:-orthogather}"            # override for testing
 APP_DIR="${ORTHOGATHER_DIR:-$HOME/Applications/OrthoGather}"  # override for testing
-ZIP_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.zip"
+# The application comes from the latest published release (a vX.Y.Z tag), not
+# from the tip of main, so every installation is a version that was tested and
+# archived on Zenodo. ORTHOGATHER_REF installs another tag, or a branch.
+FALLBACK_TAG="v2.2.0"   # used only if GitHub's release list cannot be read
+latest_release_tag() {
+  curl -fsSL --retry 3 "https://api.github.com/repos/${REPO}/releases?per_page=30" 2>/dev/null \
+    | grep -o 'tag_name.: *.v[0-9][0-9.]*' | grep -o 'v[0-9][0-9.]*$' | head -1
+}
+release_zip_url() {  # release_zip_url -> sets REF and ZIP_URL
+  REF="${ORTHOGATHER_REF:-$(latest_release_tag || true)}"
+  REF="${REF:-$FALLBACK_TAG}"
+  case "$REF" in
+    v[0-9]*) ZIP_URL="https://github.com/${REPO}/archive/refs/tags/${REF}.zip" ;;
+    *)       ZIP_URL="https://github.com/${REPO}/archive/refs/heads/${REF}.zip" ;;
+  esac
+}
 MINIFORGE_BASE="https://github.com/conda-forge/miniforge/releases/latest/download"
 
 # ---- Pretty output ---------------------------------------------------------
@@ -96,7 +110,8 @@ fi
 source "$CONDA_BASE/etc/profile.d/conda.sh"
 
 # ---- 3. Download the app ---------------------------------------------------
-say "⬇️  Downloading OrthoGather…"
+release_zip_url
+say "⬇️  Downloading OrthoGather ${REF}…"
 mkdir -p "$HOME/Applications"
 tmp_zip="$(mktemp -t orthogather).zip"
 tmp_dir="$(mktemp -d -t orthogather)"

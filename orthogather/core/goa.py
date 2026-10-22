@@ -197,6 +197,42 @@ def build_id2gos_from_goa_folder(goa_folder: str,
     return out
 
 
+def proteins_by_goa_file(goa_folder: str,
+                         limit_files: Optional[List[str]] = None) -> Dict[str, set]:
+    """Map each GOA file name to the set of accessions it annotates.
+
+    Used to keep the "all GOA files" universe to the species the foreground
+    comes from: testing proteins of one species against a pool of several
+    species makes every function that is commoner in that species look
+    enriched, whatever the experiment did. Cached on the folder contents.
+    """
+    folder = Path(goa_folder)
+    try:
+        key = _goa_cache_key(folder, limit_files, None, False)
+    except OSError:
+        key = None
+    if key is not None and _by_file_cache["key"] == key:
+        return _by_file_cache["value"]
+    out: Dict[str, set] = {}
+    files = sorted(f for pat in ("*.goa", "*.gaf", "*.goa.gz", "*.gaf.gz") for f in folder.glob(pat))
+    if limit_files:
+        files = [f for f in files if f.name in set(limit_files)]
+    for f in files:
+        accs = set()
+        with _open_gaf(f) as fh:
+            for line in fh:
+                if not line or line.startswith("!"):
+                    continue
+                cols = line.split("\t", 2)
+                if len(cols) >= 2 and cols[1].strip():
+                    accs.add(cols[1].strip())
+        out[f.name] = accs
+    if key is not None:
+        _by_file_cache["key"] = key
+        _by_file_cache["value"] = out
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Module-level caches — drastically reduce per-run cost of /gene_ontology_analysis.
 #
@@ -220,6 +256,7 @@ def build_id2gos_from_goa_folder(goa_folder: str,
 
 _godag_cache = {"path": None, "mtime": None, "godag": None}
 _id2gos_cache = {"key": None, "id2gos": None, "evidence_map": None}
+_by_file_cache = {"key": None, "value": None}
 
 
 def read_obo_metadata(path: str) -> dict:

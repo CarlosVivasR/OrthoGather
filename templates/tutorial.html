@@ -75,9 +75,10 @@
             the same dataset: <em>what biological processes are enriched in this subset?</em>
           </p>
           <p>
-            Everything runs on your machine; no data leaves your laptop. The only outgoing
-            traffic is downloading reference proteomes (UniProt) and GO annotation files
-            (GOA), and the GO basic ontology.
+            Everything runs on your machine; your protein lists never leave it. The outgoing
+            traffic is downloading reference proteomes (UniProt) and GO annotation files (GOA),
+            looking up the taxonomy of your species (UniProt), checking for catalogue updates
+            (GitHub) and loading the plotting libraries and fonts, which come from public CDNs.
           </p>
 
           <figure class="tutorial-figure">
@@ -144,7 +145,7 @@
           </p>
           <ul>
             <li>you have an OrthoDB <code>.orthoxml</code> covering hundreds of species and just
-              want to do UpSet plots / GO enrichment on a subset;</li>
+              want UpSet plots for a subset;</li>
             <li>you want to compare two orthology methods (e.g. OrthoFinder vs OMA) on the same
               species set — upload each one separately;</li>
             <li>you trust an external curation pipeline more than what OrthoFinder would produce
@@ -155,8 +156,14 @@
             nested <code>&lt;paralogGroup&gt;</code> blocks (every gene inside an
             <code>&lt;orthologGroup&gt;</code> ends up in the same orthogroup row), and writes the
             same <code>Orthogroups.tsv</code> / <code>Orthogroups.GeneCount.tsv</code> files that
-            OrthoFinder produces. Everything downstream (UpSet plots, GO enrichment, history,
-            compare, citations) works identically.
+            OrthoFinder produces. Each top-level <code>&lt;orthologGroup&gt;</code> becomes one
+            orthogroup, so a hierarchical group exported at its deepest level becomes one large
+            orthogroup. The orthogroup analyses (UpSet plots, history, compare) work with any
+            identifiers. GO enrichment and the protein filter match <strong>UniProt
+            accessions</strong>: OMA, OrthoDB and Ensembl write their own identifiers (for example
+            OMA's <code>ECOLI03899</code> for UniProt <code>P0A6F5</code>), so map them to UniProt
+            accessions before exporting if you want to use the Gene Ontology module. OrthoGather
+            warns you after the upload when most identifiers are not UniProt accessions.
           </p>
         </section>
 
@@ -325,13 +332,12 @@
           <p>
             Once the download finishes, an <strong>Annotation overview</strong> panel appears: a
             quick sanity check on how much of your dataset GO annotation can reach, with a
-            distribution chart of the share of proteins per orthogroup that belong to a species
-            with a GOA file. Read it as a <strong>ceiling</strong>, not as the real annotation rate:
-            a species with a GOA file still leaves a fraction of its proteins with no GO term at all
-            (in the six-species example that fraction ranges from 4% for <em>E. coli</em> to 28% for
-            <em>M. abscessus</em>). The exact per-protein number appears later, in the coverage
-            banner of the enrichment run. Use this chart to judge whether an enrichment will have
-            enough signal <em>before</em> you run it.
+            distribution chart of the share of proteins per orthogroup that carry at least one GO
+            term in the downloaded GOA files. Read it as a <strong>ceiling</strong>: it counts every
+            evidence code and every protein in the analysis, while the enrichment uses only your
+            background and the evidence codes you select. The number for your own proteins appears
+            later, in the coverage banner of the enrichment run. Use this chart to judge whether an
+            enrichment will have enough signal <em>before</em> you run it.
           </p>
           <h4>GOA, GAF, UniProt: who provides what?</h4>
           <ul>
@@ -354,18 +360,24 @@
           <h3>3. Foreground</h3>
           <p>
             The <strong>foreground</strong> is your hit list: the proteins you want to enrich.
-            Paste UniProt IDs (one per line or space-separated; FASTA headers are accepted too).
+            Paste UniProt accessions (one per line, or separated by spaces, commas or semicolons).
+            FASTA headers are also accepted, with or without their sequences: <code>&gt;sp|P0A6F5|CH60_ECOLI …</code>
+            and <code>sp|P0A6F5|CH60_ECOLI</code> are read as <code>P0A6F5</code>. Lower-case accessions are
+            converted to upper case, and isoform suffixes (<code>-2</code>) are removed with a warning, because
+            GOA files annotate the canonical protein. The same rules apply to the background and to the
+            UniProt filter of Figures 5 and 6.
           </p>
           <p>
-            Tick <strong>Expand to full orthogroups</strong> to broaden the test: any orthogroup
-            that contains one of your hits contributes <em>all</em> its members, from every species
-            with a GOA file, to the foreground. You are then asking
+            Tick <strong>Expand to full orthogroups</strong> to test your proteins through their
+            orthogroups: each orthogroup that contains one of your hits counts once, with the
+            annotations of its background members. You are then asking
             <em>"what functions are enriched across these protein families?"</em> rather than
-            <em>"what functions are enriched in this exact set of proteins?"</em>. No annotation is
-            transferred to your proteins: the test counts the annotations of all the members.
-            Some of those annotations may apply only to the other species, so count per
-            orthogroup and check that the enriched terms make sense for your organism. Expanded
-            proteins are tested only if they are also in the background.
+            <em>"what functions are enriched in this exact set of proteins?"</em>. To use the
+            annotations of the orthologues in other species (for a species with few or no GO
+            annotations), expand the background too. No annotation is transferred to your
+            proteins: the test counts the annotations of each orthogroup. Some of them may apply
+            only to the other species, so check that the enriched terms make sense for your
+            organism.
           </p>
 
           <figure class="tutorial-figure">
@@ -385,11 +397,16 @@
               detected in your experiment. This is the right background for a proteomics
               experiment, as in the worked example of the paper, because only detected proteins
               could have appeared in your hit list.</li>
-            <li><strong>"Use all GOA files"</strong>: every protein in the GOA files of the
-              selected species. Use it when there is no experimental background, for example for
-              a list of proteins taken from the literature.</li>
-            <li><strong>Custom IDs with orthogroup expansion</strong>: the same list expanded to
-              full orthogroups, to match an expanded foreground.</li>
+            <li><strong>"Use all GOA files"</strong>: the annotated proteome of the species your
+              foreground proteins come from (not of every species in the analysis). Counted per
+              orthogroup, it is the whole proteome of that species in the analysis, each protein
+              taking part through its orthogroup, which also works for a species without a GOA
+              file. Use it when there is no experimental background, for example for a list of
+              proteins taken from the literature.</li>
+            <li><strong>Custom IDs with orthogroup expansion</strong>: each orthogroup of the
+              pasted proteins carries the annotations of all its members in the species with a GOA
+              file, so proteins without annotations of their own are tested through their
+              orthologues. Use it when your species has few or no GO annotations.</li>
           </ul>
 
           <h3>5. Analysis settings &amp; run</h3>
@@ -435,16 +452,21 @@
               to paralog confusion.</li>
           </ul>
           <p>
-            This setting matters only when the sets are expanded to full orthogroups.
+            This setting matters only when the sets are expanded to full orthogroups, and it is
+            applied when you load them: choose it before loading the foreground and the background.
           </p>
 
           <h4>Counting</h4>
           <ul>
-            <li><strong>Per protein</strong> (default): every protein in the foreground (after
-              expansion, if used) counts as one observation. Compatible with most published enrichment workflows.</li>
-            <li><strong>Per orthogroup</strong>: collapse each OG to a single observation
-              (one anchor protein per OG). Mitigates pseudoreplication: an OG with 10 species
-              members would otherwise contribute 10 near-identical observations.</li>
+            <li><strong>Per protein</strong> (default): every protein in the foreground counts as
+              one observation. Compatible with most published enrichment workflows. Not available
+              while a set is expanded.</li>
+            <li><strong>Per orthogroup</strong>: each OG is one observation, carrying the
+              annotations of all its background members; a protein in no OG is its own
+              observation. Mitigates pseudoreplication: an OG with 10 species members would
+              otherwise contribute 10 near-identical observations. Its p-values come from a
+              permutation test, because a large family is more likely to contain one of your
+              proteins by chance.</li>
           </ul>
 
           <h3>Reading the output</h3>
@@ -475,16 +497,29 @@
             foreground is:
           </p>
           <ul>
-            <li><strong>You pasted</strong>: the raw count of UniProt IDs you submitted.</li>
-            <li><strong>After orthogroup expansion</strong> (only shown when you ticked
-              "Expand to full orthogroups"): the expanded foreground size, i.e. how many
-              proteins the test actually runs on.</li>
+            <li><strong>You pasted</strong>: the number of distinct UniProt IDs you submitted, after
+              reading FASTA headers and removing isoform suffixes and duplicates.</li>
             <li><strong>With GO annotations</strong>: the subset that has at least one GO
               term in the background, plus the percentage. Below 30% triggers a warning
               note; above 60% is "good coverage".</li>
             <li><strong>Background universe</strong>: the total size of the universe the
               hypergeometric test runs against.</li>
           </ul>
+          <p>
+            Counted per orthogroup, the banner reports the units of that test instead:
+            <strong>Tested</strong>, the pasted proteins that entered it through an annotated
+            orthogroup (or on their own, when they are in no orthogroup), and the number of those
+            units; and a <strong>Background universe</strong> of orthogroups and unassigned
+            proteins.
+          </p>
+          <p>
+            Below the banner, the pasted foreground IDs that did not enter the test are listed with
+            the reason: <em>not found in this analysis</em> (in none of its proteomes, GOA files or
+            background: often a typo, a merged accession or a protein of another species),
+            <em>not in the background</em>, <em>no GO annotation</em> (with the selected evidence
+            codes), or <em>left out by the orthogroup expansion</em> (the protein is in no
+            orthogroup, or the single-copy filter removed its orthogroup).
+          </p>
 
           <h4>Bar chart</h4>
           <ul>
@@ -536,8 +571,8 @@
               <span style="color:#4b5563;font-weight:600">gray = computational</span> (IEA, ISS and other sequence-similarity codes).
               Hover any chip for the code name and count.</li>
             <li><strong>Export</strong>: CSV / TSV / JSON of the currently <em>filtered</em>
-              rows (i.e. only what the table is showing), or the full Excel of every
-              significant term from the GOATOOLS run.</li>
+              rows (i.e. only what the table is showing), or the full Excel of every term the
+              run reports, with its settings in a Provenance sheet.</li>
           </ul>
 
           <figure class="tutorial-figure">
@@ -619,16 +654,18 @@
           <details class="tutorial-faq">
             <summary>What does "Expand to full orthogroups" do?</summary>
             <p>
-              It adds every other member of each foreground orthogroup, from the species with
-              GOA files, to the set being tested, so the test counts the GO annotations of
-              all of them. No annotation is transferred to or assigned to any protein: a protein
-              without GO terms still has none. What changes is which annotations the test counts.
+              Your proteins are tested through their orthogroups, each counted once. Expanding
+              the background makes each orthogroup carry the GO annotations of all its members in
+              the species with GOA files, so a protein without annotations of its own can still
+              be tested through its orthologues. No annotation is transferred to or assigned to
+              any protein: a protein without GO terms still has none. What changes is which
+              annotations the test counts.
             </p>
             <p>
               <strong>Note:</strong> the annotations of an orthogroup are combined, not voted on.
               If 9 out of 10 members say "DNA repair" and 1 says "kinase activity", both are
-              counted, and annotations that apply only to another lineage are counted too. Use
-              per-orthogroup counting with expansion, check that the enriched terms make sense
+              counted, and annotations that apply only to another lineage are counted too. Expanded
+              sets are counted per orthogroup; check that the enriched terms make sense
               for your organism, and for a stricter test combine it with
               <em>Experimental only</em> evidence and <em>Single-copy</em> orthogroups.
             </p>
@@ -681,11 +718,13 @@
           <details class="tutorial-faq">
             <summary>Per protein vs per orthogroup: which should I use?</summary>
             <p>
-              If your foreground has many large orthogroups, per-protein counting can inflate
-              significance (the same annotation gets counted N times, once per orthologous
-              copy). Per-orthogroup counting is more conservative; each OG contributes one
-              observation. We default to per-protein for compatibility with published
-              workflows; switch to per-orthogroup when you want to be statistically careful.
+              Without expansion, per protein is the standard choice: each protein you measured
+              is one observation. If you expand the sets to full orthogroups, OrthoGather always
+              counts per orthogroup, because per-protein counting would count the same annotation
+              N times, once per orthologous copy; per-orthogroup counting counts each OG once and takes its
+              p-values from a permutation test that allows for large families being hit by
+              chance. It answers a family-level question, so read its terms as functions of
+              protein families, not of your exact proteins.
             </p>
           </details>
         </section>

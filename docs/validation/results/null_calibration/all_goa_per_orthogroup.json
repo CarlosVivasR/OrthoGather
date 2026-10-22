@@ -1,0 +1,47 @@
+{
+ "setting": "all_goa_per_orthogroup",
+ "hide": null,
+ "bg": "all_goa",
+ "expand": false,
+ "counting": "per_orthogroup",
+ "drawn_from": 6603,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_orthogroup": 100
+ },
+ "with_a_significant_term": 7,
+ "rate": 0.07,
+ "wilson_95ci": [
+  0.0343,
+  0.1375
+ ],
+ "most_frequent_terms": [
+  [
+   "oxidoreductase activity, acting on the CH-CH group of donors, NAD or NADP as acceptor",
+   1
+  ],
+  [
+   "regulation of cell motility",
+   1
+  ],
+  [
+   "vitamin biosynthetic process",
+   1
+  ],
+  [
+   "water-soluble vitamin biosynthetic process",
+   1
+  ],
+  [
+   "vitamin metabolic process",
+   1
+  ]
+ ],
+ "seconds": 2145
+}

@@ -1,0 +1,337 @@
+{
+ "passed": 35,
+ "total": 35,
+ "checks": [
+  {
+   "where": "Paper/S1",
+   "claim": "orthogroups",
+   "expected": 5949,
+   "observed": 5949,
+   "ok": true
+  },
+  {
+   "where": "S1 Fig. S3",
+   "claim": "single-copy orthogroups",
+   "expected": 393,
+   "observed": 393,
+   "ok": true
+  },
+  {
+   "where": "S1 Fig. S3",
+   "claim": "species-specific orthogroups",
+   "expected": 778,
+   "observed": 778,
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "unassigned genes",
+   "expected": 6289,
+   "observed": 6289,
+   "ok": true
+  },
+  {
+   "where": "S1 Fig. S3",
+   "claim": "mean % assigned (range)",
+   "expected": "80.4 (75.1–85.7)",
+   "observed": "80.4 (75.1–85.7)",
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "proteins in the run",
+   "expected": 32219,
+   "observed": 32219,
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "figure 1 data identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "figure 2 data identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "Msm-only orthogroups / proteins",
+   "expected": [
+    447,
+    817
+   ],
+   "observed": [
+    447,
+    817
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "shared by all three: orthogroups / proteins",
+   "expected": [
+    1024,
+    4599
+   ],
+   "observed": [
+    1024,
+    4599
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "Mab ∩ Msm: orthogroups / proteins",
+   "expected": [
+    1699,
+    4709
+   ],
+   "observed": [
+    1699,
+    4709
+   ],
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "figure 3 data identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "figure 4 data identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "Paper/S1",
+   "claim": "IDs mapped / orthogroups / unassigned",
+   "expected": [
+    467,
+    430,
+    24
+   ],
+   "observed": [
+    467,
+    430,
+    24
+   ],
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "figure 5 data identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "figure 6 data identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "Msm-only filtered orthogroups / proteins",
+   "expected": [
+    28,
+    71
+   ],
+   "observed": [
+    28,
+    71
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1 Table S3",
+   "claim": "foreground proteins among them",
+   "expected": 35,
+   "observed": 35,
+   "ok": true
+  },
+  {
+   "where": "S1 Table S3",
+   "claim": "OGs with >1 foreground protein (proteins)",
+   "expected": [
+    5,
+    12
+   ],
+   "observed": [
+    5,
+    12
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1 Table S3",
+   "claim": "OGs with a single foreground protein",
+   "expected": 23,
+   "observed": 23,
+   "ok": true
+  },
+  {
+   "where": "S1 Table S3",
+   "claim": "OGs only foreground / mixed",
+   "expected": [
+    13,
+    15
+   ],
+   "observed": [
+    13,
+    15
+   ],
+   "ok": true
+  },
+  {
+   "where": "Paper/S1",
+   "claim": "orthogroups with ≥1 annotated protein (%)",
+   "expected": "4638 (78.0%)",
+   "observed": "4638 (78.0%)",
+   "ok": true
+  },
+  {
+   "where": "Paper/S1",
+   "claim": "mean / median coverage among annotated",
+   "expected": "93.8 / 100",
+   "observed": "93.8 / 100",
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "orthogroups with no annotated protein",
+   "expected": 1311,
+   "observed": 1311,
+   "ok": true
+  },
+  {
+   "where": "Paper/S1",
+   "claim": "decreased: enriched terms (BP, MF, CC)",
+   "expected": [
+    21,
+    20,
+    1,
+    0
+   ],
+   "observed": [
+    21,
+    20,
+    1,
+    0
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "decreased: annotated & tested / carrying a GO annotation",
+   "expected": [
+    250,
+    251
+   ],
+   "observed": [
+    250,
+    251
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "population (annotated background)",
+   "expected": 2470,
+   "observed": 2470,
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "increased: annotated & tested",
+   "expected": 162,
+   "observed": 162,
+   "ok": true
+  },
+  {
+   "where": "Paper/S1",
+   "claim": "increased: enriched terms",
+   "expected": 1,
+   "observed": 1,
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "increased: translation & protein biosynthetic process at FDR 0.06",
+   "expected": {
+    "translation": 0.06,
+    "protein biosynthetic process": 0.06
+   },
+   "observed": {
+    "translation": 0.06,
+    "protein biosynthetic process": 0.06
+   },
+   "ok": true
+  },
+  {
+   "where": "Paper/S1",
+   "claim": "491 together: one term, protein maturation",
+   "expected": [
+    "protein maturation"
+   ],
+   "observed": [
+    "protein maturation"
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "depth ≥ 5: 14 of the 21 kept + phospholipid metabolic process",
+   "expected": [
+    14,
+    [
+     "phospholipid metabolic process"
+    ]
+   ],
+   "observed": [
+    14,
+    [
+     "phospholipid metabolic process"
+    ]
+   ],
+   "ok": true
+  },
+  {
+   "where": "S1",
+   "claim": "negative-regulation terms: one group of 13 proteins, 11 with transcription terms",
+   "expected": [
+    13,
+    11
+   ],
+   "observed": [
+    13,
+    11
+   ],
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "GO results file (down-regulated_306) identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  },
+  {
+   "where": "example_analysis",
+   "claim": "GO results file (up-regulated_185) identical",
+   "expected": true,
+   "observed": true,
+   "ok": true
+  }
+ ]
+}

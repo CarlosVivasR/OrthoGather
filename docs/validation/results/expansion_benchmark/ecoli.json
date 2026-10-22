@@ -1,0 +1,836 @@
+{
+ "processes": 40,
+ "background": 4403,
+ "summary": {
+  "pure/annotated_per_protein": {
+   "exact": 40,
+   "descendant": 0,
+   "close ancestor": 0,
+   "no": 0,
+   "recovered": 40
+  },
+  "pure/hidden_expanded": {
+   "exact": 30,
+   "descendant": 0,
+   "close ancestor": 5,
+   "no": 5,
+   "recovered": 35
+  },
+  "noisy/annotated_per_protein": {
+   "exact": 40,
+   "descendant": 0,
+   "close ancestor": 0,
+   "no": 0,
+   "recovered": 40
+  },
+  "noisy/hidden_expanded": {
+   "exact": 29,
+   "descendant": 0,
+   "close ancestor": 6,
+   "no": 5,
+   "recovered": 35
+  }
+ },
+ "rows": [
+  {
+   "variant": "pure",
+   "GO": "GO:0007165",
+   "name": "signal transduction",
+   "proteins": 54,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 55
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0022603",
+   "name": "regulation of anatomical structure morphogenesis",
+   "proteins": 15,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 48
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009117",
+   "name": "nucleotide metabolic process",
+   "proteins": 79,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 145
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0046165",
+   "name": "alcohol biosynthetic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 24
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0000302",
+   "name": "response to reactive oxygen species",
+   "proteins": 41,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 16
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009894",
+   "name": "regulation of catabolic process",
+   "proteins": 22,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 7
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0042364",
+   "name": "water-soluble vitamin biosynthetic process",
+   "proteins": 53,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 64
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0006664",
+   "name": "glycolipid metabolic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 33
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0016226",
+   "name": "iron-sulfur cluster assembly",
+   "proteins": 18,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 10
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0015846",
+   "name": "polyamine transport",
+   "proteins": 17,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 25
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0006826",
+   "name": "iron ion transport",
+   "proteins": 33,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 35
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0006812",
+   "name": "monoatomic cation transport",
+   "proteins": 79,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 80
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009123",
+   "name": "nucleoside monophosphate metabolic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 40
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0006364",
+   "name": "rRNA processing",
+   "proteins": 44,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 51
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0051707",
+   "name": "response to other organism",
+   "proteins": 17,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 20
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0015804",
+   "name": "neutral amino acid transport",
+   "proteins": 37,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 57
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0043039",
+   "name": "tRNA aminoacylation",
+   "proteins": 23,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 39
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009185",
+   "name": "ribonucleoside diphosphate metabolic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 80
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009416",
+   "name": "response to light stimulus",
+   "proteins": 25,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 12
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0016071",
+   "name": "mRNA metabolic process",
+   "proteins": 21,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 23
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:2000145",
+   "name": "regulation of cell motility",
+   "proteins": 20,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 22
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0170040",
+   "name": "proteinogenic amino acid catabolic process",
+   "proteins": 25,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 29
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009073",
+   "name": "aromatic amino acid biosynthetic process",
+   "proteins": 22,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 44
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0019320",
+   "name": "hexose catabolic process",
+   "proteins": 32,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 50
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0010165",
+   "name": "response to X-ray",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 0
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0006281",
+   "name": "DNA repair",
+   "proteins": 64,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 71
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0071826",
+   "name": "protein-RNA complex organization",
+   "proteins": 47,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 45
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0044042",
+   "name": "glucan metabolic process",
+   "proteins": 19,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 17
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0015718",
+   "name": "monocarboxylic acid transport",
+   "proteins": 37,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 22
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0009112",
+   "name": "nucleobase metabolic process",
+   "proteins": 25,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 34
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0042181",
+   "name": "ketone biosynthetic process",
+   "proteins": 27,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 21
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0051259",
+   "name": "protein complex oligomerization",
+   "proteins": 73,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 73
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0006260",
+   "name": "DNA replication",
+   "proteins": 51,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 73
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0008652",
+   "name": "amino acid biosynthetic process",
+   "proteins": 75,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 73
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0071214",
+   "name": "cellular response to abiotic stimulus",
+   "proteins": 47,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 21
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0046688",
+   "name": "response to copper ion",
+   "proteins": 18,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 7
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0000101",
+   "name": "sulfur amino acid transport",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 40
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0043093",
+   "name": "FtsZ-dependent cytokinesis",
+   "proteins": 27,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 14
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:0016051",
+   "name": "carbohydrate biosynthetic process",
+   "proteins": 64,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 49
+  },
+  {
+   "variant": "pure",
+   "GO": "GO:1901264",
+   "name": "carbohydrate derivative transport",
+   "proteins": 36,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 26
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0007165",
+   "name": "signal transduction",
+   "proteins": 54,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 54
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0022603",
+   "name": "regulation of anatomical structure morphogenesis",
+   "proteins": 15,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 47
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009117",
+   "name": "nucleotide metabolic process",
+   "proteins": 79,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 126
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0046165",
+   "name": "alcohol biosynthetic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 21
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0000302",
+   "name": "response to reactive oxygen species",
+   "proteins": 41,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 9
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009894",
+   "name": "regulation of catabolic process",
+   "proteins": 22,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 7
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0042364",
+   "name": "water-soluble vitamin biosynthetic process",
+   "proteins": 53,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 41
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0006664",
+   "name": "glycolipid metabolic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 31
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0016226",
+   "name": "iron-sulfur cluster assembly",
+   "proteins": 18,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 10
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0015846",
+   "name": "polyamine transport",
+   "proteins": 17,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 21
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0006826",
+   "name": "iron ion transport",
+   "proteins": 33,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 34
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0006812",
+   "name": "monoatomic cation transport",
+   "proteins": 79,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 80
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009123",
+   "name": "nucleoside monophosphate metabolic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 30
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0006364",
+   "name": "rRNA processing",
+   "proteins": 44,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 45
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0051707",
+   "name": "response to other organism",
+   "proteins": 17,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 1
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0015804",
+   "name": "neutral amino acid transport",
+   "proteins": 37,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 44
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0043039",
+   "name": "tRNA aminoacylation",
+   "proteins": 23,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 36
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009185",
+   "name": "ribonucleoside diphosphate metabolic process",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 75
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009416",
+   "name": "response to light stimulus",
+   "proteins": 25,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 7
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0016071",
+   "name": "mRNA metabolic process",
+   "proteins": 21,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 12
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:2000145",
+   "name": "regulation of cell motility",
+   "proteins": 20,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 13
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0170040",
+   "name": "proteinogenic amino acid catabolic process",
+   "proteins": 25,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 16
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009073",
+   "name": "aromatic amino acid biosynthetic process",
+   "proteins": 22,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 44
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0019320",
+   "name": "hexose catabolic process",
+   "proteins": 32,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 7
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0010165",
+   "name": "response to X-ray",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 0
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0006281",
+   "name": "DNA repair",
+   "proteins": 64,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 63
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0071826",
+   "name": "protein-RNA complex organization",
+   "proteins": 47,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 44
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0044042",
+   "name": "glucan metabolic process",
+   "proteins": 19,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 13
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0015718",
+   "name": "monocarboxylic acid transport",
+   "proteins": 37,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 15
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0009112",
+   "name": "nucleobase metabolic process",
+   "proteins": 25,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 31
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0042181",
+   "name": "ketone biosynthetic process",
+   "proteins": 27,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 15
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0051259",
+   "name": "protein complex oligomerization",
+   "proteins": 73,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 3
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0006260",
+   "name": "DNA replication",
+   "proteins": 51,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 64
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0008652",
+   "name": "amino acid biosynthetic process",
+   "proteins": 75,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 61
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0071214",
+   "name": "cellular response to abiotic stimulus",
+   "proteins": 47,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 7
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0046688",
+   "name": "response to copper ion",
+   "proteins": 18,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "no",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 0
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0000101",
+   "name": "sulfur amino acid transport",
+   "proteins": 16,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "close ancestor",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 19
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0043093",
+   "name": "FtsZ-dependent cytokinesis",
+   "proteins": 27,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 9
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:0016051",
+   "name": "carbohydrate biosynthetic process",
+   "proteins": 64,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 43
+  },
+  {
+   "variant": "noisy",
+   "GO": "GO:1901264",
+   "name": "carbohydrate derivative transport",
+   "proteins": 36,
+   "annotated_per_protein": "exact",
+   "hidden_expanded": "exact",
+   "hidden_expanded_mode": "per_orthogroup",
+   "hidden_expanded_n_significant": 16
+  }
+ ]
+}

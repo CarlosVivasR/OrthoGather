@@ -1,0 +1,47 @@
+{
+ "setting": "expanded",
+ "hide": null,
+ "bg": "pasted",
+ "expand": true,
+ "counting": "per_orthogroup",
+ "drawn_from": 3181,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_orthogroup": 100
+ },
+ "with_a_significant_term": 3,
+ "rate": 0.03,
+ "wilson_95ci": [
+  0.0103,
+  0.0845
+ ],
+ "most_frequent_terms": [
+  [
+   "nucleotide metabolic process",
+   1
+  ],
+  [
+   "purine nucleotide metabolic process",
+   1
+  ],
+  [
+   "nicotinamide nucleotide metabolic process",
+   1
+  ],
+  [
+   "purine-containing compound metabolic process",
+   1
+  ],
+  [
+   "pyridine-containing compound metabolic process",
+   1
+  ]
+ ],
+ "seconds": 1936
+}

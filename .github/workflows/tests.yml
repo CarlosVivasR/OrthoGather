@@ -1,0 +1,36 @@
+name: tests
+
+# The test suite and the worked-example check (docs/validation/verify_example.py:
+# the 35 numbers the paper and Supplementary File S1 quote) on every change,
+# in the pinned environment of environment.yml.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Environment from environment.yml
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          create-args: pytest=9.0.3
+          cache-environment: true
+
+      - name: Test suite
+        run: python -m pytest -q
+
+      - name: Worked example (35 numbers of the paper)
+        run: python docs/validation/verify_example.py

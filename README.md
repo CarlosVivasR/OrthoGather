@@ -43,10 +43,14 @@ in their last common ancestor, as inferred by OrthoFinder. An UpSet plot shows h
 orthogroups, or proteins, each combination of species shares.
 
 OrthoGather is meant for focused comparisons of up to 50 proteomes available in UniProt; it does not
-accept your own FASTA files. GO enrichment needs EBI GOA annotation files, which exist for about 13%
-of the proteomes in the catalogue; a species without one keeps its place in the orthogroups but
-contributes no annotations. OrthoGather does not transfer annotations between proteins and does not
-replace specialised orthology or phylogenetic analyses.
+accept your own FASTA files. Reference proteomes (34,305 in the catalogue) are downloaded from
+UniProtKB; the others are no longer in UniProtKB and are downloaded from UniParc, with UniParc
+identifiers. GO enrichment needs an EBI GOA annotation file, which exists only for reference
+proteomes (28,185 in the catalogue). A species without one, including every proteome downloaded
+from UniParc, keeps its place in the orthogroups and contributes no annotations of its own, but its
+proteins can still be tested through the annotations of their orthologues (see
+[Gene Ontology enrichment](#gene-ontology-enrichment)). OrthoGather does not transfer annotations
+between proteins and does not replace specialised orthology or phylogenetic analyses.
 
 ## Installation
 
@@ -64,14 +68,16 @@ prompts, with troubleshooting and uninstall instructions; it is also available a
   libraries, which come from public CDNs.
 
 The six-species example from the paper took under three minutes on an Apple M4, 1 min 47 s of it
-in OrthoFinder, with a peak of about 1 GB of memory; download time depends on your connection.
+in OrthoFinder, with a peak of about 1.7 GB of memory, of which about 1.1 GB is the application's
+baseline with the proteome catalogue loaded; download time depends on your connection.
 
 ### Installers for macOS and Windows
 
 From the [latest release](https://github.com/CarlosVivasR/OrthoGather/releases/latest), download
 `Install-OrthoGather-Mac.zip` or `Install-OrthoGather-Windows.zip`, extract it and double-click
 `Install OrthoGather.command` (macOS, Apple Silicon or Intel) or `Install OrthoGather.bat`
-(Windows 10 version 2004 or later, or Windows 11). Installation takes about 5–15 minutes.
+(Windows 10 version 2004 or later, or Windows 11). Installation takes about 5–15 minutes. The
+installers always install the latest published release.
 
 The installer sets up Conda, Python 3.11, OrthoFinder 2.5.5 and OrthoGather, and adds a launcher
 to the Desktop. On Windows it also enables the Windows Subsystem for Linux (WSL), which needs
@@ -85,20 +91,21 @@ Conda is available from [Miniforge](https://github.com/conda-forge/miniforge); w
 replace `conda` with `micromamba`. A plain clone is enough; Git LFS is not needed.
 
 ```bash
-git clone https://github.com/CarlosVivasR/OrthoGather.git
+git clone --branch v2.2.0 https://github.com/CarlosVivasR/OrthoGather.git
 cd OrthoGather
 conda env create -f environment.yml
 conda activate orthogather
 python app.py
 ```
 
-`environment.yml` provides Python 3.11, OrthoFinder 2.5.5 and the Python dependencies; the
-environment runs natively on Apple Silicon. This is the supported route on Linux. To update, run
-`git pull` and `conda env update -f environment.yml --prune` in the project folder.
+`environment.yml` provides Python 3.11, OrthoFinder 2.5.5 and the Python dependencies, pinned to
+the versions each release was tested with; the environment runs natively on Apple Silicon. This is
+the supported route on Linux.
 
-The installers install the current version from the `main` branch. To install exactly v2.1.0, the
-version described in the paper, add `--branch v2.1.0` to the `git clone` command; to move to the
-latest version later, run `git checkout main` and `git pull`.
+`--branch v2.2.0` installs that release; use `--branch v2.1.0` for the version described in the
+preprint, or leave it out for the development version on `main`. To change version later, run
+`git fetch --tags` and `git checkout` with the new tag in the project folder, then
+`conda env update -f environment.yml --prune`.
 
 ### Checking the installation
 
@@ -116,7 +123,8 @@ works. To test OrthoFinder as well, run a New Analysis of two small proteomes, `
   fibrosis infection and antimicrobial resistance.
 - **External Upload**: a `.zip` of the files in an OrthoFinder `Orthogroups` folder, with
   `Orthogroups.tsv` and `Orthogroups.GeneCount.tsv` at the top level, or an OrthoXML file, whose
-  hierarchical groups are flattened to top-level orthogroups.
+  hierarchical groups are flattened to top-level orthogroups. GO enrichment needs UniProt
+  accessions as identifiers; OMA, OrthoDB and Ensembl exports use their own.
 
 For isolates that are not in UniProt, run OrthoFinder on their predicted proteomes and upload the
 result; only proteins with UniProt accessions contribute GO annotations.
@@ -159,22 +167,23 @@ GOA files.
 
 You then define a foreground (the proteins of interest) and a background. For a proteomics
 experiment, the background should be the proteins detected in that experiment, as in the worked
-example; **Use all GOA files** tests instead against the whole annotated proteomes of the selected
-species. GOATOOLS reads and propagates the annotations, and OrthoGather applies a one-sided
+example; **Use all GOA files** tests instead against the whole annotated proteome of the species
+your foreground proteins belong to. GOATOOLS reads and propagates the annotations, and OrthoGather applies a one-sided
 Fisher's exact test (SciPy) and Benjamini–Hochberg correction. The full settings are described in
 [`docs/ADVANCED.md`](docs/ADVANCED.md#enrichment-test).
 
 Two settings need care in poorly annotated species. The evidence-code filter can exclude
 electronic (IEA) annotations, which make up 98.3% of the GO annotations available for
 *Mycolicibacterium smegmatis* in the worked example; in such species, enriched terms mostly reflect
-predicted annotations rather than functions demonstrated in that organism. Expansion, set
-separately for the foreground and the background, adds every protein of the orthogroups that
-contain your identifiers, paralogues included, from all species with a GOA file; added foreground
-proteins are tested only if they are also in the background. No annotation is transferred to any
-protein, but some of the annotations counted apply only to the other species. If you expand the
-sets, count per orthogroup rather than per protein and check that the enriched terms make sense for
-your organism. The provenance sheet does not record expansion or the single-copy filter, so state
-them in your methods.
+predicted annotations rather than functions demonstrated in that organism. Expansion to full
+orthogroups is set separately for the foreground and the background, and expanded sets are always
+counted per orthogroup: each orthogroup that contains your identifiers counts once, and its
+p-values come from a permutation test that allows for large families. An expanded background gives
+each orthogroup the annotations of all its members, paralogues included, in the species with a GOA
+file, so proteins without annotations of their own are tested through their orthologues. No
+annotation is transferred to any protein, but some of the annotations counted apply only to the
+other species; check that the enriched terms make sense for your organism. The provenance sheet of
+each results file records these settings.
 
 ## Reproducing the example in the paper
 
@@ -186,7 +195,9 @@ of six UniProt reference proteomes (*M. smegmatis* mc²155, *M. abscessus* ATCC 
 *A. baumannii* ATCC 19606, *B. cenocepacia* J2315, *E. coli* K-12 and *P. aeruginosa* PAO1), then
 GO enrichment of the 306 proteins decreased and 185 increased in abundance against the 3,181
 proteins detected, with the default settings. The expected results are 21 enriched terms and one,
-respectively. UniProt and the EBI update their data regularly, so a later run can differ slightly.
+respectively. UniProt and the EBI update their data regularly, so a later run can differ slightly:
+on 20 October 2026 the decreased set gave 23 terms, the 21 published ones and two more (details in
+the example's README).
 
 ## Documentation
 
@@ -210,8 +221,14 @@ is one, and, for questions about a result, its provenance file. Contributions ar
 
 OrthoGather is maintained by its authors at University College Dublin. Releases follow
 `vMAJOR.MINOR.PATCH` versioning and are listed in the [CHANGELOG](CHANGELOG.md); every release since
-1.1.1 is archived on Zenodo. The repository has 101 automated tests (`pytest tests/`), and a GitHub Actions workflow
-checks the logic of the Windows installer on Windows.
+1.1.1 is archived on Zenodo. The repository has 165 automated tests (`pytest tests/`). On every
+change, a GitHub Actions workflow runs them on Linux and macOS in the pinned environment of
+`environment.yml`, together with a check of the 35 numbers of the worked example that the paper
+quotes; another workflow checks the logic of the Windows installer on Windows. The validation of the
+statistics (the worked example, random foregrounds, a species with its annotations hidden, and every
+combination of the Gene Ontology settings) is in [`docs/validation/`](docs/validation/), with its
+scripts and results. How to work on the code and how releases are made is described in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Citation
 

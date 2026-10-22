@@ -502,6 +502,12 @@
   gap: var(--space-4);
   margin: var(--space-2) 0 var(--space-3);
 }
+.goa-option-hint {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  margin: calc(-1 * var(--space-2)) 0 var(--space-3);
+  max-width: 70ch;
+}
 
 /* ============================================================================
    Phase E — Explainer cards above foreground / background
@@ -612,6 +618,7 @@
   accent-color: var(--color-primary);
 }
 .goa-radio strong { color: var(--color-text); }
+.goa-radio:has(input:disabled) { opacity: 0.55; cursor: not-allowed; }
 
 /* Help "?" button + popover (reused from Protein Analysis) */
 .figure-help-btn {
@@ -703,6 +710,43 @@
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
   line-height: 1.5;
+}
+/* Pasted foreground IDs left out of the test, with the reason */
+.go-untested {
+  margin-top: var(--space-3);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+.go-untested summary {
+  cursor: pointer;
+  line-height: 1.5;
+}
+.go-untested-scroll {
+  max-height: 240px;
+  overflow: auto;
+  margin: var(--space-2) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 4px);
+}
+.go-untested-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.go-untested-table th,
+.go-untested-table td {
+  padding: 4px var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+.go-untested-table th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.go-untested-table td:first-child {
+  font-family: var(--font-mono, ui-monospace, monospace);
 }
 
 .go-plot-controls {

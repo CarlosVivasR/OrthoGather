@@ -1,0 +1,47 @@
+{
+ "setting": "all_goa_per_protein",
+ "hide": null,
+ "bg": "all_goa",
+ "expand": false,
+ "counting": "per_protein",
+ "drawn_from": 4522,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_protein": 100
+ },
+ "with_a_significant_term": 2,
+ "rate": 0.02,
+ "wilson_95ci": [
+  0.0055,
+  0.07
+ ],
+ "most_frequent_terms": [
+  [
+   "ABC-type transporter activity",
+   1
+  ],
+  [
+   "monoatomic ion transmembrane transporter activity",
+   1
+  ],
+  [
+   "pyridine-containing compound biosynthetic process",
+   1
+  ],
+  [
+   "metal ion transmembrane transporter activity",
+   1
+  ],
+  [
+   "monoatomic cation transport",
+   1
+  ]
+ ],
+ "seconds": 1149
+}

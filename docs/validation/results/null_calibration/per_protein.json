@@ -1,0 +1,39 @@
+{
+ "setting": "per_protein",
+ "hide": null,
+ "bg": "pasted",
+ "expand": false,
+ "counting": "per_protein",
+ "drawn_from": 3181,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_protein": 100
+ },
+ "with_a_significant_term": 2,
+ "rate": 0.02,
+ "wilson_95ci": [
+  0.0055,
+  0.07
+ ],
+ "most_frequent_terms": [
+  [
+   "hydro-lyase activity",
+   1
+  ],
+  [
+   "carbon-oxygen lyase activity",
+   1
+  ],
+  [
+   "amino acid transmembrane transporter activity",
+   1
+  ]
+ ],
+ "seconds": 698
+}

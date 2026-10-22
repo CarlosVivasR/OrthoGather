@@ -1,0 +1,91 @@
+{
+ "decreased": {
+  "published_terms": [
+   "acylglycerol O-acyltransferase activity",
+   "cell communication",
+   "glucan metabolic process",
+   "glycerolipid biosynthetic process",
+   "glycerolipid metabolic process",
+   "intracellular signal transduction",
+   "macromolecule catabolic process",
+   "negative regulation of DNA-templated transcription",
+   "negative regulation of RNA biosynthetic process",
+   "negative regulation of RNA metabolic process",
+   "negative regulation of biological process",
+   "negative regulation of biosynthetic process",
+   "negative regulation of cellular process",
+   "negative regulation of macromolecule biosynthetic process",
+   "negative regulation of macromolecule metabolic process",
+   "negative regulation of metabolic process",
+   "negative regulation of nucleobase-containing compound metabolic process",
+   "phosphorelay signal transduction system",
+   "signal transduction",
+   "signaling",
+   "sulfur compound transport"
+  ],
+  "msm_hidden_expanded_terms": [],
+  "published_terms_recovered": [],
+  "mode": "per_orthogroup"
+ },
+ "increased": {
+  "published_terms": [
+   "protein metabolic process"
+  ],
+  "msm_hidden_expanded_terms": [
+   "archaeal or bacterial-type flagellum-dependent cell motility",
+   "bacterial-type flagellum-dependent cell motility",
+   "catalytic complex",
+   "cell motility",
+   "cellular component assembly",
+   "cellular component organization",
+   "cilium or flagellum-dependent cell motility",
+   "cytoplasmic translation",
+   "cytosolic ribosome",
+   "gene expression",
+   "glutamate family amino acid biosynthetic process",
+   "intracellular membrane-bounded organelle",
+   "intracellular organelle",
+   "intracellular protein-containing complex",
+   "large ribosomal subunit rRNA binding",
+   "membrane-bounded organelle",
+   "membraneless organelle assembly",
+   "negative regulation of cellular component organization",
+   "negative regulation of protein-containing complex disassembly",
+   "negative regulation of termination of DNA-templated transcription",
+   "nuclear protein-containing complex",
+   "nucleus",
+   "organelle",
+   "organelle assembly",
+   "organelle organization",
+   "protein biosynthetic process",
+   "protein metabolic process",
+   "regulation of cellular component organization",
+   "regulation of protein-containing complex disassembly",
+   "regulation of termination of DNA-templated transcription",
+   "response to abiotic stimulus",
+   "response to heat",
+   "response to temperature stimulus",
+   "ribonucleoprotein complex",
+   "ribonucleoprotein complex binding",
+   "ribosome binding",
+   "submerged biofilm formation",
+   "transcription antitermination",
+   "translation"
+  ],
+  "published_terms_recovered": [
+   "protein metabolic process"
+  ],
+  "mode": "per_orthogroup"
+ },
+ "all_491": {
+  "published_terms": [
+   "protein maturation"
+  ],
+  "msm_hidden_expanded_terms": [
+   "catalytic complex",
+   "intracellular protein-containing complex"
+  ],
+  "published_terms_recovered": [],
+  "mode": "per_orthogroup"
+ }
+}

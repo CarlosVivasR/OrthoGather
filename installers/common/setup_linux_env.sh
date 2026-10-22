@@ -11,10 +11,24 @@
 set -euo pipefail
 
 REPO="CarlosVivasR/OrthoGather"
-BRANCH="main"
 ENV_NAME="orthogather"
 APP_DIR="$HOME/OrthoGather"
-ZIP_URL="https://github.com/${REPO}/archive/refs/heads/${BRANCH}.zip"
+# The application comes from the latest published release (a vX.Y.Z tag), not
+# from the tip of main, so every installation is a version that was tested and
+# archived on Zenodo. ORTHOGATHER_REF installs another tag, or a branch.
+FALLBACK_TAG="v2.2.0"   # used only if GitHub's release list cannot be read
+latest_release_tag() {
+  curl -fsSL --retry 3 "https://api.github.com/repos/${REPO}/releases?per_page=30" 2>/dev/null \
+    | grep -o 'tag_name.: *.v[0-9][0-9.]*' | grep -o 'v[0-9][0-9.]*$' | head -1
+}
+release_zip_url() {  # release_zip_url -> sets REF and ZIP_URL
+  REF="${ORTHOGATHER_REF:-$(latest_release_tag || true)}"
+  REF="${REF:-$FALLBACK_TAG}"
+  case "$REF" in
+    v[0-9]*) ZIP_URL="https://github.com/${REPO}/archive/refs/tags/${REF}.zip" ;;
+    *)       ZIP_URL="https://github.com/${REPO}/archive/refs/heads/${REF}.zip" ;;
+  esac
+}
 MINIFORGE_BASE="https://github.com/conda-forge/miniforge/releases/latest/download"
 
 say()  { printf "\033[1m%s\033[0m\n" "$*"; }
@@ -86,7 +100,8 @@ if [ -n "${OG_SRC:-}" ] && [ -d "$OG_SRC" ]; then
   ok "Using app source provided by the installer."
   src_dir="$OG_SRC"
 else
-  say "⬇️  Downloading OrthoGather…"
+  release_zip_url
+  say "⬇️  Downloading OrthoGather ${REF}…"
   retry 5 "OrthoGather download" -- dl "$ZIP_URL" /tmp/orthogather.zip \
     || die "Could not download OrthoGather after several tries — re-run the installer to resume."
   rm -rf /tmp/og_extract && mkdir -p /tmp/og_extract

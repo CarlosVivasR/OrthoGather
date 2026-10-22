@@ -1,0 +1,48 @@
+{
+ "setting": "detected_vs_proteome",
+ "hide": null,
+ "bg": "all_goa",
+ "expand": false,
+ "counting": "per_protein",
+ "draw": "detected",
+ "drawn_from": 3181,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_protein": 100
+ },
+ "with_a_significant_term": 36,
+ "rate": 0.36,
+ "wilson_95ci": [
+  0.2727,
+  0.4576
+ ],
+ "most_frequent_terms": [
+  [
+   "phosphorus metabolic process",
+   11
+  ],
+  [
+   "organophosphate metabolic process",
+   11
+  ],
+  [
+   "nucleobase-containing small molecule metabolic process",
+   9
+  ],
+  [
+   "purine nucleotide metabolic process",
+   8
+  ],
+  [
+   "nucleoside phosphate metabolic process",
+   8
+  ]
+ ],
+ "seconds": 1144
+}

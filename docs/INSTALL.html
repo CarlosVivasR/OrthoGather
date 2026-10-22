@@ -113,7 +113,7 @@
     <h1>Install <span class="accent">OrthoGather</span></h1>
     <p>OrthoGather runs on your own computer and opens in your web browser. This guide covers the installers for macOS and Windows, which need no typed commands, and the Conda route for macOS, Linux and WSL.</p>
     <div class="badges">
-      <span class="badge"><i class="fa-solid fa-tag"></i>Version 2.1.1</span>
+      <span class="badge"><i class="fa-solid fa-tag"></i>Version 2.2.0</span>
       <span class="badge"><i class="fa-brands fa-python"></i>Python 3.11</span>
       <span class="badge"><i class="fa-solid fa-dna"></i>OrthoFinder 2.5.5</span>
       <span class="badge"><i class="fa-solid fa-laptop"></i>macOS · Windows · Linux</span>
@@ -168,7 +168,7 @@
     <div class="step-num">3</div>
     <div class="step-body">
       <h3>Let it run</h3>
-      <p>A Terminal window opens and shows the progress. The installer sets up Miniforge (Conda) if it is not already present, creates an environment with Python 3.11, OrthoFinder 2.5.5 and the other dependencies, and downloads the current version of OrthoGather from GitHub. This takes about 5–15 minutes, and the window can look idle for a minute or two at a time. Leave it open until it shows <strong>OrthoGather is installed!</strong> or an error message.</p>
+      <p>A Terminal window opens and shows the progress. The installer sets up Miniforge (Conda) if it is not already present, creates an environment with Python 3.11, OrthoFinder 2.5.5 and the other dependencies, and downloads the latest published version of OrthoGather from GitHub. This takes about 5–15 minutes, and the window can look idle for a minute or two at a time. Leave it open until it shows <strong>OrthoGather is installed!</strong> or an error message.</p>
       <p>Along the way you may be asked three things. If Conda is not installed, the installer asks whether to install Miniforge (about 400 MB, in your home folder): press Return to accept. macOS may ask whether Terminal can access your Desktop or other folders: allow it, because the launcher is created there. At the end, the installer offers to start OrthoGather.</p>
     </div>
   </div>
@@ -231,9 +231,9 @@
 
   <!-- VERSION -->
   <div class="section-title">Which version is installed</div>
-  <p class="lead">The installers download the current version of OrthoGather from GitHub (the <code>main</code> branch). To install exactly version 2.1.0, the version described in the paper, use the Conda route below and clone that release:</p>
+  <p class="lead">The installers download the latest published version of OrthoGather from GitHub, the one shown in the <a href="https://github.com/CarlosVivasR/OrthoGather/releases/latest">latest release</a>. To install a specific version, for example 2.1.0, the version described in the preprint, use the Conda route below and clone that release:</p>
   <div class="code"><button class="copy">Copy</button><pre>git clone --branch v2.1.0 https://github.com/CarlosVivasR/OrthoGather.git</pre></div>
-  <p class="note"><i class="fa-solid fa-circle-info"></i> The version in use is shown in the application's sidebar and in every provenance file it exports. A clone of a release is not on a branch, so to move to the latest version later, run <code>git checkout main</code> and then <code>git pull</code>.</p>
+  <p class="note"><i class="fa-solid fa-circle-info"></i> The version in use is shown in the application's sidebar and in every provenance file it exports. A clone of a release is not on a branch, so to move to another version later, run <code>git fetch --tags</code> and <code>git checkout</code> with its tag (for example <code>v2.2.0</code>), then <code>conda env update -f environment.yml --prune</code>.</p>
 
   <!-- CONDA -->
   <div class="section-title">Conda: macOS, Linux and WSL</div>
@@ -253,7 +253,7 @@
     <div class="step-num">1</div>
     <div class="step-body">
       <h3>Download OrthoGather</h3>
-      <div class="code"><button class="copy">Copy</button><pre>git clone https://github.com/CarlosVivasR/OrthoGather.git
+      <div class="code"><button class="copy">Copy</button><pre>git clone --branch v2.2.0 https://github.com/CarlosVivasR/OrthoGather.git
 cd OrthoGather</pre></div>
     </div>
   </div>
@@ -294,8 +294,9 @@ micromamba activate orthogather</pre></div>
   <div class="code"><button class="copy">Copy</button><pre>conda activate orthogather
 python app.py</pre></div>
 
-  <p class="lead" style="margin-top:14px">To update to the latest version, from the <code>OrthoGather</code> folder:</p>
-  <div class="code"><button class="copy">Copy</button><pre>git pull
+  <p class="lead" style="margin-top:14px">To update to a newer release, from the <code>OrthoGather</code> folder, with its tag in place of <code>v2.2.0</code>:</p>
+  <div class="code"><button class="copy">Copy</button><pre>git fetch --tags
+git checkout v2.2.0
 conda env update -f environment.yml --prune</pre></div>
 
   <!-- GUIDED SCRIPTS -->

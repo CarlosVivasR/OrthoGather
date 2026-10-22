@@ -129,3 +129,12 @@ versions used were:
 | Proteome catalogue | 2026-06-03 |
 | Gene Ontology | releases/2026-07-26 |
 | EBI GOA proteomes generated | 2026-07-28 |
+
+As an example of that drift, re-running the analysis on 20 October 2026 (UniProt 2026_03, GOA files
+generated on 2026-10-11) gave 5,952 orthogroups instead of 5,949, and 2,480 annotated background
+proteins instead of 2,470. The 306 proteins decreased in abundance gave 23 enriched terms: the 21
+reported here plus *acyltransferase activity* and *protein catabolic process*. The 185 increased in
+abundance gave the same single term, and the 491 analysed together gave five terms instead of one.
+OrthoFinder itself is deterministic: on the same proteomes it gives the same orthogroups. The files
+in this folder reproduce the published numbers exactly, and OrthoGather 2.2.0 reproduces them from
+these files.

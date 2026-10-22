@@ -1,0 +1,47 @@
+{
+ "setting": "msm_hidden_all_goa",
+ "hide": "smegmatis",
+ "bg": "all_goa",
+ "expand": false,
+ "counting": "per_orthogroup",
+ "drawn_from": 6603,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_orthogroup": 100
+ },
+ "with_a_significant_term": 5,
+ "rate": 0.05,
+ "wilson_95ci": [
+  0.0215,
+  0.1118
+ ],
+ "most_frequent_terms": [
+  [
+   "oxidoreductase activity, acting on the CH-CH group of donors, NAD or NADP as acceptor",
+   1
+  ],
+  [
+   "carbohydrate derivative transmembrane transporter activity",
+   1
+  ],
+  [
+   "glycerophospholipid metabolic process",
+   1
+  ],
+  [
+   "hexose metabolic process",
+   1
+  ],
+  [
+   "negative regulation of macromolecule biosynthetic process",
+   1
+  ]
+ ],
+ "seconds": 2043
+}

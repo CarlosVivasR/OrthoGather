@@ -1,0 +1,43 @@
+{
+ "setting": "per_orthogroup",
+ "hide": null,
+ "bg": "pasted",
+ "expand": false,
+ "counting": "per_orthogroup",
+ "drawn_from": 3181,
+ "foreground_size": 306,
+ "replicates": 100,
+ "seed": 2026,
+ "analysed": 100,
+ "http_status": {
+  "200": 100
+ },
+ "mode_applied": {
+  "per_orthogroup": 100
+ },
+ "with_a_significant_term": 3,
+ "rate": 0.03,
+ "wilson_95ci": [
+  0.0103,
+  0.0845
+ ],
+ "most_frequent_terms": [
+  [
+   "ATP hydrolysis activity",
+   1
+  ],
+  [
+   "nucleic acid biosynthetic process",
+   1
+  ],
+  [
+   "nucleoside triphosphate metabolic process",
+   1
+  ],
+  [
+   "purine nucleoside triphosphate metabolic process",
+   1
+  ]
+ ],
+ "seconds": 1466
+}

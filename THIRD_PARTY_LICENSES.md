@@ -13,6 +13,7 @@ licence.
 | Proteome catalogue derived from UniProt | `static/Proteomes_json/` | CC BY 4.0 ([uniprot.org](https://www.uniprot.org/help/license)) |
 | Preselected Dataset: orthogroups inferred from UniProt proteomes | `static/Orthogroups.zip` | CC BY 4.0 (UniProt data) |
 | Worked example input lists, from Giddey et al. (2017), *Sci. Rep.* 7:43858 | `example_analysis/input_dataset/` | CC BY 4.0 |
+| EBI GOA proteome files of the worked example's six species, generated on 28 July 2026 (UniProt-GOA, [ebi.ac.uk/GOA](https://www.ebi.ac.uk/GOA/)) | `docs/validation/data/` | CC BY 4.0 |
 
 ## Loaded from public CDNs by the web interface
 

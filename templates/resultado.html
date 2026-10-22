@@ -53,6 +53,12 @@
       </nav>
       <h1 class="sr-only">Protein Analysis results — {{ (species|length - 1) }} species</h1>
       <span class="eyebrow"><i class="fa-solid fa-circle-check"></i> Analysis complete</span>
+      {% if upload_id_note %}
+      <div class="alert alert-warning" role="status" id="upload-id-note">
+        <i class="fa-solid fa-triangle-exclamation alert-icon" aria-hidden="true"></i>
+        <div class="alert-message">{{ upload_id_note }}</div>
+      </div>
+      {% endif %}
     </section>
 
     <!-- ─── Taxonomic context (collapsed by default) ─── -->
@@ -383,7 +389,7 @@
       <div class="upset-filter-body">
         <label for="upset-filter-ids" class="sr-only">UniProt IDs to filter by</label>
         <textarea id="upset-filter-ids" rows="5"
-                  placeholder="Paste one or more UniProt IDs, separated by spaces, commas, or new lines.&#10;Example:&#10;F7STY6 F7SU20&#10;P0CW31, Q9Y2I7&#10;A0A0B7HXH8"></textarea>
+                  placeholder="Paste one or more UniProt IDs, separated by spaces, commas, or new lines (FASTA headers are also read).&#10;Example:&#10;F7STY6 F7SU20&#10;P0CW31, Q9Y2I7&#10;A0A0B7HXH8"></textarea>
         <div class="upset-filter-row">
           <span class="upset-filter-count" id="upset-filter-count">0 IDs detected</span>
           <button type="button" class="btn btn-secondary btn-sm" id="upset-filter-clear">Clear</button>
@@ -1458,15 +1464,43 @@
     const filterResultEl  = document.getElementById('upset-filter-result');
     const figuresFilteredHost = document.getElementById('upset-figures-filtered');
 
-    // Tokeniser: split on whitespace, commas, semicolons, pipes. Trim each.
+    // Mirrors the server's reader (orthogather.utils.parsing.parse_identifier_list)
+    // for the "N IDs detected" counter: one accession per FASTA header, sequence
+    // lines skipped, accessions upper-cased and isoform suffixes removed. The
+    // server reads the lines itself.
+    const ACCESSION_RE = /^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}|UPI[0-9A-F]{10})(-[0-9]+)?$/;
     function parseUniProtIds(raw) {
       if (!raw) return [];
       const seen = new Set();
       const out  = [];
-      raw.split(/[\s,;|]+/).forEach(function (tok) {
-        const t = (tok || '').trim();
-        if (!t || seen.has(t)) return;
-        seen.add(t); out.push(t);
+      let inRecord = false;
+      raw.split(/\r?\n/).forEach(function (line) {
+        line = line.trim();
+        if (!line) return;
+        let toks = line.split(/[\s,;]+/).filter(Boolean);
+        if (line[0] === '>') {
+          toks = line.slice(1).split(/\s+/).filter(Boolean).slice(0, 1);
+          inRecord = true;
+        } else if (toks[0].split('|').length >= 3 && toks.slice(1).some(function (t) { return t.indexOf('|') < 0; }) &&
+                   !toks.slice(1).filter(function (t) { return t.indexOf('|') < 0; })
+                     .every(function (t) { return ACCESSION_RE.test(t.toUpperCase()); })) {
+          // "sp|P12345|NAME description": a FASTA header without ">". A line of
+          // db|ACC|NAME entries and bare accessions is a list (as on the server).
+          toks = toks.slice(0, 1);
+          inRecord = true;
+        } else if (inRecord && /^[A-Za-z*\-]+$/.test(line.replace(/ /g, ''))) {
+          return;
+        } else {
+          inRecord = false;
+        }
+        toks.forEach(function (tok) {
+          let t = tok.replace(/^["'>]+|["']+$/g, '');
+          const f = t.split('|');
+          if (f.length >= 3 || (f.length === 2 && /^(sp|tr)$/i.test(f[0]))) t = f[1].trim();
+          if (ACCESSION_RE.test(t.toUpperCase())) t = t.toUpperCase().replace(/-[0-9]+$/, '');
+          if (!t || seen.has(t)) return;
+          seen.add(t); out.push(t);
+        });
       });
       return out;
     }
@@ -1490,7 +1524,7 @@
       try {
         const reqBody = {
           species: Array.from(selected),
-          uniprot_ids: ids,
+          uniprot_ids: filterTextarea.value.split(/\r?\n/).filter(function (l) { return l.trim(); }),
         };
         const res = await fetch('/upset_data_filtered', {
           method: 'POST',
@@ -1553,6 +1587,10 @@
         let html = '<i class="fa-solid fa-circle-check"></i> ' +
                    '<strong>' + nFound + ' of ' + nSearched + '</strong> UniProt IDs found · ' +
                    '<strong>' + (payload.n_orthogroups || 0) + '</strong> orthogroups in the filtered figures';
+        const inputNotes = (payload.input_warnings || []).concat(payload.input_notes || []);
+        if (inputNotes.length) {
+          html += '<div class="upset-not-found-hint">' + inputNotes.map(escapeHtml).join(' ') + '</div>';
+        }
         if (unassigned.length) {
           const uPreview = unassigned.slice(0, 8).join(', ');
           const uMore    = unassigned.length > 8 ? ' …and ' + (unassigned.length - 8) + ' more' : '';

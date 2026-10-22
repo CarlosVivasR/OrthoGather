@@ -45,27 +45,24 @@ fi
 eval "$(micromamba shell hook -s bash)"
 
 # ------------------------------------------------------------
-# 3️⃣ Create environment (if not exists)
+# 3️⃣ Create or update the environment from environment.yml
 # ------------------------------------------------------------
-if micromamba env list | grep -q "orthogather"; then
-  echo "✅ Environment 'orthogather' already exists."
-else
-  echo "🧩 Creating environment 'orthogather' with Python 3.11..."
-  micromamba create -n orthogather python=3.11 -y
+# environment.yml pins every dependency to the versions the tests and the
+# worked example were verified with (statsmodels 0.15, for example, breaks
+# GOATOOLS 1.6.4), so install from it rather than from package names.
+cd "$(dirname "$0")/.."
+if [[ ! -f environment.yml ]]; then
+  echo "❌ environment.yml not found: run this script from the OrthoGather folder."
+  exit 1
 fi
-
-# ------------------------------------------------------------
-# 4️⃣ Activate and install dependencies
-# ------------------------------------------------------------
+if micromamba env list | grep -q "orthogather"; then
+  echo "🧩 Updating environment 'orthogather' from environment.yml..."
+  micromamba install -n orthogather -f environment.yml -y
+else
+  echo "🧩 Creating environment 'orthogather' from environment.yml..."
+  micromamba create -n orthogather -f environment.yml -y
+fi
 micromamba activate orthogather
-
-echo ""
-echo "📦 Installing core dependencies from conda-forge..."
-micromamba install -c conda-forge flask flask-session pandas numpy matplotlib seaborn upsetplot goatools requests openpyxl -y
-
-echo ""
-echo "🧬 Installing OrthoFinder 2.5.5 from bioconda..."
-micromamba install -c bioconda 'orthofinder=2.5.5' -y
 
 # ------------------------------------------------------------
 # 5️⃣ Verify installation

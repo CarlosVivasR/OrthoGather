@@ -17,8 +17,10 @@ REM  click "More info" -> "Run anyway".
 REM ============================================================================
 
 set "REPO=CarlosVivasR/OrthoGather"
-set "BRANCH=main"
-set "SETUP_URL=https://raw.githubusercontent.com/%REPO%/%BRANCH%/installers/common/setup_linux_env.sh"
+REM The application and its Linux setup come from the latest published release
+REM (a vX.Y.Z tag), not from the tip of main; FALLBACK_TAG is used only if
+REM GitHub's release list cannot be read.
+set "FALLBACK_TAG=v2.2.0"
 set "OGHOME=%LOCALAPPDATA%\OrthoGather"
 set "LOG=%OGHOME%\install-log.txt"
 set "STATE=%OGHOME%\install_state.txt"
@@ -238,7 +240,7 @@ echo   moves ~1-2 GB and takes about 5-15 minutes. It will look frozen at times
 echo   - that's normal. Please leave this window open.
 echo.
 call :log "Running Linux setup script."
-wsl -d Ubuntu -u root -- bash -c "apt-get update -y && apt-get install -y curl && curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused '%SETUP_URL%' -o /tmp/og_setup.sh && bash /tmp/og_setup.sh"
+wsl -d Ubuntu -u root -- bash -c "apt-get update -y && apt-get install -y curl && TAG=$(curl -fsSL --retry 3 'https://api.github.com/repos/%REPO%/releases?per_page=30' | grep -o 'tag_name.: *.v[0-9][0-9.]*' | grep -o 'v[0-9][0-9.]*$' | head -1); TAG=${TAG:-%FALLBACK_TAG%}; echo Installing OrthoGather $TAG; curl -fsSL --retry 6 --retry-delay 4 --retry-connrefused https://raw.githubusercontent.com/%REPO%/$TAG/installers/common/setup_linux_env.sh -o /tmp/og_setup.sh && ORTHOGATHER_REF=$TAG bash /tmp/og_setup.sh"
 REM Check for EXACTLY 0: wsl returns negative codes that 'if errorlevel 1' misses.
 set "SETUP_RC=!errorlevel!"
 call :log "phase2 setup rc=!SETUP_RC!"

@@ -7,10 +7,15 @@
 # This pip list is provided as a fallback for the Python packages only.
 # OrthoFinder 2.5.5 is NOT pip-installable; install it via conda/bioconda
 # (see environment.yml) or your system package manager.
-flask
-flask-session
-pandas
-numpy
-goatools
-requests
-openpyxl
+# Versions are pinned to the ones the tests and the worked example were verified with.
+flask==3.1.3
+flask-session==0.8.0
+werkzeug==3.1.8
+pandas==3.0.3
+numpy==2.4.6
+scipy==1.17.1
+# GOATOOLS 1.6.4 fails with statsmodels 0.15 (multipletests import).
+statsmodels==0.14.6
+goatools==1.6.4
+requests==2.34.2
+openpyxl==3.1.5

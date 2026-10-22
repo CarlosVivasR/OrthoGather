@@ -271,12 +271,17 @@
           <p>
             The <strong>foreground</strong> is the list of UniProt IDs you are interested in: for example,
             proteins that are differentially expressed in your experiment, candidates from a pathway, or hits
-            from a screen. OrthoGather looks up their GO annotations and (optionally) expands the set to their
-            orthologs across the species you analysed.
+            from a screen. OrthoGather looks up their GO annotations and, optionally, tests them through
+            their orthogroups, so that proteins without annotations of their own can use those of their
+            orthologues in the species you analysed.
           </p>
           <p class="goa-explainer-tip">
-            <strong>Tip:</strong> paste UniProt accession IDs, one per line or space-separated
-            (e.g. <code>P0A6F5</code>, <code>P00350</code>). FASTA headers are also accepted.
+            <strong>Tip:</strong> paste UniProt accession IDs, one per line or separated by spaces, commas
+            or semicolons (e.g. <code>P0A6F5</code>, <code>P00350</code>). FASTA headers are also accepted,
+            with or without their sequences: <code>&gt;sp|P0A6F5|CH60_ECOLI …</code> and
+            <code>sp|P0A6F5|CH60_ECOLI</code> are read as <code>P0A6F5</code>. Lower-case accessions are
+            converted to upper case, and isoform suffixes (<code>P00350-2</code>) are removed with a warning,
+            because GOA files annotate the canonical protein.
           </p>
         </div>
 
@@ -286,6 +291,8 @@
           <div class="goa-inline-options">
             <label><input type="checkbox" id="use-orthogroups-fg" /> Expand to full orthogroups</label>
           </div>
+          <p class="goa-option-hint">Expanded, each pasted protein takes part through its orthogroup, and
+            each orthogroup counts once.</p>
           <button class="btn btn-secondary" id="submit-foreground" type="button">
             <i class="fa-solid fa-upload"></i> Load foreground
           </button>
@@ -307,8 +314,11 @@
             <p class="goa-explainer-tip">
               <strong>When to use "Use all GOA files":</strong> when there is no experimental background, for
               example for a list of proteins taken from the literature. It tests against the full annotated
-              proteome of every species in your analysis, which can inflate enrichment for proteins that were
-              never detectable in your experiment.
+              proteome of the species your foreground proteins come from (not of every species in the
+              analysis: pooling species would make any function commoner in your species look enriched). Counted
+              per orthogroup, it is the whole proteome of that species in the analysis, each protein taking
+              part through its orthogroup, so it also works for a species without a GOA file. It can still
+              inflate enrichment for proteins that were never detectable in your experiment.
             </p>
           </div>
 
@@ -318,6 +328,9 @@
             <label><input type="checkbox" id="use-orthogroups-bg" /> Expand to full orthogroups</label>
             <label><input type="checkbox" id="use-goa-files" /> Use all GOA files</label>
           </div>
+          <p class="goa-option-hint">Expanded, each orthogroup carries the annotations of all its members in
+            the species with a GOA file, so proteins without annotations of their own are tested through
+            their orthologues: use it when your species has few or no GO annotations.</p>
           <button class="btn btn-secondary" id="submit-background" type="button">
             <i class="fa-solid fa-upload"></i> Load background
           </button>
@@ -390,13 +403,15 @@
               </label>
               <label class="goa-radio">
                 <input type="radio" name="orthogroup_filter" value="single_copy">
-                <span><strong>Single-copy only</strong>: keep 1:1:1 orthologs (more conservative)</span>
+                <span><strong>Single-copy only</strong>: expand only through 1:1:1 orthologs (more conservative)</span>
               </label>
               <div class="figure-help-popover" data-help-for="orthogroups" hidden>
                 Single-copy orthogroups have <strong>exactly one protein per species</strong>. These are
                 the safest orthology relationships: no risk of conflating paralogs with orthologs.
                 For comparative-functional studies across model organisms, this is a defensible default.
                 For exploratory analyses or when including non-model species, "All orthogroups" gives more recall.
+                This setting acts on <strong>expanded</strong> sets and is applied when you load them:
+                change it before loading the foreground and the background.
               </div>
             </fieldset>
 
@@ -417,12 +432,23 @@
               <div class="figure-help-popover" data-help-for="counting" hidden>
                 In "per protein" mode, an orthogroup with 10 members contributes 10 observations to the
                 enrichment statistic. This can <strong>inflate significance</strong> (pseudoreplication).
-                "Per orthogroup" collapses each OG to a single observation: more conservative p-values,
-                but tighter against false positives. Useful when many species share large families.
+                "Per orthogroup" counts each orthogroup once, with the annotations of all its background
+                members; a protein in no orthogroup counts as its own unit. A large family is more likely to
+                contain one of your proteins by chance, so the p-values of this mode come from shuffling
+                your foreground among the background proteins (a permutation test), which allows for it.
+                Expanded sets are always counted per orthogroup.
               </div>
             </fieldset>
           </div>
         </details>
+
+        <!-- Shown while a set is expanded: counting is then per orthogroup (wired below). -->
+        <div id="counting-expansion-note" role="status" aria-live="polite" hidden>
+          <div class="goa-notice-block">
+            <span class="goa-notice-head"><i class="fa-solid fa-circle-info" aria-hidden="true"></i> Expanded sets are counted per orthogroup</span>
+            <span class="goa-notice-list">Counted per protein, every member of an orthogroup would be a separate observation, so the functions of large paralogue families would look enriched by chance. <strong>Per protein</strong> counting is available again when neither set is expanded.</span>
+          </div>
+        </div>
 
         <div class="goa-action-row">
           <button class="btn btn-primary" id="run-full-go-analysis" type="button" disabled>
@@ -462,9 +488,10 @@
                 <span class="go-coverage-unit">proteins</span>
               </div>
               <div class="go-coverage-cell">
-                <span class="go-coverage-label">With GO annotations</span>
+                <span class="go-coverage-label" id="go-cov-annotated-label"
+                      title="Foreground proteins that are in the background and carry at least one GO term.">With GO annotations</span>
                 <span class="go-coverage-value" id="go-cov-annotated">–</span>
-                <span class="go-coverage-unit">(<span id="go-cov-pct">–</span>)</span>
+                <span class="go-coverage-unit" id="go-cov-annotated-unit">(<span id="go-cov-pct">–</span>)</span>
               </div>
               <div class="go-coverage-cell">
                 <span class="go-coverage-label"
@@ -474,6 +501,20 @@
               </div>
             </div>
             <p class="go-coverage-note" id="go-cov-note"></p>
+            <!-- Pasted foreground IDs that did not enter the test, with the reason.
+                 Populated by JS from response.input_ids. -->
+            <details class="go-untested" id="go-untested" hidden>
+              <summary id="go-untested-summary"></summary>
+              <div class="go-untested-scroll">
+                <table class="go-untested-table">
+                  <thead><tr><th>Identifier</th><th>Pasted as</th><th>Reason</th></tr></thead>
+                  <tbody id="go-untested-body"></tbody>
+                </table>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" id="go-untested-copy">
+                <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy as TSV
+              </button>
+            </details>
           </div>
 
           <div id="go-plot-controls" class="go-plot-controls">
@@ -1180,13 +1221,73 @@
       function readSingleCopyOnly() {
         return readSetting("orthogroup_filter", "all") === "single_copy";
       }
+      // The message and hint of a failed request, or the fallback text.
+      function serverError(js, fallback) {
+        if (!js?.message) return fallback;
+        const msg = /[.!?]$/.test(js.message) ? js.message : js.message + ".";
+        return js.hint ? `${msg} ${js.hint}` : msg;
+      }
+
+      // The server reads the pasted text line by line (FASTA headers, sequences,
+      // separators), so send the lines as typed.
+      function pastedLines(textarea) {
+        return textarea.value.split(/\r?\n/).filter(l => l.trim());
+      }
+
+      // "Foreground saved: 306 identifiers." plus what the server changed while
+      // reading them; an isoform suffix removed turns the message into a warning.
+      function showSavedIds(targetId, what, input, extra) {
+        const n = input?.n_ids;
+        const parts = [`${what} saved${n != null ? `: ${n} identifier${n === 1 ? "" : "s"}` : ""}.`];
+        parts.push(...(input?.notes || []), ...(input?.warnings || []));
+        if (extra) parts.push(extra);
+        showStatus(targetId, (input?.warnings || []).length ? "warning" : "success", parts.join(" "));
+      }
+
+      // ------------------------------------------------------------------
+      // Expanded sets are counted per orthogroup
+      // ------------------------------------------------------------------
+      // A set is expanded if its box is ticked, or if it was loaded expanded and
+      // not re-loaded since (unticking alone does not change the stored set).
+      // While one is, "Per protein" is disabled; the previous choice comes back
+      // when neither is. The server applies the same rule.
+      const loadedExpanded = { fg: false, bg: false };
+      let countingBeforeExpansion = null;
+      function updateCountingWarning() {
+        const el = document.getElementById("counting-expansion-note");
+        const perProtein = document.querySelector('input[name="counting_mode"][value="per_protein"]');
+        const perOrthogroup = document.querySelector('input[name="counting_mode"][value="per_orthogroup"]');
+        if (!el || !perProtein || !perOrthogroup) return;
+        const fgExp = !!fgCheckbox?.checked || loadedExpanded.fg;
+        const bgExp = (!!bgCheckbox?.checked && !useGOACheck?.checked) || loadedExpanded.bg;
+        const expanded = fgExp || bgExp;
+        if (expanded && !perProtein.disabled) {
+          countingBeforeExpansion = readSetting("counting_mode", "per_protein");
+          perOrthogroup.checked = true;
+        } else if (!expanded && perProtein.disabled && countingBeforeExpansion === "per_protein") {
+          perProtein.checked = true;
+        }
+        perProtein.disabled = expanded;
+        el.hidden = !expanded;
+        // The orthogroup filter acts only on expanded sets.
+        const singleCopy = document.querySelector('input[name="orthogroup_filter"][value="single_copy"]');
+        if (singleCopy) {
+          if (!expanded && singleCopy.checked) {
+            document.querySelector('input[name="orthogroup_filter"][value="all"]').checked = true;
+          }
+          singleCopy.disabled = !expanded;
+        }
+      }
+      [fgCheckbox, bgCheckbox, useGOACheck, ...document.querySelectorAll('input[name="counting_mode"]')]
+        .forEach(input => input?.addEventListener("change", updateCountingWarning));
+      updateCountingWarning();
 
       // ------------------------------------------------------------------
       // Foreground submit
       // ------------------------------------------------------------------
       if (submitForegroundBtn) {
         submitForegroundBtn.addEventListener("click", async () => {
-          const ids = fgTextArea.value.trim().split(/\s+/).filter(Boolean);
+          const ids = pastedLines(fgTextArea);
           if (ids.length === 0) {
             showStatus("fg-msg", "error", "Please paste at least one UniProt ID for the foreground.");
             return;
@@ -1205,13 +1306,19 @@
                 single_copy_only: readSingleCopyOnly()
               })
             });
-            if (!res.ok) throw new Error("Foreground save failed");
+            const js = await res.json().catch(() => null);
+            if (!res.ok || js?.success === false) {
+              showStatus("fg-msg", "error", serverError(js, "Error saving Foreground."));
+              return;
+            }
 
             if (bgBlock) {
               bgBlock.classList.remove("is-disabled");
             }
-            showStatus("fg-msg", "success", "Foreground saved.");
+            showSavedIds("fg-msg", "Foreground", js.input);
             window.foregroundUniProtIDs = ids;
+            loadedExpanded.fg = !!fgCheckbox?.checked;
+            updateCountingWarning();
           } catch (err) {
             console.error(err);
             showStatus("fg-msg", "error", "Error saving Foreground.");
@@ -1238,7 +1345,7 @@
       if (submitBackgroundBtn) {
         submitBackgroundBtn.addEventListener("click", async () => {
           const useGOAFiles = !!useGOACheck?.checked;
-          const ids = bgTextArea.value.trim().split(/\s+/).filter(Boolean);
+          const ids = pastedLines(bgTextArea);
 
           if (!useGOAFiles && ids.length === 0) {
             showStatus("bg-msg", "error", "Please paste UniProt IDs for the background or tick 'Use all GOA files'.");
@@ -1261,14 +1368,24 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload)
             });
-            if (!res.ok) throw new Error("Background save failed");
+            const js = await res.json().catch(() => null);
+            if (!res.ok || js?.success === false) {
+              showStatus("bg-msg", "error", serverError(js, "Error saving Background."));
+              return;
+            }
 
             if (runAnalysisBtn) {
               runAnalysisBtn.disabled = false;
               runAnalysisBtn.style.opacity = "1";
             }
-            showStatus("bg-msg", "success", "Background saved. You can run the GO enrichment now.");
+            if (useGOAFiles) {
+              showStatus("bg-msg", "success", "Background saved. You can run the GO enrichment now.");
+            } else {
+              showSavedIds("bg-msg", "Background", js.input, "You can run the GO enrichment now.");
+            }
             window.backgroundIDs = useGOAFiles ? "ALL_GOAS" : ids;
+            loadedExpanded.bg = payload.use_orthogroups && !useGOAFiles;
+            updateCountingWarning();
           } catch (err) {
             console.error(err);
             showStatus("bg-msg", "error", "Error saving Background.");
@@ -1464,7 +1581,72 @@
       // Expose for E2E tests + debugging from devtools.
       window.renderAnnotationDistribution = renderAnnotationDistribution;
 
-      function renderCoverageBanner(stats) {
+      // Pasted foreground IDs that did not enter the test, one row each with the
+      // reason (server: _untested_ids), behind a collapse under the banner.
+      function renderUntestedIds(inputIds) {
+        const box = document.getElementById("go-untested");
+        if (!box) return;
+        const rows = inputIds?.untested || [];
+        box.hidden = !rows.length;
+        box.open = false;
+        if (!rows.length) return;
+        const labels = inputIds.labels || {};
+        document.getElementById("go-untested-summary").textContent =
+          `${inputIds.summary || ""} Show the identifiers.`;
+        const body = document.getElementById("go-untested-body");
+        body.innerHTML = "";
+        rows.forEach(r => {
+          const tr = document.createElement("tr");
+          [r.id, r.pasted_as === r.id ? "" : r.pasted_as, labels[r.reason] || r.reason].forEach(v => {
+            const td = document.createElement("td");
+            td.textContent = v;
+            tr.appendChild(td);
+          });
+          body.appendChild(tr);
+        });
+        const copyBtn = document.getElementById("go-untested-copy");
+        copyBtn.onclick = () => {
+          const tsv = ["identifier\tpasted_as\treason"]
+            .concat(rows.map(r => [r.id, r.pasted_as, labels[r.reason] || r.reason].join("\t")))
+            .join("\n");
+          navigator.clipboard?.writeText(tsv).then(() => {
+            copyBtn.lastChild.textContent = " Copied";
+            setTimeout(() => { copyBtn.lastChild.textContent = " Copy as TSV"; }, 1800);
+          });
+        };
+      }
+
+      // Per orthogroup, the test uses the pasted proteins that reach an annotated
+      // unit (their orthogroup, or themselves when in none) and counts units, so
+      // the banner reports those rather than the proteins of the expanded sets.
+      function renderOrthogroupBanner(stats) {
+        const setText = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = v;
+        };
+        const n = stats.original_input || 0;
+        const tested = stats.tested_proteins ?? 0;
+        const pct = n ? Math.round((tested / n) * 100) : 0;
+        const expCell = document.getElementById("go-cov-expansion-cell");
+        if (expCell) expCell.hidden = true;
+        const annLabel = document.getElementById("go-cov-annotated-label");
+        annLabel.textContent = "Tested";
+        annLabel.title = "Pasted foreground proteins that entered the test: their orthogroup " +
+          "(or the protein itself, when it is in none) carries a GO annotation in the background.";
+        setText("go-cov-annotated", tested.toLocaleString('en-US'));
+        const units = stats.foreground_units ?? 0;
+        document.getElementById("go-cov-annotated-unit").textContent =
+          `(${pct}% of foreground, in ${units.toLocaleString('en-US')} orthogroup${units === 1 ? "" : "s"} or unassigned proteins)`;
+        setText("go-cov-bg", (stats.background_units ?? 0).toLocaleString('en-US'));
+        setText("go-cov-bg-unit",
+                `orthogroups or unassigned proteins, from ${(stats.background_proteins ?? 0).toLocaleString('en-US')} background proteins`);
+        let note = `${pct}% of your foreground entered the test through its orthogroups, each carrying ` +
+          `the annotations of its background members and counted once.`;
+        if (pct < 30) note += " Enrichment power will be limited.";
+        setText("go-cov-note", note);
+      }
+
+      function renderCoverageBanner(stats, inputIds) {
         const banner = document.getElementById("go-coverage-banner");
         if (!banner) return;
         if (!stats) { banner.hidden = true; return; }
@@ -1473,6 +1655,16 @@
           if (el) el.textContent = v;
         };
         setText("go-cov-input",     stats.original_input ?? "–");
+        if (stats.counting === "per_orthogroup") {
+          renderOrthogroupBanner(stats);
+          renderUntestedIds(inputIds);
+          banner.hidden = false;
+          return;
+        }
+        const annLabel = document.getElementById("go-cov-annotated-label");
+        annLabel.textContent = "With GO annotations";
+        annLabel.title = "Foreground proteins that are in the background and carry at least one GO term.";
+        document.getElementById("go-cov-annotated-unit").innerHTML = '(<span id="go-cov-pct">–</span>)';
         setText("go-cov-expanded",  stats.after_expansion ?? "–");
         setText("go-cov-annotated", stats.with_annotations ?? "–");
         // Show the annotated universe (what the test runs against), with the
@@ -1499,19 +1691,21 @@
             || (stats.after_expansion === stats.original_input);
         }
 
-        // Note line — picks the most useful interpretation
+        // Note line. The share counts foreground proteins that are in the
+        // background AND annotated; why the others are out is listed per
+        // identifier below, so the note does not guess at one cause.
         let note = "";
         if (pct < 30) {
-          note = `Heads up: only ${pct}% of your foreground has GO annotations. ` +
-            `Enrichment power will be limited. Consider broadening the foreground or ` +
-            `(if you didn't already) tick "Expand to full orthogroups".`;
+          note = `Heads up: only ${pct}% of your foreground is in the background with GO annotations. ` +
+            `Enrichment power will be limited.`;
         } else if (pct < 60) {
-          note = `${pct}% of your foreground carries GO annotations. ` +
+          note = `${pct}% of your foreground is in the background with GO annotations. ` +
             `Enrichment will work but expect modest statistical power.`;
         } else {
-          note = `${pct}% of your foreground has GO annotations. Good coverage.`;
+          note = `${pct}% of your foreground is in the background with GO annotations. Good coverage.`;
         }
         setText("go-cov-note", note);
+        renderUntestedIds(inputIds);
         banner.hidden = false;
       }
 
@@ -1953,6 +2147,7 @@
         const body = Object.assign({
           evidence_preset: readSetting("evidence_preset", "all"),
           counting_mode:   readSetting("counting_mode", "per_protein"),
+          single_copy_only: readSingleCopyOnly(),
           p_value: 0.05,
           min_depth: 2
         }, extraParams);
@@ -1968,7 +2163,10 @@
           if (loadingSpinner) loadingSpinner.classList.add("hidden");
 
           if (!data || data.success !== true) {
-            setStatus(`❌ ${data?.message || "GO analysis failed."} (where=${data?.where || "?"})`, "error");
+            // The results on screen belong to an earlier run: hide them.
+            document.getElementById("go-results-container").hidden = true;
+            document.getElementById("figure-parameters-container").hidden = true;
+            setStatus(`❌ ${serverError(data, "GO analysis failed.")}`, "error");
             return;
           }
 
@@ -1986,7 +2184,8 @@
           document.getElementById("figure-parameters-container").hidden = false;
 
           // Annotation-coverage banner
-          renderCoverageBanner(window.__goResults.stats);
+          renderCoverageBanner(window.__goResults.stats,
+                               data.payload?.input_ids || data.input_ids || null);
 
           // Sync table filter inputs with run thresholds
           document.getElementById("go-fdr-input").value = body.p_value;
@@ -2011,19 +2210,16 @@
           renderTable();
           const notice = data.payload?.notice || data.notice;
           const warnings = data.payload?.warnings || data.warnings || [];
-          if (warnings.length) {
-            setStatus("⚠️ " + warnings.join("  •  "), "info");
-          } else if (notice) {
-            setStatus(`ℹ️ ${notice}`, "info");
-          } else {
-            // Count findings, not rows: ``flat`` can include sub-threshold terms
-            // kept for the chart, and they are not results.
-            const nSig = flat.filter(r => r.significant !== false).length;
-            setStatus(
-              `✅ GO Enrichment generated (${nSig} significant term${nSig === 1 ? "" : "s"}` +
-              `${flat.length > nSig ? `, ${flat.length - nSig} more shown below the threshold` : ""}).`,
-              "ok");
-          }
+          // Count findings, not rows: ``flat`` can include sub-threshold terms
+          // kept for the chart, and they are not results. The notice and the
+          // warnings follow the count; neither replaces it.
+          const nSig = flat.filter(r => r.significant !== false).length;
+          const parts = [
+            `${warnings.length ? "⚠️" : "✅"} GO Enrichment generated (${nSig} significant term${nSig === 1 ? "" : "s"}` +
+            `${flat.length > nSig ? `, ${flat.length - nSig} more shown below the threshold` : ""}).`];
+          if (notice) parts.push(notice);
+          parts.push(...warnings);
+          setStatus(parts.join("  •  "), warnings.length || notice ? "info" : "ok");
         } catch (err) {
           console.error(err);
           if (loadingSpinner) loadingSpinner.classList.add("hidden");
