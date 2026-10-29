@@ -2212,6 +2212,17 @@ def stream_download():
 # Run history — snapshot + summary helpers
 ############################################################################################################
 
+def _hide_local_paths(line):
+    """A log line for the page without the user's folders: paths inside the
+    application's folder become relative and the home folder becomes '~', so
+    screenshots and shared videos do not show them."""
+    for folder, short in ((os.getcwd(), ""), (os.path.expanduser("~"), "~")):
+        if folder and folder != os.sep:
+            line = line.replace(folder + os.sep, f"{short}{os.sep}" if short else "")
+            line = line.replace(folder, short or ".")
+    return line
+
+
 @app.route('/stream_orthofinder')
 def stream_orthofinder():
     import zipfile
@@ -2261,7 +2272,7 @@ def stream_orthofinder():
                 m = re.search(r"OrthoFinder version (\S+)", stripped)
                 if m:
                     of_version = m.group(1)
-            yield f"data: {stripped}\n\n"
+            yield f"data: {_hide_local_paths(stripped)}\n\n"
 
         process.stdout.close()
         process.wait()
