@@ -450,6 +450,9 @@
           </div>
         </div>
 
+        <!-- The effective settings of the next run (wired below). -->
+        <p id="go-run-summary" class="goa-option-hint" role="status" aria-live="polite"></p>
+
         <div class="goa-action-row">
           <button class="btn btn-primary" id="run-full-go-analysis" type="button" disabled>
             <i class="fa-solid fa-dna"></i> Run GO enrichment
@@ -1272,11 +1275,37 @@
         return loadedSets[which] !== null && loadedSets[which] === JSON.stringify(req);
       }
       function updateRunState() {
+        updateRunSummary();
         if (!runAnalysisBtn) return;
         const ready = setIsCurrent("fg") && setIsCurrent("bg");
         runAnalysisBtn.disabled = !ready;
         runAnalysisBtn.style.opacity = ready ? "1" : "";
       }
+      // One line above Run with what the run will use: the counting and the
+      // evidence as ticked, and the sets as loaded on the server.
+      const EVIDENCE_LABEL = { all: "All", curated: "Non-IEA", experimental: "Experimental only" };
+      function describeSet(which) {
+        if (!setIsCurrent(which)) return "not loaded";
+        const req = JSON.parse(loadedSets[which]);
+        if (req.background_choice === "5") return "all GOA files of the foreground's species";
+        const n = new Set(req.uniprot_ids || req.custom_uniprot_ids).size;
+        let text = `${n.toLocaleString("en")} pasted identifier${n === 1 ? "" : "s"}`;
+        if (req.use_orthogroups) {
+          text += req.single_copy_only ? ", expanded to single-copy orthogroups" : ", expanded to full orthogroups";
+        }
+        return text;
+      }
+      function updateRunSummary() {
+        const el = document.getElementById("go-run-summary");
+        if (!el) return;
+        const counting = readSetting("counting_mode", "per_protein") === "per_orthogroup"
+          ? "per orthogroup" : "per protein";
+        const evidence = EVIDENCE_LABEL[readSetting("evidence_preset", "all")] || "All";
+        el.textContent = `Will run: counting ${counting} · evidence ${evidence} · ` +
+          `foreground ${describeSet("fg")} · background ${describeSet("bg")}.`;
+      }
+      document.querySelectorAll('input[name="evidence_preset"], input[name="counting_mode"]')
+        .forEach(input => input.addEventListener("change", updateRunSummary));
       function markStale(which) {
         if (loadedSets[which] !== null && !setIsCurrent(which)) {
           const name = SET_LABEL[which];
@@ -1309,10 +1338,10 @@
       // ------------------------------------------------------------------
       // A set is expanded if its box is ticked, or if it was loaded expanded and
       // not re-loaded since (unticking alone does not change the stored set).
-      // While one is, "Per protein" is disabled; the previous choice comes back
-      // when neither is. The server applies the same rule.
+      // While one is, "Per protein" is disabled and "Per orthogroup" ticked, as
+      // the server does. When neither is, "Per protein" is available again but
+      // the counting stays as ticked: the page never changes it back on its own.
       const loadedExpanded = { fg: false, bg: false };
-      let countingBeforeExpansion = null;
       function updateCountingWarning() {
         const el = document.getElementById("counting-expansion-note");
         const perProtein = document.querySelector('input[name="counting_mode"][value="per_protein"]');
@@ -1321,11 +1350,8 @@
         const fgExp = !!fgCheckbox?.checked || loadedExpanded.fg;
         const bgExp = (!!bgCheckbox?.checked && !useGOACheck?.checked) || loadedExpanded.bg;
         const expanded = fgExp || bgExp;
-        if (expanded && !perProtein.disabled) {
-          countingBeforeExpansion = readSetting("counting_mode", "per_protein");
+        if (expanded) {
           perOrthogroup.checked = true;
-        } else if (!expanded && perProtein.disabled && countingBeforeExpansion === "per_protein") {
-          perProtein.checked = true;
         }
         perProtein.disabled = expanded;
         el.hidden = !expanded;
@@ -1337,6 +1363,7 @@
           }
           singleCopy.disabled = !expanded;
         }
+        updateRunSummary();
       }
       [fgCheckbox, bgCheckbox, useGOACheck, ...document.querySelectorAll('input[name="counting_mode"]')]
         .forEach(input => input?.addEventListener("change", updateCountingWarning));
