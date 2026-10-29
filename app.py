@@ -505,14 +505,18 @@ def cargar_carpeta():
             session['modo'] = mode_flag
             # Carry the run-step provenance stamps (UniProt release + OrthoFinder
             # version) from Proteomas/ into the analysis folder so they survive
-            # into build_provenance + the saved run snapshot. Only present for the
-            # 'generated' flow (downloaded proteomes); uploads have none, which is
-            # correct.
+            # into build_provenance + the saved run snapshot. They describe
+            # Proteomas/Orthogroups.zip, so only the 'generated' flow takes them;
+            # an upload or the bundled dataset has none, and must not show those
+            # of the last New Analysis.
             for _prov_name in ("proteome_provenance.json", "orthofinder_provenance.json"):
                 try:
                     _src = os.path.join(PROTEOMES_FOLDER, _prov_name)
-                    if os.path.exists(_src):
-                        shutil.copy2(_src, os.path.join(folder_path, _prov_name))
+                    _dst = os.path.join(folder_path, _prov_name)
+                    if mode_flag == 'generated' and os.path.exists(_src):
+                        shutil.copy2(_src, _dst)
+                    elif mode_flag != 'generated' and os.path.exists(_dst):
+                        os.remove(_dst)
                 except Exception as _e:
                     logging.warning(f"[provenance] could not copy {_prov_name}: {_e}")
             # Drop the GO-page taxonomic cache. It's keyed by the previous
@@ -1408,11 +1412,15 @@ def build_provenance(new_run=False):
         "proteome_count": manifest.get("proteome_count"),
         "is_fallback":    manifest.get("is_fallback", False),
     }
-    # Read a provenance stamp written either into the active analysis folder or,
-    # during the OrthoFinder run (before folder_path exists), into Proteomas/.
-    # Checking both means the history snapshot — taken mid-run — captures them too.
+    # Read a provenance stamp from the active analysis folder, which holds the
+    # stamps of that analysis and nothing else (none for an upload). Proteomas/
+    # holds those of the last New Analysis: read only for the new run's snapshot
+    # or while no analysis is loaded.
     def _load_prov(name):
-        bases = (PROTEOMES_FOLDER,) if new_run else (session.get("folder_path"), PROTEOMES_FOLDER)
+        if new_run or not session.get("folder_path"):
+            bases = (PROTEOMES_FOLDER,)
+        else:
+            bases = (session.get("folder_path"),)
         for base in bases:
             if not base:
                 continue
