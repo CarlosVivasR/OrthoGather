@@ -230,7 +230,7 @@ def _snapshot_run(results_dir, run_id, duration_s):
     species_ids = list(session.get('species_ids') or [])
     return _history_mod.snapshot_run(results_dir, run_id, duration_s,
                                      species_ids=species_ids,
-                                     provenance=build_provenance())
+                                     provenance=build_provenance(new_run=True))
 
 
 def _orthofinder_thread_settings() -> tuple:
@@ -1391,11 +1391,16 @@ def _write_catalog_manifest(manifest: dict):
         logging.error(f"Could not write catalogue manifest: {e}")
 
 
-def build_provenance():
+def build_provenance(new_run=False):
     """Reproducibility record for the active analysis: which proteome catalogue
     snapshot + GOA download + OrthoGather version produced it. Surfaced at the
     bottom of results pages, embedded in exports, and stored with saved runs —
-    so a result can always be traced to its data versions (reviewer ask)."""
+    so a result can always be traced to its data versions (reviewer ask).
+
+    ``new_run`` gives the record of the OrthoFinder run that has just finished,
+    for its history snapshot. Its stamps are in Proteomas/ only: the analysis
+    open in the session, if any, is another one, and no GOA file has been
+    downloaded for the new run yet."""
     manifest = _read_catalog_manifest() or {}
     catalogue = {
         "version":        manifest.get("version"),
@@ -1407,7 +1412,8 @@ def build_provenance():
     # during the OrthoFinder run (before folder_path exists), into Proteomas/.
     # Checking both means the history snapshot — taken mid-run — captures them too.
     def _load_prov(name):
-        for base in (session.get("folder_path"), PROTEOMES_FOLDER):
+        bases = (PROTEOMES_FOLDER,) if new_run else (session.get("folder_path"), PROTEOMES_FOLDER)
+        for base in bases:
             if not base:
                 continue
             p = os.path.join(base, name)
@@ -1419,7 +1425,7 @@ def build_provenance():
                     logging.warning(f"[provenance] could not read {name}: {e}")
         return None
 
-    goa      = _load_prov("goa_provenance.json")
+    goa      = None if new_run else _load_prov("goa_provenance.json")
     proteome = _load_prov("proteome_provenance.json")
     of_prov  = _load_prov("orthofinder_provenance.json") or {}
     # GO ontology release (data-version from the OBO header) — pins which GO
@@ -1428,7 +1434,7 @@ def build_provenance():
     return {
         "orthogather_version": ORTHOGATHER_VERSION,
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "mode":         session.get("modo"),
+        "mode":         "generated" if new_run else session.get("modo"),
         "catalogue":    catalogue,
         "goa":          goa,
         # UniProt release that produced the proteome sequences (None for
