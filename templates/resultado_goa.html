@@ -1234,6 +1234,66 @@
         return textarea.value.split(/\r?\n/).filter(l => l.trim());
       }
 
+      // ------------------------------------------------------------------
+      // Loaded sets follow the page
+      // ------------------------------------------------------------------
+      // What each set is loaded from. The run sends the same for both sets and
+      // the server refuses it if that is not what it loaded. The orthogroup
+      // filter only acts on an expanded set, and "Use all GOA files" takes no
+      // identifiers and is never expanded.
+      function foregroundRequest() {
+        const expand = !!fgCheckbox?.checked;
+        return {
+          uniprot_ids: pastedLines(fgTextArea),
+          use_orthogroups: expand,
+          single_copy_only: expand && readSingleCopyOnly()
+        };
+      }
+      function backgroundRequest() {
+        const useGOAFiles = !!useGOACheck?.checked;
+        const expand = !useGOAFiles && !!bgCheckbox?.checked;
+        return {
+          background_choice: useGOAFiles ? "5" : "4",
+          use_orthogroups: expand,
+          single_copy_only: expand && readSingleCopyOnly(),
+          custom_uniprot_ids: useGOAFiles ? [] : pastedLines(bgTextArea)
+        };
+      }
+      function currentSets() {
+        return { foreground: foregroundRequest(), background: backgroundRequest() };
+      }
+      // The request each set was last loaded from (null: not loaded, or the
+      // last load failed). A set whose box or options changed since is stale:
+      // Run stays disabled until it is loaded again.
+      const loadedSets = { fg: null, bg: null };
+      const SET_LABEL = { fg: "foreground", bg: "background" };
+      function setIsCurrent(which) {
+        const req = which === "fg" ? foregroundRequest() : backgroundRequest();
+        return loadedSets[which] !== null && loadedSets[which] === JSON.stringify(req);
+      }
+      function updateRunState() {
+        if (!runAnalysisBtn) return;
+        const ready = setIsCurrent("fg") && setIsCurrent("bg");
+        runAnalysisBtn.disabled = !ready;
+        runAnalysisBtn.style.opacity = ready ? "1" : "";
+      }
+      function markStale(which) {
+        if (loadedSets[which] !== null && !setIsCurrent(which)) {
+          const name = SET_LABEL[which];
+          showStatus(`${which}-msg`, "warning",
+            `The ${name} changed after it was loaded and is not loaded any more. ` +
+            `Click 'Load ${name}' to use it; Run is disabled until then.`);
+          loadedSets[which] = null;
+        }
+        updateRunState();
+      }
+      fgTextArea?.addEventListener("input", () => markStale("fg"));
+      fgCheckbox?.addEventListener("change", () => markStale("fg"));
+      [bgTextArea, bgCheckbox, useGOACheck].forEach(el =>
+        el?.addEventListener(el === bgTextArea ? "input" : "change", () => markStale("bg")));
+      document.querySelectorAll('input[name="orthogroup_filter"]').forEach(input =>
+        input.addEventListener("change", () => { markStale("fg"); markStale("bg"); }));
+
       // "Foreground saved: 306 identifiers." plus what the server changed while
       // reading them; an isoform suffix removed turns the message into a warning.
       function showSavedIds(targetId, what, input, extra) {
@@ -1295,19 +1355,21 @@
 
           setButtonLoading("submit-foreground", true, { textLoading: "Saving..." });
           showStatus("fg-msg", "info", "Saving Foreground...");
+          // Loading replaces the foreground on the server, also when it fails.
+          const request = foregroundRequest();
+          loadedSets.fg = null;
+          updateRunState();
 
           try {
             const res = await fetch("/foreground_analysis", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                uniprot_ids: ids,
-                use_orthogroups: !!fgCheckbox?.checked,
-                single_copy_only: readSingleCopyOnly()
-              })
+              body: JSON.stringify(request)
             });
             const js = await res.json().catch(() => null);
             if (!res.ok || js?.success === false) {
+              loadedExpanded.fg = false;
+              updateCountingWarning();
               showStatus("fg-msg", "error", serverError(js, "Error saving Foreground."));
               return;
             }
@@ -1317,25 +1379,23 @@
             }
             showSavedIds("fg-msg", "Foreground", js.input);
             window.foregroundUniProtIDs = ids;
-            loadedExpanded.fg = !!fgCheckbox?.checked;
+            loadedSets.fg = JSON.stringify(request);
+            loadedExpanded.fg = request.use_orthogroups;
             updateCountingWarning();
           } catch (err) {
             console.error(err);
             showStatus("fg-msg", "error", "Error saving Foreground.");
           } finally {
             setButtonLoading("submit-foreground", false);
+            updateRunState();
           }
         });
       }
 
       if (useGOACheck) {
+        // The box is disabled but kept, so unticking brings the pasted list back.
         useGOACheck.addEventListener("change", function () {
-          if (this.checked) {
-            bgTextArea.disabled = true;
-            bgTextArea.value = "";
-          } else {
-            bgTextArea.disabled = false;
-          }
+          bgTextArea.disabled = this.checked;
         });
       }
 
@@ -1352,15 +1412,13 @@
             return;
           }
 
-          const payload = {
-            background_choice: useGOAFiles ? "5" : "4",
-            use_orthogroups: !!bgCheckbox?.checked,
-            single_copy_only: readSingleCopyOnly(),
-            custom_uniprot_ids: useGOAFiles ? [] : ids
-          };
+          const payload = backgroundRequest();
 
           setButtonLoading("submit-background", true, { textLoading: "Saving..." });
           showStatus("bg-msg", "info", "Saving Background...");
+          // Loading replaces the background on the server, also when it fails.
+          loadedSets.bg = null;
+          updateRunState();
 
           try {
             const res = await fetch("/background_analysis", {
@@ -1370,27 +1428,29 @@
             });
             const js = await res.json().catch(() => null);
             if (!res.ok || js?.success === false) {
+              loadedExpanded.bg = false;
+              updateCountingWarning();
               showStatus("bg-msg", "error", serverError(js, "Error saving Background."));
               return;
             }
 
-            if (runAnalysisBtn) {
-              runAnalysisBtn.disabled = false;
-              runAnalysisBtn.style.opacity = "1";
-            }
+            loadedSets.bg = JSON.stringify(payload);
+            const ready = setIsCurrent("fg") ? "You can run the GO enrichment now."
+                                             : "Load the foreground to run the GO enrichment.";
             if (useGOAFiles) {
-              showStatus("bg-msg", "success", "Background saved. You can run the GO enrichment now.");
+              showStatus("bg-msg", "success", `Background saved. ${ready}`);
             } else {
-              showSavedIds("bg-msg", "Background", js.input, "You can run the GO enrichment now.");
+              showSavedIds("bg-msg", "Background", js.input, ready);
             }
             window.backgroundIDs = useGOAFiles ? "ALL_GOAS" : ids;
-            loadedExpanded.bg = payload.use_orthogroups && !useGOAFiles;
+            loadedExpanded.bg = payload.use_orthogroups;
             updateCountingWarning();
           } catch (err) {
             console.error(err);
             showStatus("bg-msg", "error", "Error saving Background.");
           } finally {
             setButtonLoading("submit-background", false);
+            updateRunState();
           }
         });
       }
@@ -2149,7 +2209,9 @@
           counting_mode:   readSetting("counting_mode", "per_protein"),
           single_copy_only: readSingleCopyOnly(),
           p_value: 0.05,
-          min_depth: 2
+          min_depth: 2,
+          // The sets on screen: the server checks they are the ones it loaded.
+          sets: currentSets()
         }, extraParams);
 
         try {
@@ -2226,6 +2288,7 @@
           setStatus("❌ Network error while contacting /gene_ontology_analysis.", "error");
         } finally {
           setButtonLoading("run-full-go-analysis", false);
+          updateRunState();
         }
       }
 

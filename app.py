@@ -1,6 +1,7 @@
 import os
 import io
 import gzip
+import hashlib
 import zipfile
 import shutil
 import re
@@ -3093,6 +3094,26 @@ _SET_SESSION_KEYS = {
 }
 
 
+def _set_fingerprint(name, body):
+    """What a set is loaded from, as the server reads it: the identifiers once
+    parsed, in order, and the options that change the set. Kept at load time
+    and compared with what the page shows when it runs."""
+    body = body if isinstance(body, dict) else {}
+    expand = bool(body.get("use_orthogroups"))
+    key = {"expand": expand, "single_copy": expand and bool(body.get("single_copy_only"))}
+    if name == "foreground":
+        key["ids"] = list(dict.fromkeys(parse_identifier_list(body.get("uniprot_ids", []))["ids"]))
+    else:
+        key["choice"] = str(body.get("background_choice", "")).strip()
+        if key["choice"] == "5":
+            # 'Use all GOA files' takes no identifiers and is never expanded.
+            key.update(expand=False, single_copy=False)
+        else:
+            key["ids"] = list(dict.fromkeys(
+                parse_identifier_list(body.get("custom_uniprot_ids", []))["ids"]))
+    return hashlib.sha256(json.dumps(key, sort_keys=True).encode()).hexdigest()
+
+
 def _replace_set(name, load):
     """Run ``load``, the body of a set-loading route, after dropping the
     previous set: a failed load leaves no set, so the run can never use an older
@@ -3100,9 +3121,12 @@ def _replace_set(name, load):
     for key in _SET_SESSION_KEYS[name]:
         session.pop(key, None)
     session.pop(f"{name}_load_error", None)
+    session.pop(f"{name}_fingerprint", None)
     resp, code = load()
     if code >= 400:
         session[f"{name}_load_error"] = (resp.get_json(silent=True) or {}).get("message") or "unknown error"
+    else:
+        session[f"{name}_fingerprint"] = _set_fingerprint(name, request.get_json(silent=True))
     return resp, code
 
 
@@ -3537,6 +3561,19 @@ def gene_ontology_analysis():
                                hint=(f"Load the {' and the '.join(stale)} again to apply "
                                      f"'{'Single-copy only' if data.get('single_copy_only') else 'All orthogroups'}'."),
                                code=400)
+        # The page sends the sets it shows. A box or an option changed after a
+        # set was loaded means the run would use another set than the one on
+        # screen: refuse it. Callers that do not send them are not checked.
+        shown = data.get("sets")
+        if isinstance(shown, dict):
+            for name in ("foreground", "background"):
+                loaded = session.get(f"{name}_fingerprint")
+                if name in shown and loaded and loaded != _set_fingerprint(name, shown[name]):
+                    return respond(False, f"The {name} on the page is not the one loaded",
+                                   where="gene_ontology_analysis",
+                                   hint=(f"Its box or options changed after it was loaded: click "
+                                         f"'Load {name}' again."),
+                                   code=400)
         # Isoform suffixes removed when the lists were loaded.
         warnings.extend(f"Foreground: {w}" for w in session.get("foreground_id_warnings") or [])
         if session.get("background_mode") == "ids":
