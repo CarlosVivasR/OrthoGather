@@ -18,6 +18,7 @@
         {% if p.proteome and p.proteome.release %}release
           <strong>{{ p.proteome.release if p.proteome.release is string else p.proteome.release | join(', ') }}</strong>
           {%- if p.proteome.release_date %} · {{ p.proteome.release_date if p.proteome.release_date is string else p.proteome.release_date | join(', ') }}{% endif %}
+        {%- elif p.mode == 'generated' %}<span class="provenance-muted">not recorded for this run</span>
         {%- else %}<span class="provenance-muted">externally supplied sequences</span>{% endif %}
       </dd>
     </div>
@@ -49,6 +50,7 @@
       <dt>OrthoFinder</dt>
       <dd>
         {% if p.orthofinder_version %}v{{ p.orthofinder_version }}
+        {%- elif p.mode == 'generated' %}<span class="provenance-muted">not recorded for this run</span>
         {%- else %}<span class="provenance-muted">externally supplied orthogroups</span>{% endif %}
       </dd>
     </div>

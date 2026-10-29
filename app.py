@@ -1497,7 +1497,7 @@ def build_provenance_text(prov=None) -> str:
         f"  source             : {pr.get('source') or '—'}",
         "",
         "OrthoFinder",
-        f"  version            : {p.get('orthofinder_version') or '— (externally supplied orthogroups)'}",
+        f"  version            : {p.get('orthofinder_version') or ('— (not recorded for this run)' if p.get('mode') == 'generated' else '— (externally supplied orthogroups)')}",
         "",
         "Gene Ontology ontology",
         f"  release (OBO)      : {onto.get('data_version') or '—'}",
@@ -2347,6 +2347,42 @@ def api_history():
     return jsonify(_list_history())
 
 
+def _restore_run_stamps(run_dir):
+    """Write to Proteomas/ the provenance stamps saved with a history run.
+
+    The stamps in Proteomas/ describe Proteomas/Orthogroups.zip, which is now
+    the run's, so they are replaced, or removed when the run saved none: left
+    alone, the run would show those of the last New Analysis. A run saved by
+    2.2.0 may hold the provenance of the analysis open while it ran; a proteome
+    record of other proteomes than the run's is not restored, and neither is
+    the OrthoFinder version read with it."""
+    try:
+        meta = json.loads((Path(run_dir) / "meta.json").read_text())
+    except Exception:
+        meta = {}
+    prov = meta.get("provenance") or {}
+    proteome = prov.get("proteome")
+    ids, listed = set(meta.get("species_ids") or []), set((proteome or {}).get("per_proteome") or {})
+    own = not (ids and listed and ids != listed)
+    if not own:
+        logging.warning(f"[history] run {meta.get('id')}: its saved provenance lists other proteomes; "
+                        f"not restored")
+    of_version = prov.get("orthofinder_version") if own else None
+    stamps = {"proteome_provenance.json": proteome if own else None,
+              "orthofinder_provenance.json": ({"version": of_version, "source": "OrthoFinder"}
+                                              if of_version else None)}
+    for name, data in stamps.items():
+        path = os.path.join(PROTEOMES_FOLDER, name)
+        try:
+            if data:
+                with open(path, "w") as f:
+                    json.dump(data, f)
+            elif os.path.exists(path):
+                os.remove(path)
+        except Exception as e:
+            logging.warning(f"[history] could not restore {name}: {e}")
+
+
 @app.route('/history/<run_id>/load')
 def history_load(run_id):
     """Restore a saved run as the active analysis.
@@ -2370,6 +2406,7 @@ def history_load(run_id):
         return redirect(url_for('history_page'))
     dest_zip = Path(PROTEOMES_FOLDER) / "Orthogroups.zip"
     shutil.copy2(zip_src, dest_zip)
+    _restore_run_stamps(run_dir)
     session['last_run_id'] = run_id
     # Load from the copied run zip (Proteomas/Orthogroups.zip) via the 'generated'
     # branch. Using 'preselected' here was a bug: that branch reads the bundled
