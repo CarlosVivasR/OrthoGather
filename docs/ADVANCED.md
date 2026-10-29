@@ -147,8 +147,9 @@ When reporting a problem, quote the `ERR_` code in the
 
 ## Test suite
 
-The repository has 165 tests covering species matching, taxonomy, the error catalogue, OrthoXML
-import, catalogue building, file names, provenance, pasted identifiers, local security, the
+The repository has 224 tests covering species matching, taxonomy, the error catalogue, OrthoXML
+import, catalogue building, file names, provenance in every loading mode, pasted identifiers (UniProt
+and not), the GO page states and its error codes, local security, the
 per-orthogroup permutation test (its calibration on random foregrounds and its power), the GOA files
 per species, single-copy orthogroups, failed OrthoFinder runs, and every combination of the Gene
 Ontology settings through the real routes (`tests/test_go_combinations.py`: the counting mode applied,

@@ -4,7 +4,54 @@ Notable changes to OrthoGather. Versions are tagged `vMAJOR.MINOR.PATCH`, and ev
 1.1.1 is archived on Zenodo (all versions:
 [10.5281/zenodo.18510910](https://doi.org/10.5281/zenodo.18510910)).
 
-## Unreleased
+## 2.2.1 (not released yet)
+
+Fixes from the blind study of 2.2.0 (October 2026). An analysis of proteomes with UniProt accessions
+gives exactly the same results as in 2.2.0: the worked example still gives 21 and 1 enriched terms
+with the GOA files of July 2026 (23 and 1 with those of October), and 66 analyses of the example and
+of the study's *Bacillus subtilis* data, in every counting, expansion, background and evidence
+setting, return the same terms, counts, p- and q-values. No part of the statistical method changes.
+
+### Fixed
+- Expansion with identifiers that are not UniProt accessions: proteomes from UniParc or from a lab's
+  own FASTA have bare identifiers in the orthogroups (`UPI…`, `IS27_00398`), and the expansion only
+  read `db|ACC|NAME` cells, so it found no orthogroup and the run stopped at "Foreground missing".
+  It now reads both forms, as per-orthogroup counting and the UpSet plots already did.
+- An expansion that finds no orthogroup is an error that names the identifiers, not a success.
+  Loading a foreground or background replaces it, so after a failed load the server holds none, and
+  "Foreground missing" and "Background missing" give the reason of the failed load.
+- The GO page runs only with the sets it shows. Ticking "Use all GOA files" no longer empties the
+  background box; changing a box or an option marks that set as not loaded and disables Run until it
+  is loaded again; and the server refuses a run whose sets are not the ones it loaded.
+- The counting no longer switches back to "Per protein" on its own when expansion is removed, and a
+  line above Run says what the run will use.
+- Provenance: an External Upload or the Preselected Dataset no longer shows the UniProt release and
+  OrthoFinder version of the last New Analysis; the history snapshot of a New Analysis records that
+  analysis, not the one open while it ran; and a run opened from the history shows its own
+  provenance (or "not recorded for this run" when 2.2.0 saved another run's).
+- Species matching on the GO page uses the proteome each species was downloaded from when the
+  analysis knows it, and compares names as whole words: "IS27" is no longer matched to "Influenza A
+  virus (A/Memphis/27/1983)". The table shows the proteome ID of each match. The 47 species of the
+  Preselected Dataset match as before.
+- The lineage cache of the taxonomic tree is kept in `~/.orthogather/`; the copy bundled in
+  `static/Proteomes_json/` is read but no longer modified.
+- The provenance stamps of a New Analysis are kept in `run_provenance/`, out of `Proteomas/`, which
+  OrthoFinder reads: every run warned that `proteome_provenance.json` "is not a FASTA file".
+- The OrthoFinder log on the page no longer shows the user's folders: paths inside the
+  application's folder are relative and the home folder is `~`.
+- The Data provenance panel of the GO page is refreshed when the GOA download finishes, instead of
+  saying "not downloaded" until the page is reloaded.
+- Figure 2 counts proteomes, and says how many species they are: the Preselected Dataset has 47
+  proteomes of 35 species, not "47 species".
+- The summary of the UpSet filter reads as one sentence instead of one line per piece.
+
+### Added
+- The results Excel lists the proteins (or orthogroups, and the pasted identifiers behind each) of
+  every term, in new columns after the existing ones.
+- Error codes (`ERR_…`) for every error of the Gene Ontology page.
+- Provenance: the smallest q a per-orthogroup run can reach (the floor set by the number of
+  permutations, explained in `docs/ADVANCED.md`), and the SHA-256 of each GOA file. Each history run
+  keeps the fingerprint of the GOA files used with it, and the page says when a new download differs.
 
 ### Removed
 - Code and files nothing used: the legacy `/download` and `/download_upset_data` routes (the
