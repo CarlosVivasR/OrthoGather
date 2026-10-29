@@ -3057,9 +3057,62 @@ def _orthogroup_members(groups, orthogroups):
             for acc in orthogroup_cell_accessions(cell)}
 
 
+def _no_orthogroups(ids, where):
+    """The error of an expansion that found no orthogroup. It names the
+    identifiers, so a list from another proteome or ID system is recognisable."""
+    ids = list(dict.fromkeys(ids))
+    if len(ids) == 1:
+        msg = f"Your identifier {ids[0]} is not in the orthogroups of this analysis"
+    else:
+        examples = ", ".join(ids[:3]) + (", …" if len(ids) > 3 else "")
+        msg = (f"None of your {len(ids)} identifiers is in the orthogroups of this analysis "
+               f"(for example {examples})")
+    return respond(False, msg, where=where,
+                   hint=("Paste the identifiers as they are written in the proteomes of this analysis "
+                         "(the cells of Orthogroups.tsv): UniProt accessions for UniProt proteomes, "
+                         "UPI… for UniParc ones, or the first word of the headers of your own FASTA."),
+                   code=400)
+
+
+def _no_annotated_members(n_orthogroups, where):
+    return respond(False, f"None of the {n_orthogroups} orthogroups containing your identifiers has a "
+                          f"protein in a species with a GOA file",
+                   where=where,
+                   hint=("The expansion uses the annotations of the species with a GOA file: download "
+                         "the GOA file of a species in these orthogroups from the table above."),
+                   code=400)
+
+
+# Session keys of each loaded set.
+_SET_SESSION_KEYS = {
+    "foreground": ("foreground_proteins", "selected_orthogroups", "foreground_original_count",
+                   "foreground_used_orthogroups", "foreground_single_copy", "foreground_input",
+                   "foreground_id_changes", "foreground_id_warnings"),
+    "background": ("background_mode", "background_ids", "background_goa_files", "background_input",
+                   "background_used_orthogroups", "background_single_copy", "background_id_warnings"),
+}
+
+
+def _replace_set(name, load):
+    """Run ``load``, the body of a set-loading route, after dropping the
+    previous set: a failed load leaves no set, so the run can never use an older
+    one than the page shows. The reason of a failure is kept for the run's hint."""
+    for key in _SET_SESSION_KEYS[name]:
+        session.pop(key, None)
+    session.pop(f"{name}_load_error", None)
+    resp, code = load()
+    if code >= 400:
+        session[f"{name}_load_error"] = (resp.get_json(silent=True) or {}).get("message") or "unknown error"
+    return resp, code
+
+
 @app.route('/foreground_analysis', methods=['POST'])
 def foreground_analysis():
     """Stores the foreground (pasted IDs or orthogroup-expanded IDs) in session, with detailed logs."""
+    return _replace_set("foreground", _load_foreground)
+
+
+def _load_foreground():
     try:
         data = request.get_json(silent=True) or {}
         parsed = parse_identifier_list(data.get('uniprot_ids', []))
@@ -3106,6 +3159,8 @@ def foreground_analysis():
             # Detect orthogroups containing any of the provided IDs
             selected_orthogroups = _orthogroups_with_ids(initial_orthogroups, uniprot_set)
             logging.info(f"[FG] Orthogroups matched by pasted IDs: {len(selected_orthogroups)}")
+            if not selected_orthogroups:
+                return _no_orthogroups(uniprot_ids, "foreground_analysis")
 
             # Optional: restrict to single-copy orthogroups (1:1:1... orthologs)
             if single_copy_only:
@@ -3124,9 +3179,8 @@ def foreground_analysis():
             # Expand IDs from 'Groups of Interest'
             protein_set = _orthogroup_members(orthogroups_of_interest, selected_orthogroups)
             logging.info(f"[FG] Expanded foreground IDs added from orthogroups: {len(protein_set)}")
-
-            if not selected_orthogroups:
-                logging.warning("[FG][WARN] No orthogroups matched the provided UniProt IDs.")
+            if not protein_set:
+                return _no_annotated_members(len(selected_orthogroups), "foreground_analysis")
         else:
             protein_set.update(uniprot_ids)
             # Report which orthogroups contain any of the IDs (useful info)
@@ -3176,6 +3230,10 @@ def background_analysis():
       - choice '4': pasted UniProt IDs (with or without 'use_orthogroups')
       - choice '5': use ALL downloaded GOA files as background
     """
+    return _replace_set("background", _load_background)
+
+
+def _load_background():
     try:
         data = request.get_json(silent=True) or {}
         choice = str(data.get('background_choice', '')).strip()
@@ -3218,6 +3276,8 @@ def background_analysis():
                 # Select orthogroups containing any of the custom IDs
                 sel_ogs = _orthogroups_with_ids(initial_orthogroups, custom_uniprot_ids)
                 logging.info(f"[BG] Orthogroups matched by custom IDs: {len(sel_ogs)}")
+                if not sel_ogs:
+                    return _no_orthogroups(custom_uniprot_ids, "background_analysis")
                 # Optional: restrict to single-copy orthogroups
                 if single_copy_only:
                     sc_set = get_single_copy_orthogroups()
@@ -3234,6 +3294,8 @@ def background_analysis():
                 # Expand IDs from 'Groups of Interest'
                 background_ids = _orthogroup_members(orthogroups_of_interest, sel_ogs)
                 logging.info(f"[BG] Expanded background IDs added from orthogroups: {len(background_ids)}")
+                if not background_ids:
+                    return _no_annotated_members(len(sel_ogs), "background_analysis")
             else:
                 background_ids.update(custom_uniprot_ids)
                 logging.info(f"[BG] Background from pasted IDs only: n={len(background_ids)}")
@@ -3499,9 +3561,13 @@ def gene_ontology_analysis():
 
         if not foreground:
             logging.error("[GO][ERR] ❌ Foreground missing")
+            failed = session.get("foreground_load_error")
             return respond(False, "Foreground missing",
                            where="gene_ontology_analysis",
-                           hint="Load the foreground before running the analysis.",
+                           hint=(f"The last 'Load foreground' failed: {failed}. Correct it and load the "
+                                 f"foreground again." if failed else
+                                 "Paste the foreground identifiers and click 'Load foreground' before "
+                                 "running the analysis."),
                            code=400)
 
         logging.info(f"[GO] Foreground proteins loaded: {len(foreground)}")
@@ -3604,7 +3670,10 @@ def gene_ontology_analysis():
         if not background_ids:
             logging.error("[GO][ERR] ❌ Background missing")
             hint = "Define the background before proceeding."
-            if bg_mode == "goa_all" and goa_less_species:
+            if session.get("background_load_error"):
+                hint = (f"The last 'Load background' failed: {session['background_load_error']}. "
+                        f"Correct it and load the background again.")
+            elif bg_mode == "goa_all" and goa_less_species:
                 hint = ("The species of your proteins has no GOA file, so 'Use all GOA files' has "
                         "no annotated proteome for it. Count per orthogroup, or expand the "
                         "foreground to full orthogroups, to test them through their orthologues.")
