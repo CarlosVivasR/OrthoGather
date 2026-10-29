@@ -4369,6 +4369,15 @@ def gene_ontology_analysis():
                       f"p_hypergeom is the statistic") if n_perm else
                      "hypergeometric (two-sided test; family size not accounted for)"),
                 ])
+                if n_perm:
+                    # The smallest permutation p is 1/(B+1), so no term can get a q
+                    # below m/(k(B+1)), with k terms at that p: a floor, not the
+                    # strength of the evidence (docs/ADVANCED.md).
+                    prov_rows.append((
+                        "Smallest q reachable (per-orthogroup permutations)",
+                        f"{len(testable) / (n_perm + 1):.2g} for one term at the smallest p-value, "
+                        f"1/{n_perm + 1}; m/(k({n_perm} + 1)) when k of the m = {len(testable)} "
+                        f"terms share it. Terms at that floor cannot be ranked against each other."))
             pd.DataFrame(prov_rows, columns=["key", "value"]).to_excel(
                 xw, sheet_name="Provenance", index=False)
         logging.info(f"[GO] 📑 Excel generated: {out_xlsx}")

@@ -54,7 +54,14 @@ the proteome of the foreground's species in the analysis), each shuffle is colla
 the same way (a pasted protein with no annotation of its own takes part through the annotations of
 its orthogroup, which is what expansion adds), and the observed hypergeometric p-value (exported as `p_hypergeom`) is compared with
 the shuffled ones. The number of shuffles is 2m/α, between 5,000 and 50,000, where m is the number
-of terms in the correction family; the seed is fixed, so a run is reproducible. The Orthogroups
+of terms in the correction family; the seed is fixed, so a run is reproducible. The smallest
+permutation p-value is 1/(B+1) for B shuffles, so q has a floor: k terms at that p-value get
+q = m/(k(B+1)). With B = 2m/α that is about α/(2k): 0.025 for a single term and 0.001 for 25 terms,
+and the bounds of 5,000 and 50,000 shuffles move it for very small or very large families. Terms at
+the floor all get the same q, so it cannot rank them, and a q of 1e-3 there may hide much stronger
+evidence than a q of 1e-3 counted per protein. The `Provenance` sheet of each per-orthogroup run
+records its floor (row "Smallest q reachable"). The number of shuffles is not raised to lower it:
+that would change the per-orthogroup p-values. The Orthogroups
 setting (all, or single-copy only) affects only expansion, and is applied when a set is loaded.
 
 With **Use all GOA files**, the universe is the annotated proteome of the species the foreground
