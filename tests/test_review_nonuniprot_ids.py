@@ -190,3 +190,27 @@ def test_ncbi_general_identifiers_run_end_to_end(three_species, pasted):
     assert r.status_code == 200, r.get_json()
     assert r.get_json()["annotation_stats"]["tested_proteins"] == 30
     assert "GO:0006412" in {t["GO"] for t in r.get_json()["bp_results"]}
+
+
+def test_expanding_only_the_foreground_says_it_changes_nothing(three_species):
+    # Counted per orthogroup, the orthogroups carry the annotations of the
+    # background: expanding the foreground alone gives the result of not
+    # expanding it, and the run must say so instead of implying the
+    # annotations of the orthologues were used.
+    c = three_species
+    bg = REF + OWN
+
+    def run(expand_fg):
+        assert c.post("/foreground_analysis", json={"uniprot_ids": OWN[:30],
+                                                    "use_orthogroups": expand_fg}).status_code == 200
+        assert c.post("/background_analysis", json={"background_choice": "4",
+                                                    "custom_uniprot_ids": bg}).status_code == 200
+        r = c.post("/gene_ontology_analysis", json={"counting_mode": "per_orthogroup"})
+        assert r.status_code == 200, r.get_json()
+        return r.get_json()
+
+    plain, expanded = run(False), run(True)
+    terms = lambda js: [(t["GO"], t["p_fdr_bh"]) for t in js["bp_results"]]
+    assert terms(expanded) == terms(plain)
+    assert any("only the foreground was expanded" in w.lower() for w in expanded["warnings"])
+    assert not any("only the foreground was expanded" in w.lower() for w in plain["warnings"])

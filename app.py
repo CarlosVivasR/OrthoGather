@@ -4093,6 +4093,16 @@ def gene_ontology_analysis():
                 "counted per orthogroup: counted per protein, every member of an orthogroup "
                 "would be a separate observation and the functions of large paralogue "
                 "families would look enriched by chance.")
+        if (og_perm is not None and bg_mode == "ids" and session.get("foreground_used_orthogroups")
+                and not session.get("background_used_orthogroups")):
+            # Per orthogroup the foreground enters through its pasted proteins and
+            # the orthogroups carry the annotations of the background: the
+            # expansion of the foreground alone changes nothing.
+            warnings.append(
+                "Only the foreground was expanded to full orthogroups. Counted per orthogroup, "
+                "the result is the same as without that expansion: the orthogroups carry the "
+                "annotations of the background proteins. To use the annotations of the "
+                "orthologues, expand the background too.")
         if proteome_universe and counting_mode == 'per_protein':
             # The universe above pools every GOA file for the per-orthogroup test;
             # counted per protein it would mix species, so do not report it.
