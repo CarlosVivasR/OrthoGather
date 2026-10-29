@@ -160,3 +160,39 @@ class TestRespondError:
             # The fallback ERR_UNEXPECTED spec is used for the message/hint
             assert "unexpected error" in data["message"].lower()
             assert status == 500
+
+
+class TestGoPageErrorCodes:
+    """Blind study, 29-Oct-2026: the GO page showed messages and hints but no
+    ERR_ code, so an error could not be looked up or reported by its code."""
+
+    def test_respond_carries_an_optional_code(self):
+        from flask import Flask
+        app = Flask(__name__)
+        with app.app_context():
+            from orthogather.utils.responses import respond
+            data = respond(False, "Foreground missing", error_code="ERR_FOREGROUND_MISSING")[0].get_json()
+            assert data["error_code"] == "ERR_FOREGROUND_MISSING"
+            assert data["category"] == "state"
+            assert "error_code" not in respond(True, "ok")[0].get_json()
+
+    def test_go_route_errors_have_codes(self):
+        import app as og
+        c = og.app.test_client()
+        cases = [
+            (c.post("/foreground_analysis", json={"uniprot_ids": []}), "ERR_NO_UNIPROT_IDS"),
+            (c.post("/gene_ontology_analysis", json={}), "ERR_FOREGROUND_MISSING"),
+            (c.post("/background_analysis", json={"background_choice": "9", "custom_uniprot_ids": ["P1"]}),
+             None),   # the first check that fails depends on the files present
+            (c.post("/fix_taxid", json={}), "ERR_MISSING_TAXON_INPUT"),
+        ]
+        for r, code in cases:
+            js = r.get_json()
+            assert r.status_code >= 400 and js["error_code"].startswith("ERR_"), js
+            if code:
+                assert js["error_code"] == code
+
+    def test_page_shows_the_code(self):
+        html = (REPO_ROOT / "templates" / "resultado_goa.html").read_text()
+        body = re.search(r"function serverError\(js, fallback\) \{.*?\n      \}", html, re.S).group(0)
+        assert "js.error_code" in body

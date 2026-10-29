@@ -1042,7 +1042,7 @@
                 }
                 btn.disabled = false;
                 input.disabled = false;
-                setStatus("⚠️ No match for that value.", "error");
+                setStatus(`⚠️ No match for that value.${respData?.error_code ? ` [${respData.error_code}]` : ""}`, "error");
               }
             } catch (err) {
               console.error(err);
@@ -1227,11 +1227,13 @@
       function readSingleCopyOnly() {
         return readSetting("orthogroup_filter", "all") === "single_copy";
       }
-      // The message and hint of a failed request, or the fallback text.
+      // The message and hint of a failed request, with its catalogue code, or
+      // the fallback text.
       function serverError(js, fallback) {
         if (!js?.message) return fallback;
         const msg = /[.!?]$/.test(js.message) ? js.message : js.message + ".";
-        return js.hint ? `${msg} ${js.hint}` : msg;
+        const text = js.hint ? `${msg} ${js.hint}` : msg;
+        return js.error_code ? `${text} [${js.error_code}]` : text;
       }
 
       // The server reads the pasted text line by line (FASTA headers, sequences,

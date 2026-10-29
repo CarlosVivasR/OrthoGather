@@ -113,9 +113,12 @@ application checks GitHub for a newer catalogue and offers to update it.
 ## Error codes
 
 Many errors shown by OrthoGather carry a stable code (`ERR_...`), a message and a hint; the rest
-are shown as plain messages. The codes are defined in `orthogather/utils/error_catalog.py` (36
+are shown as plain messages. The codes are defined in `orthogather/utils/error_catalog.py` (46
 entries). Backend routes call `respond_error("ERR_CODE", where=..., detail=...)`, and the
-frontend shows the response as a notification through `static/js/og-errors.js`. The categories are
+frontend shows the response as a notification through `static/js/og-errors.js`. The routes of the
+Gene Ontology page write their own message and hint, which name the identifiers or counts involved,
+and pass the code with `respond(..., error_code="ERR_CODE")`; the page shows it in brackets after
+the hint. The categories are
 `input`, `state`, `data`, `network`, `external`, `not-found` and `system`; the severities are
 `error`, `warning` and `info`.
 

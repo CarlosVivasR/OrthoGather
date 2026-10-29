@@ -108,6 +108,37 @@ ERRORS: Dict[str, ErrorSpec] = {
         category="input",
     ),
 
+    "ERR_IDS_NOT_IN_ORTHOGROUPS": ErrorSpec(
+        message="None of the identifiers is in the orthogroups of this analysis",
+        hint="Paste the identifiers as they are written in the proteomes of this analysis (the cells of Orthogroups.tsv): UniProt accessions, UniParc UPI… or the first word of your own FASTA headers.",
+        category="input",
+    ),
+
+    "ERR_NO_SINGLE_COPY_ORTHOGROUPS": ErrorSpec(
+        message="None of the orthogroups of the identifiers is single-copy",
+        hint="Choose 'All orthogroups', or load the identifiers without expansion.",
+        category="input",
+    ),
+
+    "ERR_MISSING_TAXON_INPUT": ErrorSpec(
+        message="Missing taxon_id (or species_name)",
+        hint="In the Fix field, paste either a NCBI Taxon ID (digits only) or the full species name.",
+        category="input",
+    ),
+
+    "ERR_NO_MATCH_FOR_TAXON": ErrorSpec(
+        message="No match found for that Taxon ID or species name",
+        hint="Double-check the spelling against UniProt. For Taxon IDs, use the numeric NCBI ID (e.g. 9606 for Homo sapiens).",
+        category="input",
+        http_code=404,
+    ),
+
+    "ERR_BACKGROUND_CHOICE_INVALID": ErrorSpec(
+        message="Unknown background choice",
+        hint="Use option 4 (pasted identifiers) or option 5 (use every downloaded GOA file).",
+        category="input",
+    ),
+
     "ERR_SPECIES_NOT_IN_ANALYSIS": ErrorSpec(
         message="One or more species are not in the loaded analysis",
         hint="Use the species picker to choose names from the chip list — typing a species manually can mismatch.",
@@ -177,6 +208,36 @@ ERRORS: Dict[str, ErrorSpec] = {
         message="Foreground proteins are missing from the session",
         hint="Load a foreground (paste UniProt IDs + click 'Load foreground') before running GO enrichment.",
         category="state",
+    ),
+
+    "ERR_BACKGROUND_MISSING": ErrorSpec(
+        message="Background is missing from the session",
+        hint="Define a background (paste identifiers or tick 'Use all GOA files') and click 'Load background' before running enrichment.",
+        category="state",
+    ),
+
+    "ERR_SETS_CHANGED": ErrorSpec(
+        message="A set on the page is not the one loaded",
+        hint="Its box or options changed after it was loaded: load it again before running.",
+        category="state",
+    ),
+
+    "ERR_NO_FG_GO_OVERLAP": ErrorSpec(
+        message="None of your foreground IDs has GO annotations in the background",
+        hint="Check the identifiers left out of the test, or expand the sets to full orthogroups to use the annotations of their orthologues.",
+        category="state",
+    ),
+
+    "ERR_NO_ANNOTATED_MEMBERS": ErrorSpec(
+        message="The orthogroups of the identifiers have no protein in a species with a GOA file",
+        hint="Download the GOA file of a species in these orthogroups from the species table.",
+        category="state",
+    ),
+
+    "ERR_NO_GOA_FILES": ErrorSpec(
+        message="No GOA files have been downloaded",
+        hint="Click 'Download GOA files' on the GO page before using 'Use all GOA files'.",
+        category="data",
     ),
 
     # =========================================================================

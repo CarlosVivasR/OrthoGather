@@ -22,7 +22,8 @@ from flask import jsonify
 from orthogather.utils.error_catalog import ERRORS, lookup
 
 
-def respond(ok: bool, msg: str, *, where=None, hint=None, payload=None, code=200):
+def respond(ok: bool, msg: str, *, where=None, hint=None, payload=None, code=200,
+            error_code: str = None):
     """
     Build a uniform JSON response.
 
@@ -44,8 +45,15 @@ def respond(ok: bool, msg: str, *, where=None, hint=None, payload=None, code=200
         access).
     code : int, default 200
         HTTP status code.
+    error_code : str, optional
+        Code from the error catalogue, for an error whose message and hint are
+        built by the route (they name the identifiers, the counts…). The
+        catalogue gives the category and severity; the text stays the route's.
     """
     data = {"success": ok, "message": msg}
+    if error_code:
+        spec = lookup(error_code)
+        data.update(error_code=error_code, category=spec.category, severity=spec.severity)
     if where:
         data["where"] = where
     if hint:

@@ -3046,7 +3046,7 @@ def fix_taxid():
 
         if not original or (not taxon_id and not species_name):
             return respond(False, "Missing taxon_id (or species_name) and/or original name",
-                           where="fix_taxid",
+                           error_code="ERR_MISSING_TAXON_INPUT", where="fix_taxid",
                            hint="Send { taxon_id, original } or { species_name, original } in the request body.",
                            code=400)
 
@@ -3069,7 +3069,7 @@ def fix_taxid():
 
         if not match:
             return respond(False, "No match found for Taxon ID or species name",
-                           where="fix_taxid",
+                           error_code="ERR_NO_MATCH_FOR_TAXON", where="fix_taxid",
                            hint="Verify the taxon_id / species name against the proteomes JSON file.",
                            code=404)
 
@@ -3084,7 +3084,7 @@ def fix_taxid():
 
     except Exception as e:
         return respond(False, f"Unexpected error in fix_taxid: {e}",
-                       where="fix_taxid",
+                       error_code="ERR_UNEXPECTED", where="fix_taxid",
                        hint="Check the proteomes JSON and the request data.",
                        code=500)
 
@@ -3135,7 +3135,7 @@ def _no_orthogroups(ids, where):
         examples = ", ".join(ids[:3]) + (", …" if len(ids) > 3 else "")
         msg = (f"None of your {len(ids)} identifiers is in the orthogroups of this analysis "
                f"(for example {examples})")
-    return respond(False, msg, where=where,
+    return respond(False, msg, error_code="ERR_IDS_NOT_IN_ORTHOGROUPS", where=where,
                    hint=("Paste the identifiers as they are written in the proteomes of this analysis "
                          "(the cells of Orthogroups.tsv): UniProt accessions for UniProt proteomes, "
                          "UPI… for UniParc ones, or the first word of the headers of your own FASTA."),
@@ -3145,7 +3145,7 @@ def _no_orthogroups(ids, where):
 def _no_annotated_members(n_orthogroups, where):
     return respond(False, f"None of the {n_orthogroups} orthogroups containing your identifiers has a "
                           f"protein in a species with a GOA file",
-                   where=where,
+                   error_code="ERR_NO_ANNOTATED_MEMBERS", where=where,
                    hint=("The expansion uses the annotations of the species with a GOA file: download "
                          "the GOA file of a species in these orthogroups from the table above."),
                    code=400)
@@ -3217,7 +3217,7 @@ def _load_foreground():
 
         if not uniprot_ids:
             return respond(False, "No UniProt IDs provided",
-                           where="foreground_analysis",
+                           error_code="ERR_NO_UNIPROT_IDS", where="foreground_analysis",
                            hint="Paste at least one UniProt ID.",
                            code=400)
 
@@ -3225,7 +3225,7 @@ def _load_foreground():
         if not os.path.exists(excel_path):
             logging.error(f"[FG][ERR] Gene Ontology Analysis file not found at: {excel_path}")
             return respond(False, "Gene Ontology Analysis file not found.",
-                           where="foreground_analysis",
+                           error_code="ERR_GO_ANALYSIS_EXCEL_MISSING", where="foreground_analysis",
                            hint="Click 'Download GOA files' first.",
                            code=404)
 
@@ -3236,7 +3236,7 @@ def _load_foreground():
         except Exception as e:
             logging.error(f"[FG][ERR] Failed reading sheets: {e}")
             return respond(False, f"Malformed Excel file: {e}",
-                           where="foreground_analysis",
+                           error_code="ERR_MALFORMED_EXCEL", where="foreground_analysis",
                            hint="Re-generate the Excel using 'Download GOA files'.",
                            code=500)
         logging.info(f"[FG] Sheets loaded. Initial Groups rows={len(initial_orthogroups)}, Groups of Interest rows={len(orthogroups_of_interest)}")
@@ -3263,7 +3263,7 @@ def _load_foreground():
                     return respond(False,
                                    f"None of the {before} orthogroups containing your identifiers is "
                                    f"single-copy (one protein in every species).",
-                                   where="foreground_analysis",
+                                   error_code="ERR_NO_SINGLE_COPY_ORTHOGROUPS", where="foreground_analysis",
                                    hint="Choose 'All orthogroups', or analyse the identifiers without expansion.",
                                    code=400)
 
@@ -3311,7 +3311,7 @@ def _load_foreground():
     except Exception as e:
         logging.error(f"[FG][ERR] Unexpected error: {str(e)}")
         return respond(False, f"Unexpected error: {e}",
-                       where="foreground_analysis",
+                       error_code="ERR_UNEXPECTED", where="foreground_analysis",
                        code=500)
 
 @app.route('/background_analysis', methods=['POST'])
@@ -3338,7 +3338,7 @@ def _load_background():
                      f"single_copy_only={single_copy_only} custom_ids={len(custom_uniprot_ids)}")
         if choice == '4' and not custom_uniprot_ids:
             return respond(False, "No UniProt IDs provided",
-                           where="background_analysis",
+                           error_code="ERR_NO_UNIPROT_IDS", where="background_analysis",
                            hint="Paste at least one UniProt ID for the background.",
                            code=400)
 
@@ -3346,7 +3346,7 @@ def _load_background():
         if not os.path.exists(excel_path):
             logging.error(f"[BG][ERR] Excel not found at: {excel_path}")
             return respond(False, "Gene Ontology Analysis file not found.",
-                           where="background_analysis",
+                           error_code="ERR_GO_ANALYSIS_EXCEL_MISSING", where="background_analysis",
                            hint="Click 'Download GOA files' first.",
                            code=404)
 
@@ -3356,7 +3356,7 @@ def _load_background():
         except Exception as e:
             logging.error(f"[BG][ERR] Failed reading sheets: {e}")
             return respond(False, f"Malformed Excel file: {e}",
-                           where="background_analysis",
+                           error_code="ERR_MALFORMED_EXCEL", where="background_analysis",
                            hint="Re-generate the Excel using 'Download GOA files'.",
                            code=500)
 
@@ -3379,7 +3379,7 @@ def _load_background():
                         return respond(False,
                                        f"None of the {before} orthogroups containing the background "
                                        f"identifiers is single-copy (one protein in every species).",
-                                       where="background_analysis",
+                                       error_code="ERR_NO_SINGLE_COPY_ORTHOGROUPS", where="background_analysis",
                                        hint="Choose 'All orthogroups', or use the background without expansion.",
                                        code=400)
                 # Expand IDs from 'Groups of Interest'
@@ -3396,7 +3396,7 @@ def _load_background():
             if not os.path.isdir(GOA_DOWNLOAD_FOLDER):
                 logging.error(f"[BG][ERR] GOA folder not found: {GOA_DOWNLOAD_FOLDER}")
                 return respond(False, "GOA download folder not found",
-                               where="background_analysis",
+                               error_code="ERR_NO_GOA_FILES", where="background_analysis",
                                hint="Download the GOA files from the species table first.",
                                code=400)
 
@@ -3405,7 +3405,7 @@ def _load_background():
             logging.info(f"[BG] GOA files found: {len(goa_files)}")
             if not goa_files:
                 return respond(False, "No GOA files found",
-                               where="background_analysis",
+                               error_code="ERR_NO_GOA_FILES", where="background_analysis",
                                hint="Click 'Download GOA files' before using this option.",
                                code=400)
 
@@ -3425,7 +3425,7 @@ def _load_background():
 
         else:
             return respond(False, f"Background choice '{choice}' not implemented",
-                           where="background_analysis",
+                           error_code="ERR_BACKGROUND_CHOICE_INVALID", where="background_analysis",
                            hint="Use option 4 (pasted IDs) or 5 (use GOA).",
                            code=400)
 
@@ -3446,7 +3446,7 @@ def _load_background():
                                           "warnings": id_warnings, "notes": id_notes}})
     except Exception as e:
         logging.error(f"[BG][ERR] Unexpected error: {e}")
-        return respond(False, str(e), where="background_analysis", code=500)
+        return respond(False, str(e), error_code="ERR_UNEXPECTED", where="background_analysis", code=500)
 
 # Cache for the parsed GOA association, keyed by (folder signature, evidence
 # codes, limit_files). Reading + parsing every .goa file is the slow part of an
@@ -3624,7 +3624,7 @@ def gene_ontology_analysis():
                      and session.get(f"{name}_single_copy") != bool(data.get('single_copy_only'))]
             if stale:
                 return respond(False, "The orthogroup setting changed after the expanded sets were loaded",
-                               where="gene_ontology_analysis",
+                               error_code="ERR_SETS_CHANGED", where="gene_ontology_analysis",
                                hint=(f"Load the {' and the '.join(stale)} again to apply "
                                      f"'{'Single-copy only' if data.get('single_copy_only') else 'All orthogroups'}'."),
                                code=400)
@@ -3637,7 +3637,7 @@ def gene_ontology_analysis():
                 loaded = session.get(f"{name}_fingerprint")
                 if name in shown and loaded and loaded != _set_fingerprint(name, shown[name]):
                     return respond(False, f"The {name} on the page is not the one loaded",
-                                   where="gene_ontology_analysis",
+                                   error_code="ERR_SETS_CHANGED", where="gene_ontology_analysis",
                                    hint=(f"Its box or options changed after it was loaded: click "
                                          f"'Load {name}' again."),
                                    code=400)
@@ -3667,7 +3667,7 @@ def gene_ontology_analysis():
             logging.error("[GO][ERR] ❌ Foreground missing")
             failed = session.get("foreground_load_error")
             return respond(False, "Foreground missing",
-                           where="gene_ontology_analysis",
+                           error_code="ERR_FOREGROUND_MISSING", where="gene_ontology_analysis",
                            hint=(f"The last 'Load foreground' failed: {failed}. Correct it and load the "
                                  f"foreground again." if failed else
                                  "Paste the foreground identifiers and click 'Load foreground' before "
@@ -3781,7 +3781,7 @@ def gene_ontology_analysis():
                 hint = ("The species of your proteins has no GOA file, so 'Use all GOA files' has "
                         "no annotated proteome for it. Count per orthogroup, or expand the "
                         "foreground to full orthogroups, to test them through their orthologues.")
-            return respond(False, "Background missing", where="gene_ontology_analysis",
+            return respond(False, "Background missing", error_code="ERR_BACKGROUND_MISSING", where="gene_ontology_analysis",
                            hint=hint, code=400)
 
         bg_set = set(background_ids)
@@ -3845,7 +3845,7 @@ def gene_ontology_analysis():
                          "background to full orthogroups to use the annotations of their "
                          "orthologues.")
             return respond(False, "Foreground IDs have no GO terms in background",
-                           where="gene_ontology_analysis", hint=hint,
+                           error_code="ERR_NO_FG_GO_OVERLAP", where="gene_ontology_analysis", hint=hint,
                            payload={"input_ids": {"pasted": len(pasted_fg), "untested": untested,
                                                   "labels": untested_labels}},
                            code=400)
@@ -4001,7 +4001,7 @@ def gene_ontology_analysis():
             # counted per protein it would mix species, so do not report it.
             logging.error("[GO][ERR] per-orthogroup counting failed with 'Use all GOA files'")
             return respond(False, "Foreground IDs have no GO terms in background",
-                           where="gene_ontology_analysis",
+                           error_code="ERR_NO_FG_GO_OVERLAP", where="gene_ontology_analysis",
                            hint=("None of the pasted foreground proteins has a GO annotation"
                                  + (" with the selected evidence codes" if evidence_preset != 'all' else "")
                                  + ", its own or that of its orthogroup."),
@@ -4520,7 +4520,7 @@ def gene_ontology_analysis():
         logging.error(f"[GO][ERR] ❌ Unexpected error in gene_ontology_analysis: {e}")
         import traceback; traceback.print_exc()
         return respond(False, f"Unexpected error: {e}",
-                       where="gene_ontology_analysis",
+                       error_code="ERR_UNEXPECTED", where="gene_ontology_analysis",
                        hint="Check logs and make sure OBO/GOA files exist.",
                        code=500)
 

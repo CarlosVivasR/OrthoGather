@@ -65,3 +65,19 @@ def test_valid_ids_load_as_before(three_species):
     r = c.post("/background_analysis", json={"background_choice": "4", "custom_uniprot_ids": REF,
                                              "use_orthogroups": True})
     assert r.status_code == 200 and r.get_json()["background_ids"] == sorted(REF)
+
+
+def test_go_page_errors_carry_their_codes(three_species):
+    c = three_species
+    js = c.post("/foreground_analysis", json={"uniprot_ids": MISSING, "use_orthogroups": True}).get_json()
+    assert js["error_code"] == "ERR_IDS_NOT_IN_ORTHOGROUPS"
+    js = c.post("/gene_ontology_analysis", json={}).get_json()
+    assert js["error_code"] == "ERR_FOREGROUND_MISSING"
+    assert c.post("/foreground_analysis", json={"uniprot_ids": REF[:30]}).status_code == 200
+    js = c.post("/gene_ontology_analysis", json={}).get_json()
+    assert js["error_code"] == "ERR_BACKGROUND_MISSING"
+    assert c.post("/background_analysis", json={"background_choice": "4", "custom_uniprot_ids": REF}).status_code == 200
+    js = c.post("/gene_ontology_analysis", json={"sets": {"foreground": {"uniprot_ids": REF[:5]},
+                                                         "background": {"background_choice": "4",
+                                                                        "custom_uniprot_ids": REF}}}).get_json()
+    assert js["error_code"] == "ERR_SETS_CHANGED"
