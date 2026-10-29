@@ -4235,6 +4235,10 @@ def gene_ontology_analysis():
         # EXCEL OUTPUT
         # -------------------------------
         out_xlsx = os.path.join(RESULTS_FOLDER, "go_enrichment_report.xlsx")
+        # Per orthogroup, the pasted foreground identifiers in each unit.
+        pasted_in_unit = defaultdict(list)
+        for p in (og_perm or {}).get("fg", []):
+            pasted_in_unit[og_perm["unit_of"][p]].append(p)
         with pd.ExcelWriter(out_xlsx) as xw:
             for ns, res in (("BP", bp_results), ("CC", cc_results), ("MF", mf_results)):
                 df = pd.DataFrame({
@@ -4269,6 +4273,16 @@ def gene_ontology_analysis():
                     # keep the hypergeometric statistic it was computed from.
                     df.insert(df.columns.get_loc("p_uncorrected") + 1, "p_hypergeom",
                               [getattr(r, "p_hypergeom", None) for r in res])
+                if res:
+                    # What is behind each term, after the existing columns: its
+                    # proteins, or per orthogroup its units and the pasted
+                    # foreground identifiers in each.
+                    df["study_items"] = [", ".join(sorted(r.study_items)) for r in res]
+                    if og_perm is not None:
+                        df["pasted_ids_per_unit"] = [
+                            "; ".join(f"{u}: {', '.join(pasted_in_unit.get(u, []))}"
+                                      for u in sorted(r.study_items))
+                            for r in res]
                 df.to_excel(xw, sheet_name=ns, index=False)
             # Provenance + run settings, so a downloaded report is reproducible.
             prov = build_provenance()
