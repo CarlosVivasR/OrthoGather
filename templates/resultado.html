@@ -1553,8 +1553,9 @@
             const fallback   = allMissing.length ? allMissing : ids;
             const msg = payload.message ||
                         'None of those UniProt IDs were found in the selected species.';
-            let banner = '<i class="fa-solid fa-circle-exclamation"></i> ' + escapeHtml(msg);
-            if (payload.hint) banner += ' ' + escapeHtml(payload.hint);
+            // One block per sentence: the banner is a flex column.
+            let banner = '<div class="upset-filter-summary"><i class="fa-solid fa-circle-exclamation"></i> ' +
+                         escapeHtml(msg) + (payload.hint ? ' ' + escapeHtml(payload.hint) : '') + '</div>';
             if (fallback.length) {
               const preview = fallback.slice(0, 12).join(', ');
               const more    = fallback.length > 12 ? ' …and ' + (fallback.length - 12) + ' more' : '';
@@ -1587,9 +1588,11 @@
         const notFound    = payload.ids_not_found || [];
         const unassigned  = payload.ids_unassigned || [];
         const allMissing  = unassigned.concat(notFound);
-        let html = '<i class="fa-solid fa-circle-check"></i> ' +
+        // The first sentence is one block: the banner is a flex column, and its
+        // loose pieces would each become a line.
+        let html = '<div class="upset-filter-summary"><i class="fa-solid fa-circle-check"></i> ' +
                    '<strong>' + nFound + ' of ' + nSearched + '</strong> UniProt IDs found · ' +
-                   '<strong>' + (payload.n_orthogroups || 0) + '</strong> orthogroups in the filtered figures';
+                   '<strong>' + (payload.n_orthogroups || 0) + '</strong> orthogroups in the filtered figures</div>';
         const inputNotes = (payload.input_warnings || []).concat(payload.input_notes || []);
         if (inputNotes.length) {
           html += '<div class="upset-not-found-hint">' + inputNotes.map(escapeHtml).join(' ') + '</div>';

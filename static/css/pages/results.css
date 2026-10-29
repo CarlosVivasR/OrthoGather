@@ -434,6 +434,12 @@
   line-height: 1.4;
 }
 .upset-not-found + .upset-not-found { margin-top: 6px; }
+/* Unassigned genes are in the proteome but in no orthogroup: information,
+   not an error, so they are set apart from the "not found" list. */
+.upset-unassigned {
+  padding-left: 10px;
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
 
 /* IMPORTANT: use :not([hidden]) so the [hidden] attribute on the HTML element
    actually wins over our display rule. Plain `.upset-progress { display: ... }`
