@@ -100,6 +100,20 @@ def _short_species(raw: str) -> str:
     return " ".join(x for x in (m.group(1), m.group(2), strain) if x)
 
 
+@app.template_filter("n_distinct_species")
+def _n_distinct_species(names) -> int:
+    """How many species ("Genus species") the proteomes of an analysis belong
+    to: several strains of one species are several proteomes. ``Total`` (the
+    last column of Orthogroups.GeneCount.tsv) is not a proteome."""
+    binomials = set()
+    for name in names:
+        if name == "Total":
+            continue
+        base, _ = split_species_name(str(name).replace("_", " "))
+        binomials.add(" ".join(base.lower().split()[:2]))
+    return len(binomials)
+
+
 @app.url_defaults
 def _static_cache_bust(endpoint, values):
     """Append each static file's mtime as ``?v=`` so browsers refetch CSS/JS the

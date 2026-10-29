@@ -51,7 +51,8 @@
         <i class="fa-solid fa-chevron-right"></i>
         <span>Protein Analysis</span>
       </nav>
-      <h1 class="sr-only">Protein Analysis results — {{ (species|length - 1) }} species</h1>
+      {% set n_proteomes = species|length - 1 %}{% set n_species = species|n_distinct_species %}
+      <h1 class="sr-only">Protein Analysis results — {{ n_proteomes }} proteomes{% if n_species != n_proteomes %} of {{ n_species }} species{% endif %}</h1>
       <span class="eyebrow"><i class="fa-solid fa-circle-check"></i> Analysis complete</span>
       {% if upload_id_note %}
       <div class="alert alert-warning" role="status" id="upload-id-note">
@@ -512,7 +513,9 @@
   // can embed it in PNG/SVG filenames (e.g. "..._47species_2026-05-26.png").
   // `species` is Jinja-passed by the /cargar_carpeta route; the -1 trims
   // the trailing "Total" header in gene_count_df.columns.
-  window.SPECIES_COUNT = {{ (species|length - 1) | tojson }};
+  // Columns of the analysis are proteomes; several can be strains of one species.
+  window.PROTEOME_COUNT = {{ (species|length - 1) | tojson }};
+  window.DISTINCT_SPECIES = {{ species|n_distinct_species | tojson }};
   </script>
 
   <script>
@@ -1189,24 +1192,24 @@
       return parts.filter(Boolean).join("_") + (ext ? "." + slug(ext) : "");
     }
 
-    /* Pull the species count from the active UpSet selection (for Figs 3–6)
-       or the global dataset species list (for Figs 1/2). */
-    function _figureSpeciesCount(fig) {
+    /* Pull the proteome count from the active UpSet selection (for Figs 3–6)
+       or the global dataset list (for Figs 1/2). */
+    function _figureProteomeCount(fig) {
       if (fig === '3' || fig === '4' || fig === '5' || fig === '6') {
         // Use the chips that are currently pressed in the UpSet picker.
         // Figs 5/6 are filtered over the same species selection as 3/4.
         const picked = document.querySelectorAll('#upset-picker-chips [aria-pressed="true"]');
         if (picked.length) return picked.length;
       }
-      // Fall back to the global Orthogroups species count (window.SPECIES_COUNT
+      // Fall back to the global Orthogroups proteome count (window.PROTEOME_COUNT
       // is injected by the template; if missing, leave it out of the name).
-      return window.SPECIES_COUNT || null;
+      return window.PROTEOME_COUNT || null;
     }
 
     function downloadFigureImage(fig, fmt) {
       const base = FIGURE_FILENAMES[fig] || ('figure-' + fig);
-      const nSpecies = _figureSpeciesCount(fig);
-      const ctx = nSpecies ? [`${nSpecies}species`] : [];
+      const nProteomes = _figureProteomeCount(fig);
+      const ctx = nProteomes ? [`${nProteomes}proteomes`] : [];
       const descName = descriptiveFilename(base, '', ctx);  // no ext yet
       // Plotly's `filename` option doesn't include the extension; UpSetJS adds
       // it for us; our manual a.download path adds it via descriptiveFilename.
@@ -1872,7 +1875,10 @@
       };
       renderFigureStats('fig2-stats', [
         { value: fig2Data.total.toLocaleString('en-US'), label: 'orthogroups' },
-        { value: String(N),                        label: 'species' },
+        { value: String(N),                        label: 'proteomes' },
+        // Several proteomes can be strains of one species: say how many species.
+        ...(window.DISTINCT_SPECIES && window.DISTINCT_SPECIES < N
+            ? [{ value: String(window.DISTINCT_SPECIES), label: 'species' }] : []),
       ]);
       const config = {
         responsive: true, displaylogo: false,
