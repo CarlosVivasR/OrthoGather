@@ -1535,6 +1535,13 @@ def build_provenance_text(prov=None) -> str:
     ]) + "\n"
 
 
+@app.route("/provenance_panel")
+def provenance_panel():
+    """The Data provenance panel, rendered now: the GO page swaps it in after
+    a GOA download, which adds to the provenance of the open analysis."""
+    return render_template("_provenance.html")
+
+
 @app.route("/download_provenance")
 def download_provenance():
     """Download the reproducibility provenance (data versions) as a readable

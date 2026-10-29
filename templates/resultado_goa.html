@@ -879,6 +879,22 @@
         }
       }
 
+      // The Data provenance panel is rendered with the page; a GOA download adds
+      // to it, so ask the server for it again and swap it in.
+      async function refreshProvenancePanel() {
+        try {
+          const res = await fetch("/provenance_panel");
+          if (!res.ok) return;
+          const tpl = document.createElement("template");
+          tpl.innerHTML = (await res.text()).trim();
+          const fresh = tpl.content.querySelector("section.provenance");
+          const panel = document.querySelector("section.provenance");
+          if (fresh && panel) panel.replaceWith(fresh);
+        } catch (err) {
+          console.error("[provenance] could not refresh the panel:", err);
+        }
+      }
+
       // Clean stray 'total' row
       document.querySelectorAll('#species-table tbody tr').forEach(tr => {
         const first = tr.querySelector('td');
@@ -1139,6 +1155,7 @@
             if (!finalEvent || !finalEvent.success) {
               throw new Error("GOA preparation did not complete");
             }
+            refreshProvenancePanel();
 
             if (textEl) textEl.textContent = "Computing annotation distribution…";
             const gen = await fetch("/generate_go_image", { method: "POST" });
