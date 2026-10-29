@@ -102,6 +102,14 @@ The proteome catalogue ships compressed in the repository
 before any analysis, plus the downloaded proteomes. The Conda environment adds about 2 GB. The
 application checks GitHub for a newer catalogue and offers to update it.
 
+When a New Analysis finishes, the downloaded FASTA files and OrthoFinder's intermediate files are
+deleted from `Proteomas/`. The history (`~/.orthogather/runs/`, the 20 most recent runs, set with
+`ORTHOGATHER_MAX_HISTORY`) keeps the orthogroups, OrthoFinder's statistics and the provenance of
+each run; **Reproduce** downloads the proteomes again. The NCBI lineages of the taxonomic tree are
+cached in `~/.orthogather/taxonomy_lineage.json`; the copy in `static/Proteomes_json/` ships with the
+repository, is read for the species it already holds and is never modified (2.2.0 and earlier wrote
+the cache there).
+
 ## Repository layout
 
 | Path | Contents |

@@ -36,9 +36,13 @@ import requests
 
 UNIPROT_TAXONOMY_URL = "https://rest.uniprot.org/taxonomy/{taxon_id}.json"
 
-# Cache lives next to the proteomes catalog so it ships with the repo for
-# the preselected dataset, and grows in place for user-added species.
-DEFAULT_CACHE_PATH = Path("static") / "Proteomes_json" / "taxonomy_lineage.json"
+# The cache grows in the user's folder, next to the run history. The copy
+# bundled with the repository (the species of the preselected dataset, and
+# where 2.2.0 and earlier wrote the cache) is read for the taxon IDs the user's
+# cache lacks, and never written: it is a versioned file.
+DEFAULT_CACHE_PATH = Path.home() / ".orthogather" / "taxonomy_lineage.json"
+BUNDLED_CACHE_PATH = (Path(__file__).resolve().parents[2]
+                      / "static" / "Proteomes_json" / "taxonomy_lineage.json")
 
 # Ranks we KEEP in the rendered tree. Anything outside this set is dropped
 # because it bloats the visualization without helping the user distinguish
@@ -74,11 +78,27 @@ _NEWICK_NAME_RE = re.compile(r"[^A-Za-z0-9._-]")
 # Cache I/O
 # ---------------------------------------------------------------------------
 
-def _load_cache(cache_path: Path) -> dict:
+def _cache_paths(cache_path):
+    """(cache to read and write, read-only seed). The default cache is seeded
+    from the bundled one; an explicit path is used alone."""
+    if cache_path is None:
+        return DEFAULT_CACHE_PATH, BUNDLED_CACHE_PATH
+    return Path(cache_path), None
+
+
+def _load_cache(cache_path: Path, seed_path: Path | None = None) -> dict:
     """Load the cache JSON. Returns the full envelope (with ``_meta`` and
     ``entries`` keys). Initialises a fresh envelope if the file is missing
-    or unreadable.
+    or unreadable. ``seed_path`` is a read-only cache whose entries are
+    returned under ``seed`` for the taxon IDs ``cache_path`` lacks.
     """
+    cache = _read_cache(cache_path)
+    if seed_path is not None and seed_path != cache_path:
+        cache["seed"] = _read_cache(seed_path)["entries"]
+    return cache
+
+
+def _read_cache(cache_path: Path) -> dict:
     if cache_path.exists():
         try:
             with open(cache_path, "r", encoding="utf-8") as f:
@@ -107,7 +127,7 @@ def _save_cache(cache_path: Path, cache: dict) -> None:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = cache_path.with_suffix(cache_path.suffix + ".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(cache, f, indent=2, ensure_ascii=False)
+        json.dump({k: v for k, v in cache.items() if k != "seed"}, f, indent=2, ensure_ascii=False)
     os.replace(tmp, cache_path)
 
 
@@ -171,7 +191,7 @@ def _fetch_uniprot_lineage(taxon_id: str, *, timeout: float = 8.0,
 # ---------------------------------------------------------------------------
 
 def get_lineage(taxon_id: str | int, *,
-                cache_path: Path | str = DEFAULT_CACHE_PATH,
+                cache_path: Path | str | None = None,
                 fetcher: Callable[[str], dict] | None = None,
                 session: requests.Session | None = None) -> dict:
     """Return the full lineage entry for one taxon_id.
@@ -184,7 +204,8 @@ def get_lineage(taxon_id: str | int, *,
     taxon_id : str or int
         The NCBI taxonomy ID (UniProt uses the same numbering).
     cache_path : Path or str
-        Where to read/write the cache. Defaults to the bundled location.
+        Where to read/write the cache. Defaults to ~/.orthogather/, seeded
+        from the copy bundled with the repository.
     fetcher : callable, optional
         Test seam — swap in to bypass the real UniProt call.
     session : requests.Session, optional
@@ -206,10 +227,12 @@ def get_lineage(taxon_id: str | int, *,
     if not tid or not tid.isdigit():
         raise ValueError(f"Invalid taxon_id: {taxon_id!r} (expected positive integer)")
 
-    cache_path = Path(cache_path)
-    cache = _load_cache(cache_path)
+    cache_path, seed_path = _cache_paths(cache_path)
+    cache = _load_cache(cache_path, seed_path)
     if tid in cache["entries"]:
         return cache["entries"][tid]
+    if tid in cache.get("seed", {}):
+        return cache["seed"][tid]
 
     fetch_fn = fetcher or (lambda t: _fetch_uniprot_lineage(t, session=session))
     entry = fetch_fn(tid)
@@ -219,7 +242,7 @@ def get_lineage(taxon_id: str | int, *,
 
 
 def get_lineages_bulk(species_with_taxids: Iterable[tuple[str, str]], *,
-                      cache_path: Path | str = DEFAULT_CACHE_PATH,
+                      cache_path: Path | str | None = None,
                       fetcher: Callable[[str], dict] | None = None,
                       polite_delay_s: float = 0.12,
                       ) -> dict[str, dict]:
@@ -234,8 +257,8 @@ def get_lineages_bulk(species_with_taxids: Iterable[tuple[str, str]], *,
     resolved successfully. Failures are logged and skipped (the tree
     builder will mark those species as "Unknown lineage").
     """
-    cache_path = Path(cache_path)
-    cache = _load_cache(cache_path)
+    cache_path, seed_path = _cache_paths(cache_path)
+    cache = _load_cache(cache_path, seed_path)
     out: dict[str, dict] = {}
     dirty = False
 
@@ -249,6 +272,9 @@ def get_lineages_bulk(species_with_taxids: Iterable[tuple[str, str]], *,
             continue
         if tid in cache["entries"]:
             out[tid] = cache["entries"][tid]
+            continue
+        if tid in cache.get("seed", {}):
+            out[tid] = cache["seed"][tid]
             continue
         try:
             entry = (fetch_fn(tid) if fetcher

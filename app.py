@@ -2631,7 +2631,8 @@ def api_taxonomy_tree():
 
     The first call for a given taxon_id hits UniProt's REST taxonomy
     endpoint; subsequent calls reuse the on-disk cache at
-    ``static/Proteomes_json/taxonomy_lineage.json``. Failures fall under
+    ``~/.orthogather/taxonomy_lineage.json`` (seeded from the copy bundled in
+    ``static/Proteomes_json/``, which is never written). Failures fall under
     "Unknown lineage" rather than dropping species silently.
     """
     from orthogather.core import taxonomy as tax_mod

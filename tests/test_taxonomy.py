@@ -375,3 +375,40 @@ def test_get_lineages_bulk_skips_invalid_taxids(tmp_path):
     assert "83333" in out
     assert "224308" in out
     assert "not-int" not in out
+
+
+# ---------------------------------------------------------------------------
+# Blind study, 29-Oct-2026: the lineage cache was written into the repository
+# (static/Proteomes_json/taxonomy_lineage.json, a versioned file). It now lives
+# in ~/.orthogather/, and the bundled file is read, never written.
+# ---------------------------------------------------------------------------
+def test_default_cache_is_in_the_user_folder():
+    from pathlib import Path
+    from orthogather.core import taxonomy
+    assert taxonomy.DEFAULT_CACHE_PATH == Path.home() / ".orthogather" / "taxonomy_lineage.json"
+    assert taxonomy.BUNDLED_CACHE_PATH.name == "taxonomy_lineage.json"
+    assert taxonomy.BUNDLED_CACHE_PATH.parent.name == "Proteomes_json"
+
+
+def test_bundled_cache_is_read_but_not_written(tmp_path, monkeypatch):
+    import json
+    from orthogather.core import taxonomy
+    user, bundled = tmp_path / "home" / ".orthogather" / "taxonomy_lineage.json", tmp_path / "bundled.json"
+    old = {"scientific_name": "Old species", "lineage": [], "fetched_at": "2026-01-01", "source": "x"}
+    bundled.write_text(json.dumps({"_meta": {}, "entries": {"111": old}}))
+    before = bundled.read_text()
+    monkeypatch.setattr(taxonomy, "DEFAULT_CACHE_PATH", user)
+    monkeypatch.setattr(taxonomy, "BUNDLED_CACHE_PATH", bundled)
+    fetched = []
+
+    def fetcher(tid):
+        fetched.append(tid)
+        return {"scientific_name": f"New {tid}", "lineage": [], "fetched_at": "2026-10-29", "source": "x"}
+
+    out = taxonomy.get_lineages_bulk([("a", "111"), ("b", "222")], fetcher=fetcher, polite_delay_s=0)
+    assert out["111"] == old and fetched == ["222"]          # the bundled entry is used as is
+    assert bundled.read_text() == before                      # and its file is not touched
+    saved = json.loads(user.read_text())["entries"]
+    assert set(saved) == {"222"}
+    assert taxonomy.get_lineage("222", fetcher=fetcher)["scientific_name"] == "New 222"
+    assert fetched == ["222"]
