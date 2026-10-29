@@ -3033,6 +3033,30 @@ def run_go_analysis():
                                  "which returns the distribution data as JSON.",
                           http_code=410)
 
+# Columns of the orthogroup sheets that are not species.
+_NON_SPECIES_COLUMNS = {"Orthogroup", "Annotation Percentage", "Porcentaje de Anotación"}
+
+
+def _orthogroups_with_ids(groups, ids):
+    """The orthogroups of ``groups`` (an orthogroup sheet) with a member among
+    ``ids``. Cells are read with orthogroup_cell_accessions, so both UniProt
+    FASTA cells (``tr|ACC|NAME``) and bare identifiers (UniParc ``UPI…``, an
+    isolate's own IDs) are matched; the pattern used before only read the first."""
+    ids = set(ids)
+    cols = [c for c in groups.columns if c not in _NON_SPECIES_COLUMNS]
+    return {og for og, cells in zip(groups["Orthogroup"], groups[cols].itertuples(index=False))
+            if any(acc in ids for cell in cells if not pd.isna(cell)
+                   for acc in orthogroup_cell_accessions(cell))}
+
+
+def _orthogroup_members(groups, orthogroups):
+    """Every accession in the species columns of the given orthogroups."""
+    cols = [c for c in groups.columns if c not in _NON_SPECIES_COLUMNS]
+    sub = groups[groups["Orthogroup"].isin(set(orthogroups))]
+    return {acc for col in cols for cell in sub[col].dropna()
+            for acc in orthogroup_cell_accessions(cell)}
+
+
 @app.route('/foreground_analysis', methods=['POST'])
 def foreground_analysis():
     """Stores the foreground (pasted IDs or orthogroup-expanded IDs) in session, with detailed logs."""
@@ -3080,18 +3104,8 @@ def foreground_analysis():
 
         if use_orthogroups:
             # Detect orthogroups containing any of the provided IDs
-            hits_ogs = 0
-            for _, row in initial_orthogroups.iterrows():
-                og = row['Orthogroup']
-                proteins = row[1:]
-                for protein in proteins.dropna():
-                    s = str(protein)
-                    hits = re.findall(r'\|([^|]+)\|', s)
-                    if any(uid in uniprot_set for uid in hits):
-                        selected_orthogroups.add(og)
-                        hits_ogs += 1
-                        break
-            logging.info(f"[FG] Orthogroups matched by pasted IDs: {hits_ogs}")
+            selected_orthogroups = _orthogroups_with_ids(initial_orthogroups, uniprot_set)
+            logging.info(f"[FG] Orthogroups matched by pasted IDs: {len(selected_orthogroups)}")
 
             # Optional: restrict to single-copy orthogroups (1:1:1... orthologs)
             if single_copy_only:
@@ -3108,35 +3122,16 @@ def foreground_analysis():
                                    code=400)
 
             # Expand IDs from 'Groups of Interest'
-            exp_added = 0
-            for og in selected_orthogroups:
-                sub = orthogroups_of_interest[orthogroups_of_interest['Orthogroup'] == og]
-                for _, row in sub.iterrows():
-                    proteins = row.dropna().astype(str)
-                    for protein in proteins:
-                        if protein not in ('Annotation Percentage', 'Porcentaje de Anotación'):
-                            ids = re.findall(r'\|([^|]+)\|', protein)
-                            protein_set.update(ids)
-                            exp_added += len(ids)
-            logging.info(f"[FG] Expanded foreground IDs added from orthogroups: {exp_added}")
+            protein_set = _orthogroup_members(orthogroups_of_interest, selected_orthogroups)
+            logging.info(f"[FG] Expanded foreground IDs added from orthogroups: {len(protein_set)}")
 
             if not selected_orthogroups:
                 logging.warning("[FG][WARN] No orthogroups matched the provided UniProt IDs.")
         else:
             protein_set.update(uniprot_ids)
             # Report which orthogroups contain any of the IDs (useful info)
-            hits_ogs = 0
-            for _, row in initial_orthogroups.iterrows():
-                og = row['Orthogroup']
-                proteins = row[1:]
-                for protein in proteins.dropna():
-                    s = str(protein)
-                    hits = re.findall(r'\|([^|]+)\|', s)
-                    if any(uid in uniprot_set for uid in hits):
-                        selected_orthogroups.add(og)
-                        hits_ogs += 1
-                        break
-            logging.info(f"[FG] Orthogroups containing at least one pasted ID: {hits_ogs}")
+            selected_orthogroups = _orthogroups_with_ids(initial_orthogroups, uniprot_set)
+            logging.info(f"[FG] Orthogroups containing at least one pasted ID: {len(selected_orthogroups)}")
 
         final_protein_list = sorted(protein_set)
         selected_orthogroups_list = sorted(selected_orthogroups)
@@ -3221,20 +3216,8 @@ def background_analysis():
         if choice == '4':
             if use_orthogroups:
                 # Select orthogroups containing any of the custom IDs
-                sel_ogs = set()
-                base_set = set(custom_uniprot_ids)
-                og_hits = 0
-                for _, row in initial_orthogroups.iterrows():
-                    og = row['Orthogroup']
-                    proteins = row[1:]
-                    for protein in proteins.dropna():
-                        s = str(protein)
-                        hits = re.findall(r'\|([^|]+)\|', s)
-                        if any(uid in base_set for uid in hits):
-                            sel_ogs.add(og)
-                            og_hits += 1
-                            break
-                logging.info(f"[BG] Orthogroups matched by custom IDs: {og_hits}")
+                sel_ogs = _orthogroups_with_ids(initial_orthogroups, custom_uniprot_ids)
+                logging.info(f"[BG] Orthogroups matched by custom IDs: {len(sel_ogs)}")
                 # Optional: restrict to single-copy orthogroups
                 if single_copy_only:
                     sc_set = get_single_copy_orthogroups()
@@ -3249,17 +3232,8 @@ def background_analysis():
                                        hint="Choose 'All orthogroups', or use the background without expansion.",
                                        code=400)
                 # Expand IDs from 'Groups of Interest'
-                exp_added = 0
-                for og in sel_ogs:
-                    sub = orthogroups_of_interest[orthogroups_of_interest['Orthogroup'] == og]
-                    for _, row in sub.iterrows():
-                        proteins = row.dropna().astype(str)
-                        for protein in proteins:
-                            if protein not in ('Annotation Percentage', 'Porcentaje de Anotación'):
-                                ids = re.findall(r'\|([^|]+)\|', protein)
-                                background_ids.update(ids)
-                                exp_added += len(ids)
-                logging.info(f"[BG] Expanded background IDs added from orthogroups: {exp_added}")
+                background_ids = _orthogroup_members(orthogroups_of_interest, sel_ogs)
+                logging.info(f"[BG] Expanded background IDs added from orthogroups: {len(background_ids)}")
             else:
                 background_ids.update(custom_uniprot_ids)
                 logging.info(f"[BG] Background from pasted IDs only: n={len(background_ids)}")
