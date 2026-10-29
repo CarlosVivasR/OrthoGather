@@ -29,6 +29,22 @@ _ISOFORM_RE = re.compile(rf"({_UNIPROT_ACC})-([0-9]+)")
 _SEQUENCE_LINE_RE = re.compile(r"[A-Za-z*\-]+")
 
 
+def header_identifier(fields: List[str]) -> str:
+    """The protein identifier of a FASTA ID split on ``|``: the accession of a
+    UniProt header (``sp|P12345|NAME``), and the last field of an NCBI general
+    identifier (``gnl|extdb|IS27_00001``), whose middle field names the database
+    and is the same for every protein.
+
+    >>> header_identifier("tr|A0QNX2|A0QNX2_MYCS2".split("|"))
+    'A0QNX2'
+    >>> header_identifier("gnl|extdb|IS27_00001".split("|"))
+    'IS27_00001'
+    """
+    if len(fields) >= 3 and fields[0].strip().lower() == "gnl":
+        return fields[2].strip()
+    return fields[1].strip()
+
+
 def normalise_accession(token: str):
     """Reduce one pasted identifier to the accession the GOA files use.
 
@@ -51,7 +67,7 @@ def normalise_accession(token: str):
         acc = acc.split(":", 1)[1]           # "UniProtKB:P12345", as in GAF files
     fields = acc.split("|")
     if len(fields) >= 3 or (len(fields) == 2 and fields[0].lower() in ("sp", "tr")):
-        acc = fields[1].strip()
+        acc = header_identifier(fields)
         changes.append("fasta_header")
     upper = acc.upper()
     if upper != acc and (_ACCESSION_RE.fullmatch(upper) or _ISOFORM_RE.fullmatch(upper)):
@@ -162,5 +178,5 @@ def orthogroup_cell_accessions(cell) -> List[str]:
         if not entry or entry.lower() == "nan":
             continue
         fields = entry.split("|")
-        out.append(fields[1] if len(fields) >= 3 else entry)
+        out.append(header_identifier(fields) if len(fields) >= 3 else entry)
     return out

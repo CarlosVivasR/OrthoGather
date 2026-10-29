@@ -141,3 +141,52 @@ def test_uniprot_cells_give_the_same_orthogroups_and_members_as_before():
     assert og._orthogroups_with_ids(groups, ids) == _old_matcher(groups, ids)
     ogs = _old_matcher(groups, ids)
     assert ogs and og._orthogroup_members(groups, ogs) == _old_members(groups, ogs)
+
+
+# NCBI general identifiers (gnl|DATABASE|ID), the form of the protein FASTA that
+# NCBI's annotation pipeline writes for a lab's genome (gnl|extdb|IS27_00001).
+# The second field names the database and is the same for every protein: read
+# as the accession, the whole proteome became one identifier.
+GNL = [f"gnl|extdb|{own}" for own in OWN]
+
+
+def test_ncbi_general_identifiers_keep_the_protein_id():
+    from orthogather.core.excel import _accession
+    from orthogather.utils.parsing import normalise_accession, orthogroup_cell_accessions
+    assert orthogroup_cell_accessions(", ".join(GNL[:2])) == OWN[:2]
+    assert normalise_accession(GNL[0]) == (OWN[0], ["fasta_header"])
+    assert _accession(GNL[0]) == OWN[0]
+    # UniProt headers are read as before.
+    assert orthogroup_cell_accessions("tr|A0QNX2|A0QNX2_MYCS2") == ["A0QNX2"]
+    assert normalise_accession(">sp|P12345-2|NAME_ECOLI") == ("P12345", ["fasta_header", "isoform"])
+
+
+@pytest.mark.parametrize("pasted", [GNL, OWN], ids=["as_in_the_fasta", "protein_id"])
+def test_ncbi_general_identifiers_run_end_to_end(three_species, pasted):
+    c = three_species
+    folder = None
+    with c.session_transaction() as s:
+        folder = s["folder_path"]
+    # The lab's proteome written with NCBI general identifiers.
+    import app as og
+    from orthogather.core import goa as og_goa
+    from orthogather.core.excel import generate_go_excel
+    from pathlib import Path
+    tsv = Path(folder) / "Orthogroups.tsv"
+    df = pd.read_csv(tsv, sep="\t", dtype=str)
+    df["spOwn"] = GNL
+    df.to_csv(tsv, sep="\t", index=False)
+    id2gos = og_goa.build_id2gos_from_goa_folder(og.GOA_DOWNLOAD_FOLDER, limit_files=["2.spRef.goa"])
+    generate_go_excel(str(tsv), {"spRef": "2.spRef.goa"},
+                      str(Path(og.RESULTS_FOLDER) / "Gene_Ontology_Analysis.xlsx"), annotated_ids=set(id2gos))
+    r = c.post("/foreground_analysis", json={"uniprot_ids": pasted[:30], "use_orthogroups": True})
+    assert r.status_code == 200, r.get_json()
+    with c.session_transaction() as s:
+        assert s["selected_orthogroups"] == [f"OG{i:07d}" for i in range(30)]
+        assert s["foreground_input"] == OWN[:30]
+    assert c.post("/background_analysis", json={"background_choice": "4", "custom_uniprot_ids": pasted,
+                                                "use_orthogroups": True}).status_code == 200
+    r = c.post("/gene_ontology_analysis", json={"counting_mode": "per_orthogroup"})
+    assert r.status_code == 200, r.get_json()
+    assert r.get_json()["annotation_stats"]["tested_proteins"] == 30
+    assert "GO:0006412" in {t["GO"] for t in r.get_json()["bp_results"]}

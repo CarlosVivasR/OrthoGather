@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from orthogather.utils.parsing import header_identifier
+
 # matplotlib + seaborn were dropped 2026-05-26 (Point 10 — annotation-distribution
 # figure migrated to client-side Plotly). The Excel writer itself doesn't need
 # either library.
@@ -24,11 +26,11 @@ def _accession(entry: str) -> str:
     """UniProt accession from an OrthoFinder cell entry.
 
     OrthoFinder keeps the FASTA header, so entries look like
-    ``tr|A0QNX2|A0QNX2_MYCS2`` and the accession is the middle field. Bare
-    accessions are returned unchanged.
+    ``tr|A0QNX2|A0QNX2_MYCS2`` and the accession is the middle field (the last
+    one of an NCBI ``gnl|DB|ID``). Bare accessions are returned unchanged.
     """
     parts = entry.split("|")
-    return parts[1] if len(parts) >= 3 else entry
+    return header_identifier(parts) if len(parts) >= 3 else entry
 
 
 def generate_go_excel(tsv_path: str, species_to_goafile: dict,
