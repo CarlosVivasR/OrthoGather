@@ -17,7 +17,12 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
   own FASTA have bare identifiers in the orthogroups (`UPI…`, `IS27_00398`), and the expansion only
   read `db|ACC|NAME` cells, so it found no orthogroup and the run stopped at "Foreground missing".
   It now reads both forms, as per-orthogroup counting and the UpSet plots already did.
+- Identifiers written as NCBI general IDs (`gnl|extdb|IS27_00001`, as in the protein FASTA of NCBI's
+  annotation pipeline) are read by their last field. The middle field, the database name, was read
+  instead, so every protein of such a proteome became the same identifier.
 - An expansion that finds no orthogroup is an error that names the identifiers, not a success.
+- Expanding only the foreground is reported: counted per orthogroup it gives the result of not
+  expanding it, since the orthogroups carry the annotations of the background.
   Loading a foreground or background replaces it, so after a failed load the server holds none, and
   "Foreground missing" and "Background missing" give the reason of the failed load.
 - The GO page runs only with the sets it shows. Ticking "Use all GOA files" no longer empties the
