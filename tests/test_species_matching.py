@@ -219,3 +219,65 @@ class TestAliasMapCoverage:
             assert " " not in k and "." not in k, (
                 f"Alias key {k!r} must have no spaces/dots"
             )
+
+
+# ---------------------------------------------------------------------------
+# Blind study, 29-Oct-2026: match by proteome ID when it is known, and by whole
+# words only ("IS27" was matched to "Influenza A virus (A/Memphis/27/1983)").
+# ---------------------------------------------------------------------------
+class TestMatchByProteomeIdAndWholeWords:
+    def test_isolate_name_is_not_matched_inside_another_word(self, proteomes):
+        assert match_species(["IS27"], proteomes)[0]["match"] is None
+
+    def test_strain_is_a_whole_word(self, proteomes):
+        # Only "Mycobacterium tuberculosis H37RvSiena" starts with these
+        # letters; H37Rv is another strain. Without an ID: no match, use Fix.
+        assert match_species(["Mycobacterium_tuberculosis_H37Rv"], proteomes)[0]["match"] is None
+
+    def test_known_proteome_id_wins(self, proteomes):
+        names = ["Mycobacterium_tuberculosis_H37Rv",
+                 "Mycoplasmoides_genitalium_(strain_ATCC_33530___DSM_19775___NCTC_10195___G37)",
+                 "Pseudomonas_aeruginosa"]
+        ids = {names[0]: "UP000001584", names[1]: "UP000000807", names[2]: "UP001442543"}
+        got = match_species(names, proteomes, proteome_ids=ids)
+        assert [m["match"]["Proteome Id"] for m in got] == ["UP000001584", "UP000000807", "UP001442543"]
+        assert all(m["method"] == "proteome_id" for m in got)
+        # The new genus name is not in the catalogue labels' first words, but
+        # the ID finds the proteome and its GOA file.
+        assert got[1]["match"]["file_url"].endswith("M_genitalium.goa")
+
+    def test_unknown_proteome_id_falls_back_to_the_name(self, proteomes):
+        got = match_species(["Escherichia coli K12"], proteomes, proteome_ids={"Escherichia coli K12": "UP999999999"})
+        assert got[0]["match"]["Proteome Id"] == "UP000000625" and got[0]["method"] != "proteome_id"
+
+    def test_synonym_in_parentheses_still_matches(self, proteomes):
+        # "Mycolicibacterium smegmatis (...) (Mycobacterium smegmatis)": the
+        # old name is a whole-word synonym in the label, as before.
+        m = match_species(["Mycobacterium smegmatis NCTC 8159"], proteomes)[0]["match"]
+        assert m["Proteome Id"] == "UP000000757"
+
+    def test_cache_key_includes_the_ids(self, proteomes):
+        a = match_species(["Pseudomonas_aeruginosa"], proteomes)
+        b = match_species(["Pseudomonas_aeruginosa"], proteomes,
+                          proteome_ids={"Pseudomonas_aeruginosa": "UP001442543"})
+        assert a[0]["match"]["Proteome Id"] != b[0]["match"]["Proteome Id"]
+
+
+def test_goa_page_matches_by_the_analysis_proteome_ids(tmp_path, monkeypatch):
+    import json
+    import app as og
+    folder = tmp_path / "analysis"
+    folder.mkdir()
+    names = ["Mycoplasmoides_genitalium_(strain_ATCC_33530___DSM_19775___NCTC_10195___G37)", "IS27"]
+    (folder / "Orthogroups.tsv").write_text("Orthogroup\t" + "\t".join(names) + "\nOG0000000\ta\tb\n")
+    (folder / "proteome_provenance.json").write_text(json.dumps({"per_proteome": {
+        "UP000000807": {"filename": names[0] + ".fasta", "source": "UniProtKB"}}}))
+    c = og.app.test_client()
+    with c.session_transaction() as s:
+        s.update(folder_path=str(folder), species=names, modo="generated")
+    html = c.get("/resultado_goa").get_data(as_text=True)
+    row = html[html.index('data-original="Mycoplasmoides'):]
+    row = row[:row.index("</tr>")]
+    assert "UP000000807" in row and "by proteome ID" in row
+    is27 = html[html.index('data-original="IS27"'):]
+    assert "No match" in is27[:is27.index("</tr>")]

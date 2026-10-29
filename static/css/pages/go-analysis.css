@@ -1258,3 +1258,11 @@
 #go-table tbody tr.is-not-significant td .go-dir {
   color: #7b8794 !important;
 }
+
+/* Species table: the proteome ID of the matched catalogue entry, and how it
+   was matched (by the proteome the species was downloaded from, or by name). */
+#species-table .match-id {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

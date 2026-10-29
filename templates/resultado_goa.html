@@ -164,6 +164,9 @@
                           <span class="name-tooltip" role="tooltip">{{ row.match.label }}</span>
                         </span>
                       </span>
+                      {# The proteome ID, so homonyms and name matches can be checked. #}
+                      <span class="match-id">{{ row.match['Proteome Id'] }} ·
+                        {{ 'by proteome ID' if row.method == 'proteome_id' else 'by name' }}</span>
                     {% else %}
                       <span class="fail"><i class="fa-solid fa-xmark"></i> No match</span>
                     {% endif %}

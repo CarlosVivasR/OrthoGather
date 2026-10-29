@@ -3,12 +3,16 @@ Species catalogue: loading the UniProt proteome catalogue from disk, matching
 user-supplied species names against it, and expanding common abbreviations
 ("E. coli" → "Escherichia coli").
 
-The matcher has three tiers (in order of preference):
-  1. Strain match  — prefix matches `base_norm` AND contains `strain_norm`.
-  2. Base-only     — first proteome whose normalised label starts with `base_norm`.
-  3. Substring     — first proteome whose label contains `base_norm` anywhere
-                     (catches non-standard orderings like "Coli, Escherichia"
-                     that occasionally appear in Excel exports).
+The matcher has four tiers (in order of preference):
+  0. Proteome ID   — the catalogue entry of the proteome the species was
+                     downloaded from, when the analysis knows it.
+  1. Strain match  — label starts with the base name AND contains `strain_norm`.
+  2. Base-only     — first proteome whose label starts with the base name.
+  3. Synonym       — first proteome whose label contains the base name elsewhere
+                     (UniProt keeps former names in parentheses, as in
+                     "Mycolicibacterium smegmatis (...) (Mycobacterium smegmatis)").
+Names are compared as whole words: "IS27" no longer matches "Influenza A virus
+(A/Memphis/27/1983)", nor "... H37Rv" the strain "H37RvSiena".
 
 The module-level caches (`_proteomes_cache`, `_match_species_cache`) are
 *read-only* in user-facing code; they only ever grow with idempotent values,
@@ -201,6 +205,7 @@ def load_proteomes(json_path):
 
 
 _match_species_cache = {}
+_proteome_index = {}
 
 
 def invalidate_caches():
@@ -214,49 +219,83 @@ def invalidate_caches():
     global _proteomes_cache, _match_species_cache
     _proteomes_cache = None
     _match_species_cache = {}
+    _proteome_index.clear()
 
 
-def match_species(species_list, proteomes):
+def _words(text):
+    """Lower-case alphanumeric words: 'Escherichia coli (strain K12)' ->
+    ['escherichia', 'coli', 'strain', 'k12']. Underscores separate words."""
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+
+def _has_words(label, words, at_start):
+    """Whether ``words`` appear as consecutive whole words of ``label``, at its
+    start if ``at_start``."""
+    lw, n = _words(label), len(words)
+    starts = [0] if at_start else range(len(lw) - n + 1)
+    return bool(n) and any(lw[i:i + n] == words for i in starts)
+
+
+def _by_proteome_id(proteomes):
+    key = id(proteomes)
+    if key not in _proteome_index:
+        _proteome_index.clear()
+        _proteome_index[key] = {p.get("Proteome Id"): p for p in proteomes if p.get("Proteome Id")}
+    return _proteome_index[key]
+
+
+def match_species(species_list, proteomes, proteome_ids=None):
     """Match every species in ``species_list`` against the catalogue.
 
-    Result is memoised by the ``tuple(species_list)`` so repeat warm hits to
+    ``proteome_ids`` maps a species name to the UniProt proteome it was
+    downloaded from, when the analysis knows it; that entry is used directly.
+
+    Result is memoised by the species list and the IDs, so repeat warm hits to
     /resultado_goa with the same selection skip the O(N×M) scan entirely.
 
     Returns a list of dicts: ``{"original": str, "base": str, "strain": str,
-    "match": <proteome dict | None>}``.
+    "match": <proteome dict | None>, "method": "proteome_id" | "name" | None}``.
     """
-    cache_key = tuple(species_list)
+    proteome_ids = proteome_ids or {}
+    cache_key = (tuple(species_list), tuple(sorted(proteome_ids.items())))
     cached = _match_species_cache.get(cache_key)
     if cached is not None:
         return cached
+    index = _by_proteome_id(proteomes) if proteome_ids else {}
     matches = []
     for original in species_list:
         base, strain = split_species_name(original)
         base_norm = normalize(base)
         strain_norm = normalize(strain)
-        # Tier 1 (strain match): prefix matches `base_norm` AND contains `strain_norm`
-        # Tier 2 (base-only):    first prefix candidate
-        # Tier 3 (substring):    `base_norm` appears anywhere in the label
-        matched = None
+        base_words = _words(base)
+        # Tier 0 (proteome ID): the entry of the proteome the species came from
+        # Tier 1 (strain match): label starts with the base AND contains `strain_norm`
+        # Tier 2 (base-only):    first label that starts with the base
+        # Tier 3 (synonym):      the base appears elsewhere in the label
+        # The normalised strings are a fast filter; the words decide.
+        matched = index.get(proteome_ids.get(original))
+        method = "proteome_id" if matched else None
         first_candidate = None
-        substring_candidate = None
-        for p in proteomes:
+        synonym_candidate = None
+        for p in ([] if matched else proteomes):
             norm = p.get("_norm_label") or normalize(p["label"])
-            if norm.startswith(base_norm):
+            if norm.startswith(base_norm) and _has_words(p["label"], base_words, at_start=True):
                 if first_candidate is None:
                     first_candidate = p
                 if strain_norm and strain_norm in norm:
                     matched = p
                     break
-            elif substring_candidate is None and base_norm and base_norm in norm:
-                substring_candidate = p
+            elif (synonym_candidate is None and base_norm and base_norm in norm
+                  and _has_words(p["label"], base_words, at_start=False)):
+                synonym_candidate = p
         if matched is None:
-            matched = first_candidate or substring_candidate
+            matched = first_candidate or synonym_candidate
         matches.append({
             "original": original,
             "base": base,
             "strain": strain,
             "match": matched,
+            "method": method or ("name" if matched else None),
         })
     _match_species_cache[cache_key] = matches
     return matches
@@ -271,3 +310,4 @@ def invalidate_catalogue_caches():
     global _proteomes_cache
     _proteomes_cache = None
     _match_species_cache.clear()
+    _proteome_index.clear()

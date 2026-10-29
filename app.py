@@ -2594,7 +2594,8 @@ def api_session_species_taxids():
             return jsonify({"species": []})
         try:
             proteomes = load_proteomes(JSON_PATH)
-            matches = match_species(species, proteomes)
+            matches = match_species(species, proteomes,
+                                    proteome_ids=_analysis_proteome_ids(session.get("folder_path")))
         except Exception as e:
             logging.warning(f"[taxonomy] match_species failed in session route: {e}")
             return jsonify({"species": [{"name": s, "taxon_id": ""} for s in species]})
@@ -2688,6 +2689,19 @@ def tutorial():
     return render_template('tutorial.html')
 
 
+def _analysis_proteome_ids(folder_path):
+    """species name -> UniProt proteome ID, for the proteomes this analysis
+    downloaded (proteome_provenance.json; none for an upload). OrthoFinder names
+    each species after its FASTA file, which is how the two are paired."""
+    try:
+        with open(os.path.join(folder_path or "", "proteome_provenance.json")) as fh:
+            per = (json.load(fh) or {}).get("per_proteome") or {}
+        return {os.path.splitext(v.get("filename") or "")[0]: pid
+                for pid, v in per.items() if v.get("filename")}
+    except (OSError, ValueError, AttributeError):
+        return {}
+
+
 @app.route('/resultado_goa')
 def resultado_goa():
     modo = session.get("modo")
@@ -2744,8 +2758,10 @@ def resultado_goa():
     # Load available proteomes (with GOA or from the general JSON)
     proteomes = load_proteomes(JSON_PATH)
 
-    # Automatic species matching
-    species_cache = match_species(species, proteomes)
+    # Automatic species matching: by the proteome each species was downloaded
+    # from when the analysis knows it, else by name.
+    species_cache = match_species(species, proteomes,
+                                  proteome_ids=_analysis_proteome_ids(session.get("folder_path")))
 
     # A proteome downloaded from UniParc has UniParc identifiers (UPI...), so no
     # GOA file can annotate it, even when the catalogue lists one for its taxon
