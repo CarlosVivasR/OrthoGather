@@ -50,7 +50,7 @@ logging.getLogger('werkzeug').setLevel(logging.WARNING)
 # `from app import …`) keep working unchanged.
 # ---------------------------------------------------------------------------
 from orthogather.config import (
-    BASE_DIR, STATIC_FOLDER, PROTEOMES_FOLDER, GOA_DOWNLOAD_FOLDER,
+    BASE_DIR, STATIC_FOLDER, PROTEOMES_FOLDER, GOA_DOWNLOAD_FOLDER, RUN_STAMPS_FOLDER,
     RESULTS_FOLDER, JSON_PATH, GO_ROOT_OBO, HISTORY_DIR, SESSION_FILE_DIR,
     ORTHOGATHER_VERSION,
 )
@@ -243,7 +243,7 @@ _RUN_STAMP = "history_run.json"
 
 def _write_run_stamp(run_id):
     try:
-        with open(os.path.join(PROTEOMES_FOLDER, _RUN_STAMP), "w") as f:
+        with open(os.path.join(RUN_STAMPS_FOLDER, _RUN_STAMP), "w") as f:
             json.dump({"run_id": run_id}, f)
     except Exception as e:
         logging.warning(f"[history] could not write {_RUN_STAMP}: {e}")
@@ -520,14 +520,14 @@ def cargar_carpeta():
             session['species'] = list(gene_count_df_.columns[1:])
             session['modo'] = mode_flag
             # Carry the run-step provenance stamps (UniProt release + OrthoFinder
-            # version) from Proteomas/ into the analysis folder so they survive
+            # version) from run_provenance/ into the analysis folder so they survive
             # into build_provenance + the saved run snapshot. They describe
             # Proteomas/Orthogroups.zip, so only the 'generated' flow takes them;
             # an upload or the bundled dataset has none, and must not show those
             # of the last New Analysis.
             for _prov_name in ("proteome_provenance.json", "orthofinder_provenance.json", _RUN_STAMP):
                 try:
-                    _src = os.path.join(PROTEOMES_FOLDER, _prov_name)
+                    _src = os.path.join(RUN_STAMPS_FOLDER, _prov_name)
                     _dst = os.path.join(folder_path, _prov_name)
                     if mode_flag == 'generated' and os.path.exists(_src):
                         shutil.copy2(_src, _dst)
@@ -1418,7 +1418,7 @@ def build_provenance(new_run=False):
     so a result can always be traced to its data versions (reviewer ask).
 
     ``new_run`` gives the record of the OrthoFinder run that has just finished,
-    for its history snapshot. Its stamps are in Proteomas/ only: the analysis
+    for its history snapshot. Its stamps are in run_provenance/ only: the analysis
     open in the session, if any, is another one, and no GOA file has been
     downloaded for the new run yet."""
     manifest = _read_catalog_manifest() or {}
@@ -1429,12 +1429,12 @@ def build_provenance(new_run=False):
         "is_fallback":    manifest.get("is_fallback", False),
     }
     # Read a provenance stamp from the active analysis folder, which holds the
-    # stamps of that analysis and nothing else (none for an upload). Proteomas/
-    # holds those of the last New Analysis: read only for the new run's snapshot
-    # or while no analysis is loaded.
+    # stamps of that analysis and nothing else (none for an upload).
+    # run_provenance/ holds those of Proteomas/Orthogroups.zip: read only for the
+    # new run's snapshot or while no analysis is loaded.
     def _load_prov(name):
         if new_run or not session.get("folder_path"):
-            bases = (PROTEOMES_FOLDER,)
+            bases = (RUN_STAMPS_FOLDER,)
         else:
             bases = (session.get("folder_path"),)
         for base in bases:
@@ -2101,6 +2101,12 @@ def stream_download():
                         logging.warning(f"Could not delete {p}: {e}")
             except Exception as e:
                 logging.warning(f"Could not clean {PROTEOMES_FOLDER}: {e}")
+            # The stamps of the previous run go with its proteomes.
+            for _name in os.listdir(RUN_STAMPS_FOLDER) if os.path.isdir(RUN_STAMPS_FOLDER) else []:
+                try:
+                    os.remove(os.path.join(RUN_STAMPS_FOLDER, _name))
+                except OSError as e:
+                    logging.warning(f"Could not delete stamp {_name}: {e}")
 
         downloaded, failed, empty = [], [], []
 
@@ -2166,8 +2172,8 @@ def stream_download():
                             "attempts": MAX_DOWNLOAD_ATTEMPTS, "reason": last_reason})
 
         # Persist the UniProt release that produced these proteomes. Written to
-        # PROTEOMES_FOLDER (the working dir at download time — folder_path isn't
-        # set until OrthoFinder results are loaded); _render_result_and_cache
+        # RUN_STAMPS_FOLDER (beside the working dir at download time — folder_path
+        # isn't set until OrthoFinder results are loaded); _render_result_and_cache
         # then copies it into folder_path so build_provenance + the snapshot
         # pick it up. Session writes don't survive a streamed response, hence a
         # file. Releases are normally uniform; we record the spread just in case.
@@ -2175,7 +2181,7 @@ def stream_download():
             releases = sorted({d.get("uniprot_release") for d in downloaded if d.get("uniprot_release")})
             if releases:
                 rel_dates = sorted({d.get("uniprot_release_date") for d in downloaded if d.get("uniprot_release_date")})
-                with open(os.path.join(PROTEOMES_FOLDER, "proteome_provenance.json"), "w") as f:
+                with open(os.path.join(RUN_STAMPS_FOLDER, "proteome_provenance.json"), "w") as f:
                     json.dump({
                         "source": "UniProt (rest.uniprot.org)",
                         "release": releases[0] if len(releases) == 1 else releases,
@@ -2260,12 +2266,12 @@ def stream_orthofinder():
         process.stdout.close()
         process.wait()
 
-        # Persist the OrthoFinder version next to the other run outputs. Written
-        # to PROTEOMES_FOLDER (folder_path isn't set until results are loaded);
-        # it survives cleanup_temp_run and is copied into the analysis folder by
+        # Persist the OrthoFinder version next to the other run stamps. Written
+        # to RUN_STAMPS_FOLDER (folder_path isn't set until results are loaded);
+        # it is not in OrthoFinder's input folder, and is copied into the analysis folder by
         # _render_result_and_cache, so build_provenance + the snapshot pick it up.
         try:
-            with open(os.path.join(PROTEOMES_FOLDER, "orthofinder_provenance.json"), "w") as f:
+            with open(os.path.join(RUN_STAMPS_FOLDER, "orthofinder_provenance.json"), "w") as f:
                 json.dump({"version": of_version, "source": "OrthoFinder"}, f)
         except Exception as e:
             logging.warning(f"[orthofinder] could not persist version: {e}")
@@ -2364,9 +2370,9 @@ def api_history():
 
 
 def _restore_run_stamps(run_dir):
-    """Write to Proteomas/ the provenance stamps saved with a history run.
+    """Write to run_provenance/ the provenance stamps saved with a history run.
 
-    The stamps in Proteomas/ describe Proteomas/Orthogroups.zip, which is now
+    The stamps in run_provenance/ describe Proteomas/Orthogroups.zip, which is now
     the run's, so they are replaced, or removed when the run saved none: left
     alone, the run would show those of the last New Analysis. A run saved by
     2.2.0 may hold the provenance of the analysis open while it ran; a proteome
@@ -2388,7 +2394,7 @@ def _restore_run_stamps(run_dir):
               "orthofinder_provenance.json": ({"version": of_version, "source": "OrthoFinder"}
                                               if of_version else None)}
     for name, data in stamps.items():
-        path = os.path.join(PROTEOMES_FOLDER, name)
+        path = os.path.join(RUN_STAMPS_FOLDER, name)
         try:
             if data:
                 with open(path, "w") as f:

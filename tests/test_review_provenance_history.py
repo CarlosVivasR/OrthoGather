@@ -33,8 +33,8 @@ def test_history_run_shows_its_own_provenance(workdir, tmp_path):
     prov = _provenance(c)
     assert prov["proteome"]["release"] == "2025_04"
     assert prov["orthofinder_version"] == "2.5.4"
-    # Proteomas/ now describes Proteomas/Orthogroups.zip, which is this run's.
-    stamp = json.loads((tmp_path / "Proteomas" / "proteome_provenance.json").read_text())
+    # run_provenance/ now describes Proteomas/Orthogroups.zip, which is this run's.
+    stamp = json.loads((tmp_path / "run_provenance" / "proteome_provenance.json").read_text())
     assert stamp["release"] == "2025_04"
 
 
@@ -47,6 +47,6 @@ def test_history_run_saved_with_another_runs_provenance_shows_none(workdir, tmp_
     assert c.get("/history/20261021_000000/load", follow_redirects=True).status_code == 200
     prov = _provenance(c)
     assert prov["proteome"] is None and prov["orthofinder_version"] is None
-    assert not (tmp_path / "Proteomas" / "proteome_provenance.json").exists()
+    assert not (tmp_path / "run_provenance" / "proteome_provenance.json").exists()
     page = c.get("/cargar_carpeta").get_data(as_text=True)
     assert "not recorded for this run" in page and "externally supplied" not in page

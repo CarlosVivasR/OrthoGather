@@ -13,6 +13,7 @@ static/Proteomes_json/proteomes_list.json.full.cursor
 
 # runtime outputs
 Proteomas/*
+run_provenance/*
 GOAfiles/*
 static/data_folder/*
 static/plots/*

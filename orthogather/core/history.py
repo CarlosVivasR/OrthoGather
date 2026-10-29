@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from orthogather.config import HISTORY_DIR, PROTEOMES_FOLDER, SESSION_FILE_DIR
+from orthogather.config import HISTORY_DIR, PROTEOMES_FOLDER, RUN_STAMPS_FOLDER, SESSION_FILE_DIR
 from orthogather.core.figures import generate_figure_1, generate_figure_2
 
 
@@ -200,11 +200,12 @@ def snapshot_run(results_dir, run_id: str, duration_s: float, species_ids=None,
 
 def cleanup_temp_run() -> None:
     """Delete the temporary OrthoFinder workspace (input FASTAs + the
-    ``OrthoFinder/`` intermediates dir) but PRESERVE the run outputs the next
+    ``OrthoFinder/`` intermediates dir) but PRESERVE the run output the next
     steps depend on: ``Orthogroups.zip`` (consumed by Protein Analysis / Gene
-    Ontology via ``/cargar_carpeta?modo=generated``) and the ``*_provenance.json``
-    stamps (copied into the analysis folder by ``_render_result_and_cache``).
-    Keeps ``Proteomas/`` itself so subsequent runs work.
+    Ontology via ``/cargar_carpeta?modo=generated``). Keeps ``Proteomas/``
+    itself so subsequent runs work. The provenance stamps live in
+    ``run_provenance/``; stamps that 2.2.0 and earlier wrote here are moved
+    there, unless a newer one is already there.
 
     Previously this wiped *every* file, including ``Orthogroups.zip`` — which
     made clicking "Protein Analysis" right after a run redirect to home, because
@@ -212,11 +213,19 @@ def cleanup_temp_run() -> None:
     proteomes_path = Path(PROTEOMES_FOLDER)
     if not proteomes_path.exists():
         return
-    keep = {"Orthogroups.zip", "proteome_provenance.json", "orthofinder_provenance.json",
-            "history_run.json"}
+    legacy_stamps = {"proteome_provenance.json", "orthofinder_provenance.json"}
     for entry in proteomes_path.iterdir():
-        if entry.name in keep:
+        if entry.name == "Orthogroups.zip":
             continue
+        if entry.name in legacy_stamps:
+            dest = Path(RUN_STAMPS_FOLDER) / entry.name
+            try:
+                if not dest.exists():
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.move(str(entry), dest)
+                    continue
+            except Exception:
+                pass
         try:
             if entry.is_dir():
                 shutil.rmtree(entry, ignore_errors=True)

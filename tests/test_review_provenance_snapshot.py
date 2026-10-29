@@ -31,17 +31,19 @@ def _orthogroups_zip(species=("Alpha_beta", "Gamma_delta")):
 
 @pytest.fixture
 def workdir(tmp_path, monkeypatch):
-    """A working directory whose Proteomas/ holds the stamps of a New Analysis."""
+    """A working directory whose run_provenance/ holds the stamps of a New
+    Analysis, whose orthogroups are in Proteomas/."""
     import app as og
     from orthogather.core import history as og_history
     monkeypatch.chdir(tmp_path)
     (tmp_path / ".orthogather_sessions").mkdir()       # the session store is relative too
     monkeypatch.setattr(og, "HISTORY_DIR", tmp_path / "runs")
     monkeypatch.setattr(og_history, "HISTORY_DIR", tmp_path / "runs")
-    prot = tmp_path / "Proteomas"
+    prot, stamps = tmp_path / "Proteomas", tmp_path / "run_provenance"
     prot.mkdir()
-    (prot / "proteome_provenance.json").write_text(json.dumps(STAMP))
-    (prot / "orthofinder_provenance.json").write_text(json.dumps({"version": "2.5.5", "source": "OrthoFinder"}))
+    stamps.mkdir()
+    (stamps / "proteome_provenance.json").write_text(json.dumps(STAMP))
+    (stamps / "orthofinder_provenance.json").write_text(json.dumps({"version": "2.5.5", "source": "OrthoFinder"}))
     (prot / "Orthogroups.zip").write_bytes(_orthogroups_zip())
     return og.app.test_client()
 

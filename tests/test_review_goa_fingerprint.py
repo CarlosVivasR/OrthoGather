@@ -85,7 +85,7 @@ def test_new_analysis_snapshot_names_its_run(workdir, tmp_path):
     with og.app.test_request_context():
         session["folder_path"] = None
         og._snapshot_run(str(results), "20261029_130000", 1.0)
-    assert json.loads((tmp_path / "Proteomas" / "history_run.json").read_text()) == {"run_id": "20261029_130000"}
+    assert json.loads((tmp_path / "run_provenance" / "history_run.json").read_text()) == {"run_id": "20261029_130000"}
 
 
 def test_page_reports_changed_goa_files():

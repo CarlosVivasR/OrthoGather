@@ -26,6 +26,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_FOLDER       = "static"
 PROTEOMES_FOLDER    = "Proteomas"
 GOA_DOWNLOAD_FOLDER = "GOAfiles"
+# Provenance stamps (UniProt release, OrthoFinder version, history run) of the
+# run whose orthogroups are in Proteomas/Orthogroups.zip. Kept out of
+# Proteomas/, which OrthoFinder reads as its input: a JSON file there drew a
+# "not a FASTA file" warning in every run.
+RUN_STAMPS_FOLDER   = "run_provenance"
 RESULTS_FOLDER      = os.path.join(STATIC_FOLDER, "results")
 
 JSON_PATH    = str(BASE_DIR / "static" / "Proteomes_json" / "proteomes_list.json")
@@ -42,6 +47,7 @@ SESSION_FILE_DIR = ".orthogather_sessions"
 # ---------------------------------------------------------------------------
 HISTORY_DIR.mkdir(parents=True, exist_ok=True)
 os.makedirs(PROTEOMES_FOLDER,   exist_ok=True)
+os.makedirs(RUN_STAMPS_FOLDER, exist_ok=True)
 os.makedirs(GOA_DOWNLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER,     exist_ok=True)
 os.makedirs(SESSION_FILE_DIR,   exist_ok=True)
