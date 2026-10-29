@@ -1178,6 +1178,19 @@
                    <span class="goa-notice-hint">These species have no annotation file in EBI's GOA set, so they contribute no GO terms.</span>
                  </div>`);
             }
+            // A run reopened from the history keeps the fingerprint of the GOA
+            // files used with it; EBI regenerates them under the same names.
+            const changed = finalEvent.goa_changed;
+            if (changed?.files?.length) {
+              const when = changed.previous_data_generated
+                ? ` (generated ${esc([].concat(changed.previous_data_generated).join(", "))})` : "";
+              blocks.push(
+                `<div class="goa-notice-block goa-notice-block--warn">
+                   <span class="goa-notice-head"><i class="fa-solid fa-triangle-exclamation"></i> GOA files differ from the last download for this run (${changed.files.length})</span>
+                   <span class="goa-notice-list">${changed.files.map(esc).join(", ")}</span>
+                   <span class="goa-notice-hint">EBI has regenerated them since the files used before${when}, so results can differ from earlier runs of this analysis. The Provenance sheet records the fingerprint of each file.</span>
+                 </div>`);
+            }
             if (failedSp.length) {
               blocks.push(
                 `<div class="goa-notice-block goa-notice-block--warn">

@@ -212,7 +212,8 @@ def cleanup_temp_run() -> None:
     proteomes_path = Path(PROTEOMES_FOLDER)
     if not proteomes_path.exists():
         return
-    keep = {"Orthogroups.zip", "proteome_provenance.json", "orthofinder_provenance.json"}
+    keep = {"Orthogroups.zip", "proteome_provenance.json", "orthofinder_provenance.json",
+            "history_run.json"}
     for entry in proteomes_path.iterdir():
         if entry.name in keep:
             continue

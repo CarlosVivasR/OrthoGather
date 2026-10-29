@@ -228,9 +228,25 @@ def _snapshot_run(results_dir, run_id, duration_s):
     """Backward-compat wrapper: pulls species_ids out of session and forwards
     to the pure function in orthogather.core.history."""
     species_ids = list(session.get('species_ids') or [])
-    return _history_mod.snapshot_run(results_dir, run_id, duration_s,
+    meta = _history_mod.snapshot_run(results_dir, run_id, duration_s,
                                      species_ids=species_ids,
                                      provenance=build_provenance(new_run=True))
+    _write_run_stamp(run_id)
+    return meta
+
+
+# Stamp naming the history run that Proteomas/Orthogroups.zip comes from. It
+# travels with the other provenance stamps into the analysis folder, so the GOA
+# download can keep its fingerprint with the run.
+_RUN_STAMP = "history_run.json"
+
+
+def _write_run_stamp(run_id):
+    try:
+        with open(os.path.join(PROTEOMES_FOLDER, _RUN_STAMP), "w") as f:
+            json.dump({"run_id": run_id}, f)
+    except Exception as e:
+        logging.warning(f"[history] could not write {_RUN_STAMP}: {e}")
 
 
 def _orthofinder_thread_settings() -> tuple:
@@ -509,7 +525,7 @@ def cargar_carpeta():
             # Proteomas/Orthogroups.zip, so only the 'generated' flow takes them;
             # an upload or the bundled dataset has none, and must not show those
             # of the last New Analysis.
-            for _prov_name in ("proteome_provenance.json", "orthofinder_provenance.json"):
+            for _prov_name in ("proteome_provenance.json", "orthofinder_provenance.json", _RUN_STAMP):
                 try:
                     _src = os.path.join(PROTEOMES_FOLDER, _prov_name)
                     _dst = os.path.join(folder_path, _prov_name)
@@ -2407,6 +2423,7 @@ def history_load(run_id):
     dest_zip = Path(PROTEOMES_FOLDER) / "Orthogroups.zip"
     shutil.copy2(zip_src, dest_zip)
     _restore_run_stamps(run_dir)
+    _write_run_stamp(run_id)
     session['last_run_id'] = run_id
     # Load from the copied run zip (Proteomas/Orthogroups.zip) via the 'generated'
     # branch. Using 'preselected' here was a bug: that branch reads the bundled
@@ -2853,6 +2870,36 @@ def _download_goa_file(url, outpath):
     return "failed", detail
 
 
+def _keep_goa_with_run(folder_path, goa_prov):
+    """Save the GOA record of this download with the history run the analysis
+    comes from, if any, and return what changed since the record saved there
+    before (None when nothing did, or there was none): the files whose
+    fingerprint differs or that were not used before."""
+    try:
+        with open(os.path.join(folder_path, _RUN_STAMP)) as f:
+            run_dir = HISTORY_DIR / json.load(f)["run_id"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    if not run_dir.is_dir():
+        return None
+    record = run_dir / "goa_provenance.json"
+    try:
+        before = json.loads(record.read_text()) if record.exists() else None
+    except ValueError:
+        before = None
+    with open(record, "w") as f:
+        json.dump(goa_prov, f)
+    if not before or not before.get("files"):
+        return None
+    changed = sorted(fn for fn, rec in goa_prov["files"].items()
+                     if (before["files"].get(fn) or {}).get("sha256") != rec["sha256"])
+    if not changed:
+        return None
+    return {"files": changed,
+            "previous_downloaded_at": before.get("downloaded_at"),
+            "previous_data_generated": before.get("data_generated")}
+
+
 @app.route("/download_goa_files", methods=["POST"])
 def download_goa_files():
     """
@@ -2941,28 +2988,38 @@ def download_goa_files():
             # alone isn't enough — EBI regenerates the data periodically, so two
             # downloads of the "same" species months apart can differ. Read back
             # by build_provenance().
+            goa_changed = None
             try:
-                gen_dates, go_versions = set(), set()
+                gen_dates, go_versions, files = set(), set(), {}
                 for _fn in downloaded:
-                    _h = read_goa_header(os.path.join(GOA_DOWNLOAD_FOLDER, _fn))
+                    _path = os.path.join(GOA_DOWNLOAD_FOLDER, _fn)
+                    _h = read_goa_header(_path)
                     if _h.get("date_generated"):
                         gen_dates.add(_h["date_generated"])
                     if _h.get("go_version"):
                         go_versions.add(_h["go_version"])
+                    with open(_path, "rb") as fh:
+                        files[_fn] = {"sha256": hashlib.sha256(fh.read()).hexdigest(),
+                                      "date_generated": _h.get("date_generated")}
                 gen_sorted = sorted(gen_dates)
                 gv_sorted = sorted(go_versions)
+                goa_prov = {
+                    "downloaded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "source": "EBI GOA proteomes (ftp.ebi.ac.uk/pub/databases/GO/goa/proteomes)",
+                    "n_files": len(downloaded),
+                    "n_missing": len(missing),
+                    "n_failed": len(failed),
+                    # Real EBI data version(s): a single string when uniform,
+                    # else the list so a mixed set is visible, not hidden.
+                    "data_generated": (gen_sorted[0] if len(gen_sorted) == 1 else gen_sorted) or None,
+                    "go_version": (gv_sorted[0] if len(gv_sorted) == 1 else gv_sorted) or None,
+                    # Each file's fingerprint: EBI regenerates the files under the
+                    # same names, so the name and date alone do not pin the data.
+                    "files": files,
+                }
                 with open(os.path.join(folder_path, "goa_provenance.json"), "w") as f:
-                    json.dump({
-                        "downloaded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                        "source": "EBI GOA proteomes (ftp.ebi.ac.uk/pub/databases/GO/goa/proteomes)",
-                        "n_files": len(downloaded),
-                        "n_missing": len(missing),
-                        "n_failed": len(failed),
-                        # Real EBI data version(s): a single string when uniform,
-                        # else the list so a mixed set is visible, not hidden.
-                        "data_generated": (gen_sorted[0] if len(gen_sorted) == 1 else gen_sorted) or None,
-                        "go_version": (gv_sorted[0] if len(gv_sorted) == 1 else gv_sorted) or None,
-                    }, f)
+                    json.dump(goa_prov, f)
+                goa_changed = _keep_goa_with_run(folder_path, goa_prov)
             except Exception as e:
                 logging.warning(f"[GOA] could not persist goa_provenance.json: {e}")
 
@@ -3001,7 +3058,8 @@ def download_goa_files():
             yield _sse({"phase": "done", "success": True,
                         "downloaded": len(downloaded), "missing": len(missing),
                         "failed": len(failed), "total": total,
-                        "missing_species": missing, "failed_species": failed})
+                        "missing_species": missing, "failed_species": failed,
+                        "goa_changed": goa_changed})
 
         except Exception as e:
             logging.error(f"[GOA] stream error: {e}")
@@ -4379,6 +4437,11 @@ def gene_ontology_analysis():
                         f"{len(testable) / (n_perm + 1):.2g} for one term at the smallest p-value, "
                         f"1/{n_perm + 1}; m/(k({n_perm} + 1)) when k of the m = {len(testable)} "
                         f"terms share it. Terms at that floor cannot be ranked against each other."))
+            if g.get("files"):
+                # EBI regenerates the GOA files under the same names: the
+                # fingerprint pins the annotations this run used.
+                prov_rows.append(("GOA files (SHA-256)", "; ".join(
+                    f"{fn}: {rec.get('sha256')}" for fn, rec in sorted(g["files"].items()))))
             pd.DataFrame(prov_rows, columns=["key", "value"]).to_excel(
                 xw, sheet_name="Provenance", index=False)
         logging.info(f"[GO] 📑 Excel generated: {out_xlsx}")
