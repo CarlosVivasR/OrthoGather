@@ -227,7 +227,7 @@ is one, and, for questions about a result, its provenance file. Contributions ar
 
 OrthoGather is maintained by its authors at University College Dublin. Releases follow
 `vMAJOR.MINOR.PATCH` versioning and are listed in the [CHANGELOG](CHANGELOG.md); every release since
-1.1.1 is archived on Zenodo. The repository has 165 automated tests (`pytest tests/`). On every
+1.1.1 is archived on Zenodo. The repository has 290 automated tests (`pytest tests/`). On every
 change, a GitHub Actions workflow runs them on Linux and macOS in the pinned environment of
 `environment.yml`, together with a check of the 35 numbers of the worked example that the paper
 quotes; another workflow checks the logic of the Windows installer on Windows. The validation of the

@@ -37,10 +37,19 @@ evidence setting); the statistical method is unchanged.
 - Error codes for every message of the Gene Ontology page.
 - The table's CSV/TSV export adds the raw and hypergeometric p-values and the significance flag.
 - Application data (taxonomy cache, run records) is kept out of the installation and proteome folders.
+- `tools/build_catalogue.py` follows the proteome type names that UniProt uses since release 2026_03
+  for full rebuilds of the catalogue (the numbers 1, 2 and 4 still work).
 
-### Documentation
-- Validation README: what recovery through orthologues depends on, and how the order of a pasted
-  background can move terms close to the threshold.
+### Validation and documentation
+- `docs/validation/independent_check.py` recomputes the enrichment statistics without GOATOOLS or the
+  application's code: identical in every setting tested.
+- `docs/validation/sensitivity_example.py` runs the worked example under each analysis setting (Table
+  S6 of Supplementary File S1), with seeds 1–50 for the per-orthogroup rows.
+- The hidden-annotation benchmark draws its 40 *E. coli* processes in a fixed order, so every run
+  regenerates the same figures: 27 of 40 recovered with the exact term, 37 and 35 (pure and
+  diluted) counting close relatives.
+- Validation README: what recovery through orthologues depends on, how the order of a pasted
+  background can move terms close to the threshold, and the scope of each check.
 
 ### Removed
 - Unused code, routes and files, and the guided Conda scripts (the installers and the README cover
