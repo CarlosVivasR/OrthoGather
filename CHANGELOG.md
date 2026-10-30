@@ -73,6 +73,11 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
 - An identifier in the proteomes of two species (two genomes with the same Prokka prefix) is
   reported when the lists are loaded.
 - `max_terms` sent as text is applied.
+- The evidence chips count proteins: a protein annotated to two terms below a term counted twice.
+- A species named "Candidatus …" is matched by its binomial: "Candidatus Pelagibacter ubique HTCC1062"
+  took the GOA file of another species of the genus.
+- Different identifiers of a pasted list read as one (a FASTA header form OrthoGather does not know)
+  are reported instead of being dropped as duplicates.
 - The note shown when no term is significant per orthogroup says which p-values were used, and when
   the number of permutations keeps every q above the threshold.
 
@@ -86,6 +91,9 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
 - The results Excel has a `significant` column, and the Provenance sheet the run's warnings and the
   scope of "Use all GOA files". The table's CSV/TSV export adds the raw p-value, `p_hypergeom` and
   `significant`.
+- The GO Excel says in its Meta sheet which orthogroup cells it had to cut.
+- The results file records a SHA-256 of the pasted foreground and lists the identifiers not tested,
+  with their reason, in a sheet of their own.
 - Validation README: how recovery with a species hidden depends on the kind of donor annotations,
   and that the order of the pasted background can move terms near the threshold.
 - Error codes (`ERR_…`) for every error of the Gene Ontology page.
