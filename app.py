@@ -3754,6 +3754,12 @@ def gene_ontology_analysis():
         data = request.get_json(silent=True) or {}
         p_value_threshold = float(data.get('p_value', 0.05))
         max_terms = data.get('max_terms')  # None or int
+        # A number sent as text ("1") was ignored while the Provenance sheet
+        # reported it as applied.
+        if isinstance(max_terms, str) and max_terms.strip().isdigit():
+            max_terms = int(max_terms.strip())
+        if not isinstance(max_terms, int) or isinstance(max_terms, bool) or max_terms < 1:
+            max_terms = None
         min_depth = int(data.get('min_depth', 2))
         # GO term size bounds, counted over the background. Terms smaller than
         # ``min_term_size`` are the ones topGO's vignette warns about ("detected
