@@ -6,226 +6,80 @@ Notable changes to OrthoGather. Versions are tagged `vMAJOR.MINOR.PATCH`, and ev
 
 ## 2.2.1 (not released yet)
 
-Fixes from the blind study of 2.2.0 (October 2026). An analysis of proteomes with UniProt accessions
-gives exactly the same results as in 2.2.0: the worked example still gives 21 and 1 enriched terms
-with the GOA files of July 2026 (23 and 1 with those of October), and 66 analyses of the example and
-of the study's *Bacillus subtilis* data, in every counting, expansion, background and evidence
-setting, return the same terms, counts, p- and q-values. No part of the statistical method changes.
+A maintenance release. The worked example and every analysis of proteomes with UniProt accessions give
+the same results as in 2.2.0 (checked on 66 analyses in every counting, expansion, background and
+evidence setting); the statistical method is unchanged.
 
-### Fixed
-- Expansion with identifiers that are not UniProt accessions: proteomes from UniParc or from a lab's
-  own FASTA have bare identifiers in the orthogroups (`UPI…`, `IS27_00398`), and the expansion only
-  read `db|ACC|NAME` cells, so it found no orthogroup and the run stopped at "Foreground missing".
-  It now reads both forms, as per-orthogroup counting and the UpSet plots already did.
-- Identifiers written as NCBI general IDs (`gnl|extdb|IS27_00001`, as in the protein FASTA of NCBI's
-  annotation pipeline) are read by their last field. The middle field, the database name, was read
-  instead, so every protein of such a proteome became the same identifier.
-- An expansion that finds no orthogroup is an error that names the identifiers, not a success.
-- Expanding only the foreground is reported: counted per orthogroup it gives the result of not
-  expanding it, since the orthogroups carry the annotations of the background.
-  Loading a foreground or background replaces it, so after a failed load the server holds none, and
-  "Foreground missing" and "Background missing" give the reason of the failed load.
-- The GO page runs only with the sets it shows. Ticking "Use all GOA files" no longer empties the
-  background box; changing a box or an option marks that set as not loaded and disables Run until it
-  is loaded again; and the server refuses a run whose sets are not the ones it loaded.
-- The counting no longer switches back to "Per protein" on its own when expansion is removed, and a
-  line above Run says what the run will use.
-- Provenance: an External Upload or the Preselected Dataset no longer shows the UniProt release and
-  OrthoFinder version of the last New Analysis; the history snapshot of a New Analysis records that
-  analysis, not the one open while it ran; and a run opened from the history shows its own
-  provenance (or "not recorded for this run" when 2.2.0 saved another run's).
-- Species matching on the GO page uses the proteome each species was downloaded from when the
-  analysis knows it, and compares names as whole words: "IS27" is no longer matched to "Influenza A
-  virus (A/Memphis/27/1983)". The table shows the proteome ID of each match. The 47 species of the
-  Preselected Dataset match as before.
-- The lineage cache of the taxonomic tree is kept in `~/.orthogather/`; the copy bundled in
-  `static/Proteomes_json/` is read but no longer modified.
-- The provenance stamps of a New Analysis are kept in `run_provenance/`, out of `Proteomas/`, which
-  OrthoFinder reads: every run warned that `proteome_provenance.json` "is not a FASTA file".
-- The OrthoFinder log on the page no longer shows the user's folders: paths inside the
-  application's folder are relative and the home folder is `~`.
-- The Data provenance panel of the GO page is refreshed when the GOA download finishes, instead of
-  saying "not downloaded" until the page is reloaded.
-- Figure 2 counts proteomes, and says how many species they are: the Preselected Dataset has 47
-  proteomes of 35 species, not "47 species".
-- The summary of the UpSet filter reads as one sentence instead of one line per piece.
-- The evidence chips of a term count the annotations to the terms below it, which the test
-  propagates; counting direct annotations only left 15 of the 22 terms of the worked example without
-  chips. No p- or q-value changes.
-- UniParc identifiers shared between strains: with "Use all GOA files" counted per orthogroup, a list
-  from one strain took the proteomes of every strain with identical sequences as its universe. It now
-  takes the species that holds every pasted identifier, and says when several hold them all.
-- An identifier in two orthogroups (identical sequences of two strains that OrthoFinder placed
-  apart) is counted in the orthogroup with the highest ID, whatever the row order of
-  `Orthogroups.tsv`, and the run names it.
-- The items of each term in the JSON response are sorted.
-- The GO Excel of one analysis is no longer read for another: opening another analysis left the
-  previous one's, and loading the sets used its orthogroups. The Excel records the analysis it was
-  built for, and loading, running, the annotation figure and the download refuse another's (an
-  Excel built before this version asks for the GOA files to be downloaded once again).
-- Sets loaded before the GOA files are downloaded again are refused at the run and marked as not
-  loaded on the page.
-- Orthogroup cells longer than an Excel cell (32,767 characters, families of more than about 1,200
-  proteins of one species) were cut, and the members past the cut were not found; the cells are now
-  read from `Orthogroups.tsv`.
-- JGI (`jgi|Aspni7|1234|…`), GI (`gi|…|ref|NP_207527.1|`) and PDB (`pdb|1ABC|A`) identifiers are
-  read by the field that names the protein; a JGI proteome became a single identifier.
-- An identifier in the proteomes of two species (two genomes with the same Prokka prefix) is
-  reported when the lists are loaded.
-- `max_terms` sent as text is applied.
-- After an External Data Upload, opening its Protein Analysis tab from the Gene Ontology page no
-  longer replaces the upload with the bundled Preselected Dataset.
-- The line above Run counts the identifiers the server read, not the lines of the box ("1 pasted
-  identifier" for 70 on one line).
-- The evidence chips count proteins: a protein annotated to two terms below a term counted twice.
-- A species named "Candidatus …" is matched by its binomial: "Candidatus Pelagibacter ubique HTCC1062"
-  took the GOA file of another species of the genus.
-- Different identifiers of a pasted list read as one (a FASTA header form OrthoGather does not know)
-  are reported instead of being dropped as duplicates.
-- The note shown when no term is significant per orthogroup says which p-values were used, and when
-  the number of permutations keeps every q above the threshold.
+### Highlights
+- **Proteomes from any source.** Expansion and per-orthogroup counting read bare identifiers (UniParc
+  `UPI…`, a lab's own FASTA) and the identifier forms of NCBI (`gnl|…`, `gi|…`), JGI and PDB headers.
+  Identifiers shared by several strains or proteomes are handled consistently and reported.
+- **Results you can trace.** For each term, the results Excel lists its proteins or orthogroups, which
+  pasted identifiers carry the term themselves and which through their orthologues, and whether it is
+  significant. The Provenance sheet adds fingerprints of the pasted lists and of the GOA files, the
+  run's warnings, and the identifiers that did not enter the test, each with its reason.
+- **Clearer evidence.** The evidence chips count the proteins behind each term, including their
+  annotations to more specific terms.
 
-### Added
-- The results Excel lists the proteins (or orthogroups, and the pasted identifiers behind each) of
-  every term, in new columns after the existing ones.
-- Counted per orthogroup, the results Excel says which pasted identifiers are annotated to each term
-  themselves and which get it through their orthologues only; the table shows the two counts.
-- Provenance: a SHA-256 of the pasted background in its order, which per-orthogroup permutations
-  depend on.
-- The results Excel has a `significant` column, and the Provenance sheet the run's warnings and the
-  scope of "Use all GOA files". The table's CSV/TSV export adds the raw p-value, `p_hypergeom` and
-  `significant`.
-- The GO Excel says in its Meta sheet which orthogroup cells it had to cut.
-- The results file records a SHA-256 of the pasted foreground and lists the identifiers not tested,
-  with their reason, in a sheet of their own.
-- Validation README: how recovery with a species hidden depends on the kind of donor annotations,
-  and that the order of the pasted background can move terms near the threshold.
-- Error codes (`ERR_…`) for every error of the Gene Ontology page.
-- Provenance: the smallest q a per-orthogroup run can reach (the floor set by the number of
-  permutations, explained in `docs/ADVANCED.md`), and the SHA-256 of each GOA file. Each history run
-  keeps the fingerprint of the GOA files used with it, and the page says when a new download differs.
+### Improved
+- Each run is tied to the sets and the analysis on screen: a set changed after loading, sets loaded
+  before a new GOA download, or GO tables built for another analysis ask to be loaded again. After
+  updating, download the GOA files once more for an open analysis.
+- Very large orthogroups (more than about 1,200 proteins of one species) are read in full.
+- Species matching uses the proteome each species came from, compares whole words and reads
+  "Candidatus" names by their binomial; the match table shows the proteome ID.
+- External Uploads, the Preselected Dataset and History runs show their own provenance.
+- Moving between the Protein Analysis and Gene Ontology views keeps an uploaded analysis.
+- Notes on what expanding only the foreground does, on why no term is significant per orthogroup, and
+  on identifiers in more than one proteome or orthogroup; a line above Run says what the run will use.
+- Figure 2 counts proteomes and species; the UpSet filter summary reads as one sentence; the
+  OrthoFinder log shows paths relative to the application.
+- Error codes for every message of the Gene Ontology page.
+- The table's CSV/TSV export adds the raw and hypergeometric p-values and the significance flag.
+- Application data (taxonomy cache, run records) is kept out of the installation and proteome folders.
+
+### Documentation
+- Validation README: what recovery through orthologues depends on, and how the order of a pasted
+  background can move terms close to the threshold.
 
 ### Removed
-- Code and files nothing used: the legacy `/download` and `/download_upset_data` routes (the
-  application uses `/stream_download` and `/download_figure_data`), three unused helpers in
-  `app.py`, the empty `orthogather/routes` package, 29 error-catalogue entries that were never
-  raised (some with outdated hints; a test now checks that every entry is used), an unused image
-  and two outdated end-to-end scripts in `tools/`.
-- The guided Conda scripts (`installers/install_orthogather_mac.sh`,
-  `installers/install_orthogather_wsl.sh`) and the Conda launchers (`installers/start_orthogather.sh`,
-  `installers/Start_Orthogather.command`): they repeated what the installers and the Conda
-  commands of the README and the installation guide do.
+- Unused code, routes and files, and the guided Conda scripts (the installers and the README cover
+  them).
 
 ## 2.2.0 (2026-10-22)
 
-Fixes from the October 2026 audit and review. The default analysis (per-protein counting against a
-pasted background, as in the paper) gives exactly the same results as 2.1.0 and 2.1.1: the worked
-example still gives 21 and 1 enriched terms with the same q-values. A fresh installation of 2.1.x
-picked up statsmodels 0.15, with which every GO enrichment fails; update to this version.
+Recommended for every installation: the dependencies are now pinned, including statsmodels 0.14.6,
+which GOATOOLS 1.6.4 requires. The worked example gives the same results as 2.1.0 (21 and 1 enriched
+terms, same q-values); per-orthogroup and "Use all GOA files" analyses differ from 2.1.x.
 
-### Fixed
-- Proteome download: proteomes other than reference proteomes are no longer in UniProtKB, so their
-  download came back empty. They are now downloaded from UniParc, with UniParc identifiers; the
-  download log says so, the number of sequences is checked against UniProt's count, and the
-  provenance file records where each proteome came from. Such proteomes join the orthogroups but have
-  no GO annotation, and the GOA table no longer offers them the file of another proteome of their taxon.
-- Per-orthogroup counting: an orthogroup is in the foreground when it contains a foreground
-  protein, so large families came out enriched by chance (77% of random foregrounds in a
-  simulation). Its p-values now come from a permutation test that shuffles the foreground among the
-  background proteins (`p_hypergeom` keeps the statistic), and proteins in no orthogroup count as
-  units of their own instead of being dropped. Identifiers are read from both `db|ACC|NAME` and bare
-  FASTA headers.
-- "Use all GOA files": the universe is the annotated proteome of the species the foreground comes
-  from, not of every species with a GOA file; pooling species made any function commoner in the
-  foreground's species look enriched (42.5% of random foregrounds). The provenance sheet records
-  the background used.
-- "Single-copy only" removed every orthogroup: it looked for the single-copy list in a folder that
-  was never set. It now reads the active analysis (OrthoFinder's list, or the gene counts), and an
-  expansion that leaves no single-copy orthogroup is reported instead of returning an empty set.
-- OrthoFinder: a run that fails, or whose output is incomplete, is reported as failed and is not
-  saved; results left by an earlier attempt are removed before each run, so they can no longer be
-  taken for the new one. A missing OrthoFinder installation gives a clear message.
-- Pasted identifiers: the foreground, the background and the UniProt filter of Figures 5 and 6
-  read FASTA headers, with or without their sequences, as the Gene Ontology page said they did;
-  lower-case accessions are converted to upper case and isoform suffixes are removed with a
-  warning. All of these used to be dropped in silence. The results list every pasted foreground
-  identifier that did not enter the test with the reason (not found, not in the background, no GO
-  annotation, left out by the expansion), and the coverage note no longer advises expanding to
-  orthogroups.
-- Expanded sets are always counted per orthogroup. Counted per protein, every paralogue of a family
-  was a separate observation, and random foregrounds gave a significant term every time; the
-  "Per protein" option is disabled while either set is expanded, and the results say why.
-- "Use all GOA files" counted per orthogroup is the whole proteome of the foreground's species in
-  the analysis, each protein taking part through its orthogroup, with the annotations of every GOA
-  file: the same as pasting that proteome as the background and expanding it. It now works for a
-  species without a GOA file (it used to fall back to per-protein counting).
-- Per-orthogroup counting: the population is limited to the orthogroups of the measured proteins;
-  orthogroups that no measured protein belongs to inflated the population counts.
-- OrthoXML: when most identifiers in an uploaded file are not UniProt accessions (OMA, OrthoDB and
-  Ensembl write their own), the results page says that GO enrichment and the protein filter will
-  not find them.
-- Clearer messages when nothing can be tested: a species without a GOA file, or a background
-  without annotations, now points to per-orthogroup counting or expansion.
-- Gene Ontology page, per-orthogroup counting: the coverage banner showed the proteins of the
-  expanded sets, and for a species without a GOA file it read "0% of your foreground ... with GO
-  annotations" while the test ran on most of it. It now shows the pasted proteins that entered the
-  test and the orthogroups they were counted as.
-- The run summary keeps the number of significant terms when notes or warnings are shown, and a run
-  that fails hides the results of the previous one instead of leaving them on screen.
-- "Single-copy only" acts when an expanded set is loaded; changed afterwards, it was ignored without
-  a word. The run now asks to load the sets again, and the option is available only while a set is
-  expanded.
-- A foreground or background that cannot be loaded shows the reason (for example, that none of its
-  orthogroups is single-copy) instead of "Error saving Foreground".
-- Per-orthogroup counting: the evidence codes shown for a term count the annotated background
-  proteins of its orthogroups (they counted every member, and missed proteins in no orthogroup).
-- The `Provenance` sheet of the results file also records whether each set was expanded, the
-  orthogroup filter, the display threshold, the maximum number of terms and the GOATOOLS version.
-- `installers/install_orthogather_wsl.sh` installs from `environment.yml`; it installed unpinned
-  packages.
-- The installers, and the Windows updater, install the latest published release instead of the
-  tip of the `main` branch, so every installation is a tested version archived on Zenodo. The
-  Windows updater also brings the Conda environment to that release's versions.
-- Installation: GOATOOLS 1.6.4 fails with statsmodels 0.15, which a new installation picked up,
-  so every GO enrichment of a fresh installation stopped with an error. The dependencies in
-  `environment.yml` and `requirements.txt` are now pinned to the versions the tests and the worked
-  example were verified with, statsmodels 0.14.6 included; the pinned environment installs on
-  macOS (Apple silicon and Intel) and Linux.
+### Highlights
+- **Per-orthogroup counting with permutation p-values** that allow for family size; proteins in no
+  orthogroup count as units of their own, and expanded sets are always counted per orthogroup.
+- **Non-reference proteomes** are downloaded from UniParc, as UniProtKB no longer distributes them;
+  their size is checked against UniProt and their source recorded.
+- **"Use all GOA files"** takes the proteome of the foreground's species, and counted per orthogroup it
+  works for a species without a GOA file.
+- **Pasted lists** accept FASTA headers and sequences, lower-case accessions and isoforms, and the
+  results list every identifier that did not enter the test, with its reason.
+- **Validation** (`docs/validation/`): scripts and data that reproduce the worked example (35 values)
+  and test random foregrounds, a species with hidden annotations and 1,296 combinations of settings;
+  GitHub Actions runs the tests and the example on Linux and macOS.
+
+### Improved
+- "Single-copy only" reads the active analysis, reports when no single-copy orthogroup remains, and
+  asks to load the sets again when it is changed afterwards.
+- OrthoFinder runs that fail or end incomplete are reported and not saved; a missing installation
+  gives a clear message.
+- Per-orthogroup counting limits the population to the orthogroups of the measured proteins.
+- OrthoXML uploads without UniProt accessions get a note.
+- Coverage banner, run summary and error messages; the Provenance sheet also records the expansion,
+  the orthogroup filter, the display threshold, the maximum number of terms and the GOATOOLS version.
+- The installers install the latest published release, and the Windows updater brings the Conda
+  environment to its versions.
 
 ### Documentation
-- README: the example's peak memory is about 1.7 GB, of which about 1.1 GB is the application's
-  baseline (it said about 1 GB).
-- README, `docs/ADVANCED.md`, the tutorial and the Gene Ontology page describe per-orthogroup
-  counting, expansion and "Use all GOA files" as they now work: expanding the foreground tests the
-  pasted proteins through their orthogroups, and expanding the background is what brings in the
-  annotations of orthologues.
-- Tutorial: the annotation overview counts proteins with a GO term (it described the earlier
-  species-level estimate), and the list of outgoing connections includes the taxonomy lookup, the
-  catalogue update check and the plotting libraries.
-- Home page: 28,475 is the number of taxa with a GO annotation file (it said species). The species
-  picker says that a non-reference proteome has no GO annotation.
-
-### Validation
-- `docs/validation/`: scripts and results that check the statistics on data where the answer is
-  known, with every input in the repository (the GOA files of the worked example are included):
-  the 35 numbers of the worked example, random foregrounds for every setting, a species with its
-  annotations hidden (35 of 40 *E. coli* processes recovered through orthologues), and every
-  combination of the Gene Ontology settings (1,296, no failure).
-- GitHub Actions runs the test suite and the worked-example check on Linux and macOS on every change.
-
-### Tests
-- `tests/test_enrichment_safeguards.py`: calibration and power of the per-orthogroup permutation
-  test, identifier parsing, GOA files per species, single-copy orthogroups and OrthoFinder failures.
-- `tests/test_review_input_ids.py`: reading pasted identifiers and FASTA text, and the reason
-  reported for each foreground identifier that is not tested.
-- `tests/test_review_expansion_counting.py`: expanded sets counted per orthogroup, and "Use all
-  GOA files" equal to the expanded proteome, with and without a GOA file.
-- `tests/test_review_orthoxml_ids.py`: the note for OrthoXML files without UniProt accessions.
-- `tests/test_review_final_screen.py`: the per-orthogroup banner, the orthogroup filter changed after
-  loading, and the per-orthogroup evidence breakdown.
-- `tests/test_go_combinations.py`: 144 combinations of the Gene Ontology settings through the real
-  routes, each checked against the rules every analysis must meet (the full 1,296 with
-  `OG_FULL_MATRIX=1`).
+- README, `docs/ADVANCED.md`, the tutorial and the Gene Ontology page describe per-orthogroup counting
+  and expansion; README memory figures; the home page counts taxa with a GO annotation file.
 
 ## 2.1.1 (2026-10-18)
 
@@ -264,8 +118,8 @@ Not released on its own; its changes are part of 2.2.0. Text and documentation c
 Version described in the preprint (Zenodo: [10.5281/zenodo.22738813](https://doi.org/10.5281/zenodo.22738813)).
 
 ### Changed
-- Gene Ontology enrichment corrected. The foreground and the background are both restricted to
-  the annotated background, so the two sides of the test are symmetric, and the annotated and
+- Gene Ontology enrichment: the foreground and the background are both restricted to the
+  annotated background, so the two sides of the test are symmetric, and the annotated and
   submitted counts are both reported.
 - One-sided Fisher's exact test for over-representation, replacing the two-sided GOATOOLS default.
 - Annotations are propagated through `is_a` and `part_of`, and annotations with the `NOT`
