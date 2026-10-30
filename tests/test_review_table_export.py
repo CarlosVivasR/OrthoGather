@@ -31,3 +31,9 @@ def test_the_run_summary_counts_the_identifiers_the_server_read():
     assert "loadedCounts.fg = js.input?.n_ids" in PAGE
     assert "loadedCounts.bg = js.input?.n_ids" in PAGE
     assert re.search(r"const n = loadedCounts\[which\] \?\?", PAGE)
+
+
+def test_the_columns_of_the_table_export_keep_their_places():
+    cols = [c.strip().strip('"') for c in re.search(r'const cols = \[([^\]]+)\];', PAGE).group(1).split(",")]
+    assert cols[:11] == ["GO", "name", "namespace", "direction", "depth", "study_count", "study_n",
+                         "pop_count", "pop_n", "p_fdr_bh", "neg_log10_fdr"]
