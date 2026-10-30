@@ -4708,29 +4708,38 @@ def gene_ontology_analysis():
                 # fingerprint pins the annotations this run used.
                 prov_rows.append(("GOA files (SHA-256)", "; ".join(
                     f"{fn}: {rec.get('sha256')}" for fn, rec in sorted(g["files"].items()))))
+            # Version-drift guard: the OBO and the GOA files are downloaded
+            # independently. If the GOA references a GO release newer/older than the
+            # loaded OBO, a few terms silently drop from the testable universe.
+            try:
+                _obo_v = (onto or {}).get("data_version")
+                _goa_v = g.get("go_version")
+                if isinstance(_goa_v, list):
+                    _goa_v = _goa_v[0] if _goa_v else None
+                # The OBO says "releases/2026-07-26"; the GOA header gives the full
+                # purl ".../releases/2026-07-26/extensions/go-plus.ofn". Compare the
+                # release dates, not the strings, or every run would be flagged.
+                _date = lambda v: (re.search(r"\d{4}-\d{2}-\d{2}", str(v)) or [str(v)])[0]
+                if _obo_v and _goa_v and _date(_obo_v) != _date(_goa_v):
+                    warnings.append(
+                        f"GO ontology version ({_obo_v}) differs from the GOA GO-version "
+                        f"({_goa_v}); a few annotations referencing terms outside the loaded "
+                        f"ontology may be dropped.")
+            except Exception:
+                pass
+            if fg_in_bg and len(fg_in_bg) < 5:
+                warnings.append(
+                    f"Only {len(fg_in_bg)} foreground unit(s) entered the test — "
+                    f"statistical power is very low; treat any result as exploratory.")
+            if bg_mode == "goa_all":
+                prov_rows.append(("'Use all GOA files' universe (goa_all_scope)", goa_all_scope))
+            # The run's warnings, so the file says what the page said: some
+            # (an unsuitable universe, a low-power test) change how to read it.
+            prov_rows.extend(("Warning", w) for w in warnings)
             pd.DataFrame(prov_rows, columns=["key", "value"]).to_excel(
                 xw, sheet_name="Provenance", index=False)
         logging.info(f"[GO] 📑 Excel generated: {out_xlsx}")
 
-        # Version-drift guard: the OBO and the GOA files are downloaded
-        # independently. If the GOA references a GO release newer/older than the
-        # loaded OBO, a few terms silently drop from the testable universe.
-        try:
-            _obo_v = (onto or {}).get("data_version")
-            _goa_v = g.get("go_version")
-            if isinstance(_goa_v, list):
-                _goa_v = _goa_v[0] if _goa_v else None
-            # The OBO says "releases/2026-07-26"; the GOA header gives the full
-            # purl ".../releases/2026-07-26/extensions/go-plus.ofn". Compare the
-            # release dates, not the strings, or every run would be flagged.
-            _date = lambda v: (re.search(r"\d{4}-\d{2}-\d{2}", str(v)) or [str(v)])[0]
-            if _obo_v and _goa_v and _date(_obo_v) != _date(_goa_v):
-                warnings.append(
-                    f"GO ontology version ({_obo_v}) differs from the GOA GO-version "
-                    f"({_goa_v}); a few annotations referencing terms outside the loaded "
-                    f"ontology may be dropped.")
-        except Exception:
-            pass
 
         # -------------------------------
         # PER-TERM EVIDENCE BREAKDOWN (for table chips in the UI)
@@ -4820,10 +4829,6 @@ def gene_ontology_analysis():
         total_sig = sum(1 for r in (bp_results + cc_results + mf_results)
                         if r.GO in _sig_ids)
         foreground_units = len(fg_in_bg)
-        if foreground_units and foreground_units < 5:
-            warnings.append(
-                f"Only {foreground_units} foreground unit(s) entered the test — "
-                f"statistical power is very low; treat any result as exploratory.")
         notice = None
         if counting_mode == 'per_orthogroup' and total_sig == 0:
             notice = (
