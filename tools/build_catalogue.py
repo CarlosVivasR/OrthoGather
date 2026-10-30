@@ -54,6 +54,12 @@ GOA_BASE = "https://ftp.ebi.ac.uk/pub/databases/GO/goa/proteomes/"
 PROTEOME2TAXID_URL = GOA_BASE + "proteome2taxid"
 UNIPROT_SEARCH = "https://rest.uniprot.org/proteomes/search"
 
+# UniProt proteome types, as the proteomes API names them. Since release 2026_03 the API
+# no longer accepts the old numeric tiers (1=Reference, 2=Other, 3=Redundant,
+# 4=Excluded): ``proteome_type:1`` returns nothing. The numbers still work in --types.
+PROTEOME_TYPES = ("REFERENCE", "NON_REFERENCE", "EXCLUDED")
+_LEGACY_TIERS = {"1": "REFERENCE", "2": "NON_REFERENCE", "4": "EXCLUDED"}
+
 MAX_RETRIES = 5
 TIMEOUT = 120
 
@@ -200,17 +206,17 @@ CURSOR_PATH = str(JSON_PATH) + ".full.cursor"
 
 
 def fetch_reference_upids() -> set:
-    """Authoritative set of UniProt **reference** proteome ids (``proteome_type:1``).
+    """Authoritative set of UniProt **reference** proteome ids (``proteome_type:REFERENCE``).
 
     We classify ``type`` from membership in THIS set, not from the per-object
     ``proteomeType`` string — that string is "Reference and representative
     proteome" for some reference proteomes but plain "Representative proteome" for
     others, so a substring check silently mislabels ~33 K reference proteomes.
     """
-    url = UNIPROT_SEARCH.replace("/search", "/stream") + "?query=proteome_type%3A1&format=list"
+    url = UNIPROT_SEARCH.replace("/search", "/stream") + "?query=proteome_type%3AREFERENCE&format=list"
     text = get_with_retries(url).text
     ids = {line.strip() for line in text.splitlines() if line.strip()}
-    print(f"  reference proteomes (proteome_type:1): {len(ids)}")
+    print(f"  reference proteomes (proteome_type:REFERENCE): {len(ids)}")
     return ids
 
 
@@ -238,7 +244,7 @@ def _parse_proteome(r: dict, reference_ids: set) -> dict:
     return {
         "label": f"{name}{alt_part} [{upid}]" if name else (upid or ""),
         "Proteome Id": upid,
-        # Schema keeps "reference"/"non-reference"; reference ⇔ UniProt proteome_type:1.
+        # Schema keeps "reference"/"non-reference"; reference ⇔ UniProt proteome_type:REFERENCE.
         "type": "reference" if upid in reference_ids else "non-reference",
         "taxon_id": str(taxid) if taxid is not None else "",
         "protein_count": r.get("proteinCount"),
@@ -316,24 +322,46 @@ def uniprot_release() -> tuple:
     return (r.headers.get("x-uniprot-release"), r.headers.get("x-uniprot-release-date"))
 
 
-def build_full(types=(1, 2, 3, 4), limit=None, resume=False) -> tuple:
-    """Assemble the catalogue from UniProt + EBI GOA, restricted to the given UniProt
-    proteome-quality tiers (1=Reference, 2=Other/representative, 3=Redundant,
-    4=Excluded). Returns (catalogue, stats).
+def parse_types(text: str) -> tuple:
+    """Read --types: UniProt proteome type names, or the old numeric tiers 1, 2 and 4.
 
-    Redundant/Excluded tiers are near-identical duplicates and excluded low-quality
-    assemblies — keeping only 1+2 yields a clean catalogue with the SAME GOA-taxon
-    coverage (GOA is keyed by taxid, covered by the reference/representative tiers).
+    UniProt has no Redundant type any more, so tier 3 is rejected like any unknown name.
+
+    >>> parse_types("reference, Non_Reference")
+    ('REFERENCE', 'NON_REFERENCE')
+    >>> parse_types("1,2,4,1")
+    ('REFERENCE', 'NON_REFERENCE', 'EXCLUDED')
+    """
+    out = []
+    for t in (t.strip().upper() for t in text.split(",")):
+        if not t:
+            continue
+        t = _LEGACY_TIERS.get(t, t)
+        if t not in PROTEOME_TYPES:
+            raise ValueError(t)
+        if t not in out:
+            out.append(t)
+    return tuple(out)
+
+
+def build_full(types=PROTEOME_TYPES, limit=None, resume=False) -> tuple:
+    """Assemble the catalogue from UniProt + EBI GOA, restricted to the given UniProt
+    proteome types (REFERENCE, NON_REFERENCE, EXCLUDED). Returns (catalogue, stats).
+
+    EXCLUDED holds the proteomes UniProt sets aside, such as low-quality assemblies —
+    keeping REFERENCE + NON_REFERENCE yields a clean catalogue (GOA is keyed by taxid,
+    covered by the reference proteomes).
     """
     print("=== UniProt release ===")
     release, release_date = uniprot_release()
     print(f"  {release} ({release_date})")
 
-    # UniProt query for the requested tiers, e.g. "(proteome_type:1) OR (proteome_type:2)".
+    # UniProt query for the requested types, e.g.
+    # "(proteome_type:REFERENCE) OR (proteome_type:NON_REFERENCE)".
     query = " OR ".join(f"(proteome_type:{t})" for t in types)
-    print(f"  proteome tiers: {list(types)}  →  query: {query}")
+    print(f"  proteome types: {list(types)}  →  query: {query}")
 
-    print("\n=== Reference proteome set (proteome_type:1) ===")
+    print("\n=== Reference proteome set (proteome_type:REFERENCE) ===")
     reference_ids = fetch_reference_upids()
 
     print("\n=== EBI GOA lookup (taxid → url/version/size) ===")
@@ -400,10 +428,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Build/refresh the proteome catalogue.")
     ap.add_argument("--full", action="store_true",
                     help="Full rebuild from UniProt + EBI (slow; stores per-proteome and per-GOA versions).")
-    ap.add_argument("--types", default="1,2",
-                    help="With --full: comma-separated UniProt proteome tiers to include "
-                         "(1=Reference, 2=Other/representative, 3=Redundant, 4=Excluded). "
-                         "Default 1,2 — a clean catalogue with full GOA-taxon coverage.")
+    ap.add_argument("--types", default="REFERENCE,NON_REFERENCE",
+                    help="With --full: comma-separated UniProt proteome types to include "
+                         "(REFERENCE, NON_REFERENCE, EXCLUDED; the old tiers 1, 2 and 4 also "
+                         "work). Default REFERENCE,NON_REFERENCE — a clean catalogue.")
     ap.add_argument("--resume", action="store_true",
                     help="With --full: resume an interrupted run from its checkpoint.")
     ap.add_argument("--limit", type=int, default=None,
@@ -414,9 +442,13 @@ def main() -> int:
 
     if args.full:
         try:
-            types = tuple(int(t) for t in args.types.split(",") if t.strip())
-        except ValueError:
-            print(f"ERROR: --types must be comma-separated integers, got {args.types!r}")
+            types = parse_types(args.types)
+        except ValueError as exc:
+            print(f"ERROR: unknown proteome type {exc} in --types; use "
+                  f"{', '.join(PROTEOME_TYPES)} (UniProt has no Redundant type any more).")
+            return 1
+        if not types:
+            print("ERROR: --types is empty.")
             return 1
         catalogue, stats = build_full(types=types, limit=args.limit, resume=args.resume)
         if not catalogue:

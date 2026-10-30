@@ -134,6 +134,27 @@ def test_parse_proteome_reference_by_membership():
     assert e2["type"] == "non-reference"    # not in set, despite "Reference …" string
 
 
+def test_proteome_types_use_uniprot_names(monkeypatch):
+    """UniProt 2026_03 stopped accepting proteome_type:1 (it returns nothing), so the
+    queries use the type names; the old numbers 1, 2 and 4 still work in --types."""
+    mod = _load_build_module()
+    assert mod.parse_types("reference, Non_Reference") == ("REFERENCE", "NON_REFERENCE")
+    assert mod.parse_types("1,2,4,1") == ("REFERENCE", "NON_REFERENCE", "EXCLUDED")
+    assert mod.parse_types(" , ") == ()
+    for bad in ("3", "redundant", "x"):
+        with pytest.raises(ValueError):
+            mod.parse_types(bad)
+
+    urls = []
+
+    class _Resp:
+        text = "UP000000001\nUP000000002\n"
+
+    monkeypatch.setattr(mod, "get_with_retries", lambda url, *a, **k: urls.append(url) or _Resp())
+    assert mod.fetch_reference_upids() == {"UP000000001", "UP000000002"}
+    assert "proteome_type%3AREFERENCE" in urls[0]
+
+
 def test_goa_index_parsing():
     mod = _load_build_module()
     html = (
