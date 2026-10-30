@@ -251,6 +251,14 @@ ERRORS: Dict[str, ErrorSpec] = {
         http_code=404,
     ),
 
+    "ERR_GO_ANALYSIS_EXCEL_STALE": ErrorSpec(
+        message="The GOA files were downloaded for another analysis",
+        hint="Click 'Download GOA files' for the analysis open now; the orthogroups of the "
+             "previous one would be used otherwise.",
+        category="data",
+        http_code=409,
+    ),
+
     "ERR_EXCEL_NOT_GENERATED": ErrorSpec(
         message="The Excel file does not exist yet",
         hint="Run the GO analysis first (Foreground → Background → Run GO enrichment).",

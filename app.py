@@ -3109,11 +3109,44 @@ def download_goa_files():
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
+_STAMP_CACHE = {}
+
+
+def _go_excel_stale():
+    """Whether Gene_Ontology_Analysis.xlsx was built for another analysis than
+    the one open now. It is one file in RESULTS_FOLDER: opening another analysis
+    (from the history or an upload) leaves the previous one's, and loading the
+    sets read its orthogroups. An Excel without a record (before 2.2.1) counts
+    as another analysis's."""
+    from orthogather.core.excel import analysis_fingerprint, analysis_stamp_path
+    excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
+    fp = session.get("folder_path")
+    tsv = os.path.join(fp, "Orthogroups.tsv") if fp else None
+    try:
+        with open(analysis_stamp_path(excel_path)) as f:
+            stamp = json.load(f).get("analysis")
+        mapping_path = os.path.join(fp, "goa_mapping.json")
+        mapping = {}
+        if os.path.isfile(mapping_path):
+            with open(mapping_path) as f:
+                mapping = json.load(f)
+        st = os.stat(tsv)
+        key = (tsv, st.st_mtime_ns, st.st_size, json.dumps(mapping, sort_keys=True))
+        if key not in _STAMP_CACHE:
+            _STAMP_CACHE.clear()
+            _STAMP_CACHE[key] = analysis_fingerprint(tsv, mapping)
+        return _STAMP_CACHE[key] != stamp
+    except Exception:
+        return True
+
+
 @app.route("/download_go_excel")
 def download_go_excel():
     output_excel_path = os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx")
     if not os.path.exists(output_excel_path):
         return respond_error("ERR_EXCEL_NOT_GENERATED")
+    if _go_excel_stale():
+        return respond_error("ERR_GO_ANALYSIS_EXCEL_STALE", where="download_go_excel")
     # Descriptive filename: include species count + ISO date so the user can
     # tell several downloads apart on disk.
     from orthogather.utils.filenames import descriptive_filename
@@ -3325,6 +3358,9 @@ def _load_foreground():
                            error_code="ERR_GO_ANALYSIS_EXCEL_MISSING", where="foreground_analysis",
                            hint="Click 'Download GOA files' first.",
                            code=404)
+        if _go_excel_stale():
+            logging.error("[FG][ERR] Gene_Ontology_Analysis.xlsx belongs to another analysis")
+            return respond_error("ERR_GO_ANALYSIS_EXCEL_STALE", where="foreground_analysis")
 
         logging.info("[FG] Loading sheets from Excel file ...")
         try:
@@ -3446,6 +3482,9 @@ def _load_background():
                            error_code="ERR_GO_ANALYSIS_EXCEL_MISSING", where="background_analysis",
                            hint="Click 'Download GOA files' first.",
                            code=404)
+        if _go_excel_stale():
+            logging.error("[BG][ERR] Gene_Ontology_Analysis.xlsx belongs to another analysis")
+            return respond_error("ERR_GO_ANALYSIS_EXCEL_STALE", where="background_analysis")
 
         try:
             initial_orthogroups = pd.read_excel(excel_path, sheet_name='Initial Groups')
@@ -3760,6 +3799,11 @@ def gene_ontology_analysis():
         bg_mode = session.get("background_mode")  # "goa_all" | "ids"
         goa_mapping = _read_goa_mapping()
 
+        if foreground and _go_excel_stale():
+            # The sets were loaded with the orthogroups of the analysis open
+            # then; another one is open now.
+            logging.error("[GO][ERR] Gene_Ontology_Analysis.xlsx belongs to another analysis")
+            return respond_error("ERR_GO_ANALYSIS_EXCEL_STALE", where="gene_ontology_analysis")
         if not foreground:
             logging.error("[GO][ERR] ❌ Foreground missing")
             failed = session.get("foreground_load_error")
@@ -4811,6 +4855,8 @@ def generate_go_image():
         if not os.path.exists(excel_path):
             return respond_error("ERR_GO_ANALYSIS_EXCEL_MISSING",
                                   where="generate_go_image")
+        if _go_excel_stale():
+            return respond_error("ERR_GO_ANALYSIS_EXCEL_STALE", where="generate_go_image")
 
         from orthogather.core.excel import compute_annotation_distribution
         try:
