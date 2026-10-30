@@ -3318,13 +3318,25 @@ def _replace_set(name, load):
     for key in _SET_SESSION_KEYS[name]:
         session.pop(key, None)
     session.pop(f"{name}_load_error", None)
+    session.pop(f"{name}_excel_stamp", None)
     session.pop(f"{name}_fingerprint", None)
     resp, code = load()
     if code >= 400:
         session[f"{name}_load_error"] = (resp.get_json(silent=True) or {}).get("message") or "unknown error"
     else:
         session[f"{name}_fingerprint"] = _set_fingerprint(name, request.get_json(silent=True))
+        session[f"{name}_excel_stamp"] = _go_excel_stamp()
     return resp, code
+
+
+def _go_excel_stamp():
+    """The GO Excel the sets are built from, as last written: downloading the
+    GOA files again rewrites it, and a set loaded before then is out of date."""
+    try:
+        st = os.stat(os.path.join(RESULTS_FOLDER, "Gene_Ontology_Analysis.xlsx"))
+        return [st.st_mtime_ns, st.st_size]
+    except OSError:
+        return None
 
 
 @app.route('/foreground_analysis', methods=['POST'])
@@ -3777,6 +3789,17 @@ def gene_ontology_analysis():
                                    hint=(f"Its box or options changed after it was loaded: click "
                                          f"'Load {name}' again."),
                                    code=400)
+        # The GOA files downloaded again after a set was loaded rewrite the
+        # Excel the set was built from (its orthogroups and annotated members).
+        for name in ("foreground", "background"):
+            stamp = session.get(f"{name}_excel_stamp")
+            if stamp and stamp != _go_excel_stamp():
+                return respond(False, f"The GOA files were downloaded again after the {name} "
+                                      f"was loaded",
+                               error_code="ERR_SETS_CHANGED", where="gene_ontology_analysis",
+                               hint="Load the foreground and the background again: they were "
+                                    "built from the previous download.",
+                               code=400)
         # Isoform suffixes removed when the lists were loaded.
         warnings.extend(f"Foreground: {w}" for w in session.get("foreground_id_warnings") or [])
         if session.get("background_mode") == "ids":

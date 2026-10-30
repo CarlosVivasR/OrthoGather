@@ -1156,6 +1156,8 @@
               throw new Error("GOA preparation did not complete");
             }
             refreshProvenancePanel();
+            // Sets loaded before this download were built from the previous one.
+            document.dispatchEvent(new CustomEvent("goa-downloaded"));
 
             if (textEl) textEl.textContent = "Computing annotation distribution…";
             const gen = await fetch("/generate_go_image", { method: "POST" });
@@ -1351,6 +1353,17 @@
         }
         updateRunState();
       }
+      document.addEventListener("goa-downloaded", () => {
+        ["fg", "bg"].forEach(which => {
+          if (loadedSets[which] === null) return;
+          const name = SET_LABEL[which];
+          showStatus(`${which}-msg`, "warning",
+            `The GOA files were downloaded again after the ${name} was loaded. ` +
+            `Click 'Load ${name}' to use the new files; Run is disabled until then.`);
+          loadedSets[which] = null;
+        });
+        updateRunState();
+      });
       fgTextArea?.addEventListener("input", () => markStale("fg"));
       fgCheckbox?.addEventListener("change", () => markStale("fg"));
       [bgTextArea, bgCheckbox, useGOACheck].forEach(el =>
