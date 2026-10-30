@@ -4829,11 +4829,26 @@ def gene_ontology_analysis():
             notice = (
                 f"Per-orthogroup counting tested {foreground_units} foreground "
                 f"unit{'s' if foreground_units != 1 else ''} (orthogroups, plus proteins in "
-                f"no orthogroup) and no term reached significance. Its p-values come from "
-                f"shuffling your foreground labels among the background proteins, so they "
-                f"allow for large families being hit by chance; terms that per-protein "
-                f"counting reports may rest on several paralogues of the same family."
+                f"no orthogroup) and no term reached significance. "
+                + ("Its p-values come from shuffling your foreground labels among the "
+                   "background proteins, so they allow for large families being hit by chance; "
+                   "terms that per-protein counting reports may rest on several paralogues of "
+                   "the same family." if n_perm else
+                   "With the two-sided test its p-values are hypergeometric and do not allow "
+                   "for family size.")
             )
+            # The smallest permutation p is 1/(B+1), so a term alone at it gets
+            # q = m/(B+1): with many terms or a strict threshold that floor can
+            # lie above the threshold, whatever the data.
+            floor_q = len(testable) / (n_perm + 1) if n_perm else 0
+            if floor_q >= p_value_threshold:
+                need = int(np.floor(floor_q / p_value_threshold)) + 1
+                notice += (
+                    f" With {len(testable)} terms tested and {n_perm:,} permutations, a term at "
+                    f"the smallest p-value reachable, 1/{n_perm + 1:,}, gets q = {floor_q:.2g}, "
+                    f"not below the threshold of {p_value_threshold:g}: a term can only reach "
+                    f"it if at least {need} terms share that p-value. A looser threshold or "
+                    f"fewer terms (a larger minimum term size) would let the strongest reach it.")
 
         # -------------------------------
         # FINAL RESPONSE
