@@ -3109,6 +3109,35 @@ def download_goa_files():
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
+_TSV_CELLS_CACHE = {}
+
+
+def _go_excel_sheet(excel_path, sheet):
+    """A sheet of the GO Excel with its orthogroup cells as written in
+    Orthogroups.tsv. An Excel cell holds at most 32,767 characters, and the
+    writer cuts longer ones: the members of a large family of one species
+    (more than ~1,200) were lost from the expansion. _go_excel_stale() ensures
+    the Excel was built from this Orthogroups.tsv, so its cells are the same
+    otherwise."""
+    df = pd.read_excel(excel_path, sheet_name=sheet)
+    fp = session.get("folder_path")
+    tsv = os.path.join(fp, "Orthogroups.tsv") if fp else None
+    if not tsv or not os.path.isfile(tsv) or "Orthogroup" not in df.columns:
+        return df
+    st = os.stat(tsv)
+    key = (tsv, st.st_mtime_ns, st.st_size)
+    if key not in _TSV_CELLS_CACHE:
+        _TSV_CELLS_CACHE.clear()
+        _TSV_CELLS_CACHE[key] = pd.read_csv(tsv, sep="\t", dtype=str).set_index("Orthogroup")
+    raw = _TSV_CELLS_CACHE[key]
+    cols = [c for c in df.columns if c in raw.columns]
+    if cols:
+        cells = raw.reindex(df["Orthogroup"].astype(str))[cols]
+        for c in cols:
+            df[c] = cells[c].to_numpy(dtype=object)
+    return df
+
+
 _STAMP_CACHE = {}
 
 
@@ -3376,8 +3405,8 @@ def _load_foreground():
 
         logging.info("[FG] Loading sheets from Excel file ...")
         try:
-            initial_orthogroups = pd.read_excel(excel_path, sheet_name='Initial Groups')
-            orthogroups_of_interest   = pd.read_excel(excel_path, sheet_name='Groups of Interest')
+            initial_orthogroups = _go_excel_sheet(excel_path, 'Initial Groups')
+            orthogroups_of_interest   = _go_excel_sheet(excel_path, 'Groups of Interest')
         except Exception as e:
             logging.error(f"[FG][ERR] Failed reading sheets: {e}")
             return respond(False, f"Malformed Excel file: {e}",
@@ -3499,8 +3528,8 @@ def _load_background():
             return respond_error("ERR_GO_ANALYSIS_EXCEL_STALE", where="background_analysis")
 
         try:
-            initial_orthogroups = pd.read_excel(excel_path, sheet_name='Initial Groups')
-            orthogroups_of_interest   = pd.read_excel(excel_path, sheet_name='Groups of Interest')
+            initial_orthogroups = _go_excel_sheet(excel_path, 'Initial Groups')
+            orthogroups_of_interest   = _go_excel_sheet(excel_path, 'Groups of Interest')
         except Exception as e:
             logging.error(f"[BG][ERR] Failed reading sheets: {e}")
             return respond(False, f"Malformed Excel file: {e}",
@@ -4063,7 +4092,7 @@ def gene_ontology_analysis():
                 # Interest'): the measured proteins may belong to a species
                 # without annotations, and they reach the test through their
                 # orthogroup.
-                interest_df = pd.read_excel(excel_path, sheet_name='Initial Groups')
+                interest_df = _go_excel_sheet(excel_path, 'Initial Groups')
                 protein_to_ogs = defaultdict(set)
                 exclude_cols = {'Orthogroup', 'Annotation Percentage', 'Porcentaje de Anotación'}
                 for _, row in interest_df.iterrows():
