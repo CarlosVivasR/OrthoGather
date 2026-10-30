@@ -111,20 +111,22 @@ def parse_identifier_list(text_or_list) -> dict:
 
     Returns a dict with ``ids`` (in input order), ``changed`` (one
     ``{"input", "id", "changes"}`` per identifier that was rewritten),
-    ``duplicates``, ``headers`` and ``sequence_lines``.
+    ``duplicates``, ``headers``, ``sequence_lines`` and ``collisions`` (pairs of
+    different FASTA identifiers read as the same one, with that identifier).
 
     >>> r = parse_identifier_list(">sp|P12345|A_ECOLI Protein A OS=E. coli\\nMKVL\\nq67890 P12345")
     >>> r["ids"], r["duplicates"], r["headers"], r["sequence_lines"]
     (['P12345', 'Q67890'], 1, 1, 1)
     """
-    out = {"ids": [], "changed": [], "duplicates": 0, "headers": 0, "sequence_lines": 0}
+    out = {"ids": [], "changed": [], "duplicates": 0, "headers": 0, "sequence_lines": 0,
+           "collisions": []}
     if text_or_list is None:
         return out
     if isinstance(text_or_list, (list, tuple)):
         lines = [str(x) for x in text_or_list]
     else:
         lines = str(text_or_list).splitlines()
-    seen = set()
+    seen, first = set(), {}
     in_record = False
     for line in (l for chunk in lines for l in chunk.splitlines()):
         line = line.strip()
@@ -154,10 +156,17 @@ def parse_identifier_list(text_or_list) -> dict:
                 continue
             if changes:
                 out["changed"].append({"input": token, "id": acc, "changes": changes})
+            raw = token.strip().strip("\"'").lstrip(">")
             if acc in seen:
                 out["duplicates"] += 1
+                # Two different FASTA identifiers read as one: a format whose
+                # protein field this parser does not know would collapse a
+                # whole proteome this way.
+                if "fasta_header" in changes and first[acc] != raw and "|" in first[acc]:
+                    out["collisions"].append((first[acc], raw, acc))
                 continue
             seen.add(acc)
+            first[acc] = raw
             out["ids"].append(acc)
     return out
 

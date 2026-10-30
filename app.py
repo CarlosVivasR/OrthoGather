@@ -975,6 +975,14 @@ def _identifier_notes(parsed):
             f"Isoform suffix removed from {plural(len(iso), 'identifier')} ({examples}"
             f"{', …' if len(iso) > 3 else ''}). Proteomes and GOA files list the canonical "
             f"accession, so each isoform is counted as its canonical protein.")
+    clash = parsed.get("collisions") or []
+    if clash:
+        examples = "; ".join(f"{a} and {b} → {acc}" for a, b, acc in clash[:3])
+        warnings.append(
+            f"{plural(len(clash), 'identifier')} read as one already in the list ({examples}"
+            f"{'; …' if len(clash) > 3 else ''}), so only the first is kept. If they are different "
+            f"proteins, their headers have a form OrthoGather does not read: paste the protein "
+            f"identifiers themselves.")
     if changed("fasta_header"):
         notes.append(f"{plural(len(changed('fasta_header')), 'accession')} read from FASTA headers.")
     if changed("upper_case"):
