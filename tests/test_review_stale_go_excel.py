@@ -5,11 +5,10 @@ Gene_Ontology_Analysis.xlsx is one file in the results folder. Opening
 another analysis (from the history or an upload) left the previous one's, and
 loading the sets read its orthogroups: an expansion used the orthogroups of
 analysis A on analysis B. The Excel now records the analysis it was built
-for (Orthogroups.tsv and the GOA mapping), and every reader refuses another.
+for (its Orthogroups.tsv), and every reader refuses another.
 """
 from __future__ import annotations
 
-import json
 import shutil
 
 import pandas as pd
@@ -62,8 +61,10 @@ def test_the_same_analysis_in_another_folder_is_accepted(three_species, tmp_path
     assert c.post("/foreground_analysis", json={"uniprot_ids": REF[:5], "use_orthogroups": True}).status_code == 200
 
 
-def test_another_goa_mapping_is_another_analysis(three_species, tmp_path):
+def test_reopening_the_analysis_without_its_goa_mapping_is_accepted(three_species, tmp_path):
+    # Reopening a run from the history restores Orthogroups.tsv but not
+    # goa_mapping.json: still the analysis the Excel was built for.
     c = three_species
     b = _other_analysis(c, tmp_path, regroup=False)
-    (b / "goa_mapping.json").write_text(json.dumps({}))
-    assert c.post("/foreground_analysis", json={"uniprot_ids": REF[:5]}).status_code == 409
+    (b / "goa_mapping.json").unlink()
+    assert c.post("/foreground_analysis", json={"uniprot_ids": REF[:5]}).status_code == 200

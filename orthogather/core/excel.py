@@ -41,14 +41,15 @@ def analysis_stamp_path(output_excel_path: str) -> str:
     return output_excel_path + ".analysis.json"
 
 
-def analysis_fingerprint(tsv_path: str, species_to_goafile: dict) -> str:
-    """What the Excel is built from: the bytes of Orthogroups.tsv and the
-    species -> GOA file mapping."""
+def analysis_fingerprint(tsv_path: str) -> str:
+    """The analysis an Excel is built for: the bytes of its Orthogroups.tsv.
+    The GOA mapping is left out on purpose: reopening a run from the history
+    does not restore goa_mapping.json, and a new GOA download rewrites the
+    Excel anyway."""
     h = hashlib.sha256()
     with open(tsv_path, "rb") as f:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
-    h.update(json.dumps(species_to_goafile or {}, sort_keys=True).encode())
     return h.hexdigest()
 
 
@@ -258,7 +259,7 @@ def generate_go_excel(tsv_path: str, species_to_goafile: dict,
     # The Excel is one file in the results folder, shared by every analysis:
     # record which one it belongs to, so it is never read for another.
     with open(analysis_stamp_path(output_excel_path), "w") as f:
-        json.dump({"analysis": analysis_fingerprint(tsv_path, species_to_goafile),
+        json.dump({"analysis": analysis_fingerprint(tsv_path),
                    "orthogroups": os.path.abspath(tsv_path)}, f)
 
     logging.info(f"✅ GOA Excel saved to {output_excel_path}")

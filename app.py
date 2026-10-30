@@ -3162,16 +3162,11 @@ def _go_excel_stale():
     try:
         with open(analysis_stamp_path(excel_path)) as f:
             stamp = json.load(f).get("analysis")
-        mapping_path = os.path.join(fp, "goa_mapping.json")
-        mapping = {}
-        if os.path.isfile(mapping_path):
-            with open(mapping_path) as f:
-                mapping = json.load(f)
         st = os.stat(tsv)
-        key = (tsv, st.st_mtime_ns, st.st_size, json.dumps(mapping, sort_keys=True))
+        key = (tsv, st.st_mtime_ns, st.st_size)
         if key not in _STAMP_CACHE:
             _STAMP_CACHE.clear()
-            _STAMP_CACHE[key] = analysis_fingerprint(tsv, mapping)
+            _STAMP_CACHE[key] = analysis_fingerprint(tsv)
         return _STAMP_CACHE[key] != stamp
     except Exception:
         return True
