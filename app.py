@@ -4521,6 +4521,31 @@ def gene_ontology_analysis():
         # appear among the foreground/study proteins that carry that term. Per-OG
         # counting collapses to OG IDs, so the evidence breakdown uses the proteins
         # that contributed to that OG.
+        # A protein carries a term through an annotation to the term itself or
+        # to any term below it in the same aspect: the test propagates over
+        # is_a and part_of. Counting direct annotations only left most
+        # significant terms without chips, as if nothing supported them.
+        _upper = {}
+        def _terms_above(go):
+            if go not in _upper:
+                seen, todo = set(), ([godag[go]] if go in godag else [])
+                while todo:
+                    t = todo.pop()
+                    if t.id in seen:
+                        continue
+                    seen.add(t.id)
+                    todo.extend(t.parents)
+                    todo.extend(getattr(t, "relationship", {}).get("part_of", ()))
+                _upper[go] = seen
+            return _upper[go]
+
+        def _evidence_of(p, go_id, counts):
+            ns = _NS_OF(go_id)
+            for go, evs in id2evidence.get(p, {}).items():
+                if go_id in _terms_above(go) and _NS_OF(go) == ns:
+                    for ev in evs:
+                        counts[ev] += 1
+
         def evidence_breakdown_for_term(go_id, study_ids):
             counts = defaultdict(int)
             if og_perm is not None:
@@ -4528,12 +4553,10 @@ def gene_ontology_analysis():
                 # the evidence of the annotated background proteins behind them.
                 for og in study_ids:
                     for p in og_perm["members"].get(og, []):
-                        for ev in id2evidence.get(p, {}).get(go_id, []):
-                            counts[ev] += 1
+                        _evidence_of(p, go_id, counts)
             else:
                 for p in study_ids:
-                    for ev in id2evidence.get(p, {}).get(go_id, []):
-                        counts[ev] += 1
+                    _evidence_of(p, go_id, counts)
             return dict(counts)
 
         def serialise(res):
