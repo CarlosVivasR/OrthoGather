@@ -125,6 +125,13 @@ def split_species_name(fullname):
     """
     fullname = expand_species_alias(fullname)
     parts = fullname.split()
+    if len(parts) >= 3 and parts[0].lower() == "candidatus":
+        # "Candidatus" is a status, not the genus: the binomial is the next two
+        # words. UniProt labels write it or not ("Pelagibacter ubique (strain
+        # HTCC1062)"); the base read as "Candidatus Pelagibacter" matched
+        # another species of the genus.
+        parts = parts[1:]
+        fullname = " ".join(parts)
     base = " ".join(parts[:2]) if len(parts) >= 2 else fullname
     strain = " ".join(parts[2:]) if len(parts) > 2 else ""
     # Match the run of capital letters preceding the first digit so that
