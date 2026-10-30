@@ -4338,6 +4338,30 @@ def gene_ontology_analysis():
         # `Plotly.downloadImage` call, so the server-side PNG was no longer
         # consumed by any UI element. See git log for the original code.
 
+        # A protein carries a term through an annotation to the term itself or
+        # to any term below it in the same aspect: the test propagates over
+        # is_a and part_of. Counting direct annotations only left most
+        # significant terms without chips, as if nothing supported them.
+        _upper = {}
+        def _terms_above(go):
+            if go not in _upper:
+                seen, todo = set(), ([godag[go]] if go in godag else [])
+                while todo:
+                    t = todo.pop()
+                    if t.id in seen:
+                        continue
+                    seen.add(t.id)
+                    todo.extend(t.parents)
+                    todo.extend(getattr(t, "relationship", {}).get("part_of", ()))
+                _upper[go] = seen
+            return _upper[go]
+
+        def _carries(p, go_id):
+            """Whether protein p has an annotation of its own to go_id or below it."""
+            ns = _NS_OF(go_id)
+            return any(go_id in _terms_above(go) and _NS_OF(go) == ns
+                       for go in id2gos.get(p, ()))
+
         # -------------------------------
         # EXCEL OUTPUT
         # -------------------------------
@@ -4346,6 +4370,12 @@ def gene_ontology_analysis():
         pasted_in_unit = defaultdict(list)
         for p in (og_perm or {}).get("fg", []):
             pasted_in_unit[og_perm["unit_of"][p]].append(p)
+
+        def _pasted_split(r):
+            pasted = sorted(p for u in r.study_items for p in pasted_in_unit.get(u, []))
+            own = [p for p in pasted if _carries(p, r.GO)]
+            return own, [p for p in pasted if p not in own]
+
         with pd.ExcelWriter(out_xlsx) as xw:
             for ns, res in (("BP", bp_results), ("CC", cc_results), ("MF", mf_results)):
                 df = pd.DataFrame({
@@ -4390,6 +4420,11 @@ def gene_ontology_analysis():
                             "; ".join(f"{u}: {', '.join(pasted_in_unit.get(u, []))}"
                                       for u in sorted(r.study_items))
                             for r in res]
+                        # Which pasted identifiers carry the term themselves, and
+                        # which only through the annotations of their orthologues.
+                        split = [_pasted_split(r) for r in res]
+                        df["pasted_ids_annotated_themselves"] = [", ".join(o) for o, _ in split]
+                        df["pasted_ids_through_orthologues_only"] = [", ".join(h) for _, h in split]
                 df.to_excel(xw, sheet_name=ns, index=False)
             # Provenance + run settings, so a downloaded report is reproducible.
             prov = build_provenance()
@@ -4521,24 +4556,6 @@ def gene_ontology_analysis():
         # appear among the foreground/study proteins that carry that term. Per-OG
         # counting collapses to OG IDs, so the evidence breakdown uses the proteins
         # that contributed to that OG.
-        # A protein carries a term through an annotation to the term itself or
-        # to any term below it in the same aspect: the test propagates over
-        # is_a and part_of. Counting direct annotations only left most
-        # significant terms without chips, as if nothing supported them.
-        _upper = {}
-        def _terms_above(go):
-            if go not in _upper:
-                seen, todo = set(), ([godag[go]] if go in godag else [])
-                while todo:
-                    t = todo.pop()
-                    if t.id in seen:
-                        continue
-                    seen.add(t.id)
-                    todo.extend(t.parents)
-                    todo.extend(getattr(t, "relationship", {}).get("part_of", ()))
-                _upper[go] = seen
-            return _upper[go]
-
         def _evidence_of(p, go_id, counts):
             ns = _NS_OF(go_id)
             for go, evs in id2evidence.get(p, {}).items():
@@ -4590,6 +4607,9 @@ def gene_ontology_analysis():
                     "study_items": study_items,
                     "evidence_breakdown": evidence_breakdown_for_term(r.GO, study_items),
                 })
+                if og_perm is not None:
+                    own, through = _pasted_split(r)
+                    out[-1].update({"pasted_own": len(own), "pasted_through_orthologues": len(through)})
             return out
 
         # Persist the settings of THIS run so /download_go_enrichment_excel

@@ -2092,7 +2092,9 @@
             <td><span class="go-ns-pill" style="--ns-color:${NS_COLOR[r.namespace]}">${NS_LABEL[r.namespace]}</span></td>
             <td>${dirBadge(r.direction)}</td>
             <td class="num">${r.depth}</td>
-            <td class="num">${r.study_count}/${r.study_n}</td>
+            <td class="num">${r.study_count}/${r.study_n}${r.pasted_own != null
+              ? `<br><span class="go-own-split" title="Your pasted proteins in this term's orthogroups: how many are annotated to the term (or a term below it) themselves, and how many get it only through the annotations of their orthologues.">${r.pasted_own} own · ${r.pasted_through_orthologues} via orthologues</span>`
+              : ""}</td>
             <td class="num">${r.pop_count}/${r.pop_n}</td>
             <td class="num">${(r.neg_log10_fdr || 0).toFixed(2)}${ns
               ? ` <span class="go-ns-flag" title="FDR ${(+r.p_fdr_bh).toFixed(3)} does not reach the significance threshold of ${alpha}; this row is shown because the display threshold is looser.">n.s.</span>`
