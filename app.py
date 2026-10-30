@@ -3284,6 +3284,25 @@ def _orthogroup_members(groups, orthogroups):
             for acc in orthogroup_cell_accessions(cell)}
 
 
+def _ids_in_several_species(ids):
+    """A note on the pasted identifiers that are in the proteome of more than
+    one species of the analysis, or None. Two proteomes annotated with the same
+    identifiers (an old Prokka's default PROKKA_ prefix, for instance) give the
+    same identifier to different proteins: each is matched in all of them, so an
+    expansion takes the orthogroups of both. UniParc identifiers name identical
+    sequences and are handled at the run."""
+    by_species = _analysis_accessions_by_species(session.get("folder_path"))
+    several = [p for p in dict.fromkeys(ids) if not p.startswith("UPI")
+               and sum(p in accs for accs in by_species.values()) > 1]
+    if not several:
+        return None
+    examples = ", ".join(several[:5]) + (", ..." if len(several) > 5 else "")
+    return (f"{len(several)} identifier{'s are' if len(several) > 1 else ' is'} in the proteomes "
+            f"of more than one species ({examples}), so each is matched in all of them. Give each "
+            f"proteome its own identifiers (for example, its own locus-tag prefix) to keep them "
+            f"apart.")
+
+
 def _no_orthogroups(ids, where):
     """The error of an expansion that found no orthogroup. It names the
     identifiers, so a list from another proteome or ID system is recognisable."""
@@ -3380,6 +3399,9 @@ def _load_foreground():
         parsed = parse_identifier_list(data.get('uniprot_ids', []))
         uniprot_ids = parsed["ids"]
         id_warnings, id_notes = _identifier_notes(parsed)
+        shared_ids = _ids_in_several_species(uniprot_ids)
+        if shared_ids:
+            id_warnings.append(shared_ids)
         use_orthogroups = bool(data.get('use_orthogroups', False))
         single_copy_only = bool(data.get('single_copy_only', False))
         logging.info(f"[FG] Received UniProt IDs (n={len(uniprot_ids)}): {uniprot_ids}")
@@ -3507,6 +3529,9 @@ def _load_background():
         parsed = parse_identifier_list(data.get('custom_uniprot_ids', []))
         custom_uniprot_ids = parsed["ids"]
         id_warnings, id_notes = _identifier_notes(parsed)
+        shared_ids = _ids_in_several_species(custom_uniprot_ids)
+        if shared_ids:
+            id_warnings.append(shared_ids)
 
         logging.info(f"[BG] choice={choice} use_orthogroups={use_orthogroups} "
                      f"single_copy_only={single_copy_only} custom_ids={len(custom_uniprot_ids)}")
@@ -4106,9 +4131,11 @@ def gene_ontology_analysis():
                             protein_to_ogs[pid].add(og)
                 # A UniParc identifier names a sequence, so identical proteins of
                 # two strains that OrthoFinder placed apart give one identifier in
-                # two orthogroups. Each protein is one unit: the orthogroup with
-                # the highest ID, which is the one the row order of
-                # Orthogroups.tsv used to leave, now whatever that order is.
+                # two orthogroups; so do two proteomes annotated with the same
+                # identifiers (an old Prokka's PROKKA_ prefix). Each identifier
+                # is one unit: the orthogroup with the highest ID, which is the
+                # one the row order of Orthogroups.tsv used to leave, now
+                # whatever that order is.
                 protein_to_og = {p: max(ogs) for p, ogs in protein_to_ogs.items()}
                 # The labels are shuffled among the proteins the experiment
                 # measured, before any expansion; with 'Use all GOA files' that is
@@ -4146,8 +4173,8 @@ def gene_ontology_analysis():
                         f"{len(in_several)} of the proteins in this test "
                         f"({', '.join(in_several[:5])}{', ...' if len(in_several) > 5 else ''}) "
                         f"are in more than one orthogroup: identical sequences of different "
-                        f"proteomes share one UniParc identifier, and OrthoFinder placed them "
-                        f"apart. Each is counted once, in the orthogroup with the highest ID.")
+                        f"proteomes share one UniParc identifier, or two proteomes use the same "
+                        f"identifiers. Each is counted once, in the orthogroup with the highest ID.")
                 unit_of = {p: protein_to_og.get(p, p)
                            for p in set(assoc_bg) | set(measured) | set(fg_input)}
                 og_to_gos = defaultdict(set)
