@@ -4703,6 +4703,19 @@ def gene_ontology_analysis():
                         f"{len(testable) / (n_perm + 1):.2g} for one term at the smallest p-value, "
                         f"1/{n_perm + 1}; m/(k({n_perm} + 1)) when k of the m = {len(testable)} "
                         f"terms share it. Terms at that floor cannot be ranked against each other."))
+            if session.get("foreground_input"):
+                # The foreground's order does not change any result; the
+                # fingerprint pins which list this file belongs to.
+                fg_pasted = session["foreground_input"]
+                prov_rows.append((
+                    "Foreground as pasted (SHA-256, in pasted order)",
+                    hashlib.sha256("\n".join(fg_pasted).encode()).hexdigest()
+                    + f" ({len(fg_pasted)} identifiers as read, duplicates removed, one per line "
+                      f"joined by newlines)"))
+            if untested:
+                prov_rows.append(("Foreground identifiers not tested",
+                                  _untested_summary(untested, len(pasted_fg), untested_labels)
+                                  + " Listed in the sheet 'Untested identifiers'."))
             if bg_mode == "ids" and session.get("background_input"):
                 # Per orthogroup, the permutations draw from the background in
                 # the order it was pasted, so another order gives other p-values
@@ -4748,6 +4761,11 @@ def gene_ontology_analysis():
             prov_rows.extend(("Warning", w) for w in warnings)
             pd.DataFrame(prov_rows, columns=["key", "value"]).to_excel(
                 xw, sheet_name="Provenance", index=False)
+            if untested:
+                pd.DataFrame([{"identifier": r["id"], "pasted as": r["pasted_as"],
+                               "reason": untested_labels.get(r["reason"], r["reason"])}
+                              for r in untested]).to_excel(
+                    xw, sheet_name="Untested identifiers", index=False)
         logging.info(f"[GO] 📑 Excel generated: {out_xlsx}")
 
 
