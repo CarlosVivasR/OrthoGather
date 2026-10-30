@@ -73,6 +73,10 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
 - An identifier in the proteomes of two species (two genomes with the same Prokka prefix) is
   reported when the lists are loaded.
 - `max_terms` sent as text is applied.
+- After an External Data Upload, opening its Protein Analysis tab from the Gene Ontology page no
+  longer replaces the upload with the bundled Preselected Dataset.
+- The line above Run counts the identifiers the server read, not the lines of the box ("1 pasted
+  identifier" for 70 on one line).
 - The evidence chips count proteins: a protein annotated to two terms below a term counted twice.
 - A species named "Candidatus …" is matched by its binomial: "Candidatus Pelagibacter ubique HTCC1062"
   took the GOA file of another species of the genus.
