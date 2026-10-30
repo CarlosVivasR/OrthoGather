@@ -32,3 +32,10 @@ def test_the_two_sided_test_is_not_said_to_shuffle(three_species):
     n = _notice(three_species, p_value=1e-60, test_direction="two-sided")
     assert "shuffling" not in n
     assert "hypergeometric" in n
+
+
+def test_no_testable_term_with_the_one_sided_test_is_not_called_two_sided(three_species):
+    # No term within the size limits: no permutations either, but the test was
+    # one-sided.
+    n = _notice(three_species, min_term_size=400, max_term_size=500)
+    assert "two-sided" not in n

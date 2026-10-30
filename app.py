@@ -4863,7 +4863,7 @@ def gene_ontology_analysis():
                 + ("Its p-values come from shuffling your foreground labels among the "
                    "background proteins, so they allow for large families being hit by chance; "
                    "terms that per-protein counting reports may rest on several paralogues of "
-                   "the same family." if n_perm else
+                   "the same family." if test_direction != 'two-sided' else
                    "With the two-sided test its p-values are hypergeometric and do not allow "
                    "for family size.")
             )
