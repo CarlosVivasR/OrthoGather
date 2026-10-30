@@ -29,7 +29,8 @@ def _accession(entry: str) -> str:
 
     OrthoFinder keeps the FASTA header, so entries look like
     ``tr|A0QNX2|A0QNX2_MYCS2`` and the accession is the middle field (the last
-    one of an NCBI ``gnl|DB|ID``). Bare accessions are returned unchanged.
+    one of an NCBI ``gnl|DB|ID``; see ``header_identifier`` for the other
+    prefixes). Bare accessions are returned unchanged.
     """
     parts = entry.split("|")
     return header_identifier(parts) if len(parts) >= 3 else entry

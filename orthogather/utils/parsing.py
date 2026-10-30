@@ -31,17 +31,36 @@ _SEQUENCE_LINE_RE = re.compile(r"[A-Za-z*\-]+")
 
 def header_identifier(fields: List[str]) -> str:
     """The protein identifier of a FASTA ID split on ``|``: the accession of a
-    UniProt header (``sp|P12345|NAME``), and the last field of an NCBI general
-    identifier (``gnl|extdb|IS27_00001``), whose middle field names the database
-    and is the same for every protein.
+    UniProt header (``sp|P12345|NAME``). Where the second field is the same for
+    every protein of a proteome, or not the identifier people use, the field
+    that names the protein:
+
+    - NCBI general identifier ``gnl|extdb|IS27_00001``: the last field (the
+      middle one names the database);
+    - JGI ``jgi|Aspni7|1234|e_gw1.1.1``: the protein ID, third field (the second
+      names the genome);
+    - NCBI ``gi|15645353|ref|NP_207527.1|``: the accession, fourth field;
+    - PDB ``pdb|1ABC|A``: entry and chain, ``1ABC_A`` (the chains of one entry
+      are different proteins).
 
     >>> header_identifier("tr|A0QNX2|A0QNX2_MYCS2".split("|"))
     'A0QNX2'
     >>> header_identifier("gnl|extdb|IS27_00001".split("|"))
     'IS27_00001'
+    >>> header_identifier("jgi|Aspni7|1234|e_gw1.1.1".split("|"))
+    '1234'
+    >>> header_identifier("gi|15645353|ref|NP_207527.1|".split("|"))
+    'NP_207527.1'
+    >>> header_identifier("pdb|1ABC|B".split("|"))
+    '1ABC_B'
     """
-    if len(fields) >= 3 and fields[0].strip().lower() == "gnl":
+    prefix = fields[0].strip().lower()
+    if len(fields) >= 3 and prefix in ("gnl", "jgi") and fields[2].strip():
         return fields[2].strip()
+    if len(fields) >= 4 and prefix == "gi" and fields[3].strip():
+        return fields[3].strip()
+    if len(fields) >= 3 and prefix == "pdb" and fields[2].strip():
+        return f"{fields[1].strip()}_{fields[2].strip()}"
     return fields[1].strip()
 
 
