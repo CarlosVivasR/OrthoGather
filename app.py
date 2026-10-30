@@ -4577,6 +4577,10 @@ def gene_ontology_analysis():
                     # What is behind each term, after the existing columns: its
                     # proteins, or per orthogroup its units and the pasted
                     # foreground identifiers in each.
+                    # A wider display threshold adds terms that are not findings;
+                    # the chart draws them hollow and the table marks them "n.s.".
+                    df["significant"] = [bool(r.p_fdr_bh is not None
+                                              and r.p_fdr_bh < p_value_threshold) for r in res]
                     df["study_items"] = [", ".join(sorted(r.study_items)) for r in res]
                     if og_perm is not None:
                         df["pasted_ids_per_unit"] = [
