@@ -30,7 +30,7 @@ def test_ids_without_annotation_get_the_term_through_orthologues(three_species):
     # spOwn has no GOA file: each of its proteins has translation only through
     # its spRef orthologue.
     terms, sheet = _run(three_species, OWN[:30], OWN)
-    assert list(sheet.columns[-2:]) == ADDED
+    assert list(sheet.columns[-3:-1]) == ADDED
     row = sheet.loc["GO:0006412"]
     assert row["pasted_ids_annotated_themselves"] == ""
     assert row["pasted_ids_through_orthologues_only"].split(", ") == sorted(OWN[:30])

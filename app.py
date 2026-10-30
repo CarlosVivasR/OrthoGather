@@ -4583,10 +4583,6 @@ def gene_ontology_analysis():
                     # What is behind each term, after the existing columns: its
                     # proteins, or per orthogroup its units and the pasted
                     # foreground identifiers in each.
-                    # A wider display threshold adds terms that are not findings;
-                    # the chart draws them hollow and the table marks them "n.s.".
-                    df["significant"] = [bool(r.p_fdr_bh is not None
-                                              and r.p_fdr_bh < p_value_threshold) for r in res]
                     df["study_items"] = [", ".join(sorted(r.study_items)) for r in res]
                     if og_perm is not None:
                         df["pasted_ids_per_unit"] = [
@@ -4598,6 +4594,12 @@ def gene_ontology_analysis():
                         split = [_pasted_split(r) for r in res]
                         df["pasted_ids_annotated_themselves"] = [", ".join(o) for o, _ in split]
                         df["pasted_ids_through_orthologues_only"] = [", ".join(h) for _, h in split]
+                if res:
+                    # A wider display threshold adds terms that are not findings;
+                    # the chart draws them hollow and the table marks them "n.s.".
+                    # Last, so the columns before keep their places.
+                    df["significant"] = [bool(r.p_fdr_bh is not None
+                                              and r.p_fdr_bh < p_value_threshold) for r in res]
                 df.to_excel(xw, sheet_name=ns, index=False)
             # Provenance + run settings, so a downloaded report is reproducible.
             prov = build_provenance()

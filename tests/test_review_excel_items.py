@@ -30,7 +30,7 @@ def _run(c, fg, bg, expand, mode):
 def test_per_protein_lists_the_proteins_of_each_term(three_species):
     terms, sheet = _run(three_species, REF[:30], REF, False, "per_protein")
     assert list(sheet.columns[:len(OLD)]) == OLD
-    assert list(sheet.columns[len(OLD):]) == ["significant", "study_items"]
+    assert list(sheet.columns[len(OLD):]) == ["study_items", "significant"]
     for _, row in sheet.iterrows():
         items = row["study_items"].split(", ")
         assert len(items) == row["study_count"]
@@ -40,9 +40,10 @@ def test_per_protein_lists_the_proteins_of_each_term(three_species):
 def test_per_orthogroup_lists_the_orthogroups_and_the_pasted_ids_behind_them(three_species):
     terms, sheet = _run(three_species, UPI[:30], UPI, True, "per_orthogroup")
     assert list(sheet.columns[:len(OLD) + 1]) == OLD[:5] + ["p_hypergeom"] + OLD[5:]
-    assert list(sheet.columns[len(OLD) + 1:]) == ["significant", "study_items", "pasted_ids_per_unit",
+    assert list(sheet.columns[len(OLD) + 1:]) == ["study_items", "pasted_ids_per_unit",
                                                   "pasted_ids_annotated_themselves",
-                                                  "pasted_ids_through_orthologues_only"]
+                                                  "pasted_ids_through_orthologues_only",
+                                                  "significant"]
     row = sheet[sheet["GO"] == "GO:0006412"].iloc[0]
     units = row["study_items"].split(", ")
     assert len(units) == row["study_count"]
