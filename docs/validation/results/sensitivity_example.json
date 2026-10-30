@@ -1,0 +1,1502 @@
+{
+ "decreased_306": {
+  "published": {
+   "n": 21,
+   "terms": [
+    [
+     "acylglycerol O-acyltransferase activity",
+     0.0298
+    ],
+    [
+     "cell communication",
+     0.0298
+    ],
+    [
+     "glucan metabolic process",
+     0.049
+    ],
+    [
+     "glycerolipid biosynthetic process",
+     0.0424
+    ],
+    [
+     "glycerolipid metabolic process",
+     0.0447
+    ],
+    [
+     "intracellular signal transduction",
+     0.0447
+    ],
+    [
+     "macromolecule catabolic process",
+     0.045
+    ],
+    [
+     "negative regulation of DNA-templated transcription",
+     0.0447
+    ],
+    [
+     "negative regulation of RNA biosynthetic process",
+     0.0447
+    ],
+    [
+     "negative regulation of RNA metabolic process",
+     0.0447
+    ],
+    [
+     "negative regulation of biological process",
+     0.0471
+    ],
+    [
+     "negative regulation of biosynthetic process",
+     0.0438
+    ],
+    [
+     "negative regulation of cellular process",
+     0.0471
+    ],
+    [
+     "negative regulation of macromolecule biosynthetic process",
+     0.0329
+    ],
+    [
+     "negative regulation of macromolecule metabolic process",
+     0.0329
+    ],
+    [
+     "negative regulation of metabolic process",
+     0.0447
+    ],
+    [
+     "negative regulation of nucleobase-containing compound metabolic process",
+     0.0447
+    ],
+    [
+     "phosphorelay signal transduction system",
+     0.0367
+    ],
+    [
+     "signal transduction",
+     0.0298
+    ],
+    [
+     "signaling",
+     0.0298
+    ],
+    [
+     "sulfur compound transport",
+     0.049
+    ]
+   ],
+   "not_applicable": []
+  },
+  "per_ontology_universe": {
+   "n": 1,
+   "terms": [
+    [
+     "acylglycerol O-acyltransferase activity",
+     0.0373
+    ]
+   ],
+   "not_applicable": []
+  },
+  "non_iea_evidence": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "experimental_evidence": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "per_orthogroup": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "two_sided_test": {
+   "n": 21,
+   "terms": [
+    [
+     "acylglycerol O-acyltransferase activity",
+     0.0298
+    ],
+    [
+     "cell communication",
+     0.0298
+    ],
+    [
+     "glucan metabolic process",
+     0.049
+    ],
+    [
+     "glycerolipid biosynthetic process",
+     0.0424
+    ],
+    [
+     "glycerolipid metabolic process",
+     0.0447
+    ],
+    [
+     "intracellular signal transduction",
+     0.0447
+    ],
+    [
+     "macromolecule catabolic process",
+     0.045
+    ],
+    [
+     "negative regulation of DNA-templated transcription",
+     0.0447
+    ],
+    [
+     "negative regulation of RNA biosynthetic process",
+     0.0447
+    ],
+    [
+     "negative regulation of RNA metabolic process",
+     0.0447
+    ],
+    [
+     "negative regulation of biological process",
+     0.0471
+    ],
+    [
+     "negative regulation of biosynthetic process",
+     0.0438
+    ],
+    [
+     "negative regulation of cellular process",
+     0.0471
+    ],
+    [
+     "negative regulation of macromolecule biosynthetic process",
+     0.0329
+    ],
+    [
+     "negative regulation of macromolecule metabolic process",
+     0.0329
+    ],
+    [
+     "negative regulation of metabolic process",
+     0.0447
+    ],
+    [
+     "negative regulation of nucleobase-containing compound metabolic process",
+     0.0447
+    ],
+    [
+     "phosphorelay signal transduction system",
+     0.0367
+    ],
+    [
+     "signal transduction",
+     0.0298
+    ],
+    [
+     "signaling",
+     0.0298
+    ],
+    [
+     "sulfur compound transport",
+     0.049
+    ]
+   ],
+   "not_applicable": []
+  },
+  "min_depth_5": {
+   "n": 15,
+   "terms": [
+    [
+     "acylglycerol O-acyltransferase activity",
+     0.0161
+    ],
+    [
+     "glucan metabolic process",
+     0.0379
+    ],
+    [
+     "glycerolipid biosynthetic process",
+     0.0283
+    ],
+    [
+     "glycerolipid metabolic process",
+     0.0283
+    ],
+    [
+     "intracellular signal transduction",
+     0.0283
+    ],
+    [
+     "negative regulation of DNA-templated transcription",
+     0.0283
+    ],
+    [
+     "negative regulation of RNA biosynthetic process",
+     0.0283
+    ],
+    [
+     "negative regulation of RNA metabolic process",
+     0.0283
+    ],
+    [
+     "negative regulation of biosynthetic process",
+     0.0283
+    ],
+    [
+     "negative regulation of macromolecule biosynthetic process",
+     0.0283
+    ],
+    [
+     "negative regulation of macromolecule metabolic process",
+     0.0283
+    ],
+    [
+     "negative regulation of metabolic process",
+     0.0283
+    ],
+    [
+     "negative regulation of nucleobase-containing compound metabolic process",
+     0.0283
+    ],
+    [
+     "phospholipid metabolic process",
+     0.0431
+    ],
+    [
+     "phosphorelay signal transduction system",
+     0.0283
+    ]
+   ],
+   "not_applicable": []
+  },
+  "whole_proteome_background": {
+   "n": 35,
+   "terms": [
+    [
+     "acylglycerol O-acyltransferase activity",
+     0.0067
+    ],
+    [
+     "acyltransferase activity",
+     0.0235
+    ],
+    [
+     "acyltransferase activity, transferring groups other than amino-acyl groups",
+     0.0465
+    ],
+    [
+     "catalytic activity, acting on a protein",
+     0.0149
+    ],
+    [
+     "cell communication",
+     0.0209
+    ],
+    [
+     "cytosol",
+     0.0131
+    ],
+    [
+     "diacylglycerol O-acyltransferase activity",
+     0.0131
+    ],
+    [
+     "dicarboxylic acid metabolic process",
+     0.0274
+    ],
+    [
+     "glucan metabolic process",
+     0.0131
+    ],
+    [
+     "glycerolipid biosynthetic process",
+     0.0149
+    ],
+    [
+     "glycerolipid metabolic process",
+     0.0131
+    ],
+    [
+     "macromolecule catabolic process",
+     0.0209
+    ],
+    [
+     "negative regulation of DNA-templated transcription",
+     0.029
+    ],
+    [
+     "negative regulation of RNA biosynthetic process",
+     0.029
+    ],
+    [
+     "negative regulation of RNA metabolic process",
+     0.029
+    ],
+    [
+     "negative regulation of biological process",
+     0.0213
+    ],
+    [
+     "negative regulation of biosynthetic process",
+     0.0149
+    ],
+    [
+     "negative regulation of cellular process",
+     0.0213
+    ],
+    [
+     "negative regulation of macromolecule biosynthetic process",
+     0.0131
+    ],
+    [
+     "negative regulation of macromolecule metabolic process",
+     0.0131
+    ],
+    [
+     "negative regulation of metabolic process",
+     0.018
+    ],
+    [
+     "negative regulation of nucleobase-containing compound metabolic process",
+     0.029
+    ],
+    [
+     "organophosphate biosynthetic process",
+     0.0131
+    ],
+    [
+     "organophosphate metabolic process",
+     0.0089
+    ],
+    [
+     "phospholipid metabolic process",
+     0.0131
+    ],
+    [
+     "phosphorelay signal transduction system",
+     0.0317
+    ],
+    [
+     "phosphorus metabolic process",
+     0.0067
+    ],
+    [
+     "protein catabolic process",
+     0.0217
+    ],
+    [
+     "pyridine-containing compound biosynthetic process",
+     0.0131
+    ],
+    [
+     "response to decreased oxygen levels",
+     0.0337
+    ],
+    [
+     "response to hypoxia",
+     0.0337
+    ],
+    [
+     "response to oxygen levels",
+     0.0337
+    ],
+    [
+     "signal transduction",
+     0.0209
+    ],
+    [
+     "signaling",
+     0.0209
+    ],
+    [
+     "sulfur compound transport",
+     0.0395
+    ]
+   ],
+   "not_applicable": []
+  },
+  "expanded": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "expanded_without_msm_goa": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  }
+ },
+ "increased_185": {
+  "published": {
+   "n": 1,
+   "terms": [
+    [
+     "protein metabolic process",
+     0.0125
+    ]
+   ],
+   "not_applicable": []
+  },
+  "per_ontology_universe": {
+   "n": 1,
+   "terms": [
+    [
+     "protein metabolic process",
+     0.0208
+    ]
+   ],
+   "not_applicable": []
+  },
+  "non_iea_evidence": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "experimental_evidence": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "per_orthogroup": {
+   "n": 5,
+   "terms": [
+    [
+     "glutamate family amino acid biosynthetic process",
+     0.0375
+    ],
+    [
+     "protein biosynthetic process",
+     0.025
+    ],
+    [
+     "protein metabolic process",
+     0.025
+    ],
+    [
+     "serine-type endopeptidase activity",
+     0.045
+    ],
+    [
+     "translation",
+     0.025
+    ]
+   ],
+   "not_applicable": []
+  },
+  "two_sided_test": {
+   "n": 3,
+   "terms": [
+    [
+     "protein biosynthetic process",
+     0.0439
+    ],
+    [
+     "protein metabolic process",
+     0.0145
+    ],
+    [
+     "translation",
+     0.0439
+    ]
+   ],
+   "not_applicable": []
+  },
+  "min_depth_5": {
+   "n": 2,
+   "terms": [
+    [
+     "protein biosynthetic process",
+     0.0453
+    ],
+    [
+     "translation",
+     0.0453
+    ]
+   ],
+   "not_applicable": []
+  },
+  "whole_proteome_background": {
+   "n": 33,
+   "terms": [
+    [
+     "ATP-dependent activity, acting on DNA",
+     0.0408
+    ],
+    [
+     "DNA helicase activity",
+     0.0447
+    ],
+    [
+     "RNA binding",
+     0.0045
+    ],
+    [
+     "S-adenosylmethionine-dependent methyltransferase activity",
+     0.0436
+    ],
+    [
+     "amino acid biosynthetic process",
+     0.0059
+    ],
+    [
+     "amino acid metabolic process",
+     0.018
+    ],
+    [
+     "carbohydrate derivative binding",
+     0.0317
+    ],
+    [
+     "carboxylic acid biosynthetic process",
+     0.0274
+    ],
+    [
+     "cytosol",
+     0.0037
+    ],
+    [
+     "glutamate family amino acid biosynthetic process",
+     0.0059
+    ],
+    [
+     "helicase activity",
+     0.0336
+    ],
+    [
+     "isomerase activity",
+     0.0292
+    ],
+    [
+     "methyltransferase activity",
+     0.0206
+    ],
+    [
+     "nucleotide metabolic process",
+     0.0408
+    ],
+    [
+     "protein biosynthetic process",
+     0.0002
+    ],
+    [
+     "protein metabolic process",
+     0.0
+    ],
+    [
+     "protein-containing complex organization",
+     0.0408
+    ],
+    [
+     "proteinogenic amino acid biosynthetic process",
+     0.0131
+    ],
+    [
+     "proteinogenic amino acid metabolic process",
+     0.0336
+    ],
+    [
+     "proteolysis",
+     0.0331
+    ],
+    [
+     "purine nucleotide binding",
+     0.0336
+    ],
+    [
+     "purine ribonucleoside triphosphate binding",
+     0.0408
+    ],
+    [
+     "purine ribonucleotide binding",
+     0.0421
+    ],
+    [
+     "rRNA binding",
+     0.0336
+    ],
+    [
+     "ribonucleotide binding",
+     0.0447
+    ],
+    [
+     "ribonucleotide metabolic process",
+     0.0305
+    ],
+    [
+     "ribose phosphate metabolic process",
+     0.0336
+    ],
+    [
+     "ribosome",
+     0.0206
+    ],
+    [
+     "serine-type endopeptidase activity",
+     0.0336
+    ],
+    [
+     "structural constituent of ribosome",
+     0.0174
+    ],
+    [
+     "transferase activity, transferring one-carbon groups",
+     0.0206
+    ],
+    [
+     "translation",
+     0.0002
+    ],
+    [
+     "zinc ion binding",
+     0.0206
+    ]
+   ],
+   "not_applicable": []
+  },
+  "expanded": {
+   "n": 60,
+   "terms": [
+    [
+     "RNA binding",
+     0.0383
+    ],
+    [
+     "amino acid binding",
+     0.0496
+    ],
+    [
+     "archaeal or bacterial-type flagellum-dependent cell motility",
+     0.0097
+    ],
+    [
+     "bacterial-type flagellum-dependent cell motility",
+     0.0097
+    ],
+    [
+     "carbohydrate derivative binding",
+     0.0445
+    ],
+    [
+     "catalytic complex",
+     0.0184
+    ],
+    [
+     "cell motility",
+     0.0097
+    ],
+    [
+     "cellular component assembly",
+     0.027
+    ],
+    [
+     "cellular component disassembly",
+     0.0445
+    ],
+    [
+     "cellular component organization",
+     0.0236
+    ],
+    [
+     "cilium or flagellum-dependent cell motility",
+     0.0097
+    ],
+    [
+     "cytoplasmic translation",
+     0.0145
+    ],
+    [
+     "cytosolic large ribosomal subunit",
+     0.0392
+    ],
+    [
+     "cytosolic ribosome",
+     0.025
+    ],
+    [
+     "gene expression",
+     0.0314
+    ],
+    [
+     "glutamate family amino acid biosynthetic process",
+     0.012
+    ],
+    [
+     "heterocyclic compound binding",
+     0.0341
+    ],
+    [
+     "intracellular membrane-bounded organelle",
+     0.0083
+    ],
+    [
+     "intracellular organelle",
+     0.0145
+    ],
+    [
+     "intracellular protein-containing complex",
+     0.0105
+    ],
+    [
+     "large ribosomal subunit",
+     0.0423
+    ],
+    [
+     "large ribosomal subunit rRNA binding",
+     0.025
+    ],
+    [
+     "membrane-bounded organelle",
+     0.0097
+    ],
+    [
+     "membraneless organelle assembly",
+     0.012
+    ],
+    [
+     "negative regulation of cellular component organization",
+     0.0174
+    ],
+    [
+     "negative regulation of protein metabolic process",
+     0.0383
+    ],
+    [
+     "negative regulation of protein-containing complex disassembly",
+     0.012
+    ],
+    [
+     "negative regulation of termination of DNA-templated transcription",
+     0.012
+    ],
+    [
+     "nuclear protein-containing complex",
+     0.0083
+    ],
+    [
+     "nucleus",
+     0.0083
+    ],
+    [
+     "organelle",
+     0.0156
+    ],
+    [
+     "organelle assembly",
+     0.012
+    ],
+    [
+     "organelle organization",
+     0.0125
+    ],
+    [
+     "oxidoreductase activity, acting on paired donors, with incorporation or reduction of molecular oxygen, reduced flavin or flavoprotein as one donor, and incorporation of one atom of oxygen",
+     0.0392
+    ],
+    [
+     "protein biosynthetic process",
+     0.0062
+    ],
+    [
+     "protein folding",
+     0.05
+    ],
+    [
+     "protein maturation",
+     0.0381
+    ],
+    [
+     "protein metabolic process",
+     0.0062
+    ],
+    [
+     "protein-containing complex binding",
+     0.0391
+    ],
+    [
+     "purine nucleotide binding",
+     0.0496
+    ],
+    [
+     "rRNA binding",
+     0.0439
+    ],
+    [
+     "regulation of cellular component organization",
+     0.0097
+    ],
+    [
+     "regulation of protein metabolic process",
+     0.0383
+    ],
+    [
+     "regulation of protein-containing complex disassembly",
+     0.0083
+    ],
+    [
+     "regulation of termination of DNA-templated transcription",
+     0.0097
+    ],
+    [
+     "response to abiotic stimulus",
+     0.0097
+    ],
+    [
+     "response to heat",
+     0.0062
+    ],
+    [
+     "response to radiation",
+     0.0378
+    ],
+    [
+     "response to temperature stimulus",
+     0.0083
+    ],
+    [
+     "ribonucleoprotein complex",
+     0.0143
+    ],
+    [
+     "ribonucleoprotein complex binding",
+     0.0145
+    ],
+    [
+     "ribosomal subunit",
+     0.0319
+    ],
+    [
+     "ribosome",
+     0.0496
+    ],
+    [
+     "ribosome binding",
+     0.0143
+    ],
+    [
+     "serine-type endopeptidase activity",
+     0.0478
+    ],
+    [
+     "structural constituent of ribosome",
+     0.0378
+    ],
+    [
+     "submerged biofilm formation",
+     0.0097
+    ],
+    [
+     "transcription antitermination",
+     0.012
+    ],
+    [
+     "translation",
+     0.0062
+    ],
+    [
+     "zinc ion binding",
+     0.0392
+    ]
+   ],
+   "not_applicable": [
+    "archaeal or bacterial-type flagellum-dependent cell motility",
+    "bacterial-type flagellum-dependent cell motility",
+    "cilium or flagellum-dependent cell motility",
+    "intracellular membrane-bounded organelle",
+    "membrane-bounded organelle",
+    "nuclear protein-containing complex",
+    "nucleus"
+   ]
+  },
+  "expanded_without_msm_goa": {
+   "n": 39,
+   "terms": [
+    [
+     "archaeal or bacterial-type flagellum-dependent cell motility",
+     0.0196
+    ],
+    [
+     "bacterial-type flagellum-dependent cell motility",
+     0.0196
+    ],
+    [
+     "catalytic complex",
+     0.0382
+    ],
+    [
+     "cell motility",
+     0.0196
+    ],
+    [
+     "cellular component assembly",
+     0.0382
+    ],
+    [
+     "cellular component organization",
+     0.0261
+    ],
+    [
+     "cilium or flagellum-dependent cell motility",
+     0.0196
+    ],
+    [
+     "cytoplasmic translation",
+     0.0287
+    ],
+    [
+     "cytosolic ribosome",
+     0.048
+    ],
+    [
+     "gene expression",
+     0.05
+    ],
+    [
+     "glutamate family amino acid biosynthetic process",
+     0.0287
+    ],
+    [
+     "intracellular membrane-bounded organelle",
+     0.0196
+    ],
+    [
+     "intracellular organelle",
+     0.0281
+    ],
+    [
+     "intracellular protein-containing complex",
+     0.0261
+    ],
+    [
+     "large ribosomal subunit rRNA binding",
+     0.0446
+    ],
+    [
+     "membrane-bounded organelle",
+     0.0261
+    ],
+    [
+     "membraneless organelle assembly",
+     0.0261
+    ],
+    [
+     "negative regulation of cellular component organization",
+     0.0421
+    ],
+    [
+     "negative regulation of protein-containing complex disassembly",
+     0.0292
+    ],
+    [
+     "negative regulation of termination of DNA-templated transcription",
+     0.0292
+    ],
+    [
+     "nuclear protein-containing complex",
+     0.0196
+    ],
+    [
+     "nucleus",
+     0.0196
+    ],
+    [
+     "organelle",
+     0.0287
+    ],
+    [
+     "organelle assembly",
+     0.0261
+    ],
+    [
+     "organelle organization",
+     0.0272
+    ],
+    [
+     "protein biosynthetic process",
+     0.0083
+    ],
+    [
+     "protein metabolic process",
+     0.015
+    ],
+    [
+     "regulation of cellular component organization",
+     0.0196
+    ],
+    [
+     "regulation of protein-containing complex disassembly",
+     0.0083
+    ],
+    [
+     "regulation of termination of DNA-templated transcription",
+     0.0196
+    ],
+    [
+     "response to abiotic stimulus",
+     0.0233
+    ],
+    [
+     "response to heat",
+     0.015
+    ],
+    [
+     "response to temperature stimulus",
+     0.025
+    ],
+    [
+     "ribonucleoprotein complex",
+     0.0298
+    ],
+    [
+     "ribonucleoprotein complex binding",
+     0.0424
+    ],
+    [
+     "ribosome binding",
+     0.0375
+    ],
+    [
+     "submerged biofilm formation",
+     0.025
+    ],
+    [
+     "transcription antitermination",
+     0.0292
+    ],
+    [
+     "translation",
+     0.0083
+    ]
+   ],
+   "not_applicable": [
+    "archaeal or bacterial-type flagellum-dependent cell motility",
+    "bacterial-type flagellum-dependent cell motility",
+    "cilium or flagellum-dependent cell motility",
+    "intracellular membrane-bounded organelle",
+    "membrane-bounded organelle",
+    "nuclear protein-containing complex",
+    "nucleus"
+   ]
+  }
+ },
+ "all_491": {
+  "published": {
+   "n": 1,
+   "terms": [
+    [
+     "protein maturation",
+     0.0267
+    ]
+   ],
+   "not_applicable": []
+  },
+  "per_ontology_universe": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "non_iea_evidence": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "experimental_evidence": {
+   "n": 0,
+   "terms": [],
+   "not_applicable": []
+  },
+  "per_orthogroup": {
+   "n": 4,
+   "terms": [
+    [
+     "endopeptidase activity",
+     0.0333
+    ],
+    [
+     "protein maturation",
+     0.025
+    ],
+    [
+     "protein metabolic process",
+     0.0375
+    ],
+    [
+     "serine-type endopeptidase activity",
+     0.0333
+    ]
+   ],
+   "not_applicable": []
+  },
+  "two_sided_test": {
+   "n": 1,
+   "terms": [
+    [
+     "protein maturation",
+     0.0267
+    ]
+   ],
+   "not_applicable": []
+  },
+  "min_depth_5": {
+   "n": 1,
+   "terms": [
+    [
+     "protein maturation",
+     0.0138
+    ]
+   ],
+   "not_applicable": []
+  },
+  "whole_proteome_background": {
+   "n": 71,
+   "terms": [
+    [
+     "ATP binding",
+     0.0252
+    ],
+    [
+     "RNA binding",
+     0.0475
+    ],
+    [
+     "acylglycerol O-acyltransferase activity",
+     0.0132
+    ],
+    [
+     "adenyl nucleotide binding",
+     0.0288
+    ],
+    [
+     "adenyl ribonucleotide binding",
+     0.0285
+    ],
+    [
+     "amino acid biosynthetic process",
+     0.0412
+    ],
+    [
+     "amino acid metabolic process",
+     0.0105
+    ],
+    [
+     "carbohydrate derivative binding",
+     0.0103
+    ],
+    [
+     "carbohydrate derivative metabolic process",
+     0.0364
+    ],
+    [
+     "carboxylic acid biosynthetic process",
+     0.0282
+    ],
+    [
+     "carboxylic acid metabolic process",
+     0.021
+    ],
+    [
+     "catalytic activity, acting on a protein",
+     0.0076
+    ],
+    [
+     "catalytic complex",
+     0.0105
+    ],
+    [
+     "cell communication",
+     0.0364
+    ],
+    [
+     "cellular component organization",
+     0.0349
+    ],
+    [
+     "cellular response to stimulus",
+     0.0193
+    ],
+    [
+     "cytosol",
+     0.0
+    ],
+    [
+     "diacylglycerol O-acyltransferase activity",
+     0.0288
+    ],
+    [
+     "dicarboxylic acid metabolic process",
+     0.0186
+    ],
+    [
+     "endopeptidase activity",
+     0.0105
+    ],
+    [
+     "glucan metabolic process",
+     0.0288
+    ],
+    [
+     "glutamate family amino acid biosynthetic process",
+     0.0398
+    ],
+    [
+     "glycerolipid biosynthetic process",
+     0.0433
+    ],
+    [
+     "glycerolipid metabolic process",
+     0.0252
+    ],
+    [
+     "intracellular protein-containing complex",
+     0.0191
+    ],
+    [
+     "isomerase activity",
+     0.0364
+    ],
+    [
+     "macromolecule catabolic process",
+     0.0101
+    ],
+    [
+     "negative regulation of biological process",
+     0.0385
+    ],
+    [
+     "negative regulation of cellular process",
+     0.0385
+    ],
+    [
+     "nicotinamide nucleotide metabolic process",
+     0.0211
+    ],
+    [
+     "nucleobase-containing small molecule metabolic process",
+     0.0105
+    ],
+    [
+     "nucleoside phosphate biosynthetic process",
+     0.021
+    ],
+    [
+     "nucleoside phosphate metabolic process",
+     0.0272
+    ],
+    [
+     "nucleotide biosynthetic process",
+     0.0412
+    ],
+    [
+     "nucleotide metabolic process",
+     0.0273
+    ],
+    [
+     "organophosphate biosynthetic process",
+     0.0024
+    ],
+    [
+     "organophosphate metabolic process",
+     0.0007
+    ],
+    [
+     "oxidoreductase activity, acting on the CH-NH2 group of donors",
+     0.0364
+    ],
+    [
+     "oxoacid metabolic process",
+     0.021
+    ],
+    [
+     "peptidase activity",
+     0.0105
+    ],
+    [
+     "phospholipid metabolic process",
+     0.0136
+    ],
+    [
+     "phosphorelay response regulator activity",
+     0.0255
+    ],
+    [
+     "phosphorelay signal transduction system",
+     0.0385
+    ],
+    [
+     "phosphorus metabolic process",
+     0.0005
+    ],
+    [
+     "protein biosynthetic process",
+     0.0351
+    ],
+    [
+     "protein catabolic process",
+     0.0077
+    ],
+    [
+     "protein folding",
+     0.0364
+    ],
+    [
+     "protein maturation",
+     0.0033
+    ],
+    [
+     "protein metabolic process",
+     0.0
+    ],
+    [
+     "proteinogenic amino acid metabolic process",
+     0.0056
+    ],
+    [
+     "proteolysis",
+     0.0132
+    ],
+    [
+     "purine nucleotide binding",
+     0.0105
+    ],
+    [
+     "purine nucleotide metabolic process",
+     0.0364
+    ],
+    [
+     "purine ribonucleoside triphosphate binding",
+     0.0101
+    ],
+    [
+     "purine ribonucleotide binding",
+     0.0103
+    ],
+    [
+     "purine-containing compound biosynthetic process",
+     0.0132
+    ],
+    [
+     "purine-containing compound metabolic process",
+     0.0132
+    ],
+    [
+     "pyridine-containing compound biosynthetic process",
+     0.0101
+    ],
+    [
+     "pyridine-containing compound metabolic process",
+     0.0161
+    ],
+    [
+     "ribonucleoprotein complex binding",
+     0.0433
+    ],
+    [
+     "ribonucleotide binding",
+     0.0101
+    ],
+    [
+     "ribosome binding",
+     0.0364
+    ],
+    [
+     "serine-type endopeptidase activity",
+     0.0077
+    ],
+    [
+     "signal transduction",
+     0.0364
+    ],
+    [
+     "signaling",
+     0.0364
+    ],
+    [
+     "small molecule biosynthetic process",
+     0.0139
+    ],
+    [
+     "sulfur compound transport",
+     0.0364
+    ],
+    [
+     "transferase activity, transferring one-carbon groups",
+     0.0385
+    ],
+    [
+     "translation",
+     0.0351
+    ],
+    [
+     "vitamin binding",
+     0.0434
+    ],
+    [
+     "zinc ion binding",
+     0.0132
+    ]
+   ],
+   "not_applicable": []
+  },
+  "expanded": {
+   "n": 9,
+   "terms": [
+    [
+     "anion binding",
+     0.0333
+    ],
+    [
+     "catalytic complex",
+     0.0333
+    ],
+    [
+     "intracellular membrane-bounded organelle",
+     0.0333
+    ],
+    [
+     "intracellular protein-containing complex",
+     0.0125
+    ],
+    [
+     "nuclear protein-containing complex",
+     0.0333
+    ],
+    [
+     "nucleus",
+     0.0333
+    ],
+    [
+     "protein catabolic process",
+     0.0125
+    ],
+    [
+     "protein maturation",
+     0.0125
+    ],
+    [
+     "protein metabolic process",
+     0.0125
+    ]
+   ],
+   "not_applicable": [
+    "intracellular membrane-bounded organelle",
+    "nuclear protein-containing complex",
+    "nucleus"
+   ]
+  },
+  "expanded_without_msm_goa": {
+   "n": 2,
+   "terms": [
+    [
+     "catalytic complex",
+     0.025
+    ],
+    [
+     "intracellular protein-containing complex",
+     0.025
+    ]
+   ],
+   "not_applicable": []
+  }
+ }
+}

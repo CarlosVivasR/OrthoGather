@@ -95,8 +95,10 @@ def part_ecoli():
             continue
         for g in {c[4]} | dag[c[4]].get_all_upper():
             sets.setdefault(g, set()).add(c[1])
-    candidates = [g for g, s in sets.items() if 15 <= len(s) <= 80 and dag[g].depth >= 4
-                  and dag[g].namespace == "biological_process"]
+    # Sorted before the shuffle: the order of `sets` follows the iteration of
+    # Python sets, which changes from run to run.
+    candidates = sorted(g for g, s in sets.items() if 15 <= len(s) <= 80 and dag[g].depth >= 4
+                        and dag[g].namespace == "biological_process")
     rng = random.Random(21)
     rng.shuffle(candidates)
     chosen = []
