@@ -50,3 +50,9 @@ def test_per_orthogroup_lists_the_orthogroups_and_the_pasted_ids_behind_them(thr
     assert sorted(behind) == units
     # Each orthogroup OGnnnnnnn holds the pasted UniParc protein UPI[n].
     assert all(behind[og] == UPI[int(og[2:])] for og in units)
+
+
+def test_the_json_lists_the_items_of_each_term_sorted(three_species):
+    # GOATOOLS keeps them in a set, so their order changed from run to run.
+    terms, _ = _run(three_species, UPI[:30], UPI, True, "per_orthogroup")
+    assert terms["GO:0006412"]["study_items"] == [f"OG{i:07d}" for i in range(30)]

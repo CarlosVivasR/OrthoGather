@@ -4629,7 +4629,8 @@ def gene_ontology_analysis():
         def serialise(res):
             out = []
             for r in res:
-                study_items = list(r.study_items) if hasattr(r, 'study_items') else []
+                # A set in GOATOOLS: sorted, so the same run gives the same JSON.
+                study_items = sorted(r.study_items) if hasattr(r, 'study_items') else []
                 out.append({
                     "GO": r.GO,
                     "name": r.name,
