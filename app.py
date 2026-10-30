@@ -3997,7 +3997,7 @@ def gene_ontology_analysis():
                 # without annotations, and they reach the test through their
                 # orthogroup.
                 interest_df = pd.read_excel(excel_path, sheet_name='Initial Groups')
-                protein_to_og = {}
+                protein_to_ogs = defaultdict(set)
                 exclude_cols = {'Orthogroup', 'Annotation Percentage', 'Porcentaje de Anotación'}
                 for _, row in interest_df.iterrows():
                     og = row.get('Orthogroup')
@@ -4007,7 +4007,13 @@ def gene_ontology_analysis():
                         if col in exclude_cols or pd.isna(val):
                             continue
                         for pid in orthogroup_cell_accessions(val):
-                            protein_to_og[pid] = og
+                            protein_to_ogs[pid].add(og)
+                # A UniParc identifier names a sequence, so identical proteins of
+                # two strains that OrthoFinder placed apart give one identifier in
+                # two orthogroups. Each protein is one unit: the orthogroup with
+                # the highest ID, which is the one the row order of
+                # Orthogroups.tsv used to leave, now whatever that order is.
+                protein_to_og = {p: max(ogs) for p, ogs in protein_to_ogs.items()}
                 # The labels are shuffled among the proteins the experiment
                 # measured, before any expansion; with 'Use all GOA files' that is
                 # the proteome in this analysis of the species the pasted foreground
@@ -4037,6 +4043,15 @@ def gene_ontology_analysis():
                     warnings.append(
                         "None of the pasted foreground proteins is in a downloaded GOA file, so "
                         "'Use all GOA files' has no proteome of their species to shuffle them in.")
+                in_several = sorted(p for p in set(measured) | set(fg_input)
+                                    if len(protein_to_ogs.get(p, ())) > 1)
+                if in_several:
+                    warnings.append(
+                        f"{len(in_several)} of the proteins in this test "
+                        f"({', '.join(in_several[:5])}{', ...' if len(in_several) > 5 else ''}) "
+                        f"are in more than one orthogroup: identical sequences of different "
+                        f"proteomes share one UniParc identifier, and OrthoFinder placed them "
+                        f"apart. Each is counted once, in the orthogroup with the highest ID.")
                 unit_of = {p: protein_to_og.get(p, p)
                            for p in set(assoc_bg) | set(measured) | set(fg_input)}
                 og_to_gos = defaultdict(set)
