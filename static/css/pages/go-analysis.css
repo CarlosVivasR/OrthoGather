@@ -1259,7 +1259,6 @@
 .go-own-split {
   font-size: .78em;
   color: #5b6672;
-  white-space: nowrap;
 }
 #go-table tbody tr.is-not-significant td .go-dir {
   color: #7b8794 !important;
