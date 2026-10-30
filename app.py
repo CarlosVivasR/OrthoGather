@@ -677,8 +677,12 @@ def cargar_carpeta():
     # GET (preselected / generated / upload)
     # -------------------------
     if request.method == 'GET':
-        # A) preselected / generated -> extract from given ZIP
-        if request.args.get('filename') == 'Orthogroups.zip':
+        # A) preselected / generated -> extract from given ZIP. An upload has
+        # no ZIP of its own here: the view tab of the GO page sends
+        # filename=Orthogroups.zip with modo=upload, which used to extract the
+        # bundled Preselected Dataset over the user's analysis.
+        if (request.args.get('filename') == 'Orthogroups.zip'
+                and request.args.get('modo') != 'upload'):
             modo_arg = request.args.get('modo', 'preselected')
             try:
                 if modo_arg == 'generated':
