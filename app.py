@@ -3831,9 +3831,21 @@ def gene_ontology_analysis():
             # the background and expanding it. It works the same for a species
             # with a complete, a partial or no GOA file.
             pasted_lookup = set(session.get("foreground_input") or foreground)
-            pasted_species = sorted(
-                sp for sp, accs in _analysis_accessions_by_species(session.get("folder_path")).items()
-                if pasted_lookup & accs)
+            accs_by_species = _analysis_accessions_by_species(session.get("folder_path"))
+            pasted_species = sorted(sp for sp, accs in accs_by_species.items()
+                                    if pasted_lookup & accs)
+            # UniParc identifiers name a sequence, not a protein of one proteome:
+            # strains with identical proteins share them. A list from one strain
+            # then touches the proteomes of the others too, which would join the
+            # universe below. Keep the species that holds every pasted identifier
+            # found in the analysis; when several hold them all, say so. UniProt
+            # accessions are not shared between proteomes, so this never applies.
+            found = pasted_lookup & set().union(*accs_by_species.values())
+            holding_all = [sp for sp in pasted_species if found <= accs_by_species[sp]]
+            shared_with = ([sp for sp in pasted_species if sp not in holding_all]
+                           if len(pasted_species) > 1 and len(holding_all) == 1 else [])
+            if shared_with:
+                pasted_species = holding_all
             proteome_universe = (counting_mode == 'per_orthogroup' and goa_all_scope != 'all'
                                  and bool(pasted_species))
             if not any(pasted_lookup & a for a in by_file.values()):
@@ -3849,7 +3861,20 @@ def gene_ontology_analysis():
                 background_desc = ("proteome in this analysis of " + "; ".join(pasted_species)
                                    + ", each protein through its orthogroup; orthogroups annotated "
                                    "from every GOA file")
-                if len(pasted_species) > 1:
+                if shared_with:
+                    warnings.append(
+                        f"The pasted identifiers also occur in the proteome of "
+                        f"{'; '.join(shared_with)} (identical sequences share a UniParc "
+                        f"identifier). Only {pasted_species[0]} contains all of them, so its "
+                        f"proteome is the universe.")
+                elif len(holding_all) > 1:
+                    warnings.append(
+                        f"Every pasted identifier occurs in {len(holding_all)} proteomes "
+                        f"({'; '.join(holding_all)}): identical sequences share a UniParc "
+                        f"identifier, so the list does not tell which one it comes from, and "
+                        f"the universe pools them. To use one proteome, paste its identifiers "
+                        f"as the background.")
+                elif len(pasted_species) > 1:
                     warnings.append(
                         f"The foreground spans {len(pasted_species)} species and the universe "
                         f"pools their proteomes. If the species are represented in different "
