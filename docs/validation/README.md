@@ -91,6 +91,25 @@ Limits:
   it, so recovery is optimistic for a species without close annotated relatives.
 - Annotations of other lineages are counted too: with *M. smegmatis* hidden, flagellar motility
   appears through *E. coli* orthologues.
+- Recovery rests on the donors' electronic annotations, which are 87% of their biological-process
+  annotations. A re-run of the *E. coli* benchmark with donor annotations removed by kind (exact
+  term, pure foregrounds; its baseline is 27 exact rather than the 30 above):
+
+  | Donor annotations | Exact term |
+  |---|---|
+  | All | 27/40 |
+  | Without those citing an *E. coli* protein in with/from | 27/40 |
+  | Also without IBA and TreeGrafter (GO_REF:0000118) | 24/40 |
+  | Experimental only | 1/40 |
+
+  Annotations derived from *E. coli* itself do not explain the result. A species whose relatives
+  have experimental annotations only would get almost nothing back.
+- Counted per orthogroup, the permutation p-values depend on the order in which the background is
+  pasted, as on the seed: terms near the threshold can enter or leave with another order. The
+  Provenance sheet of each results file records a SHA-256 of the background in its order, so a
+  run can be repeated exactly.
+- Isolates that are not in UniProt need their own OrthoFinder run, uploaded to OrthoGather; their
+  proteins are then tested through the annotations of their orthologues.
 
 Counting per protein after expansion is not offered: there every paralogue counts as a separate
 observation, and in the same set-up random foregrounds gave a significant term every time.

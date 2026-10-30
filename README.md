@@ -182,8 +182,14 @@ p-values come from a permutation test that allows for large families. An expande
 each orthogroup the annotations of all its members, paralogues included, in the species with a GOA
 file, so proteins without annotations of their own are tested through their orthologues. No
 annotation is transferred to any protein, but some of the annotations counted apply only to the
-other species; check that the enriched terms make sense for your organism. The provenance sheet of
-each results file records these settings.
+other species; check that the enriched terms make sense for your organism. How much this recovers
+depends on the annotations of the other species, most of them electronic: with *E. coli* hidden in
+the [validation benchmark](docs/validation/README.md#a-species-without-annotation), 27 of 40 known
+processes came back with the exact term using every annotation, and 1 of 40 using experimental
+annotations only. Counted per orthogroup, the permutation p-values also depend on the order of the
+pasted background, so terms near the threshold can change if the same list is pasted in another
+order. The provenance sheet of each results file records these settings and a SHA-256 of the
+background in its order.
 
 ## Reproducing the example in the paper
 

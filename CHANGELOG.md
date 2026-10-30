@@ -49,10 +49,26 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
 - Figure 2 counts proteomes, and says how many species they are: the Preselected Dataset has 47
   proteomes of 35 species, not "47 species".
 - The summary of the UpSet filter reads as one sentence instead of one line per piece.
+- The evidence chips of a term count the annotations to the terms below it, which the test
+  propagates; counting direct annotations only left 15 of the 22 terms of the worked example without
+  chips. No p- or q-value changes.
+- UniParc identifiers shared between strains: with "Use all GOA files" counted per orthogroup, a list
+  from one strain took the proteomes of every strain with identical sequences as its universe. It now
+  takes the species that holds every pasted identifier, and says when several hold them all.
+- An identifier in two orthogroups (identical sequences of two strains that OrthoFinder placed
+  apart) is counted in the orthogroup with the highest ID, whatever the row order of
+  `Orthogroups.tsv`, and the run names it.
+- The items of each term in the JSON response are sorted.
 
 ### Added
 - The results Excel lists the proteins (or orthogroups, and the pasted identifiers behind each) of
   every term, in new columns after the existing ones.
+- Counted per orthogroup, the results Excel says which pasted identifiers are annotated to each term
+  themselves and which get it through their orthologues only; the table shows the two counts.
+- Provenance: a SHA-256 of the pasted background in its order, which per-orthogroup permutations
+  depend on.
+- Validation README: how recovery with a species hidden depends on the kind of donor annotations,
+  and that the order of the pasted background can move terms near the threshold.
 - Error codes (`ERR_…`) for every error of the Gene Ontology page.
 - Provenance: the smallest q a per-orthogroup run can reach (the floor set by the number of
   permutations, explained in `docs/ADVANCED.md`), and the SHA-256 of each GOA file. Each history run
