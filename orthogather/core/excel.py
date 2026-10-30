@@ -162,6 +162,14 @@ def generate_go_excel(tsv_path: str, species_to_goafile: dict,
     columns_interest = ["Orthogroup", "Annotation Percentage"] + species_with_goa_sorted
     interest = initial[columns_interest].copy()
 
+    # An Excel cell holds at most 32,767 characters, and the writer cuts longer
+    # ones (a family of more than ~1,200 proteins of one species).
+    long_cells = sum(int((df[c].dropna().astype(str).str.len() > 32767).sum())
+                     for c in species_all)
+    if long_cells:
+        summary["warnings"].append(
+            f"{long_cells} orthogroup cell(s) exceed 32,767 characters and are cut in the Excel")
+
     try:
         with pd.ExcelWriter(output_excel_path) as writer:
             # The Meta sheet is the only context a reader gets when this file is
@@ -202,6 +210,14 @@ def generate_go_excel(tsv_path: str, species_to_goafile: dict,
                            "file. This is the sheet the per-orthogroup counting mode reads."),
                           ],
             })
+            if long_cells:
+                meta = pd.concat([meta, pd.DataFrame({
+                    "key": ["Cells cut to 32,767 characters"],
+                    "value": [f"{long_cells} cell(s) of the orthogroup sheets hold more proteins "
+                              f"than an Excel cell can (32,767 characters) and are cut here. "
+                              f"OrthoGather reads them in full from Orthogroups.tsv; use that "
+                              f"file for the members of those orthogroups."]})],
+                    ignore_index=True)
             meta.to_excel(writer, sheet_name="Meta", index=False)
             initial.to_excel(writer, sheet_name="Initial Groups", index=False)
             filtered.to_excel(writer, sheet_name="Filtered Groups", index=False)

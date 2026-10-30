@@ -75,3 +75,20 @@ def test_per_orthogroup_counting_puts_it_in_its_orthogroup(big_family):
     assert r.status_code == 200, r.get_json()
     # All 40 pasted proteins are one unit, OG0000000, with spRef's translation.
     assert r.get_json()["annotation_stats"]["foreground_units"] == 1
+
+
+def test_the_excel_says_which_cells_it_cut(big_family):
+    import app as og
+    meta = pd.read_excel(f"{og.RESULTS_FOLDER}/Gene_Ontology_Analysis.xlsx", sheet_name="Meta")
+    row = dict(zip(meta["key"], meta["value"]))
+    assert row["Cells cut to 32,767 characters"].startswith("1 cell(s) of the orthogroup sheets")
+
+
+def test_an_excel_without_long_cells_has_no_such_row(tmp_path):
+    from orthogather.core.excel import generate_go_excel
+    tsv = tmp_path / "Orthogroups.tsv"
+    pd.DataFrame([{"Orthogroup": "OG0000000", "spRef": "tr|B00000|X"}]).to_csv(tsv, sep="\t", index=False)
+    out = tmp_path / "go.xlsx"
+    generate_go_excel(str(tsv), {"spRef": "2.spRef.goa"}, str(out), annotated_ids=set())
+    meta = pd.read_excel(out, sheet_name="Meta")
+    assert "Cells cut to 32,767 characters" not in set(meta["key"])
