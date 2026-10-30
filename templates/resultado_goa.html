@@ -1306,6 +1306,8 @@
       // last load failed). A set whose box or options changed since is stale:
       // Run stays disabled until it is loaded again.
       const loadedSets = { fg: null, bg: null };
+      // How many identifiers the server read from each set, as it said on load.
+      const loadedCounts = { fg: null, bg: null };
       const SET_LABEL = { fg: "foreground", bg: "background" };
       function setIsCurrent(which) {
         const req = which === "fg" ? foregroundRequest() : backgroundRequest();
@@ -1325,7 +1327,9 @@
         if (!setIsCurrent(which)) return "not loaded";
         const req = JSON.parse(loadedSets[which]);
         if (req.background_choice === "5") return "all GOA files of the foreground's species";
-        const n = new Set(req.uniprot_ids || req.custom_uniprot_ids).size;
+        // The server's count: the box holds lines, and a line can carry several
+        // identifiers (or a FASTA sequence, which is not one).
+        const n = loadedCounts[which] ?? new Set(req.uniprot_ids || req.custom_uniprot_ids).size;
         let text = `${n.toLocaleString("en")} pasted identifier${n === 1 ? "" : "s"}`;
         if (req.use_orthogroups) {
           text += req.single_copy_only ? ", expanded to single-copy orthogroups" : ", expanded to full orthogroups";
@@ -1455,6 +1459,7 @@
             showSavedIds("fg-msg", "Foreground", js.input);
             window.foregroundUniProtIDs = ids;
             loadedSets.fg = JSON.stringify(request);
+            loadedCounts.fg = js.input?.n_ids ?? null;
             loadedExpanded.fg = request.use_orthogroups;
             updateCountingWarning();
           } catch (err) {
@@ -1510,6 +1515,7 @@
             }
 
             loadedSets.bg = JSON.stringify(payload);
+            loadedCounts.bg = js.input?.n_ids ?? null;
             const ready = setIsCurrent("fg") ? "You can run the GO enrichment now."
                                              : "Load the foreground to run the GO enrichment.";
             if (useGOAFiles) {

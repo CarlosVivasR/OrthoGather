@@ -24,3 +24,10 @@ def test_the_table_export_has_the_p_values_and_significance():
     cols = re.search(r'const cols = \[([^\]]+)\];', PAGE).group(1)
     for c in ("p_uncorrected", "p_hypergeom", "p_fdr_bh", "significant"):
         assert f'"{c}"' in cols
+
+
+def test_the_run_summary_counts_the_identifiers_the_server_read():
+    # The box holds lines; 70 identifiers pasted on one line were "1 pasted identifier".
+    assert "loadedCounts.fg = js.input?.n_ids" in PAGE
+    assert "loadedCounts.bg = js.input?.n_ids" in PAGE
+    assert re.search(r"const n = loadedCounts\[which\] \?\?", PAGE)
