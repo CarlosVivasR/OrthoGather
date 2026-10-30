@@ -4751,11 +4751,13 @@ def gene_ontology_analysis():
         # counting collapses to OG IDs, so the evidence breakdown uses the proteins
         # that contributed to that OG.
         def _evidence_of(p, go_id, counts):
+            # Each protein counts once per code, however many of its
+            # annotations below the term carry it: the chips count proteins.
             ns = _NS_OF(go_id)
-            for go, evs in id2evidence.get(p, {}).items():
-                if go_id in _terms_above(go) and _NS_OF(go) == ns:
-                    for ev in evs:
-                        counts[ev] += 1
+            codes = {ev for go, evs in id2evidence.get(p, {}).items()
+                     if go_id in _terms_above(go) and _NS_OF(go) == ns for ev in evs}
+            for ev in codes:
+                counts[ev] += 1
 
         def evidence_breakdown_for_term(go_id, study_ids):
             counts = defaultdict(int)

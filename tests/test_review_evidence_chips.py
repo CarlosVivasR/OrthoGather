@@ -39,3 +39,17 @@ def test_annotations_of_another_aspect_are_not_counted(three_species):
     # Each protein also has one MF annotation (IEA); a BP term counts only BP.
     terms = _terms(three_species, REF[:30], REF, False, "per_protein")
     assert sum(terms["GO:0008152"]["evidence_breakdown"].values()) == 30
+
+
+def test_a_protein_counts_once_per_code(three_species):
+    # The 30 proteins also get an IEA annotation to translational elongation,
+    # below translation: still 30 proteins, not 60 annotations.
+    import app as og
+    path = f"{og.GOA_DOWNLOAD_FOLDER}/2.spRef.goa"
+    from tests.test_review_nonuniprot_ids import _gaf
+    with open(path, "a") as f:
+        f.write("".join(_gaf(REF[i], "GO:0006414", "P") for i in range(30)))
+    og._ID2GOS_CACHE.clear()
+    terms = _terms(three_species, REF[:30], REF, False, "per_protein")
+    assert terms["GO:0006412"]["evidence_breakdown"] == {"IEA": 30}
+    assert terms["GO:0006412"]["study_count"] == 30
