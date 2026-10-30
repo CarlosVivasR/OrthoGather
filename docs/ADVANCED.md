@@ -147,7 +147,7 @@ When reporting a problem, quote the `ERR_` code in the
 
 ## Test suite
 
-The repository has 243 tests covering species matching, taxonomy, the error catalogue, OrthoXML
+The repository has 273 tests covering species matching, taxonomy, the error catalogue, OrthoXML
 import, catalogue building, file names, provenance in every loading mode, pasted identifiers (UniProt
 and not), the GO page states and its error codes, local security, the
 per-orthogroup permutation test (its calibration on random foregrounds and its power), the GOA files

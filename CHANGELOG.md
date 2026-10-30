@@ -59,6 +59,22 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
   apart) is counted in the orthogroup with the highest ID, whatever the row order of
   `Orthogroups.tsv`, and the run names it.
 - The items of each term in the JSON response are sorted.
+- The GO Excel of one analysis is no longer read for another: opening another analysis left the
+  previous one's, and loading the sets used its orthogroups. The Excel records the analysis it was
+  built for, and loading, running, the annotation figure and the download refuse another's (an
+  Excel built before this version asks for the GOA files to be downloaded once again).
+- Sets loaded before the GOA files are downloaded again are refused at the run and marked as not
+  loaded on the page.
+- Orthogroup cells longer than an Excel cell (32,767 characters, families of more than about 1,200
+  proteins of one species) were cut, and the members past the cut were not found; the cells are now
+  read from `Orthogroups.tsv`.
+- JGI (`jgi|Aspni7|1234|…`), GI (`gi|…|ref|NP_207527.1|`) and PDB (`pdb|1ABC|A`) identifiers are
+  read by the field that names the protein; a JGI proteome became a single identifier.
+- An identifier in the proteomes of two species (two genomes with the same Prokka prefix) is
+  reported when the lists are loaded.
+- `max_terms` sent as text is applied.
+- The note shown when no term is significant per orthogroup says which p-values were used, and when
+  the number of permutations keeps every q above the threshold.
 
 ### Added
 - The results Excel lists the proteins (or orthogroups, and the pasted identifiers behind each) of
@@ -67,6 +83,9 @@ setting, return the same terms, counts, p- and q-values. No part of the statisti
   themselves and which get it through their orthologues only; the table shows the two counts.
 - Provenance: a SHA-256 of the pasted background in its order, which per-orthogroup permutations
   depend on.
+- The results Excel has a `significant` column, and the Provenance sheet the run's warnings and the
+  scope of "Use all GOA files". The table's CSV/TSV export adds the raw p-value, `p_hypergeom` and
+  `significant`.
 - Validation README: how recovery with a species hidden depends on the kind of donor annotations,
   and that the order of the pasted background can move terms near the threshold.
 - Error codes (`ERR_…`) for every error of the Gene Ontology page.
