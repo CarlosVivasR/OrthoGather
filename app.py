@@ -4560,6 +4560,16 @@ def gene_ontology_analysis():
                         f"{len(testable) / (n_perm + 1):.2g} for one term at the smallest p-value, "
                         f"1/{n_perm + 1}; m/(k({n_perm} + 1)) when k of the m = {len(testable)} "
                         f"terms share it. Terms at that floor cannot be ranked against each other."))
+            if bg_mode == "ids" and session.get("background_input"):
+                # Per orthogroup, the permutations draw from the background in
+                # the order it was pasted, so another order gives other p-values
+                # near the threshold. The fingerprint pins the list and its order.
+                bg_pasted = session["background_input"]
+                prov_rows.append((
+                    "Background as pasted (SHA-256, in pasted order)",
+                    hashlib.sha256("\n".join(bg_pasted).encode()).hexdigest()
+                    + f" ({len(bg_pasted)} identifiers as read, duplicates removed, one per line "
+                      f"joined by newlines)"))
             if g.get("files"):
                 # EBI regenerates the GOA files under the same names: the
                 # fingerprint pins the annotations this run used.
