@@ -62,3 +62,10 @@ def test_different_identifiers_read_as_one_are_reported():
 def test_plain_duplicates_are_not_collisions():
     parsed = parse_identifier_list(["sp|P12345|A_ECOLI", "P12345", "sp|P12345|A_ECOLI", "q67890", "Q67890"])
     assert parsed["collisions"] == []
+
+
+def test_an_isoform_and_its_canonical_entry_are_not_a_collision():
+    # UniProt FASTA with isoforms: the merge is intended and has its own note.
+    for pair in (["sp|Q9H0H5|RGAP1_HUMAN", "sp|Q9H0H5-2|RGAP1_HUMAN"],
+                 ["sp|Q9H0H5-2|RGAP1_HUMAN", "sp|Q9H0H5|RGAP1_HUMAN"]):
+        assert parse_identifier_list(pair)["collisions"] == []

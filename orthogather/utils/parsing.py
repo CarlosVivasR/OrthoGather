@@ -126,7 +126,7 @@ def parse_identifier_list(text_or_list) -> dict:
         lines = [str(x) for x in text_or_list]
     else:
         lines = str(text_or_list).splitlines()
-    seen, first = set(), {}
+    seen, first, first_changes = set(), {}, {}
     in_record = False
     for line in (l for chunk in lines for l in chunk.splitlines()):
         line = line.strip()
@@ -162,11 +162,14 @@ def parse_identifier_list(text_or_list) -> dict:
                 # Two different FASTA identifiers read as one: a format whose
                 # protein field this parser does not know would collapse a
                 # whole proteome this way.
-                if "fasta_header" in changes and first[acc] != raw and "|" in first[acc]:
+                if ("fasta_header" in changes and "isoform" not in changes
+                        and first[acc] != raw and "|" in first[acc]
+                        and "isoform" not in first_changes[acc]):
                     out["collisions"].append((first[acc], raw, acc))
                 continue
             seen.add(acc)
             first[acc] = raw
+            first_changes[acc] = changes
             out["ids"].append(acc)
     return out
 
