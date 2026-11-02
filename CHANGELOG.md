@@ -4,7 +4,7 @@ Notable changes to OrthoGather. Versions are tagged `vMAJOR.MINOR.PATCH`, and ev
 1.1.1 is archived on Zenodo (all versions:
 [10.5281/zenodo.18510910](https://doi.org/10.5281/zenodo.18510910)).
 
-## 2.2.1 (not released yet)
+## 2.2.1 (2026-11-02)
 
 A maintenance release. The worked example and every analysis of proteomes with UniProt accessions give
 the same results as in 2.2.0 (checked on 66 analyses in every counting, expansion, background and

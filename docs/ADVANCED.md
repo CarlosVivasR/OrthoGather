@@ -1,8 +1,7 @@
 # OrthoGather: advanced notes
 
 This page collects details that most users do not need: the enrichment test settings, OrthoFinder
-thread settings, disk use, the repository layout, the error codes and
-the test suite. For installation and use, see the [README](../README.md) and the
+thread settings, disk use, the error codes and the test suite. For installation and use, see the [README](../README.md) and the
 [installation guide](Installation_guide.pdf).
 
 ## Enrichment test
@@ -113,18 +112,7 @@ the cache there).
 
 ## Repository layout
 
-| Path | Contents |
-|---|---|
-| `app.py` | The Flask application: routes, analysis steps and exports |
-| `orthogather/` | Core modules: catalogue, GOA parsing, OrthoXML import, history, error codes |
-| `templates/`, `static/` | Web pages, styles, scripts and images. `static/Orthogroups.zip` holds the Preselected Dataset, `static/Proteomes_json/` the proteome catalogue and `static/vendor/` the bundled UpSetJS and its licence |
-| `go-basic.obo` | The Gene Ontology release used for enrichment, read by the application from the repository root |
-| `example_analysis/` | The worked example from the paper, as exported by the application |
-| `installers/` | The macOS and Windows installers (see [installers/README.md](../installers/README.md)) |
-| `docs/` | The installation guide (PDF and HTML) and this page |
-| `tests/`, `tools/` | The test suite and maintenance scripts (catalogue building, end-to-end checks, tutorial screenshots) |
-| `environment.yml`, `requirements*.txt` | Conda environment and pip requirements |
-| `CITATION.cff`, `.zenodo.json` | Citation metadata for GitHub and Zenodo |
+See [Repository layout](../README.md#repository-layout) in the README.
 
 ## Error codes
 

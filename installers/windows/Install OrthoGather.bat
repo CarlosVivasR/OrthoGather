@@ -20,7 +20,7 @@ set "REPO=CarlosVivasR/OrthoGather"
 REM The application and its Linux setup come from the latest published release
 REM (a vX.Y.Z tag), not from the tip of main; FALLBACK_TAG is used only if
 REM GitHub's release list cannot be read.
-set "FALLBACK_TAG=v2.2.0"
+set "FALLBACK_TAG=v2.2.1"
 set "OGHOME=%LOCALAPPDATA%\OrthoGather"
 set "LOG=%OGHOME%\install-log.txt"
 set "STATE=%OGHOME%\install_state.txt"

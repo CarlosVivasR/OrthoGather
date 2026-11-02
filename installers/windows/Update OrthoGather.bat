@@ -20,7 +20,7 @@ set "REPO=CarlosVivasR/OrthoGather"
 REM --- The update comes from the latest published release (a vX.Y.Z tag), not
 REM     from the tip of main; FALLBACK_TAG is used only if GitHub's release list
 REM     cannot be read. ----------------------------------------------------------
-set "FALLBACK_TAG=v2.2.0"
+set "FALLBACK_TAG=v2.2.1"
 
 echo(
 echo   ============================================================

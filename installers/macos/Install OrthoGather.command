@@ -19,7 +19,7 @@ APP_DIR="${ORTHOGATHER_DIR:-$HOME/Applications/OrthoGather}"  # override for tes
 # The application comes from the latest published release (a vX.Y.Z tag), not
 # from the tip of main, so every installation is a version that was tested and
 # archived on Zenodo. ORTHOGATHER_REF installs another tag, or a branch.
-FALLBACK_TAG="v2.2.0"   # used only if GitHub's release list cannot be read
+FALLBACK_TAG="v2.2.1"   # used only if GitHub's release list cannot be read
 latest_release_tag() {
   curl -fsSL --retry 3 "https://api.github.com/repos/${REPO}/releases?per_page=30" 2>/dev/null \
     | grep -o 'tag_name.: *.v[0-9][0-9.]*' | grep -o 'v[0-9][0-9.]*$' | head -1

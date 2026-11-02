@@ -67,8 +67,8 @@ prompts, with troubleshooting and uninstall instructions; it is also available a
 - An internet connection, to download proteomes and GO annotation files and to load the plotting
   libraries, which come from public CDNs.
 
-The six-species example from the paper took under three minutes on an Apple M4, 1 min 47 s of it
-in OrthoFinder, with a peak of about 1.7 GB of memory, of which about 1.1 GB is the application's
+The six-species example from the paper took about three minutes on an Apple M4, 1.8–2.5 min of it
+in OrthoFinder across runs, with a peak of about 1.7 GB of memory, of which about 1.1 GB is the application's
 baseline with the proteome catalogue loaded; download time depends on your connection.
 
 ### Installers for macOS and Windows
@@ -91,7 +91,7 @@ Conda is available from [Miniforge](https://github.com/conda-forge/miniforge); w
 replace `conda` with `micromamba`. A plain clone is enough; Git LFS is not needed.
 
 ```bash
-git clone --branch v2.2.0 https://github.com/CarlosVivasR/OrthoGather.git
+git clone --branch v2.2.1 https://github.com/CarlosVivasR/OrthoGather.git
 cd OrthoGather
 conda env create -f environment.yml
 conda activate orthogather
@@ -102,8 +102,8 @@ python app.py
 the versions each release was tested with; the environment runs natively on Apple Silicon. This is
 the supported route on Linux.
 
-`--branch v2.2.0` installs that release; use `--branch v2.1.0` for the version described in the
-preprint, or leave it out for the development version on `main`. To change version later, run
+`--branch v2.2.1` installs that release, the version described in the paper; use `--branch v2.1.0`
+for the version described in the preprint, or leave it out for the development version on `main`. To change version later, run
 `git fetch --tags` and `git checkout` with the new tag in the project folder, then
 `conda env update -f environment.yml --prune`.
 
@@ -184,10 +184,11 @@ each orthogroup the annotations of all its members, paralogues included, in the 
 file, so proteins without annotations of their own are tested through their orthologues. No
 annotation is transferred to any protein, but some of the annotations counted apply only to the
 other species; check that the enriched terms make sense for your organism. How much this recovers
-depends on the annotations of the other species, most of them electronic: with *E. coli* hidden in
-the [validation benchmark](docs/validation/README.md#a-species-without-annotation), 27 of 40 known
-processes came back with the exact term using every annotation, and 1 of 40 using experimental
-annotations only. Counted per orthogroup, the permutation p-values also depend on the order of the
+depends on how closely related and how well annotated the other species are, and mostly on their
+inferred (phylogenetic and electronic) annotations rather than experimental ones: with *E. coli*
+hidden in the [validation benchmark](docs/validation/README.md#a-species-without-annotation), 27 of
+40 known processes came back with the exact term using every annotation, 19 without the electronic
+ones and 1 using experimental annotations only. Counted per orthogroup, the permutation p-values also depend on the order of the
 pasted background, so terms near the threshold can change if the same list is pasted in another
 order. The provenance sheet of each results file records these settings and a SHA-256 of the
 background in its order.
@@ -195,9 +196,10 @@ background in its order.
 ## Reproducing the example in the paper
 
 [`example_analysis/`](example_analysis/) holds the worked example of Supplementary File S1: the
-input lists and every file exported by OrthoGather v2.1.0
-([10.5281/zenodo.22738813](https://doi.org/10.5281/zenodo.22738813)), the version described in the
-paper. Its [README](example_analysis/README.md) gives the steps button by button: a New Analysis
+input lists, how they were built from the study's supplementary data, and every file exported by
+OrthoGather v2.1.0 ([10.5281/zenodo.22738813](https://doi.org/10.5281/zenodo.22738813)); version
+2.2.1 reproduces them exactly (`python docs/validation/verify_example.py`). Its
+[README](example_analysis/README.md) gives the steps button by button: a New Analysis
 of six UniProt reference proteomes (*M. smegmatis* mc²155, *M. abscessus* ATCC 19977,
 *A. baumannii* ATCC 19606, *B. cenocepacia* J2315, *E. coli* K-12 and *P. aeruginosa* PAO1), then
 GO enrichment of the 306 proteins decreased and 185 increased in abundance against the 3,181
@@ -210,11 +212,35 @@ the example's README).
 
 - [Installation guide](docs/Installation_guide.pdf) ([web version](https://carlosvivasr.github.io/OrthoGather/INSTALL.html)):
   installers, Conda, troubleshooting and uninstalling.
-- [docs/ADVANCED.md](docs/ADVANCED.md): enrichment test settings, OrthoFinder threads, repository
-  layout, error codes and tests.
+- [docs/ADVANCED.md](docs/ADVANCED.md): enrichment test settings, OrthoFinder threads, disk use,
+  error codes and tests.
+- [docs/validation/README.md](docs/validation/README.md): what each validation checks, how to run it
+  and its results.
 - [example_analysis/README.md](example_analysis/README.md): the worked example, step by step.
 - The tutorial inside the application, in the sidebar.
 - [CHANGELOG.md](CHANGELOG.md): changes in each version.
+
+## Repository layout
+
+| Path | What it holds |
+|---|---|
+| `app.py` | The application (Flask): the pages, the analysis steps and the exports. Start it with `python app.py`. |
+| `orthogather/` | The core modules: proteome catalogue and species matching, GOA files and evidence settings, orthogroup permutation, OrthoXML import, history, error codes. |
+| `templates/`, `static/` | The web interface: pages, styles, scripts and images. `static/Orthogroups.zip` is the Preselected Dataset, `static/Proteomes_json/` the catalogue of UniProt proteomes, `static/proteins/` the structures drawn on the home page and `static/vendor/` the bundled UpSetJS. |
+| `go-basic.obo` | The Gene Ontology release used for enrichment. |
+| `example_analysis/` | The worked example of the paper: input lists, every exported file and a step-by-step README. |
+| `docs/` | The installation guide (PDF, and HTML for the [web version](https://carlosvivasr.github.io/OrthoGather/INSTALL.html)), [ADVANCED.md](docs/ADVANCED.md) and the README screenshot. |
+| `docs/validation/` | The scripts that check the statistics and reproduce the paper's numbers, the GOA files of the example (28 July 2026) and their results. |
+| `installers/` | The macOS and Windows installers and how releases are built ([installers/README.md](installers/README.md)). |
+| `tests/` | The automated tests (`pytest tests/`), run by GitHub Actions on every change (`.github/workflows/`). |
+| `tools/` | Maintenance scripts: catalogue building, installation-guide PDF, tutorial screenshots, an end-to-end check. |
+| `environment.yml`, `requirements*.txt` | The pinned Conda environment and the pip requirements. |
+| `CHANGELOG.md`, `CITATION.cff`, `.zenodo.json`, `LICENSE`, `THIRD_PARTY_LICENSES.md`, `CONTRIBUTING.md` | Changes per version, citation metadata, licences and how to contribute. |
+
+Folders created while you work are not part of the repository: downloaded proteomes and the
+current orthogroups (`Proteomas/`), GOA files (`GOAfiles/`), the provenance of the current run
+(`run_provenance/`), exported results (`static/results/`) and sessions (`.orthogather_sessions/`). The
+history of runs is kept in `~/.orthogather/runs`, outside the project folder.
 
 ## Getting help and contributing
 
@@ -232,9 +258,9 @@ OrthoGather is maintained by its authors at University College Dublin. Releases 
 change, a GitHub Actions workflow runs them on Linux and macOS in the pinned environment of
 `environment.yml`, together with a check of the 35 numbers of the worked example that the paper
 quotes; another workflow checks the logic of the Windows installer on Windows. The validation of the
-statistics (the worked example, random foregrounds, a species with its annotations hidden, and every
-combination of the Gene Ontology settings) is in [`docs/validation/`](docs/validation/), with its
-scripts and results. How to work on the code and how releases are made is described in
+statistics (the worked example, random foregrounds, a species with its annotations hidden, every
+combination of the Gene Ontology settings, an independent recomputation and a comparison with
+clusterProfiler) is in [`docs/validation/`](docs/validation/), with its scripts and results. How to work on the code and how releases are made is described in
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Citation
