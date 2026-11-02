@@ -123,8 +123,9 @@ works. To test OrthoFinder as well, run a New Analysis of two small proteomes, `
   fibrosis infection and antimicrobial resistance.
 - **External Upload**: a `.zip` of the files in an OrthoFinder `Orthogroups` folder, with
   `Orthogroups.tsv` and `Orthogroups.GeneCount.tsv` at the top level, or an OrthoXML file, whose
-  hierarchical groups are flattened to top-level orthogroups. GO enrichment needs UniProt
-  accessions as identifiers; OMA, OrthoDB and Ensembl exports use their own.
+  hierarchical groups are flattened to top-level orthogroups. GO annotations are matched to UniProt
+  accessions; OMA, OrthoDB and Ensembl exports use their own identifiers, which get annotation only
+  through orthologues that have UniProt accessions when the background is expanded.
 
 For isolates that are not in UniProt, run OrthoFinder on their predicted proteomes and upload the
 result; only proteins with UniProt accessions contribute GO annotations.

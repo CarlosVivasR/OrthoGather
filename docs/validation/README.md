@@ -6,7 +6,7 @@ folder, so they never touch an installation's history or data. Every input is in
 the worked example's OrthoFinder export (`example_analysis/1_orthofinder/`) and the EBI GOA files it
 was analysed with, generated on 28 July 2026 (`data/goa_2026-07-28/`, CC BY 4.0, UniProt-GOA).
 
-The results below were produced with OrthoGather 2.2.0 in the pinned environment of
+The results below were produced with OrthoGather 2.2.1 in the pinned environment of
 `environment.yml`; the JSON files in `results/` hold every number.
 
 | Validation | Question | Result |
@@ -16,6 +16,7 @@ The results below were produced with OrthoGather 2.2.0 in the pinned environment
 | [Hidden annotations](#a-species-without-annotation) | Does expansion recover the functions of a species without annotation? | In an ideal case, 27 of 40 *E. coli* processes with the exact term; 2% of random lists |
 | [Every combination of settings](#every-combination-of-settings) | Does any combination break a rule? | 1,296 combinations, 0 failures |
 | [Independent implementation](#independent-implementation) | Do the statistics match code written without GOATOOLS? | Identical in every setting tested |
+| [Another tool](#another-tool) | Does another enrichment tool return the example's terms from the same data? | clusterProfiler returns the 21 and the 1 terms |
 | [Sensitivity of the example](#sensitivity-of-the-example) | How do the example's results change with the settings? | Table S6 of Supplementary File S1 |
 
 Run any of them from the repository root, in the `orthogather` environment:
@@ -108,19 +109,23 @@ Limits:
   it, so recovery is optimistic for a species without close annotated relatives.
 - Annotations of other lineages are counted too: flagellar motility and the nucleus appear through
   *E. coli* and *P. aeruginosa* annotations, with or without *M. smegmatis*' own.
-- Recovery rests on the donors' electronic annotations, which are 87% of their biological-process
-  annotations. A re-run of the *E. coli* benchmark with donor annotations removed by kind (exact
-  term, pure foregrounds):
+- Recovery rests on the donors' inferred annotations, phylogenetic (IBA) and electronic, rather than
+  on their experimental ones; electronic annotations are 88% of their biological-process annotations
+  (31,046 of 35,458 lines). The pure foregrounds with donor annotations restricted by kind
+  (`expansion_benchmark.py donors`, exact term):
 
   | Donor annotations | Exact term |
   |---|---|
   | All | 27/40 |
   | Without those citing an *E. coli* protein in with/from | 27/40 |
   | Also without IBA and TreeGrafter (GO_REF:0000118) | 24/40 |
-  | Experimental only | 1/40 |
+  | The Non-IEA setting (no IEA; IBA kept) | 19/40 |
+  | The Experimental only setting | 1/40 |
 
-  Annotations derived from *E. coli* itself do not explain the result. A species whose relatives
-  have experimental annotations only would get almost nothing back.
+  Annotations derived from *E. coli* itself do not explain the result, and removing the electronic
+  annotations alone keeps most of it; it is lost when the phylogenetic ones go too. A species whose
+  relatives have experimental annotations only would get almost nothing back. Results:
+  [`results/expansion_benchmark/ecoli_donors.json`](results/expansion_benchmark/ecoli_donors.json).
 - Counted per orthogroup, the permutation p-values depend on the order in which the background is
   pasted, as on the seed: terms near the threshold can enter or leave with another order. The
   Provenance sheet of each results file records a SHA-256 of the background in its order, so a
@@ -191,6 +196,27 @@ generator (largest |z| 2.0 over the 20 terms, with the application's 21,760 shuf
 brute-force ones).
 
 Results: [`results/independent_check.json`](results/independent_check.json).
+
+## Another tool
+
+`clusterprofiler_check.R` tests the worked example's two lists with clusterProfiler's `enricher()`
+(hypergeometric test, Benjamini–Hochberg, gene sets of 10 to 500) against the same background and
+the same *M. smegmatis* GOA file, with ancestors taken from GO.db rather than from the GO release
+OrthoGather uses and no minimum depth, so the tested families differ a little (551 and 534 terms).
+Corrected once across the three ontologies, as OrthoGather does, it returns the 21 terms of the
+decreased set and three related ones close to the threshold (*O*-acyltransferase activity,
+acyltransferase activity and phospholipid metabolic process, FDR 0.014–0.048), and the single term of
+the increased set, protein metabolic process. Corrected separately for each ontology, as
+clusterProfiler's `enrichGO()` does, it returns two molecular-function terms for the decreased set
+and the same term for the increased set. It needs R with clusterProfiler, GO.db and jsonlite
+(Bioconductor):
+
+```bash
+Rscript docs/validation/clusterprofiler_check.R
+```
+
+Results: [`results/clusterprofiler/summary.json`](results/clusterprofiler/summary.json), with the full
+tables beside it.
 
 ## Sensitivity of the example
 

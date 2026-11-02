@@ -1,0 +1,64 @@
+{
+  "clusterProfiler": "4.18.4",
+  "GO.db": "3.22.0",
+  "decreased_306": {
+    "orthogather_terms": 21,
+    "pooled": {
+      "tested": 551,
+      "significant": 24,
+      "orthogather_terms_returned": 21,
+      "only_clusterprofiler": [
+        {
+          "ID": "GO:0008374",
+          "Description": "O-acyltransferase activity",
+          "p.adjust": 0.014399
+        },
+        {
+          "ID": "GO:0016746",
+          "Description": "acyltransferase activity",
+          "p.adjust": 0.045892
+        },
+        {
+          "ID": "GO:0006644",
+          "Description": "phospholipid metabolic process",
+          "p.adjust": 0.048295
+        }
+      ]
+    },
+    "per_ontology": {
+      "significant": [
+        {
+          "ID": "GO:0008374",
+          "Description": "O-acyltransferase activity",
+          "ONT": "MF",
+          "p.adjust": 0.006072
+        },
+        {
+          "ID": "GO:0016411",
+          "Description": "acylglycerol O-acyltransferase activity",
+          "ONT": "MF",
+          "p.adjust": 0.006072
+        }
+      ]
+    }
+  },
+  "increased_185": {
+    "orthogather_terms": 1,
+    "pooled": {
+      "tested": 534,
+      "significant": 1,
+      "orthogather_terms_returned": 1,
+      "only_clusterprofiler": []
+    },
+    "per_ontology": {
+      "significant": [
+        {
+          "ID": "GO:0019538",
+          "Description": "protein metabolic process",
+          "ONT": "BP",
+          "p.adjust": 0.017797
+        }
+      ]
+    }
+  }
+}

@@ -19,6 +19,19 @@ UniProt accessions. Because proteins that increase and proteins that decrease in
 opposite biological responses, the 491 differentially abundant proteins were split by direction and
 analysed as two independent foregrounds against a common background.
 
+How the lists were built from the supplementary workbook of Giddey et al.:
+- **Background:** the 3,218 protein groups of the sheet *Observed Proteins by Replicate*, split into
+  their accessions (3,234), less the 53 contaminant (`CON__`) and reversed-decoy (`REV__`) entries
+  of MaxQuant: 3,181 UniProt accessions.
+- **Foreground:** the proteins of the sheet *All Differentially Expressed* at any of the three time
+  points (fold-change test; the proteins of the sheet *Presence and Absence Analysis* are not
+  included), with protein groups split into their accessions and contaminants left out. Ten proteins
+  change in opposite directions at different time points; each was assigned to the direction of its
+  largest change. Two identifiers differ from that rule: A0QPX2 (MSMEG_0549, decreased at the third
+  time point) was left out when the lists were assembled, and A0R0Y4 comes only from the group
+  "A0QU18; A0R0Y4" of the differential sheet and is not among the observed proteins, so it is not in
+  the background and is not tested. Adding A0QPX2 to the decreased list leaves the 21 terms unchanged.
+
 ## Contents
 
 ### `input_dataset/`

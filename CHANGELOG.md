@@ -48,8 +48,16 @@ evidence setting); the statistical method is unchanged.
 - The hidden-annotation benchmark draws its 40 *E. coli* processes in a fixed order, so every run
   regenerates the same figures: 27 of 40 recovered with the exact term, 37 and 35 (pure and
   diluted) counting close relatives.
+- `expansion_benchmark.py donors` repeats the benchmark with the donors' annotations restricted by
+  kind: 27, 27, 24, 19 (Non-IEA setting) and 1 (Experimental only) of 40.
+- `docs/validation/clusterprofiler_check.R` tests the worked example with clusterProfiler on the same
+  data: the 21 and the 1 terms are returned.
 - Validation README: what recovery through orthologues depends on, how the order of a pasted
   background can move terms close to the threshold, and the scope of each check.
+- `example_analysis/README.md`: how the example's foreground and background were built from the
+  supplementary workbook of Giddey et al. 2017.
+- The note after an OrthoXML upload, the README and the tutorial say that non-UniProt identifiers get
+  annotation only through orthologues that have UniProt accessions.
 
 ### Removed
 - Unused code, routes and files, and the guided Conda scripts (the installers and the README cover

@@ -632,10 +632,12 @@ def cargar_carpeta():
                             f"{len(ids) - n_uniprot:,} of the {len(ids):,} identifiers in this "
                             f"OrthoXML file are not UniProt accessions (for example "
                             f"{next(a for a in ids if not _ACCESSION_RE.fullmatch(a))}). "
-                            f"The orthogroup analyses work with them, but GO enrichment and the "
-                            f"protein filter match UniProt accessions, so those identifiers will "
-                            f"not be found there. Map them to UniProt accessions before export "
-                            f"to use the Gene Ontology module.")
+                            f"The orthogroup analyses work with them, but GO annotations and the "
+                            f"protein filter match UniProt accessions, so those identifiers carry "
+                            f"no annotation of their own; with the background expanded to "
+                            f"orthogroups they are tested only through orthologues that have UniProt "
+                            f"accessions. Map them to UniProt accessions before export to use the "
+                            f"Gene Ontology module fully.")
                     logging.info(
                         f"[upload] OrthoXML parsed: {xml_meta['n_orthogroups']} OGs, "
                         f"{xml_meta['n_species']} species, "

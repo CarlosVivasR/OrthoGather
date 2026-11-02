@@ -159,10 +159,11 @@
             OrthoFinder produces. Each top-level <code>&lt;orthologGroup&gt;</code> becomes one
             orthogroup, so a hierarchical group exported at its deepest level becomes one large
             orthogroup. The orthogroup analyses (UpSet plots, history, compare) work with any
-            identifiers. GO enrichment and the protein filter match <strong>UniProt
+            identifiers. GO annotations and the protein filter match <strong>UniProt
             accessions</strong>: OMA, OrthoDB and Ensembl write their own identifiers (for example
-            OMA's <code>ECOLI03899</code> for UniProt <code>P0A6F5</code>), so map them to UniProt
-            accessions before exporting if you want to use the Gene Ontology module. OrthoGather
+            OMA's <code>ECOLI03899</code> for UniProt <code>P0A6F5</code>), which get annotation only
+            through orthologues that have UniProt accessions when the background is expanded, so
+            map them to UniProt accessions before exporting to use the Gene Ontology module fully. OrthoGather
             warns you after the upload when most identifiers are not UniProt accessions.
           </p>
         </section>

@@ -1,0 +1,1274 @@
+{
+ "all": {
+  "evidence_setting": "all",
+  "annotations_removed": null,
+  "summary": {
+   "exact": 27,
+   "descendant": 0,
+   "close ancestor": 10,
+   "no": 3
+  },
+  "rows": [
+   {
+    "GO": "GO:0009244",
+    "name": "lipopolysaccharide core region biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0015748",
+    "name": "organophosphate ester transport",
+    "recovery": "close ancestor",
+    "n_significant": 7
+   },
+   {
+    "GO": "GO:0006352",
+    "name": "DNA-templated transcription initiation",
+    "recovery": "close ancestor",
+    "n_significant": 74
+   },
+   {
+    "GO": "GO:1901293",
+    "name": "nucleoside phosphate biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 107
+   },
+   {
+    "GO": "GO:0006631",
+    "name": "fatty acid metabolic process",
+    "recovery": "exact",
+    "n_significant": 38
+   },
+   {
+    "GO": "GO:0034220",
+    "name": "monoatomic ion transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 72
+   },
+   {
+    "GO": "GO:0009166",
+    "name": "nucleotide catabolic process",
+    "recovery": "exact",
+    "n_significant": 74
+   },
+   {
+    "GO": "GO:0072330",
+    "name": "monocarboxylic acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 38
+   },
+   {
+    "GO": "GO:1901678",
+    "name": "iron coordination entity transport",
+    "recovery": "exact",
+    "n_significant": 32
+   },
+   {
+    "GO": "GO:0019320",
+    "name": "hexose catabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 50
+   },
+   {
+    "GO": "GO:0017148",
+    "name": "negative regulation of translation",
+    "recovery": "close ancestor",
+    "n_significant": 45
+   },
+   {
+    "GO": "GO:0034219",
+    "name": "carbohydrate transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 20
+   },
+   {
+    "GO": "GO:0046496",
+    "name": "nicotinamide nucleotide metabolic process",
+    "recovery": "exact",
+    "n_significant": 93
+   },
+   {
+    "GO": "GO:0042908",
+    "name": "xenobiotic transport",
+    "recovery": "exact",
+    "n_significant": 32
+   },
+   {
+    "GO": "GO:0034614",
+    "name": "cellular response to reactive oxygen species",
+    "recovery": "close ancestor",
+    "n_significant": 11
+   },
+   {
+    "GO": "GO:0009894",
+    "name": "regulation of catabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 7
+   },
+   {
+    "GO": "GO:0006766",
+    "name": "vitamin metabolic process",
+    "recovery": "exact",
+    "n_significant": 63
+   },
+   {
+    "GO": "GO:0009252",
+    "name": "peptidoglycan biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 51
+   },
+   {
+    "GO": "GO:0009432",
+    "name": "SOS response",
+    "recovery": "exact",
+    "n_significant": 51
+   },
+   {
+    "GO": "GO:0030030",
+    "name": "cell projection organization",
+    "recovery": "exact",
+    "n_significant": 19
+   },
+   {
+    "GO": "GO:0070925",
+    "name": "organelle assembly",
+    "recovery": "exact",
+    "n_significant": 47
+   },
+   {
+    "GO": "GO:0006972",
+    "name": "hyperosmotic response",
+    "recovery": "close ancestor",
+    "n_significant": 32
+   },
+   {
+    "GO": "GO:0009411",
+    "name": "response to UV",
+    "recovery": "no",
+    "n_significant": 11
+   },
+   {
+    "GO": "GO:0051260",
+    "name": "protein homooligomerization",
+    "recovery": "no",
+    "n_significant": 90
+   },
+   {
+    "GO": "GO:0042398",
+    "name": "modified amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:0009073",
+    "name": "aromatic amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 44
+   },
+   {
+    "GO": "GO:0015031",
+    "name": "protein transport",
+    "recovery": "exact",
+    "n_significant": 27
+   },
+   {
+    "GO": "GO:0006869",
+    "name": "lipid transport",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:0019321",
+    "name": "pentose metabolic process",
+    "recovery": "exact",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0010212",
+    "name": "response to ionizing radiation",
+    "recovery": "no",
+    "n_significant": 15
+   },
+   {
+    "GO": "GO:0071470",
+    "name": "cellular response to osmotic stress",
+    "recovery": "close ancestor",
+    "n_significant": 30
+   },
+   {
+    "GO": "GO:0009063",
+    "name": "amino acid catabolic process",
+    "recovery": "exact",
+    "n_significant": 37
+   },
+   {
+    "GO": "GO:0008654",
+    "name": "phospholipid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:0007165",
+    "name": "signal transduction",
+    "recovery": "exact",
+    "n_significant": 55
+   },
+   {
+    "GO": "GO:0000154",
+    "name": "rRNA modification",
+    "recovery": "exact",
+    "n_significant": 37
+   },
+   {
+    "GO": "GO:0043708",
+    "name": "cell adhesion involved in biofilm formation",
+    "recovery": "close ancestor",
+    "n_significant": 13
+   },
+   {
+    "GO": "GO:0016226",
+    "name": "iron-sulfur cluster assembly",
+    "recovery": "exact",
+    "n_significant": 10
+   },
+   {
+    "GO": "GO:0043242",
+    "name": "negative regulation of protein-containing complex disassembly",
+    "recovery": "close ancestor",
+    "n_significant": 23
+   },
+   {
+    "GO": "GO:0022411",
+    "name": "cellular component disassembly",
+    "recovery": "exact",
+    "n_significant": 45
+   },
+   {
+    "GO": "GO:0006650",
+    "name": "glycerophospholipid metabolic process",
+    "recovery": "exact",
+    "n_significant": 16
+   }
+  ]
+ },
+ "without_ecoli_citations": {
+  "evidence_setting": "all",
+  "annotations_removed": {
+   "4412838.A_baumannii_ATCC_19606_2.goa": 0,
+   "31277.B_cepacia.goa": 3,
+   "30878.M_abscessus.goa": 2,
+   "25827.M_smegmatis.goa": 13,
+   "36.P_aeruginosa_LMG_12228.goa": 6368
+  },
+  "summary": {
+   "exact": 27,
+   "descendant": 0,
+   "close ancestor": 10,
+   "no": 3
+  },
+  "rows": [
+   {
+    "GO": "GO:0009244",
+    "name": "lipopolysaccharide core region biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0015748",
+    "name": "organophosphate ester transport",
+    "recovery": "close ancestor",
+    "n_significant": 4
+   },
+   {
+    "GO": "GO:0006352",
+    "name": "DNA-templated transcription initiation",
+    "recovery": "close ancestor",
+    "n_significant": 69
+   },
+   {
+    "GO": "GO:1901293",
+    "name": "nucleoside phosphate biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 105
+   },
+   {
+    "GO": "GO:0006631",
+    "name": "fatty acid metabolic process",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:0034220",
+    "name": "monoatomic ion transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 55
+   },
+   {
+    "GO": "GO:0009166",
+    "name": "nucleotide catabolic process",
+    "recovery": "exact",
+    "n_significant": 74
+   },
+   {
+    "GO": "GO:0072330",
+    "name": "monocarboxylic acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 32
+   },
+   {
+    "GO": "GO:1901678",
+    "name": "iron coordination entity transport",
+    "recovery": "exact",
+    "n_significant": 28
+   },
+   {
+    "GO": "GO:0019320",
+    "name": "hexose catabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 50
+   },
+   {
+    "GO": "GO:0017148",
+    "name": "negative regulation of translation",
+    "recovery": "close ancestor",
+    "n_significant": 42
+   },
+   {
+    "GO": "GO:0034219",
+    "name": "carbohydrate transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 20
+   },
+   {
+    "GO": "GO:0046496",
+    "name": "nicotinamide nucleotide metabolic process",
+    "recovery": "exact",
+    "n_significant": 92
+   },
+   {
+    "GO": "GO:0042908",
+    "name": "xenobiotic transport",
+    "recovery": "exact",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:0034614",
+    "name": "cellular response to reactive oxygen species",
+    "recovery": "close ancestor",
+    "n_significant": 11
+   },
+   {
+    "GO": "GO:0009894",
+    "name": "regulation of catabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 7
+   },
+   {
+    "GO": "GO:0006766",
+    "name": "vitamin metabolic process",
+    "recovery": "exact",
+    "n_significant": 64
+   },
+   {
+    "GO": "GO:0009252",
+    "name": "peptidoglycan biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 49
+   },
+   {
+    "GO": "GO:0009432",
+    "name": "SOS response",
+    "recovery": "exact",
+    "n_significant": 51
+   },
+   {
+    "GO": "GO:0030030",
+    "name": "cell projection organization",
+    "recovery": "exact",
+    "n_significant": 15
+   },
+   {
+    "GO": "GO:0070925",
+    "name": "organelle assembly",
+    "recovery": "exact",
+    "n_significant": 45
+   },
+   {
+    "GO": "GO:0006972",
+    "name": "hyperosmotic response",
+    "recovery": "close ancestor",
+    "n_significant": 28
+   },
+   {
+    "GO": "GO:0009411",
+    "name": "response to UV",
+    "recovery": "no",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:0051260",
+    "name": "protein homooligomerization",
+    "recovery": "no",
+    "n_significant": 93
+   },
+   {
+    "GO": "GO:0042398",
+    "name": "modified amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 26
+   },
+   {
+    "GO": "GO:0009073",
+    "name": "aromatic amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 41
+   },
+   {
+    "GO": "GO:0015031",
+    "name": "protein transport",
+    "recovery": "exact",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:0006869",
+    "name": "lipid transport",
+    "recovery": "exact",
+    "n_significant": 32
+   },
+   {
+    "GO": "GO:0019321",
+    "name": "pentose metabolic process",
+    "recovery": "exact",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0010212",
+    "name": "response to ionizing radiation",
+    "recovery": "no",
+    "n_significant": 10
+   },
+   {
+    "GO": "GO:0071470",
+    "name": "cellular response to osmotic stress",
+    "recovery": "close ancestor",
+    "n_significant": 26
+   },
+   {
+    "GO": "GO:0009063",
+    "name": "amino acid catabolic process",
+    "recovery": "exact",
+    "n_significant": 36
+   },
+   {
+    "GO": "GO:0008654",
+    "name": "phospholipid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 41
+   },
+   {
+    "GO": "GO:0007165",
+    "name": "signal transduction",
+    "recovery": "exact",
+    "n_significant": 54
+   },
+   {
+    "GO": "GO:0000154",
+    "name": "rRNA modification",
+    "recovery": "exact",
+    "n_significant": 36
+   },
+   {
+    "GO": "GO:0043708",
+    "name": "cell adhesion involved in biofilm formation",
+    "recovery": "close ancestor",
+    "n_significant": 13
+   },
+   {
+    "GO": "GO:0016226",
+    "name": "iron-sulfur cluster assembly",
+    "recovery": "exact",
+    "n_significant": 10
+   },
+   {
+    "GO": "GO:0043242",
+    "name": "negative regulation of protein-containing complex disassembly",
+    "recovery": "close ancestor",
+    "n_significant": 21
+   },
+   {
+    "GO": "GO:0022411",
+    "name": "cellular component disassembly",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:0006650",
+    "name": "glycerophospholipid metabolic process",
+    "recovery": "exact",
+    "n_significant": 17
+   }
+  ]
+ },
+ "without_ecoli_citations_iba_treegrafter": {
+  "evidence_setting": "all",
+  "annotations_removed": {
+   "4412838.A_baumannii_ATCC_19606_2.goa": 3580,
+   "31277.B_cepacia.goa": 6208,
+   "30878.M_abscessus.goa": 4280,
+   "25827.M_smegmatis.goa": 5554,
+   "36.P_aeruginosa_LMG_12228.goa": 8147
+  },
+  "summary": {
+   "exact": 24,
+   "descendant": 0,
+   "close ancestor": 10,
+   "no": 6
+  },
+  "rows": [
+   {
+    "GO": "GO:0009244",
+    "name": "lipopolysaccharide core region biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0015748",
+    "name": "organophosphate ester transport",
+    "recovery": "close ancestor",
+    "n_significant": 2
+   },
+   {
+    "GO": "GO:0006352",
+    "name": "DNA-templated transcription initiation",
+    "recovery": "close ancestor",
+    "n_significant": 65
+   },
+   {
+    "GO": "GO:1901293",
+    "name": "nucleoside phosphate biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 99
+   },
+   {
+    "GO": "GO:0006631",
+    "name": "fatty acid metabolic process",
+    "recovery": "exact",
+    "n_significant": 36
+   },
+   {
+    "GO": "GO:0034220",
+    "name": "monoatomic ion transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 47
+   },
+   {
+    "GO": "GO:0009166",
+    "name": "nucleotide catabolic process",
+    "recovery": "exact",
+    "n_significant": 65
+   },
+   {
+    "GO": "GO:0072330",
+    "name": "monocarboxylic acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:1901678",
+    "name": "iron coordination entity transport",
+    "recovery": "exact",
+    "n_significant": 26
+   },
+   {
+    "GO": "GO:0019320",
+    "name": "hexose catabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 38
+   },
+   {
+    "GO": "GO:0017148",
+    "name": "negative regulation of translation",
+    "recovery": "close ancestor",
+    "n_significant": 21
+   },
+   {
+    "GO": "GO:0034219",
+    "name": "carbohydrate transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 15
+   },
+   {
+    "GO": "GO:0046496",
+    "name": "nicotinamide nucleotide metabolic process",
+    "recovery": "exact",
+    "n_significant": 80
+   },
+   {
+    "GO": "GO:0042908",
+    "name": "xenobiotic transport",
+    "recovery": "exact",
+    "n_significant": 23
+   },
+   {
+    "GO": "GO:0034614",
+    "name": "cellular response to reactive oxygen species",
+    "recovery": "no",
+    "n_significant": 4
+   },
+   {
+    "GO": "GO:0009894",
+    "name": "regulation of catabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0006766",
+    "name": "vitamin metabolic process",
+    "recovery": "exact",
+    "n_significant": 59
+   },
+   {
+    "GO": "GO:0009252",
+    "name": "peptidoglycan biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 38
+   },
+   {
+    "GO": "GO:0009432",
+    "name": "SOS response",
+    "recovery": "close ancestor",
+    "n_significant": 38
+   },
+   {
+    "GO": "GO:0030030",
+    "name": "cell projection organization",
+    "recovery": "exact",
+    "n_significant": 19
+   },
+   {
+    "GO": "GO:0070925",
+    "name": "organelle assembly",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:0006972",
+    "name": "hyperosmotic response",
+    "recovery": "no",
+    "n_significant": 26
+   },
+   {
+    "GO": "GO:0009411",
+    "name": "response to UV",
+    "recovery": "no",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:0051260",
+    "name": "protein homooligomerization",
+    "recovery": "no",
+    "n_significant": 74
+   },
+   {
+    "GO": "GO:0042398",
+    "name": "modified amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 26
+   },
+   {
+    "GO": "GO:0009073",
+    "name": "aromatic amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 40
+   },
+   {
+    "GO": "GO:0015031",
+    "name": "protein transport",
+    "recovery": "exact",
+    "n_significant": 24
+   },
+   {
+    "GO": "GO:0006869",
+    "name": "lipid transport",
+    "recovery": "close ancestor",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0019321",
+    "name": "pentose metabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 17
+   },
+   {
+    "GO": "GO:0010212",
+    "name": "response to ionizing radiation",
+    "recovery": "no",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:0071470",
+    "name": "cellular response to osmotic stress",
+    "recovery": "close ancestor",
+    "n_significant": 28
+   },
+   {
+    "GO": "GO:0009063",
+    "name": "amino acid catabolic process",
+    "recovery": "exact",
+    "n_significant": 31
+   },
+   {
+    "GO": "GO:0008654",
+    "name": "phospholipid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 35
+   },
+   {
+    "GO": "GO:0007165",
+    "name": "signal transduction",
+    "recovery": "exact",
+    "n_significant": 55
+   },
+   {
+    "GO": "GO:0000154",
+    "name": "rRNA modification",
+    "recovery": "exact",
+    "n_significant": 37
+   },
+   {
+    "GO": "GO:0043708",
+    "name": "cell adhesion involved in biofilm formation",
+    "recovery": "close ancestor",
+    "n_significant": 14
+   },
+   {
+    "GO": "GO:0016226",
+    "name": "iron-sulfur cluster assembly",
+    "recovery": "exact",
+    "n_significant": 10
+   },
+   {
+    "GO": "GO:0043242",
+    "name": "negative regulation of protein-containing complex disassembly",
+    "recovery": "close ancestor",
+    "n_significant": 17
+   },
+   {
+    "GO": "GO:0022411",
+    "name": "cellular component disassembly",
+    "recovery": "exact",
+    "n_significant": 33
+   },
+   {
+    "GO": "GO:0006650",
+    "name": "glycerophospholipid metabolic process",
+    "recovery": "exact",
+    "n_significant": 16
+   }
+  ]
+ },
+ "non_iea_setting": {
+  "evidence_setting": "curated",
+  "annotations_removed": null,
+  "summary": {
+   "exact": 19,
+   "descendant": 0,
+   "close ancestor": 10,
+   "no": 11
+  },
+  "rows": [
+   {
+    "GO": "GO:0009244",
+    "name": "lipopolysaccharide core region biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 20
+   },
+   {
+    "GO": "GO:0015748",
+    "name": "organophosphate ester transport",
+    "recovery": "close ancestor",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:0006352",
+    "name": "DNA-templated transcription initiation",
+    "recovery": "close ancestor",
+    "n_significant": 57
+   },
+   {
+    "GO": "GO:1901293",
+    "name": "nucleoside phosphate biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 64
+   },
+   {
+    "GO": "GO:0006631",
+    "name": "fatty acid metabolic process",
+    "recovery": "exact",
+    "n_significant": 22
+   },
+   {
+    "GO": "GO:0034220",
+    "name": "monoatomic ion transmembrane transport",
+    "recovery": "exact",
+    "n_significant": 60
+   },
+   {
+    "GO": "GO:0009166",
+    "name": "nucleotide catabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 55
+   },
+   {
+    "GO": "GO:0072330",
+    "name": "monocarboxylic acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:1901678",
+    "name": "iron coordination entity transport",
+    "recovery": "exact",
+    "n_significant": 31
+   },
+   {
+    "GO": "GO:0019320",
+    "name": "hexose catabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0017148",
+    "name": "negative regulation of translation",
+    "recovery": "close ancestor",
+    "n_significant": 41
+   },
+   {
+    "GO": "GO:0034219",
+    "name": "carbohydrate transmembrane transport",
+    "recovery": "close ancestor",
+    "n_significant": 11
+   },
+   {
+    "GO": "GO:0046496",
+    "name": "nicotinamide nucleotide metabolic process",
+    "recovery": "exact",
+    "n_significant": 58
+   },
+   {
+    "GO": "GO:0042908",
+    "name": "xenobiotic transport",
+    "recovery": "close ancestor",
+    "n_significant": 26
+   },
+   {
+    "GO": "GO:0034614",
+    "name": "cellular response to reactive oxygen species",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0009894",
+    "name": "regulation of catabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0006766",
+    "name": "vitamin metabolic process",
+    "recovery": "exact",
+    "n_significant": 36
+   },
+   {
+    "GO": "GO:0009252",
+    "name": "peptidoglycan biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 27
+   },
+   {
+    "GO": "GO:0009432",
+    "name": "SOS response",
+    "recovery": "close ancestor",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:0030030",
+    "name": "cell projection organization",
+    "recovery": "exact",
+    "n_significant": 13
+   },
+   {
+    "GO": "GO:0070925",
+    "name": "organelle assembly",
+    "recovery": "exact",
+    "n_significant": 36
+   },
+   {
+    "GO": "GO:0006972",
+    "name": "hyperosmotic response",
+    "recovery": "no",
+    "n_significant": 7
+   },
+   {
+    "GO": "GO:0009411",
+    "name": "response to UV",
+    "recovery": "no",
+    "n_significant": 10
+   },
+   {
+    "GO": "GO:0051260",
+    "name": "protein homooligomerization",
+    "recovery": "no",
+    "n_significant": 30
+   },
+   {
+    "GO": "GO:0042398",
+    "name": "modified amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 19
+   },
+   {
+    "GO": "GO:0009073",
+    "name": "aromatic amino acid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 25
+   },
+   {
+    "GO": "GO:0015031",
+    "name": "protein transport",
+    "recovery": "exact",
+    "n_significant": 17
+   },
+   {
+    "GO": "GO:0006869",
+    "name": "lipid transport",
+    "recovery": "exact",
+    "n_significant": 29
+   },
+   {
+    "GO": "GO:0019321",
+    "name": "pentose metabolic process",
+    "recovery": "no",
+    "n_significant": 5
+   },
+   {
+    "GO": "GO:0010212",
+    "name": "response to ionizing radiation",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0071470",
+    "name": "cellular response to osmotic stress",
+    "recovery": "no",
+    "n_significant": 17
+   },
+   {
+    "GO": "GO:0009063",
+    "name": "amino acid catabolic process",
+    "recovery": "exact",
+    "n_significant": 28
+   },
+   {
+    "GO": "GO:0008654",
+    "name": "phospholipid biosynthetic process",
+    "recovery": "exact",
+    "n_significant": 20
+   },
+   {
+    "GO": "GO:0007165",
+    "name": "signal transduction",
+    "recovery": "exact",
+    "n_significant": 39
+   },
+   {
+    "GO": "GO:0000154",
+    "name": "rRNA modification",
+    "recovery": "exact",
+    "n_significant": 38
+   },
+   {
+    "GO": "GO:0043708",
+    "name": "cell adhesion involved in biofilm formation",
+    "recovery": "close ancestor",
+    "n_significant": 17
+   },
+   {
+    "GO": "GO:0016226",
+    "name": "iron-sulfur cluster assembly",
+    "recovery": "no",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:0043242",
+    "name": "negative regulation of protein-containing complex disassembly",
+    "recovery": "no",
+    "n_significant": 8
+   },
+   {
+    "GO": "GO:0022411",
+    "name": "cellular component disassembly",
+    "recovery": "close ancestor",
+    "n_significant": 29
+   },
+   {
+    "GO": "GO:0006650",
+    "name": "glycerophospholipid metabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 9
+   }
+  ]
+ },
+ "experimental_setting": {
+  "evidence_setting": "experimental",
+  "annotations_removed": null,
+  "summary": {
+   "exact": 1,
+   "descendant": 0,
+   "close ancestor": 7,
+   "no": 32
+  },
+  "rows": [
+   {
+    "GO": "GO:0009244",
+    "name": "lipopolysaccharide core region biosynthetic process",
+    "recovery": "close ancestor",
+    "n_significant": 16
+   },
+   {
+    "GO": "GO:0015748",
+    "name": "organophosphate ester transport",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0006352",
+    "name": "DNA-templated transcription initiation",
+    "recovery": "no",
+    "n_significant": 45
+   },
+   {
+    "GO": "GO:1901293",
+    "name": "nucleoside phosphate biosynthetic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0006631",
+    "name": "fatty acid metabolic process",
+    "recovery": "close ancestor",
+    "n_significant": 5
+   },
+   {
+    "GO": "GO:0034220",
+    "name": "monoatomic ion transmembrane transport",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0009166",
+    "name": "nucleotide catabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0072330",
+    "name": "monocarboxylic acid biosynthetic process",
+    "recovery": "close ancestor",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:1901678",
+    "name": "iron coordination entity transport",
+    "recovery": "no",
+    "n_significant": 4
+   },
+   {
+    "GO": "GO:0019320",
+    "name": "hexose catabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0017148",
+    "name": "negative regulation of translation",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0034219",
+    "name": "carbohydrate transmembrane transport",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0046496",
+    "name": "nicotinamide nucleotide metabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0042908",
+    "name": "xenobiotic transport",
+    "recovery": "no",
+    "n_significant": 12
+   },
+   {
+    "GO": "GO:0034614",
+    "name": "cellular response to reactive oxygen species",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0009894",
+    "name": "regulation of catabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0006766",
+    "name": "vitamin metabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0009252",
+    "name": "peptidoglycan biosynthetic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0009432",
+    "name": "SOS response",
+    "recovery": "close ancestor",
+    "n_significant": 7
+   },
+   {
+    "GO": "GO:0030030",
+    "name": "cell projection organization",
+    "recovery": "no",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:0070925",
+    "name": "organelle assembly",
+    "recovery": "no",
+    "n_significant": 9
+   },
+   {
+    "GO": "GO:0006972",
+    "name": "hyperosmotic response",
+    "recovery": "no",
+    "n_significant": 4
+   },
+   {
+    "GO": "GO:0009411",
+    "name": "response to UV",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0051260",
+    "name": "protein homooligomerization",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0042398",
+    "name": "modified amino acid biosynthetic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0009073",
+    "name": "aromatic amino acid biosynthetic process",
+    "recovery": "close ancestor",
+    "n_significant": 13
+   },
+   {
+    "GO": "GO:0015031",
+    "name": "protein transport",
+    "recovery": "no",
+    "n_significant": 5
+   },
+   {
+    "GO": "GO:0006869",
+    "name": "lipid transport",
+    "recovery": "no",
+    "n_significant": 10
+   },
+   {
+    "GO": "GO:0019321",
+    "name": "pentose metabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0010212",
+    "name": "response to ionizing radiation",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0071470",
+    "name": "cellular response to osmotic stress",
+    "recovery": "no",
+    "n_significant": 8
+   },
+   {
+    "GO": "GO:0009063",
+    "name": "amino acid catabolic process",
+    "recovery": "exact",
+    "n_significant": 6
+   },
+   {
+    "GO": "GO:0008654",
+    "name": "phospholipid biosynthetic process",
+    "recovery": "close ancestor",
+    "n_significant": 12
+   },
+   {
+    "GO": "GO:0007165",
+    "name": "signal transduction",
+    "recovery": "close ancestor",
+    "n_significant": 12
+   },
+   {
+    "GO": "GO:0000154",
+    "name": "rRNA modification",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0043708",
+    "name": "cell adhesion involved in biofilm formation",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0016226",
+    "name": "iron-sulfur cluster assembly",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0043242",
+    "name": "negative regulation of protein-containing complex disassembly",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0022411",
+    "name": "cellular component disassembly",
+    "recovery": "no",
+    "n_significant": 0
+   },
+   {
+    "GO": "GO:0006650",
+    "name": "glycerophospholipid metabolic process",
+    "recovery": "no",
+    "n_significant": 0
+   }
+  ]
+ }
+}

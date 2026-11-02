@@ -21,15 +21,20 @@ Parts (run one per process, or all):
   null    The same set-up with random foregrounds of 40 E. coli proteins
           (100 replicates): a replicate is a false positive if any term has
           FDR < 0.05.
+  donors  The pure foregrounds of `ecoli` with the donors' annotations
+          restricted by kind: all; without those citing an E. coli protein in
+          with/from; also without IBA and TreeGrafter; the Non-IEA setting; the
+          Experimental only setting.
   example The paper's lists (306 decreased, 185 increased, the 491 together;
           background of 3,181) with M. smegmatis hidden, against the published
           results (M. smegmatis annotated, per protein).
 
-Usage:  python docs/validation/expansion_benchmark.py [ecoli|null|example ...]
+Usage:  python docs/validation/expansion_benchmark.py [ecoli|null|donors|example ...]
 """
 from __future__ import annotations
 
 import random
+import re
 import sys
 import time
 
@@ -79,9 +84,9 @@ def recovery(dag, p, sig):
     return next((k for k in ("descendant", "close ancestor") if k in kinds), "no")
 
 
-def part_ecoli():
-    dag = h.og.ensure_godag(h.og.GO_ROOT_OBO)
-    truth = h.ExampleWorkspace("ecoli_annotated")
+def draw_processes(dag, truth):
+    """The 40 E. coli processes of the benchmark, and the generator that drew
+    them (part `ecoli` goes on to use it for the noisy foregrounds)."""
     base = species_proteins(truth, "Escherichia")
     base_set = set(base)
     eco_file = next(f for sp, f in truth.mapping.items() if sp.startswith("Escherichia"))
@@ -107,6 +112,14 @@ def part_ecoli():
             chosen.append(g)
         if len(chosen) == 40:
             break
+    return base, sets, chosen, rng
+
+
+def part_ecoli():
+    dag = h.og.ensure_godag(h.og.GO_ROOT_OBO)
+    truth = h.ExampleWorkspace("ecoli_annotated")
+    base, sets, chosen, rng = draw_processes(dag, truth)
+    base_set = set(base)
     hidden = h.ExampleWorkspace("ecoli_hidden", hide="Escherichia")
     truth.background_once(base)
     hidden.background_once(base, expand=True)
@@ -157,6 +170,60 @@ def part_null(replicates=100):
         "most_frequent_terms": sorted(seen.items(), key=lambda x: -x[1])[:8]})
 
 
+def _filter_donor_goa(ws, eco_acc, also_iba):
+    """Drop, from the donors' GOA files, the annotations that cite an E. coli
+    protein in with/from (column 8) and, with `also_iba`, every IBA annotation
+    and the IEA ones of TreeGrafter (GO_REF:0000118, which carries PAINT's trees)."""
+    removed = {}
+    for fn in ws.mapping.values():
+        path = ws.goa_dir / fn
+        keep, n = [], 0
+        for line in open(path):
+            if not line.startswith("!"):
+                c = line.split("\t")
+                drop = bool(set(re.findall(r"UniProtKB:([A-Z0-9]+)", c[7])) & eco_acc)
+                if also_iba:
+                    drop = drop or c[6] == "IBA" or (c[6] == "IEA" and c[5].startswith("GO_REF:0000118"))
+                if drop:
+                    n += 1
+                    continue
+            keep.append(line)
+        path.write_text("".join(keep))
+        removed[fn] = n
+    ws._finish(ws.mapping)
+    return removed
+
+
+def part_donors():
+    """What recovery rests on: the pure foregrounds of part `ecoli` with the
+    donors' annotations restricted by kind, through the evidence settings of the
+    application or by removing annotations from their GOA files."""
+    dag = h.og.ensure_godag(h.og.GO_ROOT_OBO)
+    truth = h.ExampleWorkspace("ecoli_annotated")
+    base, sets, chosen, _ = draw_processes(dag, truth)
+    eco_file = next(f for sp, f in truth.mapping.items() if sp.startswith("Escherichia"))
+    eco_acc = {l.split("\t")[1] for l in open(truth.goa_dir / eco_file) if not l.startswith("!")}
+    variants = [("all", "all", None), ("without_ecoli_citations", "all", False),
+                ("without_ecoli_citations_iba_treegrafter", "all", True),
+                ("non_iea_setting", "curated", None), ("experimental_setting", "experimental", None)]
+    out = {}
+    for label, preset, also_iba in variants:
+        hidden = h.ExampleWorkspace(f"ecoli_hidden_{label}", hide="Escherichia")
+        removed = None if also_iba is None else _filter_donor_goa(hidden, eco_acc, also_iba)
+        hidden.background_once(base, expand=True)
+        rows = []
+        for g in chosen:
+            status, js = hidden.foreground(sorted(sets[g]), expand=True)
+            status, js = hidden.enrich(counting_mode="per_orthogroup", evidence_preset=preset)
+            sig = {t["GO"] for t in h.terms(js) if t["p_fdr_bh"] < 0.05}
+            rows.append({"GO": g, "name": dag[g].name, "recovery": recovery(dag, g, sig),
+                         "n_significant": len(sig)})
+        summary = {k: sum(r["recovery"] == k for r in rows) for k in ("exact", "descendant", "close ancestor", "no")}
+        out[label] = {"evidence_setting": preset, "annotations_removed": removed, "summary": summary, "rows": rows}
+        print(label, summary, flush=True)
+    h.write_result("expansion_benchmark/ecoli_donors", out)
+
+
 def part_example():
     bg = h.read_list(EX / "background_3181.txt")
     lists = {"decreased": h.read_list(EX / "foreground_down-regulated_306.txt"),
@@ -180,8 +247,9 @@ def part_example():
 
 
 if __name__ == "__main__":
-    parts = sys.argv[1:] or ["ecoli", "null", "example"]
+    parts = sys.argv[1:] or ["ecoli", "null", "donors", "example"]
     t0 = time.time()
     for part in parts:
-        {"ecoli": part_ecoli, "null": part_null, "example": part_example}[part]()
+        {"ecoli": part_ecoli, "null": part_null, "donors": part_donors,
+         "example": part_example}[part]()
     print(f"done in {time.time() - t0:.0f} s")

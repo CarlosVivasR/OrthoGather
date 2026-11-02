@@ -17,7 +17,8 @@ Benjamini–Hochberg correction itself:
   excluded, the limits used by clusterProfiler and WebGestalt.
 - Biological Process, Cellular Component and Molecular Function share a single annotated
   background, as in PANTHER's over-representation test, and Benjamini–Hochberg correction is
-  applied once across all three.
+  applied once across all three (PANTHER analyses one ontology at a time, so it corrects each
+  separately).
 - The minimum GO depth is applied before the correction. It is not only a display setting: raising
   it shrinks the set of tested terms and so changes every q-value.
 - The foreground is restricted to proteins that are annotated and present in the background. An
