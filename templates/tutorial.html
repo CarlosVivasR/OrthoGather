@@ -244,7 +244,9 @@
             orthogroup present in all 10 falls in the 3-species bar, because the other 7 are not part
             of that comparison.
           </p>
-          <p>Hover a bar to see the exact count, click to drill into that intersection.
+          <p>Hover a bar to see its count and the species it combines; hover a species name to
+            highlight every bar it takes part in (in Figure 4, the share of each bar's proteins that
+            come from that species). The plots do not respond to clicks.
             Use each figure's <strong>Image</strong> menu (PNG/SVG) to download the figure, or the
             <strong>Data</strong> menu to grab the underlying table as Excel/CSV/TSV/JSON.</p>
 
@@ -257,9 +259,11 @@
 
           <h3>Figures 5 and 6: UniProt filter</h3>
           <p>
-            Paste UniProt accession IDs in the filter box and Figures 5 / 6 show only orthogroups
-            that contain at least one of your IDs. Useful when you have a hit list and want to
-            know which species share each hit's orthogroup.
+            Once Figures 3 and 4 are drawn, a <strong>Filter by UniProt IDs</strong> box appears
+            below them. Paste UniProt accession IDs and click <strong>Generate filtered figures
+            (5 &amp; 6)</strong>: Figures 5 / 6 show only orthogroups that contain at least one of
+            your IDs, over the same species. Useful when you have a hit list and want to know which
+            species share each hit's orthogroup.
           </p>
 
           <figure class="tutorial-figure">
@@ -274,9 +278,10 @@
         <section id="gene-ontology" class="tutorial-section">
           <h2>Gene Ontology page</h2>
           <p>
-            The Gene Ontology page (top-right tab in Protein Analysis, or the
-            <em>Run GO enrichment</em> button at the bottom of the page) walks you through
-            five steps. Each step unlocks when the previous one succeeds.
+            The Gene Ontology page (the <em>Gene Ontology</em> tab at the top of Protein Analysis)
+            walks you through five steps: Match species, Download GOA, Foreground, Background, and
+            Settings &amp; run. Steps 3 to 5 open with the <strong>Continue to GO enrichment</strong>
+            button, which appears once the GOA files are downloaded.
           </p>
 
           <h3>1. Species match</h3>
@@ -319,22 +324,25 @@
             <em>Burkholderia</em>, exotic <em>Mycobacterium</em>, clinical isolates, etc.).
             It is a <strong>data-source limitation</strong>, not a bug in OrthoGather. Those
             species will still appear in the orthogroup tables but contribute no GO annotations
-            during enrichment.
+            during enrichment. The <strong>Fix</strong> field is offered for these rows too, in case
+            the species was matched to the wrong taxon.
           </p>
 
           <h3>2. Download GOA</h3>
           <p>
             Clicking <strong>Download GOA files</strong> pulls the matched annotation files from
             EBI and builds a summary listing every orthogroup, its members, and their annotation
-            status. Export it from the <strong>Download GOA tables</strong> control as Excel
-            (<em>Gene_Ontology_Analysis.xlsx</em>), <strong>CSV</strong> or <strong>TSV</strong> —
-            the on-disk record of which proteins carry GO terms.
+            status. Export it from the <strong>Download GOA tables</strong> control as Excel, or as
+            <strong>CSV</strong> or <strong>TSV</strong> (a ZIP with one file per sheet), named
+            <code>orthogather_GOA-orthogroup-annotation_&lt;N&gt;species_&lt;date&gt;</code>: the
+            on-disk record of which proteins carry GO terms.
           </p>
           <p>
             Once the download finishes, an <strong>Annotation overview</strong> panel appears: a
-            quick sanity check on how much of your dataset GO annotation can reach, with a
-            distribution chart of the share of proteins per orthogroup that carry at least one GO
-            term in the downloaded GOA files. Read it as a <strong>ceiling</strong>: it counts every
+            quick sanity check on how much of your dataset GO annotation can reach. Its collapsed
+            <strong>Annotation distribution chart</strong> shows the share of proteins per
+            orthogroup that carry at least one GO term in the downloaded GOA files (orthogroups
+            with no annotated protein are left out of the chart). Read it as a <strong>ceiling</strong>: it counts every
             evidence code and every protein in the analysis, while the enrichment uses only your
             background and the evidence codes you select. The number for your own proteins appears
             later, in the coverage banner of the enrichment run. Use this chart to judge whether an
@@ -366,7 +374,7 @@
             and <code>sp|P0A6F5|CH60_ECOLI</code> are read as <code>P0A6F5</code>. Lower-case accessions are
             converted to upper case, and isoform suffixes (<code>-2</code>) are removed with a warning, because
             GOA files annotate the canonical protein. The same rules apply to the background and to the
-            UniProt filter of Figures 5 and 6.
+            UniProt filter of Figures 5 and 6. Click <strong>Load foreground</strong> to send the list.
           </p>
           <p>
             Tick <strong>Expand to full orthogroups</strong> to test your proteins through their
@@ -409,6 +417,12 @@
               file, so proteins without annotations of their own are tested through their
               orthologues. Use it when your species has few or no GO annotations.</li>
           </ul>
+          <p>
+            Click <strong>Load background</strong> to send it. <strong>Run GO enrichment</strong>
+            stays greyed out until both sets are loaded, and changing a box, a tick box or the
+            Orthogroups setting afterwards unloads that set, so load it again before running. The
+            line above the Run button says what the run will use.
+          </p>
 
           <h3>5. Analysis settings &amp; run</h3>
           <p>
@@ -453,8 +467,9 @@
               to paralog confusion.</li>
           </ul>
           <p>
-            This setting matters only when the sets are expanded to full orthogroups, and it is
-            applied when you load them: choose it before loading the foreground and the background.
+            This setting matters only when the sets are expanded to full orthogroups (Single-copy
+            only is greyed out otherwise), and it is applied when you load them: choose it before
+            loading the foreground and the background.
           </p>
 
           <h4>Counting</h4>
@@ -479,8 +494,8 @@
           </p>
           <p class="tutorial-note">
             <strong>One-sided test:</strong> OrthoGather tests for over-representation only
-            (Fisher's exact test, one-sided), so every term it reports is enriched in your
-            foreground. Terms that miss the significance threshold but pass the display threshold
+            (Fisher's exact test, one-sided; counted per orthogroup, a one-sided permutation test),
+            so every term it reports is enriched in your foreground. Terms that miss the significance threshold but pass the display threshold
             (<strong>Show down to FDR</strong>, in the re-run bar) are drawn as hollow bars and
             flagged <em>n.s.</em> in the table: they are shown for context, not as findings.
           </p>
@@ -489,13 +504,14 @@
             <em>once over the three namespaces together</em> (BP + CC + MF as a single family of
             tests), before the results are split into tabs. This is a valid single-experiment
             correction, but it is not per-aspect: q-values will differ slightly from tools that
-            correct each namespace separately. Worth stating in a methods section.
+            correct each namespace separately. Only the terms at least as deep as
+            <strong>Min depth</strong> and with 10 to 500 annotated background proteins are tested and corrected, so changing
+            Min depth in the re-run bar changes the q-values too. Worth stating in a methods section.
           </p>
 
           <h4>Coverage banner</h4>
           <p>
-            The first thing you see is a four-column banner that summarises how usable your
-            foreground is:
+            The first thing you see is a banner that summarises how usable your foreground is:
           </p>
           <ul>
             <li><strong>You pasted</strong>: the number of distinct UniProt IDs you submitted, after
@@ -524,16 +540,19 @@
 
           <h4>Bar chart</h4>
           <ul>
-            <li><strong>Namespace tabs</strong> (All / BP / CC / MF) at the top-left.
-              "All" overlays the three namespaces; the individual tabs zoom into one.</li>
+            <li><strong>Namespace tabs</strong> (All / Biological Process / Cellular Component /
+              Molecular Function) at the top-left. "All" overlays the three namespaces; the
+              individual tabs zoom into one.</li>
             <li><strong>"Top N" selector</strong> at the top-right (default 20 per namespace).
               The chart caps at the top-N most significant terms so the figure stays
-              readable; raise the selector to 50 / 100 / All, or use the full table below.
+              readable; raise the selector to 30 / 50 / 100 / All, or use the full table below.
               When truncated, a note below the chart tells you "Showing top 60 of 696 terms".</li>
-            <li><strong>Hover</strong> any bar for the full term name, GO ID, depth, study /
-              population counts, and exact p-value.</li>
+            <li><strong>Hover</strong> any bar for the term name (shortened to 50 characters; the
+              table has it in full), GO ID, namespace, depth, study count and FDR.</li>
             <li><strong>PNG and SVG download buttons</strong> on the right. The PNG is scaled 2×
-              for crisp output; the SVG is publication-ready vector graphics.</li>
+              for crisp output; the SVG is publication-ready vector graphics. Next to them,
+              <strong>Excel</strong>, <strong>CSV</strong> and <strong>TSV</strong> download the
+              full report of the run (see <em>Export</em> below).</li>
           </ul>
 
           <figure class="tutorial-figure">
@@ -557,7 +576,8 @@
             <li><strong>Column tooltips</strong>: every header has a "(?)" hint. Hover to
               see what the column means (e.g. <em>"study_count / study_n: how many of your
               foreground proteins are annotated with this term, out of how many were tested"</em>).</li>
-            <li><strong>Sort</strong>: click any column header to sort ascending / descending.</li>
+            <li><strong>Sort</strong>: click any column header except Evidence to sort ascending /
+              descending.</li>
             <li><strong>n.s. flag</strong>: rows shown only because of a looser display
               threshold are marked <em>n.s.</em>, matching the hollow bars in the chart above.</li>
             <li><strong>Filter</strong>: search box (free text on GO ID + name), namespace
@@ -568,12 +588,16 @@
               toolbar shows "Showing 20 of 696 terms" so you know what you're looking at.</li>
             <li><strong>Evidence chips</strong>, colour-coded by GO Consortium tier:
               <span style="color:#16653a;font-weight:600">green = experimental</span> (EXP, IDA, IPI, IMP, IGI, IEP and high-throughput variants),
-              <span style="color:#1d4ed8;font-weight:600">blue = curated</span> (TAS, NAS, IC, IBA / PAINT), and
-              <span style="color:#4b5563;font-weight:600">gray = computational</span> (IEA, ISS and other sequence-similarity codes).
-              Hover any chip for the code name and count.</li>
-            <li><strong>Export</strong>: CSV / TSV / JSON of the currently <em>filtered</em>
-              rows (i.e. only what the table is showing), or the full Excel of every term the
-              run reports, with its settings in a Provenance sheet.</li>
+              <span style="color:#1d4ed8;font-weight:600">blue = curated</span> (TAS, NAS, IC and the PAINT codes IBA, IBD, IKR, IRD), and
+              <span style="color:#4b5563;font-weight:600">gray = computational / other</span> (IEA, ISS, ISO, ISA, ISM, IGC, RCA, and ND).
+              Each chip counts the foreground proteins that support the term with that code; hover
+              it for the code, its tier and the count.</li>
+            <li><strong>Export</strong>: the CSV / TSV / JSON buttons of the table export the
+              currently <em>filtered</em> rows (i.e. only what the table is showing). The full
+              report, every term down to <strong>Show down to FDR</strong> (n.s. ones included,
+              marked in a <code>significant</code> column; up to <strong>Max terms per NS</strong>
+              when that is set) with its settings in a Provenance
+              sheet, comes from the Excel, CSV and TSV buttons above the chart.</li>
           </ul>
 
           <figure class="tutorial-figure">
@@ -588,13 +612,16 @@
         <section id="history" class="tutorial-section">
           <h2>History &amp; reproducibility</h2>
           <p>
-            Every completed analysis is recorded in <a href="/history">History</a>. From there
-            you can:
+            Every New Analysis that finishes is recorded in <a href="/history">History</a>
+            (Preselected Dataset and External Upload analyses are not). The 20 most recent runs are
+            kept; the <code>ORTHOGATHER_MAX_HISTORY</code> environment variable changes that
+            number. From there you can:
           </p>
           <ul>
             <li><strong>Open</strong>: restore a saved run as the active analysis.</li>
             <li><strong>Reproduce</strong>: pre-fill the species picker with the same proteomes,
               ready to run again.</li>
+            <li><strong>Download OrthoFinder files</strong>: the run's OrthoFinder output as a ZIP.</li>
             <li><strong>Cite</strong>: export a BibTeX or RIS entry for the paper and for the run,
               with its species, number of orthogroups and date.</li>
             <li><strong>Compare</strong>: show two runs side by side, with the differences in
@@ -681,8 +708,9 @@
               <strong>IBA</strong> evidence code that you see in GOA files.
             </p>
             <p>
-              OrthoGather doesn't replace PAINT; it <em>uses</em> PAINT-curated annotations,
-              which the Non-IEA evidence preset keeps. PAINT is upstream curation;
+              OrthoGather doesn't replace PAINT; it <em>uses</em> the IBA annotations PAINT
+              produces, which the Non-IEA evidence preset keeps (it leaves out the other PAINT codes,
+              IBD, IKR and IRD). PAINT is upstream curation;
               OrthoGather is downstream analysis.
             </p>
           </details>
@@ -703,10 +731,12 @@
               evidence, not a weak form of it.
             </p>
             <p>
-              The colour of each chip in the results table follows these groups. The
+              The chips in the results table group these codes into three colours: green for the
+              experimental and high-throughput codes, blue for the author, curator and phylogenetic
+              codes, and grey for the computational and electronic codes and ND. The
               <strong>filter presets</strong> are narrower than the groups: <em>Experimental only</em>
               keeps EXP, IDA, IPI, IMP, IGI, IEP, HTP, HEP, HDA, HMP, HGI; <em>Non-IEA</em> adds TAS,
-              IC and IBA on top of those. <strong>NAS is not kept by any preset except All</strong>:
+              IC and IBA on top of those, but not IBD, IKR or IRD. <strong>NAS is not kept by any preset except All</strong>:
               a non-traceable author statement cannot be checked against a source, and in a typical
               bacterial GOA set it is more frequent than TAS, so including it would quietly loosen
               the Non-IEA filter.

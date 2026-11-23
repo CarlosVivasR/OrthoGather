@@ -4,6 +4,25 @@ Notable changes to OrthoGather. Versions are tagged `vMAJOR.MINOR.PATCH`, and ev
 1.1.1 is archived on Zenodo (all versions:
 [10.5281/zenodo.18510910](https://doi.org/10.5281/zenodo.18510910)).
 
+## Unreleased
+
+### Fixed
+- The results table of the Gene Ontology page lists the terms drawn as hollow (n.s.) bars: after a
+  re-run with a looser **Show down to FDR**, its FDR filter starts at that threshold instead of the
+  significance threshold, which hid them.
+- The evidence chips say in their hover that they count proteins.
+
+### Documentation
+- Tutorial checked against the current pages: how to open the Gene Ontology page, the UpSet hover,
+  the names of the GOA table downloads, the chart hover, the coverage banner, where the full report
+  is, which runs History keeps and which PAINT codes Non-IEA keeps. It now names the Load and
+  Continue buttons and says which terms the FDR correction covers; the Min depth help says that it
+  changes the q-values.
+- Installation guide (PDF): every command stays on one line, so it copies into a terminal intact.
+- ADVANCED.md (47 error codes), CONTRIBUTING.md (provenance file name, when the tests run), README
+  (when the tests run), the bug-report form (version 2.2.1) and the sidebar's Cite link, which now
+  opens the citation.
+
 ## 2.2.1 (2026-11-02)
 
 A maintenance release. The worked example and every analysis of proteomes with UniProt accessions give

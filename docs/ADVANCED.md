@@ -117,7 +117,7 @@ See [Repository layout](../README.md#repository-layout) in the README.
 ## Error codes
 
 Many errors shown by OrthoGather carry a stable code (`ERR_...`), a message and a hint; the rest
-are shown as plain messages. The codes are defined in `orthogather/utils/error_catalog.py` (46
+are shown as plain messages. The codes are defined in `orthogather/utils/error_catalog.py` (47
 entries). Backend routes call `respond_error("ERR_CODE", where=..., detail=...)`, and the
 frontend shows the response as a notification through `static/js/og-errors.js`. The routes of the
 Gene Ontology page write their own message and hint, which name the identifiers or counts involved,
@@ -146,7 +146,7 @@ the notes that explain it, Fisher p-values equal to SciPy's and a Benjamini-Hoch
 reproduces). The worked example is checked number by number by
 `docs/validation/verify_example.py`; [`docs/validation/`](validation/) also holds the calibration of
 every setting on random foregrounds and the benchmark of expansion with a species' annotations
-hidden. GitHub Actions runs the tests and the example check on Linux and macOS on every change.
+hidden. GitHub Actions runs the tests and the example check on Linux and macOS on every push to `main` and every pull request.
 
 ```bash
 conda activate orthogather

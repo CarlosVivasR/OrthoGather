@@ -14,7 +14,7 @@ Use the **Bug report** form. The most useful details are:
 - the error code, if the message starts with `ERR_` (the codes are listed in
   `orthogather/utils/error_catalog.py`);
 - what you did, what you expected and what happened instead;
-- the provenance file of the analysis (`provenance.txt`, downloadable from the results pages),
+- the provenance file of the analysis (`orthogather-provenance.txt`, downloadable from the results pages),
   if the problem concerns a result;
 - on Windows, the installer log in `%LOCALAPPDATA%\OrthoGather\install-log.txt` if installation
   failed.
@@ -42,7 +42,8 @@ python app.py
 - Work on a branch and open a pull request against `main`; the pull-request template lists the
   checks. `main` is the development version; users install published releases (see below).
 - Run `pytest tests/` before opening the pull request. GitHub Actions runs the same tests on Linux
-  and macOS, in the pinned environment of `environment.yml`, on every push and pull request,
+  and macOS, in the pinned environment of `environment.yml`, on every push to `main` and every
+  pull request,
   together with `python docs/validation/verify_example.py`, which must report 35/35: the numbers
   of the worked example that the paper quotes.
 - Changes to the Gene Ontology analysis should also pass the full combinations matrix

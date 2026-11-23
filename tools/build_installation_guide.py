@@ -47,8 +47,14 @@ def print_html(ver):
     body {{ background: #fff; }}
     main.wrap {{ padding-top: 0; }}
     .section-title {{ font-family: 'Fraunces', Georgia, serif; font-size: 24px; font-weight: 700;
-      letter-spacing: 0; text-transform: none; color: var(--navy); margin: 34px 0 16px; }}
+      letter-spacing: 0; text-transform: none; color: var(--navy); margin: 34px 0 16px;
+      break-after: avoid; }}
     .section-title:first-of-type {{ margin-top: 0; }}
+    /* A command wrapped across lines copies out of a PDF with a line break in it,
+       which breaks it in a terminal: keep every command on one line. */
+    .code .copy {{ display: none; }}
+    .code pre {{ white-space: pre; word-break: normal; overflow: visible;
+      padding-right: 16px; font-size: 10.5px; }}
   }}
   .guide-cover {{ page: cover; position: relative; width: 210mm; height: 297mm; overflow: hidden;
     break-after: page; text-align: center; font-family: Inter, sans-serif; }}

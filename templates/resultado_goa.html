@@ -578,6 +578,8 @@
                   Depth 1 means top-level categories like "metabolic process"; depth 5+
                   gives specific terms like "cellular response to oxidative stress".
                   Useful when the result is dominated by trivially broad terms.
+                  Skipped terms are not tested, so the FDR correction covers fewer
+                  terms and every q-value can change.
                 </div>
               </div>
               <div class="goa-param">
@@ -1897,7 +1899,7 @@
         return entries.map(([code, n]) => {
           const tier = EVIDENCE_TIER[code] || "computational";
           const tierLabel = TIER_LABEL[tier];
-          return `<span class="go-ev-chip is-${tier}" title="${code} (${tierLabel}): ${n} annotation(s)">${code}<span>${n}</span></span>`;
+          return `<span class="go-ev-chip is-${tier}" title="${code} (${tierLabel}): ${n} protein(s)">${code}<span>${n}</span></span>`;
         }).join("");
       }
 
@@ -2332,8 +2334,11 @@
           renderCoverageBanner(window.__goResults.stats,
                                data.payload?.input_ids || data.input_ids || null);
 
-          // Sync table filter inputs with run thresholds
-          document.getElementById("go-fdr-input").value = body.p_value;
+          // Sync table filter inputs with run thresholds. The FDR box takes the
+          // display threshold, so the n.s. terms drawn as hollow bars are also
+          // listed in the table.
+          document.getElementById("go-fdr-input").value =
+            Math.max(body.p_value, body.display_p_value ?? body.p_value);
           document.getElementById("go-depth-input").value = body.min_depth;
 
           // Excel link
